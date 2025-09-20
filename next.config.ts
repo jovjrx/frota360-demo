@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   i18n: {
-    defaultLocale: "pt",
-    locales: ["pt", "en"],
+    locales: ['pt', 'en', 'es'],
+    defaultLocale: 'pt',
     localeDetection: false,
   },
   images: {
@@ -47,6 +47,32 @@ const nextConfig: NextConfig = {
       {
         source: "/fonts/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/admin/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/drivers',
+        destination: '/drivers/dashboard',
+        permanent: true,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/drivers/:path*',
+        destination: '/api/drivers/:path*',
+      },
+      {
+        source: '/api/admin/:path*',
+        destination: '/api/admin/:path*',
       },
     ];
   },

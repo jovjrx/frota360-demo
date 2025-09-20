@@ -121,7 +121,7 @@ export default function DriversManagement({
       const matchesStatus = statusFilter === 'all' || driver.status === statusFilter;
       
       return matchesSearch && matchesStatus;
-    };
+    });
   }, [drivers, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {
@@ -156,7 +156,7 @@ export default function DriversManagement({
           driverId,
           status: newStatus,
         }),
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -169,7 +169,7 @@ export default function DriversManagement({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
         // Refresh page or update drivers list
         window.location.reload();
       } else {
@@ -182,7 +182,7 @@ export default function DriversManagement({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setLoading(false);
     }
@@ -206,7 +206,7 @@ export default function DriversManagement({
       ])
     ].map(row => row.join(',')).join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' };
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

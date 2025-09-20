@@ -80,7 +80,7 @@ export default function ProfilePage({
     bankAccount: driver?.bankAccount || '',
     emergencyContact: driver?.emergencyContact || '',
     emergencyPhone: driver?.emergencyPhone || '',
-  };
+  });
 
   const [preferences, setPreferences] = useState({
     emailNotifications: driver?.preferences?.emailNotifications ?? true,
@@ -88,7 +88,7 @@ export default function ProfilePage({
     pushNotifications: driver?.preferences?.pushNotifications ?? true,
     language: driver?.preferences?.language || 'pt',
     timezone: driver?.preferences?.timezone || 'Europe/Lisbon',
-  };
+  });
 
   const [loading, setLoading] = useState(false);
 
@@ -118,7 +118,7 @@ export default function ProfilePage({
           ...formData,
           preferences,
         }),
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -127,7 +127,7 @@ export default function ProfilePage({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
       } else {
         throw new Error('Failed to update profile');
       }
@@ -138,7 +138,7 @@ export default function ProfilePage({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setLoading(false);
     }

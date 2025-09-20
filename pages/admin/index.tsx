@@ -1,6 +1,6 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withAdmin } from '@/lib/auth/rbac';
+import { withAdmin } from '@/lib/auth/withAdmin';
 import { store } from '@/lib/store';
 import {
   Box,
@@ -19,7 +19,6 @@ import {
   StatArrow,
   useColorModeValue,
   Button,
-  Link as ChakraLink,
 } from '@chakra-ui/react';
 import { FiUsers, FiDollarSign, FiTrendingUp, FiFileText, FiSettings, FiBell } from 'react-icons/fi';
 import Link from 'next/link';
@@ -264,4 +263,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-});
+};

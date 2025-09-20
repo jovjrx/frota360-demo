@@ -53,7 +53,7 @@ export default function Header({ t }: HeaderProps) {
   const items = useMemo(
     () => [
       { href: "/", label: t("navigation.home") },
-      { href: "/services/painels", label: t("navigation.drivers") },
+      { href: "/services/drivers", label: t("navigation.drivers") },
       { href: "/services/companies", label: t("navigation.companies") },
       { href: "/about", label: t("navigation.about") },
       { href: "/contact", label: t("navigation.contact") }
@@ -155,7 +155,7 @@ export default function Header({ t }: HeaderProps) {
                   <MenuList>
                     <MenuItem icon={<FiUser />} onClick={() => {
                       const isAdmin = user?.email?.endsWith('@conduz.pt') || user?.email === 'conduzcontacto@gmail.com';
-                      router.push(isAdmin ? '/dashboard/admin' : '/painel');
+                      router.push(isAdmin ? '/dashboard/admin' : '/drivers/dashboard');
                     }}>
                       Dashboard
                     </MenuItem>
@@ -217,7 +217,7 @@ export default function Header({ t }: HeaderProps) {
                       w="full"
                       onClick={() => {
                         const isAdmin = user?.email?.endsWith('@conduz.pt') || user?.email === 'conduzcontacto@gmail.com';
-                        router.push(isAdmin ? '/dashboard/admin' : '/painel');
+                        router.push(isAdmin ? '/dashboard/admin' : '/drivers/dashboard');
                       }}
                     >
                       Dashboard

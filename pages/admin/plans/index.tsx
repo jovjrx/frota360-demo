@@ -1,7 +1,5 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withAdmin } from '@/lib/auth/rbac';
-import { store } from '@/lib/store';
 import {
   Box,
   SimpleGrid,
@@ -19,13 +17,6 @@ import {
   InputGroup,
   InputLeftElement,
   Select,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
   IconButton,
   useToast,
   Modal,
@@ -49,10 +40,6 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Flex,
   Spacer,
   List,
@@ -116,7 +103,7 @@ export default function PlansManagement({
     features: [] as string[],
     active: true,
     featured: false,
-  };
+  });
 
   const filteredPlans = useMemo(() => {
     return plans.filter(plan => {
@@ -129,7 +116,7 @@ export default function PlansManagement({
         (statusFilter === 'inactive' && !plan.active);
       
       return matchesSearch && matchesStatus;
-    };
+    });
   }, [plans, searchTerm, statusFilter]);
 
   const handleCreatePlan = () => {
@@ -144,7 +131,7 @@ export default function PlansManagement({
       features: [],
       active: true,
       featured: false,
-    };
+    });
     onOpen();
   };
 
@@ -160,7 +147,7 @@ export default function PlansManagement({
       features: plan.features || [],
       active: plan.active ?? true,
       featured: plan.featured ?? false,
-    };
+    });
     onOpen();
   };
 
@@ -176,7 +163,7 @@ export default function PlansManagement({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -187,7 +174,7 @@ export default function PlansManagement({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
         onClose();
         window.location.reload();
       } else {
@@ -202,7 +189,7 @@ export default function PlansManagement({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setLoading(false);
     }
@@ -214,7 +201,7 @@ export default function PlansManagement({
     try {
       const response = await fetch(`/api/admin/plans/${planId}`, {
         method: 'DELETE',
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -223,7 +210,7 @@ export default function PlansManagement({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
         window.location.reload();
       } else {
         throw new Error('Failed to delete plan');
@@ -235,7 +222,7 @@ export default function PlansManagement({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     }
   };
 

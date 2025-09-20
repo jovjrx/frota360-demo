@@ -196,7 +196,7 @@ export default function DocumentsPage({
       const response = await fetch('/api/drivers/documents', {
         method: 'POST',
         body: formData,
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -205,7 +205,7 @@ export default function DocumentsPage({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
         onClose();
         setUploadFile(null);
         // Refresh page or update documents list
@@ -220,7 +220,7 @@ export default function DocumentsPage({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setUploading(false);
     }
@@ -235,7 +235,7 @@ export default function DocumentsPage({
     const approvedDocs = requiredDocs.filter(doc => {
       const document = getDocumentForType(doc.type);
       return document && document.status === 'approved';
-    };
+    });
     return Math.round((approvedDocs.length / requiredDocs.length) * 100);
   };
 

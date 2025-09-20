@@ -4,8 +4,8 @@ import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { GoogleAnalytics } from "nextjs-google-analytics";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { theme } from "@/lib/theme";
 import { fonts } from "@/lib/fonts";
 import { LanguageProvider } from "@/components/Language";
@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   // Verifica se é uma rota logada
   const isLoggedInRoute = router.pathname.startsWith('/dashboard') || 
-                         router.pathname.startsWith('/painel') ||
+                         router.pathname.startsWith('/drivers') ||
                          router.pathname.startsWith('/admin') ||
                          router.pathname === '/login' || 
                          router.pathname === '/signup';
@@ -91,14 +91,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 <Footer t={tCommon} />
               </>
             )}
-
-            {/* ✅ Google Analytics */}
             <GoogleAnalytics gaMeasurementId={GA_ID} trackPageViews />
-
-            {/* ✅ Vercel Analytics */}
             <Analytics />
-
-            {/* ✅ Vercel Speed Insights */}
             <SpeedInsights />
           </AuthProvider>
         </LanguageProvider>

@@ -91,7 +91,7 @@ export default function SubscriptionPage({
           planId: selectedPlan.id,
           driverId: driver.id,
         }),
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -99,7 +99,7 @@ export default function SubscriptionPage({
           status: 'success',
           duration: 3000,
           isClosable: true,
-        };
+        });
         onClose();
         // Refresh page or redirect
         window.location.reload();
@@ -113,7 +113,7 @@ export default function SubscriptionPage({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export default function SubscriptionPage({
     try {
       const response = await fetch(`/api/billing/subscriptions/${currentSubscription.id}`, {
         method: 'DELETE',
-      };
+      });
 
       if (response.ok) {
         toast({
@@ -135,7 +135,7 @@ export default function SubscriptionPage({
           status: 'info',
           duration: 5000,
           isClosable: true,
-        };
+        });
         // Refresh page
         window.location.reload();
       } else {
@@ -148,7 +148,7 @@ export default function SubscriptionPage({
         status: 'error',
         duration: 5000,
         isClosable: true,
-      };
+      });
     } finally {
       setLoading(false);
     }

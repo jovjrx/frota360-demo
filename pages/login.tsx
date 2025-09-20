@@ -17,7 +17,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
     email: '',
     password: '',
     userType: 'driver' as 'driver' | 'admin',
-  };
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -57,7 +57,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    };
+    });
   };
 
   return (
