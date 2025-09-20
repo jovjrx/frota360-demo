@@ -72,7 +72,7 @@ export default function SignupPage() {
   };
 
   return (
-    <Box minH="100vh" bg="gray.50" display="flex" alignItems="center" justifyContent="center">
+    <Box py={16} bg="white">
       <Container maxW="4xl">
         <VStack spacing={8} align="stretch">
           {/* Logo e Título */}

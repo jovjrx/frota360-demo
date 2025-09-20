@@ -31,17 +31,17 @@ export default function App({ Component, pageProps }: AppProps) {
   // Verifica se é uma rota logada
   const isLoggedInRoute = router.pathname.startsWith('/dashboard') || 
                          router.pathname.startsWith('/drivers') ||
-                         router.pathname.startsWith('/admin') ||
-                         router.pathname === '/login' || 
-                         router.pathname === '/signup';
+                         router.pathname.startsWith('/admin');
 
   const getCurrentPage = () => {
     const path = router.pathname;
     if (path === "/") return "home";
     if (path === "/about") return "about";
     if (path === "/services-drivers") return "services";
-    if (path === "/services-companies") return "tservices-companiesools";
+    if (path === "/services-companies") return "services-companies";
     if (path === "/contact") return "contact";
+    if (path === "/login") return "login";
+    if (path === "/signup") return "signup";
     return "home";
   };
 

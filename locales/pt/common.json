@@ -64,6 +64,16 @@
         "title": "Contactos Conduz.pt | Suporte TVDE 7 Dias por Semana",
         "description": "Entre em contacto com a Conduz.pt. Suporte via WhatsApp, telefone e email. Equipa especializada em TVDE disponível 7 dias por semana.",
         "keywords": "contacto Conduz, suporte TVDE, WhatsApp TVDE, telefone motorista, ajuda TVDE, contacto empresa TVDE"
+      },
+      "login": {
+        "title": "Login | Conduz.pt - Plataforma TVDE",
+        "description": "Faça login na plataforma Conduz.pt para acessar sua conta de motorista ou administrador.",
+        "keywords": "login Conduz, acesso motorista, login TVDE, plataforma motorista"
+      },
+      "signup": {
+        "title": "Cadastro de Motorista | Conduz.pt - Seja Motorista TVDE",
+        "description": "Cadastre-se como motorista na plataforma Conduz.pt. Onboarding rápido, suporte 7/7 e comissões transparentes.",
+        "keywords": "cadastro motorista, registro TVDE, ser motorista, cadastro Conduz"
       }
     }
   },
