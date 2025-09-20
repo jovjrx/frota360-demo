@@ -209,20 +209,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
               </Text>
             </VStack>
 
-            {/* Demo Credentials */}
-            <Box p={4} bg="yellow.50" border="1px" borderColor="yellow.200" borderRadius="md">
-              <Text fontSize="sm" fontWeight="medium" color="yellow.800" mb={2}>
-                Credenciais de Demonstração:
-              </Text>
-              <VStack spacing={1} align="start">
-                <Text fontSize="xs" color="yellow.700">
-                  <strong>Admin:</strong> admin@conduz.pt / admin123
-                </Text>
-                <Text fontSize="xs" color="yellow.700">
-                  <strong>Motorista:</strong> motorista@conduz.pt / driver123
-                </Text>
-              </VStack>
-            </Box>
           </VStack>
         </Container>
       </Box>

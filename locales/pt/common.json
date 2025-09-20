@@ -4,9 +4,13 @@
     "about": "Sobre",
     "drivers": "Seja Motorista",
     "companies": "Para Empresas",
-    "contact": "Contacto"
-    ,
-    "panel": "Painel"
+    "contact": "Contacto",
+    "login": "Entrar",
+    "loading": "Carregando..."
+  },
+  "user": {
+    "email": "E-mail",
+    "password": "Senha"
   },
   "header": {
     "logo": "Conduz.pt",
