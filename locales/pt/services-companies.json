@@ -1,0 +1,222 @@
+{
+  "hero": {
+    "title": "Soluções para Empresas",
+    "subtitle": "Gestão completa de mobilidade corporativa com faturação mensal, centros de custo e relatórios detalhados.",
+    "badge": "PARA EMPRESAS",
+    "cta": {
+      "primary": "Pedir Proposta",
+      "secondary": "Marcar Demo"
+    }
+  },
+  "benefits": {
+    "title": "Vantagens Empresariais",
+    "subtitle": "Soluções B2B especializadas para a sua empresa",
+    "feature": "VANTAGENS",
+    "card": {
+      "title": "Gestão Corporativa",
+      "description": "Controlo total da mobilidade da sua empresa",
+      "content": "A Conduz.pt oferece soluções empresariais completas para gestão de mobilidade corporativa, com faturação centralizada, controlo de custos e relatórios detalhados.",
+      "list": {
+        "title": "Benefícios empresariais:",
+        "items": [
+          "Faturação mensal centralizada",
+          "Centros de custo personalizados",
+          "Relatórios detalhados em tempo real",
+          "Gestão de colaboradores",
+          "Controlo de orçamentos",
+          "API para integração",
+          "Suporte dedicado B2B",
+          "Compliance fiscal garantido"
+        ]
+      }
+    },
+    "highlight": {
+      "title": "Redução de 30% nos Custos",
+      "description": "Otimização comprovada de despesas de mobilidade"
+    }
+  },
+  "services": {
+    "title": "Serviços Empresariais",
+    "subtitle": "Soluções completas para gestão de mobilidade corporativa",
+    "feature": "SERVIÇOS",
+    "list": [
+      {
+        "title": "Gestão de Frota",
+        "description": "Controlo total da frota empresarial",
+        "icon": "🚗",
+        "details": "Gestão completa de veículos corporativos, manutenção, seguros e otimização de rotas para maximizar eficiência.",
+        "features": [
+          "Monitorização GPS em tempo real",
+          "Gestão de manutenção",
+          "Controlo de combustível",
+          "Relatórios de utilização"
+        ]
+      },
+      {
+        "title": "Faturação Centralizada",
+        "description": "Sistema de faturação empresarial",
+        "icon": "💼",
+        "details": "Faturação mensal consolidada com breakdown por departamento, colaborador ou centro de custo para controlo total.",
+        "features": [
+          "Faturas mensais consolidadas",
+          "Centros de custo personalizados",
+          "Aprovações hierárquicas",
+          "Integração contabilística"
+        ]
+      },
+      {
+        "title": "Portal Empresarial",
+        "description": "Dashboard executivo completo",
+        "icon": "📊",
+        "details": "Portal web dedicado com relatórios em tempo real, gestão de utilizadores e controlo de orçamentos.",
+        "features": [
+          "Dashboard executivo",
+          "Relatórios personalizados",
+          "Gestão de utilizadores",
+          "Alertas de orçamento"
+        ]
+      },
+      {
+        "title": "Gestão de Colaboradores",
+        "description": "Controlo de acessos e permissões",
+        "icon": "👥",
+        "details": "Sistema de gestão de colaboradores com diferentes níveis de acesso, aprovações e limites de utilização.",
+        "features": [
+          "Perfis de utilizador",
+          "Limites personalizados",
+          "Aprovações automáticas",
+          "Auditoria completa"
+        ]
+      },
+      {
+        "title": "Integração API",
+        "description": "Conectividade com sistemas existentes",
+        "icon": "🔗",
+        "details": "API robusta para integração com sistemas ERP, CRM e de gestão existentes na sua empresa.",
+        "features": [
+          "API REST completa",
+          "Webhooks em tempo real",
+          "Documentação técnica",
+          "Suporte de integração"
+        ]
+      },
+      {
+        "title": "Compliance Fiscal",
+        "description": "Conformidade fiscal garantida",
+        "icon": "📋",
+        "details": "Garantimos conformidade com todas as obrigações fiscais portuguesas e europeias para despesas de mobilidade.",
+        "features": [
+          "Faturas certificadas",
+          "Relatórios fiscais",
+          "Arquivo digital",
+          "Auditoria preparada"
+        ]
+      }
+    ]
+  },
+  "process": {
+    "title": "Implementação Empresarial",
+    "subtitle": "Processo estruturado para implementação nas empresas",
+    "feature": "IMPLEMENTAÇÃO",
+    "highlight": {
+      "title": "Go-Live em 2 Semanas",
+      "description": "Implementação rápida e eficiente"
+    },
+    "card": {
+      "title": "Metodologia Comprovada",
+      "description": "Processo testado em centenas de empresas",
+      "content": "A nossa metodologia de implementação garante uma transição suave e rápida para o sistema Conduz.pt, minimizando disruções operacionais.",
+      "steps": {
+        "title": "Fases de Implementação:",
+        "list": [
+          {
+            "title": "Análise de Necessidades",
+            "description": "Reunião com stakeholders para entender requisitos específicos e definir configurações.",
+            "duration": "2-3 dias"
+          },
+          {
+            "title": "Configuração do Sistema",
+            "description": "Setup do portal empresarial, centros de custo, utilizadores e integrações necessárias.",
+            "duration": "3-5 dias"
+          },
+          {
+            "title": "Formação de Equipas",
+            "description": "Formação dos administradores e utilizadores finais no uso da plataforma.",
+            "duration": "2 dias"
+          },
+          {
+            "title": "Go-Live e Suporte",
+            "description": "Ativação do sistema com suporte dedicado nas primeiras semanas de operação.",
+            "duration": "Contínuo"
+          }
+        ]
+      }
+    }
+  },
+  "pricing": {
+    "title": "Planos Empresariais",
+    "subtitle": "Soluções escaláveis para empresas de todos os tamanhos",
+    "feature": "PLANOS",
+    "plans": [
+      {
+        "name": "Starter",
+        "description": "Para pequenas empresas",
+        "price": "€99",
+        "period": "por mês",
+        "popular": false,
+        "features": [
+          "Até 10 colaboradores",
+          "Faturação mensal",
+          "Portal básico",
+          "Suporte por email",
+          "Relatórios standard"
+        ],
+        "cta": "Começar Agora"
+      },
+      {
+        "name": "Business",
+        "description": "Para empresas em crescimento",
+        "price": "€299",
+        "period": "por mês",
+        "popular": true,
+        "features": [
+          "Até 50 colaboradores",
+          "Centros de custo",
+          "Portal avançado",
+          "Suporte telefónico",
+          "Relatórios personalizados",
+          "API básica"
+        ],
+        "cta": "Mais Popular"
+      },
+      {
+        "name": "Enterprise",
+        "description": "Para grandes corporações",
+        "price": "Personalizado",
+        "period": "contacte-nos",
+        "popular": false,
+        "features": [
+          "Utilizadores ilimitados",
+          "Configuração personalizada",
+          "Account manager dedicado",
+          "SLA garantido",
+          "API completa",
+          "Integrações personalizadas"
+        ],
+        "cta": "Contactar"
+      }
+    ]
+  },
+  "support": {
+    "title": "Suporte Empresarial",
+    "subtitle": "Equipa B2B dedicada ao sucesso da sua empresa",
+    "feature": "SUPORTE"
+  },
+  "cta": {
+    "title": "Pronto para Otimizar a Mobilidade da Sua Empresa?",
+    "subtitle": "Vamos conversar sobre as suas necessidades específicas",
+    "feature": "PRÓXIMO PASSO",
+    "button": "Pedir Proposta"
+  }
+}
+

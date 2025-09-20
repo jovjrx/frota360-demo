@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.conduz.pt
+
+# Sitemaps
+Sitemap: https://www.conduz.pt/sitemap.xml

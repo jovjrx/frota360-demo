@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "title": "Mais do que conduzir, você faz a estrada acontecer!",
+    "subtitle": "Gestão 360º para motoristas, frotas e empresas — Plataforma certa, apoio real, ganhos garantidos.",
+    "description": "A Conduz.pt é o braço TVDE da Alvorada Magistral. Oferecemos soluções completas para motoristas, empresas e gestores de frota com tecnologia avançada e suporte humano.",
+    "cta": "Entrar em contacto",
+    "ctaSecondary": "Sou empresa",
+    "badge": "TVDE PORTUGAL",
+    "highlight": {
+      "title": "Porquê a Conduz?",
+      "description": "Onboarding em dias, não semanas. Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
+    }
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "subtitle": "3 passos simples para começar",
+    "feature": "PROCESSO",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Registo",
+        "description": "Submeta documentos e escolha o plano"
+      },
+      {
+        "number": "2", 
+        "title": "Validação & formação",
+        "description": "Compliance, seguro, kit de boas‑vindas"
+      },
+      {
+        "number": "3",
+        "title": "Comece a faturar",
+        "description": "Monitorização em tempo real e pagamentos claros"
+      }
+    ]
+  },
+  "segments": {
+    "title": "Soluções para todos",
+    "subtitle": "Ofertas por segmento",
+    "feature": "SEGMENTOS",
+    "drivers": {
+      "title": "Para Motoristas",
+      "description": "Benefícios, comissões transparentes, carro próprio ou alugado",
+      "cta": "Seja motorista"
+    },
+    "companies": {
+      "title": "Para Empresas", 
+      "description": "Faturação mensal, centros de custo, relatórios",
+      "cta": "Pedir proposta"
+    }
+  },
+  "metrics": {
+    "title": "Os Nossos Números",
+    "subtitle": "Indicadores que comprovam a nossa eficiência",
+    "feature": "RESULTADOS",
+    "stats": [
+      {
+        "value": "95",
+        "total": "100",
+        "unit": "%",
+        "label": "Taxa de aprovação de documentos",
+        "description": "Mais de 95% de taxa de aprovação de documentos"
+      },
+      {
+        "value": "24",
+        "total": "48",
+        "unit": "h",
+        "label": "Tempo médio para análise",
+        "description": "Menos de 24h tempo médio para análise quando possível"
+      },
+      {
+        "value": "4.8",
+        "total": "5.0",
+        "unit": "/5",
+        "label": "Satisfação do suporte",
+        "description": "4.8/5 satisfação do suporte"
+      },
+      {
+        "value": "7",
+        "total": "7",
+        "unit": "dias",
+        "label": "Suporte disponível",
+        "description": "Suporte 7 dias por semana"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Pronto para Começar a Faturar?",
+    "subtitle": "Junte-se aos motoristas que já escolheram a Conduz",
+    "button": "Começar agora",
+    "feature": "PRÓXIMO PASSO"
+  }
+}
+

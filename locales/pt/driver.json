@@ -1,0 +1,463 @@
+{
+  "dashboard": {
+    "title": "Painel do Motorista",
+    "welcome": "Bem-vindo",
+    "welcome_back": "Bem-vindo de volta",
+    "account_status": {
+      "pending": "A sua conta está pendente de aprovação",
+      "suspended": "A sua conta está suspensa",
+      "approved": "A sua conta está aprovada e ativa",
+      "rejected": "A sua conta foi rejeitada"
+    },
+    "stats": {
+      "total_earnings": "Ganhos Totais",
+      "monthly_earnings": "Ganhos Mensais",
+      "weekly_earnings": "Ganhos Semanais",
+      "daily_earnings": "Ganhos Diários",
+      "total_trips": "Total de Corridas",
+      "monthly_trips": "Corridas Mensais",
+      "weekly_trips": "Corridas Semanais",
+      "daily_trips": "Corridas Diárias",
+      "average_rating": "Avaliação Média",
+      "completion_rate": "Taxa de Conclusão",
+      "acceptance_rate": "Taxa de Aceitação",
+      "online_hours": "Horas Online"
+    },
+    "subscription": {
+      "title": "Assinatura",
+      "status": "Estado da Assinatura",
+      "plan": "Plano Atual",
+      "next_billing": "Próxima Cobrança",
+      "trial_ends": "Período de teste termina em",
+      "manage": "Gerir Assinatura"
+    },
+    "quick_actions": {
+      "title": "Ações Rápidas",
+      "manage_subscription": "Gerir Assinatura",
+      "update_profile": "Atualizar Perfil",
+      "view_documents": "Ver Documentos",
+      "earnings_report": "Relatório de Ganhos",
+      "trip_history": "Histórico de Corridas",
+      "support": "Suporte"
+    },
+    "recent_activity": {
+      "title": "Atividade Recente",
+      "recent_trips": "Corridas Recentes",
+      "recent_payments": "Pagamentos Recentes",
+      "no_trips": "Nenhuma corrida registada",
+      "no_payments": "Nenhum pagamento ainda",
+      "view_all": "Ver Tudo"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "no_notifications": "Nenhuma notificação",
+      "mark_all_read": "Marcar todas como lidas"
+    }
+  },
+  "subscription": {
+    "title": "Minha Assinatura",
+    "subtitle": "Gerencie a sua assinatura e planos",
+    "current_subscription": {
+      "title": "Assinatura Atual",
+      "no_subscription": "Ainda não tem uma assinatura ativa",
+      "choose_plan_description": "Escolha um plano para começar a usar todos os recursos da plataforma",
+      "status": "Estado",
+      "plan": "Plano",
+      "billing_cycle": "Ciclo de Cobrança",
+      "next_billing": "Próxima Cobrança",
+      "amount": "Valor",
+      "trial_active": "Período de teste ativo",
+      "trial_ends": "O seu período de teste termina em"
+    },
+    "actions": {
+      "choose_plan": "Escolher Plano",
+      "change_plan": "Alterar Plano",
+      "cancel_subscription": "Cancelar Assinatura",
+      "reactivate": "Reativar Assinatura",
+      "view_plans": "Ver Planos Disponíveis",
+      "billing_history": "Histórico de Cobrança"
+    },
+    "available_plans": {
+      "title": "Planos Disponíveis",
+      "subtitle": "Escolha o plano que melhor se adequa às suas necessidades",
+      "monthly": "Mensal",
+      "yearly": "Anual",
+      "per_month": "por mês",
+      "per_year": "por ano",
+      "free_trial": "{{days}} dias grátis",
+      "most_popular": "Mais Popular",
+      "current_plan": "Plano Atual",
+      "choose_plan": "Escolher Plano",
+      "upgrade": "Fazer Upgrade",
+      "downgrade": "Fazer Downgrade"
+    },
+    "confirmation": {
+      "title": "Confirmar Assinatura",
+      "plan_details": "Detalhes do Plano",
+      "billing_details": "Detalhes de Cobrança",
+      "trial_info": "Período de teste de {{days}} dias",
+      "trial_description": "Não será cobrado durante o período de teste",
+      "confirm_button": "Confirmar Assinatura",
+      "cancel_button": "Cancelar"
+    },
+    "billing_history": {
+      "title": "Histórico de Cobrança",
+      "date": "Data",
+      "description": "Descrição",
+      "amount": "Valor",
+      "status": "Estado",
+      "invoice": "Fatura",
+      "download": "Descarregar",
+      "no_history": "Nenhum histórico de cobrança"
+    },
+    "messages": {
+      "subscription_created": "Assinatura criada com sucesso!",
+      "subscription_updated": "Assinatura atualizada com sucesso!",
+      "subscription_cancelled": "Assinatura cancelada",
+      "subscription_reactivated": "Assinatura reativada com sucesso!",
+      "cancellation_scheduled": "A sua assinatura será cancelada no final do período atual",
+      "error_creating": "Erro ao criar assinatura. Tente novamente.",
+      "error_updating": "Erro ao atualizar assinatura. Tente novamente.",
+      "error_cancelling": "Erro ao cancelar assinatura. Tente novamente."
+    }
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "subtitle": "Gerencie as suas informações pessoais",
+    "personal_info": {
+      "title": "Informações Pessoais",
+      "first_name": "Primeiro Nome",
+      "last_name": "Último Nome",
+      "email": "Email",
+      "phone": "Telefone",
+      "date_of_birth": "Data de Nascimento",
+      "gender": "Género",
+      "nationality": "Nacionalidade",
+      "tax_number": "Número de Contribuinte",
+      "id_number": "Número de Identificação"
+    },
+    "address": {
+      "title": "Morada",
+      "street": "Rua",
+      "number": "Número",
+      "floor": "Andar",
+      "postal_code": "Código Postal",
+      "city": "Cidade",
+      "district": "Distrito",
+      "country": "País"
+    },
+    "emergency_contact": {
+      "title": "Contacto de Emergência",
+      "name": "Nome",
+      "relationship": "Parentesco",
+      "phone": "Telefone",
+      "email": "Email"
+    },
+    "bank_details": {
+      "title": "Dados Bancários",
+      "bank_name": "Nome do Banco",
+      "account_holder": "Titular da Conta",
+      "iban": "IBAN",
+      "swift": "Código SWIFT/BIC"
+    },
+    "preferences": {
+      "title": "Preferências",
+      "language": "Idioma",
+      "timezone": "Fuso Horário",
+      "currency": "Moeda",
+      "notifications": "Notificações",
+      "email_notifications": "Notificações por Email",
+      "sms_notifications": "Notificações por SMS",
+      "push_notifications": "Notificações Push"
+    },
+    "avatar": {
+      "title": "Foto de Perfil",
+      "upload": "Carregar Foto",
+      "remove": "Remover Foto",
+      "change": "Alterar Foto"
+    },
+    "actions": {
+      "save": "Guardar Alterações",
+      "cancel": "Cancelar",
+      "reset": "Repor",
+      "delete_account": "Eliminar Conta"
+    },
+    "messages": {
+      "profile_updated": "Perfil atualizado com sucesso!",
+      "error_updating": "Erro ao atualizar perfil. Tente novamente.",
+      "avatar_updated": "Foto de perfil atualizada!",
+      "avatar_removed": "Foto de perfil removida!",
+      "confirm_delete": "Tem certeza que deseja eliminar a sua conta? Esta ação não pode ser desfeita."
+    }
+  },
+  "documents": {
+    "title": "Documentos",
+    "subtitle": "Gerencie os seus documentos e certificações",
+    "required_documents": {
+      "title": "Documentos Obrigatórios",
+      "driving_license": "Carta de Condução",
+      "id_card": "Cartão de Cidadão/Passaporte",
+      "criminal_record": "Registo Criminal",
+      "medical_certificate": "Certificado Médico",
+      "tvde_license": "Licença TVDE",
+      "vehicle_registration": "Registo do Veículo",
+      "insurance": "Seguro do Veículo",
+      "inspection": "Inspeção Técnica"
+    },
+    "optional_documents": {
+      "title": "Documentos Opcionais",
+      "professional_certificate": "Certificado Profissional",
+      "training_certificate": "Certificado de Formação",
+      "language_certificate": "Certificado de Idiomas"
+    },
+    "document_status": {
+      "pending": "Pendente",
+      "approved": "Aprovado",
+      "rejected": "Rejeitado",
+      "expired": "Expirado",
+      "missing": "Em Falta"
+    },
+    "actions": {
+      "upload": "Carregar Documento",
+      "replace": "Substituir",
+      "download": "Descarregar",
+      "view": "Ver",
+      "delete": "Eliminar"
+    },
+    "upload": {
+      "title": "Carregar Documento",
+      "drag_drop": "Arraste e largue o ficheiro aqui ou clique para selecionar",
+      "file_types": "Tipos de ficheiro aceites: PDF, JPG, PNG",
+      "max_size": "Tamanho máximo: 10MB",
+      "expiry_date": "Data de Validade",
+      "notes": "Notas (opcional)"
+    },
+    "messages": {
+      "document_uploaded": "Documento carregado com sucesso!",
+      "document_updated": "Documento atualizado com sucesso!",
+      "document_deleted": "Documento eliminado com sucesso!",
+      "error_uploading": "Erro ao carregar documento. Tente novamente.",
+      "file_too_large": "Ficheiro muito grande. Máximo 10MB.",
+      "invalid_file_type": "Tipo de ficheiro inválido.",
+      "document_expired": "Este documento está expirado. Por favor, carregue uma versão atualizada."
+    }
+  },
+  "earnings": {
+    "title": "Ganhos",
+    "subtitle": "Acompanhe os seus ganhos e pagamentos",
+    "overview": {
+      "title": "Resumo de Ganhos",
+      "total_earnings": "Ganhos Totais",
+      "this_month": "Este Mês",
+      "last_month": "Mês Passado",
+      "this_week": "Esta Semana",
+      "last_week": "Semana Passada",
+      "today": "Hoje",
+      "yesterday": "Ontem"
+    },
+    "breakdown": {
+      "title": "Detalhamento",
+      "gross_earnings": "Ganhos Brutos",
+      "platform_commission": "Comissão da Plataforma",
+      "service_fees": "Taxas de Serviço",
+      "bonuses": "Bónus",
+      "tips": "Gorjetas",
+      "net_earnings": "Ganhos Líquidos"
+    },
+    "payment_history": {
+      "title": "Histórico de Pagamentos",
+      "date": "Data",
+      "period": "Período",
+      "gross_amount": "Valor Bruto",
+      "deductions": "Deduções",
+      "net_amount": "Valor Líquido",
+      "status": "Estado",
+      "payment_method": "Método de Pagamento",
+      "reference": "Referência"
+    },
+    "filters": {
+      "period": "Período",
+      "last_7_days": "Últimos 7 dias",
+      "last_30_days": "Últimos 30 dias",
+      "last_3_months": "Últimos 3 meses",
+      "last_6_months": "Últimos 6 meses",
+      "last_year": "Último ano",
+      "custom": "Personalizado",
+      "start_date": "Data de Início",
+      "end_date": "Data de Fim"
+    },
+    "export": {
+      "title": "Exportar Dados",
+      "csv": "Exportar CSV",
+      "pdf": "Exportar PDF",
+      "excel": "Exportar Excel"
+    },
+    "messages": {
+      "no_earnings": "Nenhum ganho registado para este período",
+      "export_success": "Dados exportados com sucesso!",
+      "export_error": "Erro ao exportar dados. Tente novamente."
+    }
+  },
+  "trips": {
+    "title": "Corridas",
+    "subtitle": "Histórico e detalhes das suas corridas",
+    "overview": {
+      "title": "Resumo de Corridas",
+      "total_trips": "Total de Corridas",
+      "completed_trips": "Corridas Concluídas",
+      "cancelled_trips": "Corridas Canceladas",
+      "average_rating": "Avaliação Média",
+      "total_distance": "Distância Total",
+      "total_time": "Tempo Total"
+    },
+    "trip_list": {
+      "title": "Lista de Corridas",
+      "date": "Data",
+      "time": "Hora",
+      "pickup": "Origem",
+      "destination": "Destino",
+      "distance": "Distância",
+      "duration": "Duração",
+      "fare": "Tarifa",
+      "rating": "Avaliação",
+      "status": "Estado"
+    },
+    "trip_details": {
+      "title": "Detalhes da Corrida",
+      "trip_id": "ID da Corrida",
+      "platform": "Plataforma",
+      "vehicle": "Veículo",
+      "passenger": "Passageiro",
+      "pickup_address": "Morada de Origem",
+      "destination_address": "Morada de Destino",
+      "pickup_time": "Hora de Recolha",
+      "dropoff_time": "Hora de Entrega",
+      "waiting_time": "Tempo de Espera",
+      "base_fare": "Tarifa Base",
+      "distance_fare": "Tarifa por Distância",
+      "time_fare": "Tarifa por Tempo",
+      "surge_multiplier": "Multiplicador de Procura",
+      "tolls": "Portagens",
+      "tips": "Gorjetas",
+      "total_fare": "Tarifa Total",
+      "commission": "Comissão",
+      "net_earnings": "Ganhos Líquidos"
+    },
+    "filters": {
+      "status": "Estado",
+      "all": "Todas",
+      "completed": "Concluídas",
+      "cancelled": "Canceladas",
+      "platform": "Plataforma",
+      "date_range": "Período"
+    },
+    "status": {
+      "completed": "Concluída",
+      "cancelled": "Cancelada",
+      "cancelled_by_driver": "Cancelada pelo Motorista",
+      "cancelled_by_passenger": "Cancelada pelo Passageiro",
+      "no_show": "Passageiro não apareceu"
+    },
+    "messages": {
+      "no_trips": "Nenhuma corrida encontrada para este período",
+      "trip_details_error": "Erro ao carregar detalhes da corrida"
+    }
+  },
+  "support": {
+    "title": "Suporte",
+    "subtitle": "Precisa de ajuda? Estamos aqui para si",
+    "contact_methods": {
+      "title": "Métodos de Contacto",
+      "phone": "Telefone",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "chat": "Chat Online"
+    },
+    "faq": {
+      "title": "Perguntas Frequentes",
+      "search_placeholder": "Pesquisar nas perguntas frequentes...",
+      "categories": {
+        "account": "Conta",
+        "documents": "Documentos",
+        "earnings": "Ganhos",
+        "trips": "Corridas",
+        "technical": "Técnico",
+        "billing": "Cobrança"
+      }
+    },
+    "ticket": {
+      "title": "Criar Ticket de Suporte",
+      "subject": "Assunto",
+      "category": "Categoria",
+      "priority": "Prioridade",
+      "description": "Descrição",
+      "attachments": "Anexos",
+      "submit": "Enviar Ticket"
+    },
+    "ticket_history": {
+      "title": "Histórico de Tickets",
+      "ticket_id": "ID do Ticket",
+      "subject": "Assunto",
+      "status": "Estado",
+      "created": "Criado",
+      "last_update": "Última Atualização"
+    },
+    "messages": {
+      "ticket_created": "Ticket criado com sucesso!",
+      "ticket_updated": "Ticket atualizado com sucesso!",
+      "error_creating_ticket": "Erro ao criar ticket. Tente novamente."
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Personalize a sua experiência",
+    "account": {
+      "title": "Conta",
+      "change_password": "Alterar Palavra-passe",
+      "two_factor": "Autenticação de Dois Fatores",
+      "login_history": "Histórico de Logins",
+      "delete_account": "Eliminar Conta"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "email_notifications": "Notificações por Email",
+      "sms_notifications": "Notificações por SMS",
+      "push_notifications": "Notificações Push",
+      "trip_notifications": "Notificações de Corridas",
+      "payment_notifications": "Notificações de Pagamentos",
+      "promotional_notifications": "Notificações Promocionais"
+    },
+    "privacy": {
+      "title": "Privacidade",
+      "data_sharing": "Partilha de Dados",
+      "location_tracking": "Rastreamento de Localização",
+      "analytics": "Analytics",
+      "marketing": "Marketing"
+    },
+    "appearance": {
+      "title": "Aparência",
+      "theme": "Tema",
+      "light": "Claro",
+      "dark": "Escuro",
+      "auto": "Automático",
+      "language": "Idioma",
+      "timezone": "Fuso Horário"
+    },
+    "messages": {
+      "settings_saved": "Configurações guardadas com sucesso!",
+      "password_changed": "Palavra-passe alterada com sucesso!",
+      "error_saving": "Erro ao guardar configurações. Tente novamente."
+    }
+  },
+  "navigation": {
+    "dashboard": "Painel",
+    "subscription": "Assinatura",
+    "profile": "Perfil",
+    "documents": "Documentos",
+    "earnings": "Ganhos",
+    "trips": "Corridas",
+    "support": "Suporte",
+    "settings": "Configurações",
+    "logout": "Sair"
+  }
+}

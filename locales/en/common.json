@@ -1,0 +1,130 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "drivers": "Become a Driver",
+    "companies": "For Companies",
+    "contact": "Contact"
+    ,
+    "panel": "Panel"
+  },
+  "header": {
+    "logo": "Conduz.pt",
+    "tagline": "An Alvorada Magistral company",
+    "language": "Language"
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "description": "Elevating Experiences. Empowering Businesses.",
+    "tagline": "An Alvorada Magistral company",
+    "contactInfo": "Contact",
+    "developer": "José Júnior",
+    "developerBy": "Developed by",
+    "sections": {
+      "company": "Company",
+      "services": "Services",
+      "contact": "Contact",
+      "legal": "Legal"
+    }
+  },
+  "seo": {
+    "default": {
+      "title": "Conduz.pt - Frictionless TVDE | Drivers & Companies in Portugal",
+      "description": "Portugal's leading TVDE platform. Fast onboarding for drivers, complete business solutions, and support 7 days a week. Start earning today!",
+      "keywords": "TVDE Portugal, TVDE driver, Uber Portugal, Bolt Portugal, urban mobility, private transportation, TVDE company, TVDE fleet, TVDE license",
+      "image": "https://conduz.pt/img/conduz.png",
+      "url": "https://conduz.pt"
+    },
+    "pages": {
+      "home": {
+        "title": "Frictionless TVDE – Drive Your Future | Conduz.pt",
+        "description": "360º management for drivers, fleets and TVDE companies. Onboarding in days, 7/7 support, technology that simplifies. 95% approval rate.",
+        "keywords": "TVDE Portugal, TVDE driver Lisbon, TVDE driver Porto, Uber driver, Bolt driver, TVDE license, TVDE onboarding, driver support"
+      },
+      "services-drivers": {
+        "title": "Become a TVDE Driver | Fast Onboarding & 7/7 Support | Conduz.pt",
+        "description": "Become a TVDE driver in 3–5 days. Transparent commissions, dedicated support, intuitive portal. 95% approval rate. Start today!",
+        "keywords": "become TVDE driver, how to be an Uber driver, Bolt driver Portugal, fast TVDE license, TVDE training, TVDE documents, TVDE car"
+      },
+      "services-companies": {
+        "title": "TVDE Solutions for Companies | Fleet & Mobility Management | Conduz.pt",
+        "description": "B2B solutions for corporate mobility management. Centralized invoicing, cost centers, detailed reports. Reduce costs by 30%.",
+        "keywords": "TVDE for companies, TVDE fleet management, corporate mobility, corporate transportation, TVDE invoicing, TVDE API, enterprise compliance"
+      },
+      "about": {
+        "title": "About Conduz.pt | TVDE Specialists in Portugal",
+        "description": "Meet Conduz.pt, the TVDE arm of Alvorada Magistral. 30+ years of management experience, advanced technology and guaranteed TVDE compliance.",
+        "keywords": "about Conduz, Alvorada Magistral TVDE, TVDE company Portugal, Conduz story, TVDE team, mobility experience"
+      },
+      "contact": {
+        "title": "Conduz.pt Contacts | TVDE Support 7 Days a Week",
+        "description": "Get in touch with Conduz.pt. Support via WhatsApp, phone and email. TVDE-specialized team available 7 days a week.",
+        "keywords": "Conduz contact, TVDE support, TVDE WhatsApp, driver phone, TVDE help, TVDE company contact"
+      }
+    }
+  },
+  "video": {
+    "playButton": "Watch",
+    "playAriaLabel": "Play video"
+  },
+  "company": {
+    "name": "Alvorada Magistral",
+    "address": "Rua Engenheiro Arantes de Oliveira 143",
+    "postalCode": "3720-253",
+    "city": "Oliveira de Azeméis",
+    "state": "Aveiros",
+    "country": "Portugal",
+    "email": "conduz@alvoradamagistral.eu",
+    "emailDescription": "Support and information",
+    "nipc": "517524945",
+    "phone": "+351 913 415 670",
+    "phoneDescription": "Support 7 days/week",
+    "whats": "http://wa.me/+351913415670",
+    "whatsDescription": "Fast and efficient support",
+    "website": "conduz.pt"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "We clarify your main questions",
+    "feature": "FAQ",
+    "items": [
+      {
+        "question": "Can I work with my own car?",
+        "answer": "Yes, we offer plans both for those with their own car and for those who need an operational rental."
+      },
+      {
+        "question": "How do commissions and payments work?",
+        "answer": "We have transparent commissions and clear payments through the driver portal with balance, history and invoices."
+      },
+      {
+        "question": "What if I already have accounts on other platforms?",
+        "answer": "No problem! We can integrate with the main TVDE platforms like Uber, Bolt and FreeNow."
+      },
+      {
+        "question": "What support do you offer?",
+        "answer": "Human and effective support via WhatsApp, phone and email, 7 days a week."
+      },
+      {
+        "question": "How long does the onboarding process take?",
+        "answer": "Our onboarding is fast — in days, not weeks. It depends on document validation and training."
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "What our drivers say",
+    "subtitle": "Real experiences from people who are already with Conduz",
+    "feature": "TESTIMONIALS",
+    "items": [
+      {
+        "quote": "I joined on Monday and was already billing by Friday.",
+        "author": "João S.",
+        "location": "Lisbon"
+      },
+      {
+        "quote": "Clear reports put an end to surprises in the accounts.",
+        "author": "Marta R.",
+        "location": "Porto"
+      }
+    ]
+  }
+}

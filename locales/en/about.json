@@ -1,0 +1,107 @@
+{
+  "mission": {
+    "title": "Our Mission",
+    "subtitle": "Simplify TVDE in Portugal with advanced technology, human support and guaranteed compliance",
+    "feature": "MISSION",
+    "card": {
+      "title": "Vision and Values",
+      "description": "Building the future of TVDE mobility",
+      "content": "Conduz.pt was born to simplify TVDE in Portugal. We are the mobility arm of Alvorada Magistral, combining over 30 years of management experience with cutting‑edge technology to offer complete solutions for drivers, companies and fleet managers.",
+      "values": {
+        "title": "Our Core Values",
+        "list": [
+          "Transparency in every operation",
+          "Safety and TVDE compliance guaranteed",
+          "Excellent service 7 days a week",
+          "Technology that simplifies processes",
+          "Sustainable and responsible scale"
+        ]
+      }
+    },
+    "highlight": {
+      "title": "conduz.pt",
+      "description": "Building the future of TVDE mobility"
+    }
+  },
+  "approach": {
+    "title": "Our Approach",
+    "subtitle": "Proven methodology for outstanding TVDE results",
+    "feature": "APPROACH",
+    "methods": [
+      {
+        "title": "Fast Onboarding",
+        "description": "Onboarding in days, not weeks, with smart checklists and efficient validation",
+        "icon": "🚀"
+      },
+      {
+        "title": "Human Support",
+        "description": "Dedicated team available 7 days a week via WhatsApp, phone and email",
+        "icon": "🤝"
+      },
+      {
+        "title": "Simple Technology",
+        "description": "Intuitive driver portal with balance, history, invoices and real‑time reports",
+        "icon": "💻"
+      },
+      {
+        "title": "Full Compliance",
+        "description": "We ensure compliance with all Portuguese TVDE regulations",
+        "icon": "✅"
+      }
+    ]
+  },
+  "experience": {
+    "title": "Our Experience",
+    "subtitle": "Numbers that prove our efficiency and dedication",
+    "feature": "EXPERIENCE",
+    "card": {
+      "title": "Success Story",
+      "description": "From business management to excellent TVDE",
+      "content": "Alvorada Magistral has been operating for over 30 years in business management in Portugal, Italy, Spain and other countries. Conduz.pt represents our entry into the TVDE market, bringing all this experience to revolutionize Portuguese mobility.",
+      "stats": {
+        "title": "Alvorada Magistral in numbers",
+        "list": [
+          { "value": "30+", "label": "Years of Experience" },
+          { "value": "95%", "label": "Approval Rate" },
+          { "value": "<24h", "label": "Review Time" },
+          { "value": "4.9/5", "label": "Support Satisfaction" }
+        ]
+      }
+    },
+    "highlight": {
+      "title": "Proven Results",
+      "description": "Operational efficiency and customer satisfaction"
+    }
+  },
+  "team": {
+    "title": "Our Team",
+    "subtitle": "Professionals dedicated to the success of our drivers and partners",
+    "feature": "TEAM",
+    "members": [
+      {
+        "name": "Onboarding Team",
+        "position": "TVDE Specialists",
+        "bio": "Responsible for ensuring a quick and efficient onboarding process, with document validation and complete training.",
+        "expertise": ["TVDE Compliance", "Training"]
+      },
+      {
+        "name": "Driver Support",
+        "position": "7/7 Support",
+        "bio": "Dedicated team available every day of the week to solve issues and support our drivers.",
+        "expertise": ["Technical Support", "Problem Solving"]
+      },
+      {
+        "name": "Fleet Management",
+        "position": "B2B Specialists",
+        "bio": "Focused on business solutions, fleet management and strategic partnerships to maximize efficiency.",
+        "expertise": ["B2B Management", "Partnerships"]
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to be part of Conduz?",
+    "subtitle": "Join us and discover how we can simplify your TVDE",
+    "feature": "NEXT STEP",
+    "button": "Contact Now"
+  }
+}

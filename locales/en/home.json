@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "title": "More than driving, you make the road happen!",
+    "subtitle": "360° management for drivers, fleets and companies — Right platform, true support, guaranteed income.",
+    "description": "Conduz.pt is the TVDE arm of Alvorada Magistral. We offer complete solutions for drivers, companies and fleet managers with advanced technology and human support.",
+    "cta": "Get in touch",
+    "ctaSecondary": "I’m a company",
+    "badge": "TVDE PORTUGAL",
+    "highlight": {
+      "title": "Why Conduz?",
+      "description": "Onboarding in days, not weeks. Human, effective support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
+    }
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "subtitle": "3 simple steps to get started",
+    "feature": "PROCESS",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Registration",
+        "description": "Submit documents and choose your plan"
+      },
+      {
+        "number": "2",
+        "title": "Validation & training",
+        "description": "Compliance, insurance, welcome kit"
+      },
+      {
+        "number": "3",
+        "title": "Start earning",
+        "description": "Real‑time monitoring and clear payments"
+      }
+    ]
+  },
+  "segments": {
+    "title": "Solutions for everyone",
+    "subtitle": "Offers by segment",
+    "feature": "SEGMENTS",
+    "drivers": {
+      "title": "For Drivers",
+      "description": "Benefits, transparent commissions, own car or rental",
+      "cta": "Become a driver"
+    },
+    "companies": {
+      "title": "For Companies",
+      "description": "Monthly invoicing, cost centers, reports",
+      "cta": "Request a proposal"
+    }
+  },
+  "metrics": {
+    "title": "Our Numbers",
+    "subtitle": "Indicators that prove our efficiency",
+    "feature": "RESULTS",
+    "stats": [
+      {
+        "value": "95",
+        "total": "100",
+        "unit": "%",
+        "label": "Document approval rate",
+        "description": "Over 95% document approval rate"
+      },
+      {
+        "value": "24",
+        "total": "48",
+        "unit": "h",
+        "label": "Average review time",
+        "description": "Under 24h average review time whenever possible"
+      },
+      {
+        "value": "4.8",
+        "total": "5.0",
+        "unit": "/5",
+        "label": "Support satisfaction",
+        "description": "4.8/5 support satisfaction"
+      },
+      {
+        "value": "7",
+        "total": "7",
+        "unit": "days",
+        "label": "Support availability",
+        "description": "Support 7 days a week"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to start earning?",
+    "subtitle": "Join the drivers who already chose Conduz",
+    "button": "Start now",
+    "feature": "NEXT STEP"
+  }
+}
+

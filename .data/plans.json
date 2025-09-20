@@ -1,0 +1,81 @@
+[
+  {
+    "id": "plan_starter",
+    "name": "Plano Starter",
+    "description": "Ideal para motoristas iniciantes",
+    "priceCents": 2900,
+    "currency": "EUR",
+    "interval": "month",
+    "trialDays": 7,
+    "features": [
+      "Até 100 corridas por mês",
+      "Relatórios básicos",
+      "Suporte por email",
+      "Comissão padrão"
+    ],
+    "commissionRate": 0.15,
+    "status": "active",
+    "createdAt": 1703462400000,
+    "updatedAt": 1703462400000
+  },
+  {
+    "id": "plan_professional", 
+    "name": "Plano Professional",
+    "description": "A escolha mais popular",
+    "priceCents": 4900,
+    "currency": "EUR", 
+    "interval": "month",
+    "trialDays": 14,
+    "features": [
+      "Corridas ilimitadas",
+      "Relatórios avançados",
+      "Suporte prioritário",
+      "Comissão reduzida",
+      "Acesso à comunidade de motoristas"
+    ],
+    "commissionRate": 0.12,
+    "status": "active",
+    "createdAt": 1703462400000,
+    "updatedAt": 1703462400000
+  },
+  {
+    "id": "plan_enterprise",
+    "name": "Plano Enterprise", 
+    "description": "Para proprietários de frotas",
+    "priceCents": 9900,
+    "currency": "EUR",
+    "interval": "month",
+    "trialDays": 30,
+    "features": [
+      "Gestão multi-motoristas",
+      "Relatórios personalizados",
+      "Suporte dedicado",
+      "Menor comissão",
+      "Acesso à API"
+    ],
+    "commissionRate": 0.10,
+    "status": "active",
+    "createdAt": 1703462400000,
+    "updatedAt": 1703462400000
+  },
+  {
+    "id": "plan_basic_yearly",
+    "name": "Plano Starter (Anual)",
+    "description": "Plano starter com desconto anual",
+    "priceCents": 29000,
+    "currency": "EUR",
+    "interval": "year", 
+    "trialDays": 7,
+    "features": [
+      "Até 100 corridas por mês",
+      "Relatórios básicos",
+      "Suporte por email",
+      "Comissão padrão",
+      "20% de desconto no pagamento anual"
+    ],
+    "commissionRate": 0.15,
+    "status": "active",
+    "createdAt": 1703462400000,
+    "updatedAt": 1703462400000
+  }
+]

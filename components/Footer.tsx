@@ -1,0 +1,132 @@
+import NextLink from "next/link";
+import {
+  Heading,
+  Text,
+  Link,
+  HStack,
+  Divider,
+  Image,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import { Container } from "./Container";
+import { ContainerDivisions } from "./ContainerDivisions";
+
+interface FooterProps {
+  t: (key: string) => string;
+}
+
+export default function Footer({ t }: FooterProps) {
+  const year = new Date().getFullYear();
+  const color = "white";
+  const colorSoft = "whiteAlpha.600";
+  const border = "whiteAlpha.300";
+
+  return (
+    <Container bg="#0d152b" softBg>
+      <VStack spacing={6} minW="full">
+        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }}>
+
+          <Stack spacing={3} minW="full" align={{ base: "center", md: "flex-start" }}>
+            <Link as={NextLink} href="/">
+              <Image
+                src="/img/logo.png"
+                alt="Conduz.pt"
+                h={'auto'}
+                w={64}
+                filter="brightness(0) invert(1)"
+              />
+            </Link>
+            <VStack spacing={0} align={{ base: "center", md: "flex-start" }}>
+              <Heading size="md" fontWeight="medium" color={color}>
+                {t("footer.tagline")}
+              </Heading>
+              <Text color={colorSoft} fontStyle="italic" fontSize="sm">
+                "{t("footer.description")}"
+              </Text>
+            </VStack>
+          </Stack>
+
+          <Divider borderColor={border} display={{ base: "flex", md: "none" }} />
+
+          <Stack spacing={3} align={{ base: "center", md: "flex-start" }}>
+            <Heading size="md" fontWeight="medium" color={color} textAlign={{ base: "center", md: "left" }}>
+              {t("footer.contactInfo")}
+            </Heading>
+            <Link
+              href={t("company.whats")}
+              color="brand.500"
+              fontSize="sm"
+              _hover={{ textDecoration: "underline" }}
+              fontWeight="medium"
+            >
+              {t("company.phone")}
+            </Link>
+            <Link
+              href={`mailto:${t("company.email")}`}
+              color="brand.500"
+              fontSize="sm"
+              _hover={{ textDecoration: "underline" }}
+              fontWeight="medium"
+            >
+              {t("company.email")}
+            </Link>
+            <Text color="whiteAlpha.900" fontSize="sm">
+              {t("company.address")}, {t("company.postalCode")}
+            </Text>
+            <Text color="whiteAlpha.900" fontSize="sm">
+              {t("company.city")}, {t("company.state")}, {t("company.country")}
+            </Text>
+          </Stack>
+
+
+        </ContainerDivisions>
+
+        <Divider borderColor={border} />
+
+        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }} gap={{ base: 2, md: 6 }}>
+          <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
+            <Link as={NextLink} fontSize="sm" href="/" _hover={{ textDecoration: "underline" }}>
+              {t("navigation.home")}
+            </Link>
+            <Link as={NextLink} fontSize="sm" href="/about" _hover={{ textDecoration: "underline" }}>
+              {t("navigation.about")}
+            </Link>
+            <Link as={NextLink} fontSize="sm" href="/services/painels" _hover={{ textDecoration: "underline" }}>
+              {t("navigation.drivers")}
+            </Link>
+            <Link as={NextLink} fontSize="sm" href="/services/companies" _hover={{ textDecoration: "underline" }}>
+              {t("navigation.companies")}
+            </Link>
+
+            <Link as={NextLink} fontSize="sm" href="/contact" _hover={{ textDecoration: "underline" }}>
+              {t("navigation.contact")}
+            </Link>
+          </HStack>
+
+          <HStack justify={{ base: "center", md: "flex-start" }}>
+            <Text color={colorSoft} fontSize="sm" textAlign="center" gap={2}>
+              {t("footer.developerBy")}
+            </Text>
+            <Link href="https://josejunior.com.br" fontSize="sm" _hover={{ textDecoration: "underline" }}>
+              {t("footer.developer")}
+            </Link>
+          </HStack>
+
+        </ContainerDivisions>
+        <Divider borderColor={border} />
+
+        <Stack spacing={2} flexDirection={{ base: "column", md: "row" }} justify={{ base: "center", md: "space-between" }}>
+          <Text color={colorSoft} fontSize="sm" textAlign="center">
+            © {year} Conduz.pt, uma empresa Alvorada Magistral LDA. {t("company.nipc")}.
+          </Text>
+          <Text color={colorSoft} fontSize="sm" textAlign="center">
+            {t("footer.copyright")}
+          </Text>
+        </Stack>
+      </VStack>
+
+    </Container>
+
+  );
+}
