@@ -1,5 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+// Dynamic imports for Node.js modules (server-side only)
+const fs = typeof window === 'undefined' ? require('fs') : null;
+const path = typeof window === 'undefined' ? require('path') : null;
 
 export interface TranslationNamespace {
   [key: string]: any;
@@ -21,6 +22,12 @@ export async function loadTranslations(
   locale: string = DEFAULT_LOCALE,
   namespaces: string[] = ['common']
 ): Promise<Translations> {
+  // Only work on server-side
+  if (typeof window !== 'undefined' || !fs || !path) {
+    console.warn('loadTranslations can only be used on the server-side');
+    return {};
+  }
+
   const normalizedLocale = SUPPORTED_LOCALES.includes(locale as SupportedLocale) 
     ? locale as SupportedLocale 
     : DEFAULT_LOCALE;
