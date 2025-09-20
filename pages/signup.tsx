@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import Head from 'next/head';
 import {
   Box,
   Button,
@@ -72,8 +73,15 @@ export default function SignupPage() {
   };
 
   return (
-    <Box py={16} bg="white">
-      <Container maxW="4xl">
+    <>
+      <Head>
+        <title>Cadastro de Motorista | Conduz.pt - Seja Motorista TVDE</title>
+        <meta name="description" content="Cadastre-se como motorista na plataforma Conduz.pt. Onboarding rápido, suporte 7/7 e comissões transparentes." />
+        <meta name="keywords" content="cadastro motorista, registro TVDE, ser motorista, cadastro Conduz" />
+      </Head>
+
+      <Box py={16} bg="white">
+        <Container maxW="4xl">
         <VStack spacing={8} align="stretch">
           {/* Logo e Título */}
           <VStack spacing={4} textAlign="center">
@@ -360,5 +368,6 @@ export default function SignupPage() {
         </VStack>
       </Container>
     </Box>
+    </>
   );
 }

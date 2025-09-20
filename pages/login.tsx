@@ -4,7 +4,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
-import LanguageSelector from '../components/LanguageSelector';
 import {
   Box,
   Button,
@@ -117,10 +116,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
               </VStack>
             </VStack>
 
-            {/* Language Selector */}
-            <Box display="flex" justifyContent="center">
-              <LanguageSelector />
-            </Box>
 
             {/* Formulário */}
             <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
