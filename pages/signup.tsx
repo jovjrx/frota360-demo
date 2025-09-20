@@ -20,14 +20,25 @@ import {
   Icon,
   InputGroup,
   InputRightElement,
+  Select,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff, FiUser, FiPhone, FiCalendar, FiMapPin } from 'react-icons/fi';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [city, setCity] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [licenseExpiry, setLicenseExpiry] = useState('');
+  const [vehicleType, setVehicleType] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -80,22 +91,148 @@ export default function SignupPage() {
             >
               C
             </Box>
-            <VStack spacing={2}>
-              <Heading size="lg" color="gray.900">
-                Criar conta
-              </Heading>
-              <Text color="gray.600">
-                Junte-se à plataforma Conduz.pt
-              </Text>
-            </VStack>
+              <VStack spacing={2}>
+                <Heading size="lg" color="gray.900">
+                  Criar conta de Motorista
+                </Heading>
+                <Text color="gray.600">
+                  Junte-se à plataforma Conduz.pt como motorista
+                </Text>
+              </VStack>
           </VStack>
 
           {/* Formulário */}
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>
-                <FormControl id="email" isRequired>
-                  <FormLabel>E-mail</FormLabel>
+                {/* Informações Pessoais */}
+                <Box>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
+                    Informações Pessoais
+                  </Text>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                    <GridItem>
+                      <FormControl id="firstName" isRequired>
+                        <FormLabel>Nome</FormLabel>
+                        <Input
+                          type="text"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="João"
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                    <GridItem>
+                      <FormControl id="lastName" isRequired>
+                        <FormLabel>Sobrenome</FormLabel>
+                        <Input
+                          type="text"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          placeholder="Silva"
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                  </Grid>
+                  
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} mt={4}>
+                    <GridItem>
+                      <FormControl id="phone" isRequired>
+                        <FormLabel>Telefone</FormLabel>
+                        <Input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="+351 912 345 678"
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                    <GridItem>
+                      <FormControl id="birthDate" isRequired>
+                        <FormLabel>Data de Nascimento</FormLabel>
+                        <Input
+                          type="date"
+                          value={birthDate}
+                          onChange={(e) => setBirthDate(e.target.value)}
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                  </Grid>
+
+                  <FormControl id="city" isRequired mt={4}>
+                    <FormLabel>Cidade</FormLabel>
+                    <Input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Lisboa"
+                      size="lg"
+                    />
+                  </FormControl>
+                </Box>
+
+                <Divider />
+
+                {/* Informações de Condução */}
+                <Box>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
+                    Informações de Condução
+                  </Text>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                    <GridItem>
+                      <FormControl id="licenseNumber" isRequired>
+                        <FormLabel>Número da Carta de Condução</FormLabel>
+                        <Input
+                          type="text"
+                          value={licenseNumber}
+                          onChange={(e) => setLicenseNumber(e.target.value)}
+                          placeholder="123456789"
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                    <GridItem>
+                      <FormControl id="licenseExpiry" isRequired>
+                        <FormLabel>Validade da Carta</FormLabel>
+                        <Input
+                          type="date"
+                          value={licenseExpiry}
+                          onChange={(e) => setLicenseExpiry(e.target.value)}
+                          size="lg"
+                        />
+                      </FormControl>
+                    </GridItem>
+                  </Grid>
+
+                  <FormControl id="vehicleType" isRequired mt={4}>
+                    <FormLabel>Tipo de Veículo</FormLabel>
+                    <Select
+                      value={vehicleType}
+                      onChange={(e) => setVehicleType(e.target.value)}
+                      placeholder="Selecione o tipo de veículo"
+                      size="lg"
+                    >
+                      <option value="car">Automóvel</option>
+                      <option value="motorcycle">Motociclo</option>
+                      <option value="van">Furgão</option>
+                      <option value="truck">Camião</option>
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                <Divider />
+
+                {/* Informações de Conta */}
+                <Box>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
+                    Informações de Conta
+                  </Text>
+                  <FormControl id="email" isRequired>
+                    <FormLabel>E-mail</FormLabel>
                     <Input
                       type="email"
                       value={email}
@@ -103,51 +240,52 @@ export default function SignupPage() {
                       placeholder="seu@email.com"
                       size="lg"
                     />
-                </FormControl>
+                  </FormControl>
 
-                <FormControl id="password" isRequired>
-                  <FormLabel>Senha</FormLabel>
-                  <InputGroup>
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      size="lg"
-                    />
-                    <InputRightElement h="full">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <FiEyeOff /> : <FiEye />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
+                  <FormControl id="password" isRequired mt={4}>
+                    <FormLabel>Senha</FormLabel>
+                    <InputGroup>
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        size="lg"
+                      />
+                      <InputRightElement h="full">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <FiEyeOff /> : <FiEye />}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
+                  </FormControl>
 
-                <FormControl id="confirmPassword" isRequired>
-                  <FormLabel>Confirmar senha</FormLabel>
-                  <InputGroup>
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      size="lg"
-                    />
-                    <InputRightElement h="full">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
+                  <FormControl id="confirmPassword" isRequired mt={4}>
+                    <FormLabel>Confirmar senha</FormLabel>
+                    <InputGroup>
+                      <Input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        size="lg"
+                      />
+                      <InputRightElement h="full">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
+                  </FormControl>
+                </Box>
 
                 {error && (
                   <Alert status="error" borderRadius="md">

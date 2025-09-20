@@ -5,6 +5,26 @@ import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
 import LanguageSelector from '../components/LanguageSelector';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Stack,
+  Heading,
+  Text,
+  Container,
+  VStack,
+  Link as ChakraLink,
+  Alert,
+  AlertIcon,
+  Divider,
+  Select,
+  InputGroup,
+  InputRightElement,
+} from '@chakra-ui/react';
+import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface LoginPageProps {
   translations: Record<string, any>;
@@ -20,6 +40,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,150 +88,144 @@ export default function LoginPage({ translations }: LoginPageProps) {
         <meta name="description" content="Faça login na plataforma Conduz.pt" />
       </Head>
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          {/* Header */}
-          <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <img
-                className="h-12 w-auto"
-                src="/img/conduz.png"
-                alt="Conduz.pt"
-              />
-            </div>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              {t('navigation.login')}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Acesse a sua conta na plataforma
-            </p>
-          </div>
-
-          {/* Language Selector */}
-          <div className="flex justify-center">
-            <LanguageSelector />
-          </div>
-
-          {/* Login Form */}
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              {/* User Type Selection */}
-              <div>
-                <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
-                  Tipo de Utilizador
-                </label>
-                <select
-                  id="userType"
-                  name="userType"
-                  value={formData.userType}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="driver">Motorista</option>
-                  <option value="admin">Administrador</option>
-                </select>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  {t('user.email')}
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="seu@email.com"
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  {t('user.password')}
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      <Box minH="100vh" bg="gray.50" display="flex" alignItems="center" justifyContent="center">
+        <Container maxW="md">
+          <VStack spacing={8} align="stretch">
+            {/* Logo e Título */}
+            <VStack spacing={4} textAlign="center">
+              <Box
+                w="60px"
+                h="60px"
+                bg="green.500"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="white"
+                fontWeight="bold"
+                fontSize="2xl"
               >
-                {isLoading ? (
-                  <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {t('navigation.loading')}
-                  </div>
-                ) : (
-                  t('navigation.login')
-                )}
-              </button>
-            </div>
+                C
+              </Box>
+              <VStack spacing={2}>
+                <Heading size="lg" color="gray.900">
+                  {t('navigation.login')}
+                </Heading>
+                <Text color="gray.600">
+                  Acesse a sua conta na plataforma
+                </Text>
+              </VStack>
+            </VStack>
+
+            {/* Language Selector */}
+            <Box display="flex" justifyContent="center">
+              <LanguageSelector />
+            </Box>
+
+            {/* Formulário */}
+            <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
+              <form onSubmit={handleSubmit}>
+                <Stack spacing={6}>
+                  {/* User Type Selection */}
+                  <FormControl id="userType" isRequired>
+                    <FormLabel>Tipo de Utilizador</FormLabel>
+                    <Select
+                      value={formData.userType}
+                      onChange={handleInputChange}
+                      name="userType"
+                      size="lg"
+                    >
+                      <option value="driver">Motorista</option>
+                      <option value="admin">Administrador</option>
+                    </Select>
+                  </FormControl>
+
+                  {/* Email */}
+                  <FormControl id="email" isRequired>
+                    <FormLabel>{t('user.email')}</FormLabel>
+                    <Input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="seu@email.com"
+                      size="lg"
+                    />
+                  </FormControl>
+
+                  {/* Password */}
+                  <FormControl id="password" isRequired>
+                    <FormLabel>{t('user.password')}</FormLabel>
+                    <InputGroup>
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="••••••••"
+                        size="lg"
+                      />
+                      <InputRightElement h="full">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <FiEyeOff /> : <FiEye />}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
+                  </FormControl>
+
+                  {error && (
+                    <Alert status="error" borderRadius="md">
+                      <AlertIcon />
+                      {error}
+                    </Alert>
+                  )}
+
+                  <Button
+                    type="submit"
+                    colorScheme="green"
+                    size="lg"
+                    isLoading={isLoading}
+                    loadingText="Entrando..."
+                    rightIcon={<FiArrowRight />}
+                  >
+                    {t('navigation.login')}
+                  </Button>
+                </Stack>
+              </form>
+            </Box>
 
             {/* Links */}
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                  Esqueceu a palavra-passe?
-                </Link>
-              </div>
-              <div className="text-sm">
-                <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            <VStack spacing={4}>
+              <Divider />
+              <Text color="gray.600" fontSize="sm">
+                Não tem uma conta?{' '}
+                <ChakraLink as={Link} href="/signup" color="green.500" fontWeight="medium">
                   Criar conta
-                </Link>
-              </div>
-            </div>
-          </form>
+                </ChakraLink>
+              </Text>
+            </VStack>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <h3 className="text-sm font-medium text-yellow-800 mb-2">Credenciais de Demonstração:</h3>
-            <div className="text-xs text-yellow-700 space-y-1">
-              <p><strong>Admin:</strong> admin@conduz.pt / admin123</p>
-              <p><strong>Motorista:</strong> motorista@conduz.pt / driver123</p>
-            </div>
-          </div>
-        </div>
-      </div>
+            {/* Demo Credentials */}
+            <Box p={4} bg="yellow.50" border="1px" borderColor="yellow.200" borderRadius="md">
+              <Text fontSize="sm" fontWeight="medium" color="yellow.800" mb={2}>
+                Credenciais de Demonstração:
+              </Text>
+              <VStack spacing={1} align="start">
+                <Text fontSize="xs" color="yellow.700">
+                  <strong>Admin:</strong> admin@conduz.pt / admin123
+                </Text>
+                <Text fontSize="xs" color="yellow.700">
+                  <strong>Motorista:</strong> motorista@conduz.pt / driver123
+                </Text>
+              </VStack>
+            </Box>
+          </VStack>
+        </Container>
+      </Box>
     </>
   );
 }
