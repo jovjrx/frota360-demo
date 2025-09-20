@@ -110,7 +110,7 @@ export default function SignupPage() {
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
                     Informações Pessoais
                   </Text>
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" }} gap={6}>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
                       <FormControl id="firstName" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Nome</FormLabel>
@@ -139,23 +139,9 @@ export default function SignupPage() {
                         />
                       </FormControl>
                     </GridItem>
-                    <GridItem display={{ base: "none", lg: "block" }}>
-                      <FormControl id="phone" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Telefone</FormLabel>
-                        <Input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+351 912 345 678"
-                          size="lg"
-                          height="50px"
-                          fontSize="md"
-                        />
-                      </FormControl>
-                    </GridItem>
                   </Grid>
                   
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr" }} gap={6} mt={6} display={{ base: "grid", lg: "none" }}>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="phone" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Telefone</FormLabel>
@@ -185,34 +171,9 @@ export default function SignupPage() {
                     </GridItem>
                   </Grid>
 
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" }} gap={6} mt={6}>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
-                      <FormControl id="birthDate" isRequired display={{ base: "block", lg: "none" }}>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Data de Nascimento</FormLabel>
-                        <Input
-                          type="date"
-                          value={birthDate}
-                          onChange={(e) => setBirthDate(e.target.value)}
-                          size="lg"
-                          height="50px"
-                          fontSize="md"
-                        />
-                      </FormControl>
-                      <FormControl id="city" isRequired display={{ base: "none", lg: "block" }}>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Cidade</FormLabel>
-                        <Input
-                          type="text"
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder="Lisboa"
-                          size="lg"
-                          height="50px"
-                          fontSize="md"
-                        />
-                      </FormControl>
-                    </GridItem>
-                    <GridItem>
-                      <FormControl id="city" isRequired display={{ base: "block", lg: "none" }}>
+                      <FormControl id="city" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Cidade</FormLabel>
                         <Input
                           type="text"
@@ -235,7 +196,7 @@ export default function SignupPage() {
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
                     Informações de Condução
                   </Text>
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" }} gap={6}>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
                       <FormControl id="licenseNumber" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Número da Carta de Condução</FormLabel>
@@ -263,9 +224,12 @@ export default function SignupPage() {
                         />
                       </FormControl>
                     </GridItem>
+                  </Grid>
+
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
-                      <FormControl id="vehicleType" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Tipo de Veículo</FormLabel>
+                      <FormControl id="vehicleType">
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Tipo de Veículo (Opcional)</FormLabel>
                         <Select
                           value={vehicleType}
                           onChange={(e) => setVehicleType(e.target.value)}
@@ -291,8 +255,8 @@ export default function SignupPage() {
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
                     Informações de Conta
                   </Text>
-                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" }} gap={6}>
-                    <GridItem colSpan={{ base: 1, md: 2, lg: 3 }}>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+                    <GridItem>
                       <FormControl id="email" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">E-mail</FormLabel>
                         <Input
@@ -306,6 +270,9 @@ export default function SignupPage() {
                         />
                       </FormControl>
                     </GridItem>
+                  </Grid>
+
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="password" isRequired>
                         <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Senha</FormLabel>
