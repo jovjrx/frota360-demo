@@ -70,7 +70,6 @@ export default function Header({ t }: HeaderProps) {
       fontWeight="medium"
       onClick={() => {
         setOpen(false); // Fechar menu mobile
-        setIsToolsOpen(false); // Fechar submenu
       }}
     >
       {label}
@@ -185,7 +184,6 @@ export default function Header({ t }: HeaderProps) {
               variant="ghost"
               onClick={() => {
                 setOpen((s) => !s);
-                setIsToolsOpen(false); // Fechar submenu quando abre menu mobile
               }}
             />
             <LanguageSelector />

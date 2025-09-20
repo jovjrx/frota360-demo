@@ -25,14 +25,11 @@ export function NotificationCenter() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-
   useEffect(() => {
-    if (user) {
+    if (user?.uid) {
       loadNotifications();
     }
-  }, [user]);
+  }, [user?.uid]);
 
   const loadNotifications = async () => {
     if (!user) return;
@@ -147,7 +144,7 @@ export function NotificationCenter() {
           )}
         </IconButton>
       </PopoverTrigger>
-      <PopoverContent w="400px" maxH="500px" bg={bgColor} borderColor={borderColor}>
+      <PopoverContent w="400px" maxH="500px" bg="white" borderColor="gray.200">
         <PopoverHeader>
           <HStack justify="space-between" align="center">
             <Text fontWeight="semibold">Notificações</Text>

@@ -15,7 +15,6 @@ import {
   Spinner,
   Stack,
   Fade,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 
@@ -54,8 +53,6 @@ export function useLanguage() {
 
 /** Overlay de loading mostrado durante troca de idioma */
 function LanguageLoader({ open, message }: { open: boolean; message?: string }) {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const cardShadow = useColorModeValue("xl", "dark-lg");
 
   return (
     <Portal>
@@ -74,11 +71,11 @@ function LanguageLoader({ open, message }: { open: boolean; message?: string }) 
           <Stack
             align="center"
             spacing={3}
-            bg={cardBg}
+            bg="white"
             px={6}
             py={5}
             rounded="xl"
-            boxShadow={cardShadow}
+            boxShadow="xl"
             borderTop="4px solid"
             borderColor="brand.500"
           >
@@ -189,7 +186,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 /** Seletor com Chakra Menu + bandeiras */
 export function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
-  const band = useColorModeValue("orange.500", "orange.300");
   const current = languages.find((l) => l.code === locale) ?? languages[0];
 
   const handleChange = async (code: string) => {
@@ -232,7 +228,7 @@ export function LanguageSelector() {
                 <Box as={lang.flag} boxSize={4} aria-hidden="true" />
                 <Text fontSize="sm">{lang.nativeName}</Text>
                 {isActive && (
-                  <Text fontSize="xs" color={band} ml="auto">
+                  <Text fontSize="xs" color="orange.500" ml="auto">
                     ✓
                   </Text>
                 )}
