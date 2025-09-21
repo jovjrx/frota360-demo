@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
@@ -69,10 +70,76 @@ export default function SignupPage({ translations }: SignupPageProps) {
     setError(null);
     
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      // Criar usuário no Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Criar documento do motorista no Firestore
+      const driverData = {
+        uid: user.uid,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        fullName: `${firstName} ${lastName}`,
+        phone: phone,
+        birthDate: birthDate,
+        city: city,
+        licenseNumber: licenseNumber,
+        licenseExpiry: licenseExpiry,
+        vehicleType: vehicleType || null,
+        status: 'pending', // pending, active, inactive, suspended
+        isActive: false, // Para controle rápido de ativação
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        createdBy: 'self', // self, admin
+        lastLoginAt: null,
+        weeklyEarnings: 0,
+        monthlyEarnings: 0,
+        totalTrips: 0,
+        rating: 0,
+        // Campos adicionais para administração
+        statusUpdatedAt: null,
+        statusUpdatedBy: null,
+        notes: '',
+        documents: {
+          license: {
+            uploaded: false,
+            verified: false,
+            url: null
+          },
+          insurance: {
+            uploaded: false,
+            verified: false,
+            url: null
+          },
+          vehicle: {
+            uploaded: false,
+            verified: false,
+            url: null
+          }
+        }
+      };
+
+      // Salvar dados do motorista no Firestore
+      await addDoc(collection(db, 'drivers'), driverData);
+
+      // Definir cookies de autenticação
+      document.cookie = `auth-token=${user.uid}; path=/; max-age=86400; secure; samesite=strict`;
+      document.cookie = `user-type=driver; path=/; max-age=86400; secure; samesite=strict`;
+
+      // Redirecionar para o dashboard do motorista
+      router.push('/drivers/dashboard');
     } catch (err: any) {
-      setError(err?.message || 'Erro ao criar conta');
+      console.error('Erro ao criar conta:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Este email já está sendo usado.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Email inválido.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('A senha é muito fraca.');
+      } else {
+        setError('Erro ao criar conta. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }

@@ -21,22 +21,54 @@ export const DriverCommissionSchema = z.object({
   percent: z.number().min(0).max(100).optional(),
 });
 
-export const DriverStatusSchema = z.enum(['pending', 'approved', 'rejected', 'suspended']);
+export const DriverStatusSchema = z.enum(['pending', 'active', 'inactive', 'suspended']);
+
+export const DriverDocumentSchema = z.object({
+  uploaded: z.boolean().default(false),
+  verified: z.boolean().default(false),
+  url: z.string().nullable().default(null),
+});
+
+export const DriverDocumentsSchema = z.object({
+  license: DriverDocumentSchema,
+  insurance: DriverDocumentSchema,
+  vehicle: DriverDocumentSchema,
+});
 
 export const DriverSchema = z.object({
   id: z.string().optional(),
-  userId: z.string().min(1),
+  uid: z.string().min(1), // Firebase UID
+  userId: z.string().min(1), // Para compatibilidade
   name: z.string().min(1),
+  fullName: z.string().min(1),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   email: z.string().email(),
   phone: z.string().min(1),
+  birthDate: z.string().optional(),
+  city: z.string().optional(),
+  licenseNumber: z.string().optional(),
+  licenseExpiry: z.string().optional(),
+  vehicleType: z.string().nullable().optional(),
   locale: z.string().default('pt'),
   status: DriverStatusSchema.default('pending'),
+  isActive: z.boolean().default(false),
+  createdAt: z.any().optional(), // serverTimestamp
+  updatedAt: z.any().optional(), // serverTimestamp
+  createdBy: z.string().default('self'),
+  lastLoginAt: z.any().nullable().optional(),
+  weeklyEarnings: z.number().default(0),
+  monthlyEarnings: z.number().default(0),
+  totalTrips: z.number().default(0),
+  rating: z.number().default(0),
+  statusUpdatedAt: z.any().nullable().optional(),
+  statusUpdatedBy: z.string().nullable().optional(),
+  notes: z.string().default(''),
+  documents: DriverDocumentsSchema.optional(),
   kyc: DriverKycSchema.optional(),
   vehicle: DriverVehicleSchema.optional(),
   availability: DriverAvailabilitySchema.optional(),
   commission: DriverCommissionSchema.optional(),
-  createdAt: z.number().optional(),
-  updatedAt: z.number().optional(),
 });
 
 export const CreateDriverSchema = DriverSchema.omit({

@@ -4,6 +4,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import {
   Box,
   Button,
@@ -47,27 +49,34 @@ export default function LoginPage({ translations }: LoginPageProps) {
     setError('');
 
     try {
-      // Simulação de autenticação para demonstração
-      if (
-        (formData.userType === 'admin' && formData.email === 'admin@conduz.pt' && formData.password === 'admin123') ||
-        (formData.userType === 'driver' && formData.email === 'motorista@conduz.pt' && formData.password === 'driver123')
-      ) {
-        // Definir cookies de autenticação
-        document.cookie = `auth-token=demo-token-${formData.userType}; path=/; max-age=86400; secure; samesite=strict`;
-        document.cookie = `user-type=${formData.userType}; path=/; max-age=86400; secure; samesite=strict`;
+      // Autenticação com Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
 
-        // Redirecionar baseado no tipo de usuário
-        const redirectPath = router.query.redirect as string;
-        if (redirectPath) {
-          router.push(redirectPath);
-        } else {
-          router.push(formData.userType === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
-        }
+      // Definir cookies de autenticação
+      document.cookie = `auth-token=${user.uid}; path=/; max-age=86400; secure; samesite=strict`;
+      document.cookie = `user-type=${formData.userType}; path=/; max-age=86400; secure; samesite=strict`;
+
+      // Redirecionar baseado no tipo de usuário
+      const redirectPath = router.query.redirect as string;
+      if (redirectPath) {
+        router.push(redirectPath);
       } else {
-        setError('Credenciais inválidas. Use as credenciais de demonstração.');
+        router.push(formData.userType === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
       }
-    } catch (err) {
-      setError(t('messages.error.network'));
+    } catch (err: any) {
+      console.error('Erro de login:', err);
+      if (err.code === 'auth/user-not-found') {
+        setError('Usuário não encontrado. Verifique o email.');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Senha incorreta.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Email inválido.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Muitas tentativas. Tente novamente mais tarde.');
+      } else {
+        setError('Erro ao fazer login. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
