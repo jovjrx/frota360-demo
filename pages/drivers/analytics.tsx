@@ -1,6 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withDriver } from '@/lib/auth/withDriver';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -350,49 +351,128 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Load translations
     const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock analytics data
+    // Get user data from context (passed by withDriver HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
+    
+    if (driverSnap.empty) {
+      throw new Error('Driver not found');
+    }
+
+    const driverDoc = driverSnap.docs[0];
     const driver = {
-      id: 'driver1',
-      name: 'João Silva',
-      email: 'joao@example.com',
-      status: 'active',
+      id: driverDoc.id,
+      ...driverDoc.data(),
     };
+
+    // Get real trips data for analytics
+    const tripsSnap = await adminDb.collection('trips').where('driverId', '==', driverDoc.id).get();
+    const trips = tripsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
+    }));
+
+    // Get real payments data for earnings
+    const paymentsSnap = await adminDb.collection('payments').where('driverId', '==', driverDoc.id).get();
+    const payments = paymentsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
+    }));
+
+    // Calculate analytics from real data
+    const totalEarnings = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const monthlyEarnings = payments
+      .filter(p => new Date(p.date).getMonth() === new Date().getMonth())
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const weeklyEarnings = payments
+      .filter(p => {
+        const paymentDate = new Date(p.date);
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return paymentDate >= weekAgo;
+      })
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const dailyEarnings = payments
+      .filter(p => {
+        const paymentDate = new Date(p.date);
+        const today = new Date();
+        return paymentDate.toDateString() === today.toDateString();
+      })
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    const completedTrips = trips.filter(t => t.status === 'completed');
+    const cancelledTrips = trips.filter(t => t.status === 'cancelled');
+    const totalTrips = trips.length;
+    const averageRating = completedTrips.length > 0 
+      ? completedTrips.reduce((sum, t) => sum + (Number(t.rating) || 0), 0) / completedTrips.length 
+      : 0;
+    const completionRate = totalTrips > 0 ? Math.round((completedTrips.length / totalTrips) * 100) : 0;
+
+    // Calculate performance metrics
+    const onlineHours = trips.reduce((sum, t) => sum + (Number(t.duration) || 0), 0) / 60; // Convert minutes to hours
+    const acceptanceRate = totalTrips > 0 ? Math.round((completedTrips.length / totalTrips) * 100) : 0;
+    const averageTripDuration = completedTrips.length > 0 
+      ? Math.round(completedTrips.reduce((sum, t) => sum + (Number(t.duration) || 0), 0) / completedTrips.length)
+      : 0;
+    const averageTripDistance = completedTrips.length > 0 
+      ? Math.round((completedTrips.reduce((sum, t) => sum + (Number(t.distance) || 0), 0) / completedTrips.length) * 10) / 10
+      : 0;
+
+    // Calculate growth trends (simplified - you can implement more sophisticated trend analysis)
+    const previousMonthEarnings = payments
+      .filter(p => {
+        const paymentDate = new Date(p.date);
+        const now = new Date();
+        const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        return paymentDate >= previousMonth && paymentDate < currentMonth;
+      })
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    
+    const earningsGrowth = previousMonthEarnings > 0 
+      ? ((monthlyEarnings - previousMonthEarnings) / previousMonthEarnings) * 100 
+      : 0;
 
     const analytics = {
       earnings: {
-        total: 2450.75,
-        monthly: 850.50,
-        weekly: 320.25,
-        daily: 45.80,
-        growth: 15.2,
+        total: totalEarnings,
+        monthly: monthlyEarnings,
+        weekly: weeklyEarnings,
+        daily: dailyEarnings,
+        growth: earningsGrowth,
       },
       trips: {
-        total: 156,
-        completed: 148,
-        cancelled: 8,
-        averageRating: 4.8,
-        completionRate: 95,
+        total: totalTrips,
+        completed: completedTrips.length,
+        cancelled: cancelledTrips.length,
+        averageRating,
+        completionRate,
       },
       performance: {
-        onlineHours: 42,
-        acceptanceRate: 92,
-        averageTripDuration: 18,
-        averageTripDistance: 8.5,
+        onlineHours: Math.round(onlineHours),
+        acceptanceRate,
+        averageTripDuration,
+        averageTripDistance,
       },
       trends: {
-        earningsTrend: 'up' as const,
-        tripsTrend: 'up' as const,
-        ratingTrend: 'stable' as const,
+        earningsTrend: earningsGrowth > 5 ? 'up' : earningsGrowth < -5 ? 'down' : 'stable',
+        tripsTrend: totalTrips > 0 ? 'up' : 'stable',
+        ratingTrend: averageRating > 4.5 ? 'up' : averageRating < 3.5 ? 'down' : 'stable',
       },
     };
 
-    const recentTrips = [
-      { id: '1', from: 'Centro', to: 'Aeroporto', earnings: 25.50, rating: 5.0, date: '2024-01-20' },
-      { id: '2', from: 'Shopping', to: 'Hospital', earnings: 18.75, rating: 4.5, date: '2024-01-19' },
-      { id: '3', from: 'Universidade', to: 'Estação', earnings: 12.30, rating: 4.8, date: '2024-01-18' },
-      { id: '4', from: 'Praia', to: 'Centro', earnings: 22.40, rating: 5.0, date: '2024-01-17' },
-      { id: '5', from: 'Aeroporto', to: 'Hotel', earnings: 28.90, rating: 4.7, date: '2024-01-16' },
-    ];
+    // Get recent trips for the table
+    const recentTrips = trips
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10);
 
     return {
       props: {

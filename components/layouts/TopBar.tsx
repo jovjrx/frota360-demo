@@ -14,8 +14,9 @@ import {
   BreadcrumbSeparator,
   Tooltip,
 } from '@chakra-ui/react';
-import { FiBell, FiSettings, FiHome, FiChevronRight } from 'react-icons/fi';
+import { FiBell, FiSettings, FiHome, FiChevronRight, FiMapPin } from 'react-icons/fi';
 import Link from 'next/link';
+import { useCheckIn } from '@/lib/hooks/useCheckIn';
 
 interface TopBarProps {
   user: {
@@ -39,6 +40,8 @@ export default function TopBar({
   breadcrumbs = [],
   basePath = '/admin'
 }: TopBarProps) {
+  const { doCheckIn, isLoading } = useCheckIn();
+
   const getRoleText = (role: string) => {
     switch (role) {
       case 'admin': return 'Administrador';
@@ -59,6 +62,14 @@ export default function TopBar({
   const truncateName = (name: string, maxLength: number = 20) => {
     if (name.length <= maxLength) return name;
     return name.substring(0, maxLength) + '...';
+  };
+
+  const handleQuickCheckIn = async () => {
+    try {
+      await doCheckIn('manual');
+    } catch (error) {
+      console.error('Erro no check-in rápido:', error);
+    }
   };
 
   return (
@@ -95,6 +106,27 @@ export default function TopBar({
 
           {/* Right side - Notifications and User Info */}
           <HStack spacing={3}>
+            {/* Quick Check-in for Drivers */}
+            {user.role === 'driver' && (
+              <Tooltip label="Check-in Rápido" placement="bottom">
+                <Button
+                  leftIcon={<FiMapPin />}
+                  variant="outline"
+                  size="sm"
+                  colorScheme="green"
+                  borderRadius="full"
+                  px={4}
+                  isLoading={isLoading}
+                  loadingText="Check-in..."
+                  onClick={handleQuickCheckIn}
+                  _hover={{ transform: 'translateY(-1px)', shadow: 'md' }}
+                  transition="all 0.2s"
+                >
+                  Check-in
+                </Button>
+              </Tooltip>
+            )}
+
             {/* Notifications */}
             <Tooltip label={`${notifications} notificações`} placement="bottom">
               <Button

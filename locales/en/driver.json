@@ -52,6 +52,50 @@
       "title": "Notifications",
       "no_notifications": "No notifications",
       "mark_all_read": "Mark all as read"
+    },
+    "checkin": {
+      "title": "Check-in System",
+      "subtitle": "Manage your location and operational status",
+      "status": {
+        "active": "Operating",
+        "inactive": "Inactive",
+        "operating": "Operating",
+        "not_operating": "Not Operating"
+      },
+      "actions": {
+        "check_in": "Check-in",
+        "start_operation": "Start Operation",
+        "pause_operation": "Pause Operation",
+        "quick_checkin": "Quick Check-in"
+      },
+      "info": {
+        "last_checkin": "Last check-in",
+        "next_checkin": "Next check-in",
+        "total_checkins": "Total check-ins",
+        "automatic_active": "Automatic check-ins active every 5 minutes",
+        "automatic_paused": "Automatic check-ins paused"
+      },
+      "history": {
+        "title": "Check-in History",
+        "date": "Date",
+        "time": "Time",
+        "type": "Type",
+        "status": "Status",
+        "location": "Location",
+        "ip": "IP",
+        "automatic": "Automatic",
+        "manual": "Manual",
+        "export_csv": "Export CSV",
+        "view_details": "View Details",
+        "no_checkins": "No check-ins recorded"
+      },
+      "messages": {
+        "checkin_success": "Check-in completed successfully!",
+        "checkin_error": "Error performing check-in",
+        "status_updated": "Status updated successfully!",
+        "status_error": "Error updating status",
+        "location_error": "Error getting location"
+      }
     }
   },
   "subscription": {

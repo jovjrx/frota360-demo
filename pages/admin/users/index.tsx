@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withAdmin } from '@/lib/auth/withAdmin';
-import { store } from '@/lib/store';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -432,8 +432,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const translations = await loadTranslations('pt', ['common', 'admin']);
 
     // Get all users (admins)
-    const usersSnap = await store.users.findAll();
-    const users = usersSnap.map((doc: any) => ({
+    const usersSnap = await adminDb.collection('users').get();
+    const users = usersSnap.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
@@ -449,7 +449,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         users,
         stats,
         translations,
-        userData: { name: 'Administrador' }, // Mock data
+        userData: { name: 'Administrador' },
       },
     };
   } catch (error) {

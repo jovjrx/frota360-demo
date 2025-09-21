@@ -242,15 +242,15 @@ export default function Header({ t }: HeaderProps) {
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiDollarSign />}
-                                onClick={() => router.push('/admin/payouts')}
+                                leftIcon={<FiSettings />}
+                                onClick={() => router.push('/admin/config')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
                                 transition="all 0.2s"
                                 h="48px"
                                 px={4}
                               >
-                                <Text fontWeight="medium">Pagamentos</Text>
+                                <Text fontWeight="medium">Configurações</Text>
                               </Button>
                               <Button
                                 variant="ghost"

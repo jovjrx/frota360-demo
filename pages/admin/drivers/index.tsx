@@ -51,6 +51,7 @@ import {
   FormControl,
   FormLabel,
   Textarea,
+  Icon,
 } from '@chakra-ui/react';
 import { 
   FiSearch,
@@ -70,7 +71,9 @@ import {
   FiCalendar,
   FiUser,
   FiFileText,
-  FiDollarSign
+  FiDollarSign,
+  FiCheckCircle,
+  FiXCircle
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
@@ -105,13 +108,14 @@ export default function DriversManagement({
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [driversList, setDriversList] = useState(drivers);
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const filteredDrivers = useMemo(() => {
-    return drivers.filter(driver => {
+    return driversList.filter(driver => {
       const matchesSearch = 
         driver.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         driver.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,7 +125,7 @@ export default function DriversManagement({
       
       return matchesSearch && matchesStatus;
     });
-  }, [drivers, searchTerm, statusFilter]);
+  }, [driversList, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -140,6 +144,54 @@ export default function DriversManagement({
       case 'suspended': return 'Suspenso';
       case 'inactive': return 'Inativo';
       default: return 'Desconhecido';
+    }
+  };
+
+  const handleActivateDriver = async (driverId: string, status: string) => {
+    try {
+      const response = await fetch('/api/admin/drivers/activate', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          driverId,
+          status,
+          reason: `Status alterado para ${status}`
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao atualizar status do motorista');
+      }
+
+      toast({
+        title: 'Status atualizado!',
+        description: `Motorista ${status === 'active' ? 'aprovado' : 'desativado'} com sucesso.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Atualizar lista local
+      setDriversList(prev => prev.map(driver => 
+        driver.id === driverId 
+          ? { ...driver, status }
+          : driver
+      ));
+
+      // Fechar modal se estiver aberto
+      onClose();
+
+    } catch (error) {
+      console.error('Erro ao ativar motorista:', error);
+      toast({
+        title: 'Erro ao atualizar status',
+        description: 'Não foi possível atualizar o status do motorista.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -411,6 +463,47 @@ export default function DriversManagement({
                               {getStatusText(selectedDriver.status)}
                             </Badge>
                           </VStack>
+                          <Spacer />
+                          <VStack spacing={2}>
+                            {selectedDriver.status === 'pending' && (
+                              <Button
+                                colorScheme="green"
+                                size="sm"
+                                onClick={() => handleActivateDriver(selectedDriver.id, 'active')}
+                                leftIcon={<Icon as={FiCheckCircle} />}
+                              >
+                                Aprovar
+                              </Button>
+                            )}
+                            {selectedDriver.status === 'active' && (
+                              <Button
+                                colorScheme="orange"
+                                size="sm"
+                                onClick={() => handleActivateDriver(selectedDriver.id, 'inactive')}
+                                leftIcon={<Icon as={FiPause} />}
+                              >
+                                Desativar
+                              </Button>
+                            )}
+                            {selectedDriver.status === 'inactive' && (
+                              <Button
+                                colorScheme="green"
+                                size="sm"
+                                onClick={() => handleActivateDriver(selectedDriver.id, 'active')}
+                                leftIcon={<Icon as={FiPlay} />}
+                              >
+                                Reativar
+                              </Button>
+                            )}
+                            <Button
+                              colorScheme="red"
+                              size="sm"
+                              onClick={() => handleActivateDriver(selectedDriver.id, 'suspended')}
+                              leftIcon={<Icon as={FiXCircle} />}
+                            >
+                              Suspender
+                            </Button>
+                          </VStack>
                         </HStack>
 
                         <SimpleGrid columns={2} spacing={4}>
@@ -604,7 +697,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         drivers,
         stats,
         translations,
-        userData: { name: 'Administrador' }, // Mock data
+        userData: { name: 'Administrador' },
       },
     };
   } catch (error) {

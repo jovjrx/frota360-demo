@@ -18,7 +18,6 @@ import {
   StatNumber,
   Button,
   Avatar,
-  Badge,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -49,6 +48,7 @@ import {
   FiAlertCircle
 } from 'react-icons/fi';
 import Link from 'next/link';
+import { formatPortugalTime } from '@/lib/timezone';
 import { loadTranslations } from '@/lib/translations';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import QuickActions from '@/components/QuickActions';
@@ -201,7 +201,7 @@ export default function AdminDashboard({
                         <VStack align="flex-start" spacing={0}>
                       <Text fontWeight="medium">{payout.driverName}</Text>
                       <Text fontSize="sm" color="gray.600">
-                        {new Date(payout.createdAt).toLocaleDateString('pt-BR')}
+                        {formatPortugalTime(payout.createdAt, 'dd/MM/yyyy')}
                           </Text>
                         </VStack>
                         <VStack align="flex-end" spacing={0}>
@@ -251,10 +251,15 @@ export default function AdminDashboard({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // Get user data from context (passed by withAdmin HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
     // Load translations
     const translations = await loadTranslations('pt', ['common', 'admin']);
-
-    // Get real data from Firestore
     const driversSnap = await adminDb.collection('drivers').get();
     const drivers = driversSnap.docs.map((doc: any) => ({
       id: doc.id,
@@ -262,23 +267,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt),
     }));
     
-    // Mock payouts data (you can implement real payouts collection later)
-    const payouts = [
-      {
-        id: '1',
-        driverId: 'driver1',
-        amount: 150.00,
-        status: 'completed',
-        createdAt: new Date('2024-01-15'),
-      },
-      {
-        id: '2',
-        driverId: 'driver2',
-        amount: 200.00,
-        status: 'pending',
-        createdAt: new Date('2024-01-14'),
-      },
-    ];
+    // Get real payouts data from Firestore
+    const payoutsSnap = await adminDb.collection('payouts').get();
+    const payouts = payoutsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt),
+    }));
 
     const stats = {
       totalDrivers: drivers.length,
@@ -286,7 +281,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       pendingDrivers: drivers.filter(d => d.status === 'pending').length,
       totalRevenue: payouts.reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
       monthlyRevenue: payouts
-        .filter(p => new Date(p.createdAt).getMonth() === new Date().getMonth())
+        .filter(p => {
+          const payoutDate = new Date(p.createdAt);
+          const now = new Date();
+          return payoutDate.getMonth() === now.getMonth() && 
+                 payoutDate.getFullYear() === now.getFullYear();
+        })
         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
       totalPayouts: payouts.length,
       pendingPayouts: payouts.filter(p => p.status === 'pending').length,
@@ -308,7 +308,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         recentDrivers,
         recentPayouts,
         translations,
-        userData: { name: 'Administrador' }, // Mock data
+        userData: { name: 'Administrador' },
       },
     };
   } catch (error) {

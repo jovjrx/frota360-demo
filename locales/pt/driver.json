@@ -52,6 +52,50 @@
       "title": "Notificações",
       "no_notifications": "Nenhuma notificação",
       "mark_all_read": "Marcar todas como lidas"
+    },
+    "checkin": {
+      "title": "Sistema de Check-in",
+      "subtitle": "Gerencie sua localização e status operacional",
+      "status": {
+        "active": "Operando",
+        "inactive": "Inativo",
+        "operating": "Operando",
+        "not_operating": "Não Operando"
+      },
+      "actions": {
+        "check_in": "Fazer Check-in",
+        "start_operation": "Iniciar Operação",
+        "pause_operation": "Pausar Operação",
+        "quick_checkin": "Check-in Rápido"
+      },
+      "info": {
+        "last_checkin": "Último check-in",
+        "next_checkin": "Próximo check-in",
+        "total_checkins": "Total de check-ins",
+        "automatic_active": "Check-ins automáticos ativos a cada 5 minutos",
+        "automatic_paused": "Check-ins automáticos pausados"
+      },
+      "history": {
+        "title": "Histórico de Check-ins",
+        "date": "Data",
+        "time": "Hora",
+        "type": "Tipo",
+        "status": "Status",
+        "location": "Localização",
+        "ip": "IP",
+        "automatic": "Automático",
+        "manual": "Manual",
+        "export_csv": "Exportar CSV",
+        "view_details": "Ver Detalhes",
+        "no_checkins": "Nenhum check-in registrado"
+      },
+      "messages": {
+        "checkin_success": "Check-in realizado com sucesso!",
+        "checkin_error": "Erro ao realizar check-in",
+        "status_updated": "Status atualizado com sucesso!",
+        "status_error": "Erro ao atualizar status",
+        "location_error": "Erro ao obter localização"
+      }
     }
   },
   "subscription": {

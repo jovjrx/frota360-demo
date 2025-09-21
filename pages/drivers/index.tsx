@@ -44,9 +44,12 @@ import {
   FiXCircle
 } from 'react-icons/fi';
 import Link from 'next/link';
+import { formatPortugalTime } from '@/lib/timezone';
 import { loadTranslations } from '@/lib/translations';
 import DriverLayout from '@/components/layouts/DriverLayout';
 import QuickActions from '@/components/QuickActions';
+import { CheckInManager } from '@/components/checkin/CheckInManager';
+import { CheckInHistory } from '@/components/checkin/CheckInHistory';
 
 interface DriverDashboardProps {
   driver: any;
@@ -157,103 +160,123 @@ export default function DriverDashboard({
           }
         ]}
         actions={
-          <HStack spacing={4}>
+              <HStack spacing={4}>
             <Button leftIcon={<FiUpload />} variant="outline" size="sm">
               Upload Documentos
-            </Button>
-            <Button leftIcon={<FiSettings />} variant="outline" size="sm">
+                </Button>
+                <Button leftIcon={<FiSettings />} variant="outline" size="sm">
               Configurações
-            </Button>
-          </HStack>
+                </Button>
+              </HStack>
         }
       >
-        {/* Quick Actions */}
+            {/* Quick Actions */}
         <QuickActions userRole="driver" userData={driver} />
 
-        {/* Recent Activity */}
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-          {/* Recent Payments */}
+        {/* Check-in System */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Sistema de Check-in</Heading>
+          </CardHeader>
+                <CardBody>
+            <CheckInManager />
+                </CardBody>
+              </Card>
+
+        {/* Check-in History */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Histórico de Check-ins</Heading>
+          </CardHeader>
+                <CardBody>
+            <CheckInHistory />
+              </CardBody>
+            </Card>
+
+            {/* Recent Activity */}
+            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+              {/* Recent Payments */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
               <Heading size="md">Pagamentos Recentes</Heading>
             </CardHeader>
-            <CardBody>
-              <VStack spacing={3} align="stretch">
-                {recentPayments.length > 0 ? (
+                <CardBody>
+                  <VStack spacing={3} align="stretch">
+                    {recentPayments.length > 0 ? (
                   recentPayments.slice(0, 5).map((payment, index) => (
                     <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
                       <HStack>
                         <Icon as={FiDollarSign} color="green.500" />
-                        <VStack align="flex-start" spacing={0}>
+                          <VStack align="flex-start" spacing={0}>
                           <Text fontSize="sm" fontWeight="medium">
                             Pagamento #{payment.id}
-                          </Text>
+                            </Text>
                           <Text fontSize="xs" color="gray.600">
-                            {new Date(payment.date).toLocaleDateString('pt-BR')}
-                          </Text>
-                        </VStack>
+                            {formatPortugalTime(payment.date, 'dd/MM/yyyy')}
+                            </Text>
+                          </VStack>
                       </HStack>
                       <Text fontWeight="bold" color="green.500">
                         €{payment.amount.toFixed(2)}
-                      </Text>
-                    </HStack>
-                  ))
-                ) : (
-                  <Text color="gray.500" textAlign="center" py={4}>
+                            </Text>
+                        </HStack>
+                      ))
+                    ) : (
+                      <Text color="gray.500" textAlign="center" py={4}>
                     Nenhum pagamento recente
-                  </Text>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
+                      </Text>
+                    )}
+                  </VStack>
+                </CardBody>
+              </Card>
 
-          {/* Recent Trips */}
+              {/* Recent Trips */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
               <Heading size="md">Corridas Recentes</Heading>
             </CardHeader>
-            <CardBody>
-              <VStack spacing={3} align="stretch">
-                {recentTrips.length > 0 ? (
+                <CardBody>
+                  <VStack spacing={3} align="stretch">
+                    {recentTrips.length > 0 ? (
                   recentTrips.slice(0, 5).map((trip, index) => (
                     <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
                       <HStack>
                         <Icon as={FiMapPin} color="blue.500" />
-                        <VStack align="flex-start" spacing={0}>
+                          <VStack align="flex-start" spacing={0}>
                           <Text fontSize="sm" fontWeight="medium">
                             {trip.from} → {trip.to}
-                          </Text>
+                              </Text>
                           <Text fontSize="xs" color="gray.600">
-                            {new Date(trip.date).toLocaleDateString('pt-BR')}
-                          </Text>
+                            {formatPortugalTime(trip.date, 'dd/MM/yyyy')}
+                              </Text>
                         </VStack>
-                      </HStack>
-                      <VStack align="flex-end" spacing={0}>
+                            </HStack>
+                          <VStack align="flex-end" spacing={0}>
                         <Text fontWeight="bold" color="blue.500">
-                          €{trip.earnings.toFixed(2)}
-                        </Text>
+                              €{trip.earnings.toFixed(2)}
+                            </Text>
                         <Text fontSize="xs" color="gray.600">
-                          ⭐ {trip.rating}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  ))
-                ) : (
-                  <Text color="gray.500" textAlign="center" py={4}>
+                              ⭐ {trip.rating}
+                            </Text>
+                          </VStack>
+                        </HStack>
+                      ))
+                    ) : (
+                      <Text color="gray.500" textAlign="center" py={4}>
                     Nenhuma corrida recente
-                  </Text>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
+                      </Text>
+                    )}
+                  </VStack>
+                </CardBody>
+              </Card>
+            </SimpleGrid>
 
         {/* Document Status */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
             <Heading size="md">Status dos Documentos</Heading>
           </CardHeader>
-          <CardBody>
+                <CardBody>
             <VStack spacing={4} align="stretch">
               <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
                 <HStack>
@@ -278,9 +301,9 @@ export default function DriverDashboard({
                 </HStack>
                 <Badge colorScheme="red">Rejeitado</Badge>
               </HStack>
-            </VStack>
-          </CardBody>
-        </Card>
+                    </VStack>
+                </CardBody>
+              </Card>
       </DriverLayout>
     </>
   );
@@ -291,44 +314,91 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Load translations
     const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock data - replace with actual data fetching
+    // Get user data from context (passed by withDriver HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
+    
+    if (driverSnap.empty) {
+      throw new Error('Driver not found');
+    }
+
+    const driverDoc = driverSnap.docs[0];
     const driver = {
-      id: '1',
-      name: 'João Silva',
-      email: 'joao@example.com',
-      status: 'active',
-      avatar: null,
+      id: driverDoc.id,
+      ...driverDoc.data(),
     };
+
+    // Get real payments data
+    const paymentsSnap = await adminDb.collection('payments').where('driverId', '==', driverDoc.id).get();
+    const payments = paymentsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
+    }));
+
+    // Get real trips data
+    const tripsSnap = await adminDb.collection('trips').where('driverId', '==', driverDoc.id).get();
+    const trips = tripsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
+    }));
+
+    // Get subscription data
+    const subscriptionSnap = await adminDb.collection('subscriptions').where('driverId', '==', driverDoc.id).limit(1).get();
+    const subscription = subscriptionSnap.empty ? null : {
+      ...subscriptionSnap.docs[0].data(),
+      plan: subscriptionSnap.docs[0].data().plan || { name: 'Sem plano' },
+    };
+
+    // Calculate stats from real data
+    const totalEarnings = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const monthlyEarnings = payments
+      .filter(p => {
+        const paymentDate = new Date(p.date);
+        const now = new Date();
+        return paymentDate.getMonth() === now.getMonth() && 
+               paymentDate.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    
+    const completedTrips = trips.filter(t => t.status === 'completed');
+    const totalTrips = trips.length;
+    const averageRating = completedTrips.length > 0 
+      ? completedTrips.reduce((sum, t) => sum + (Number(t.rating) || 0), 0) / completedTrips.length 
+      : 0;
+    const completionRate = totalTrips > 0 ? Math.round((completedTrips.length / totalTrips) * 100) : 0;
 
     const stats = {
-      totalEarnings: 2450.75,
-      monthlyEarnings: 850.50,
-      totalTrips: 156,
-      averageRating: 4.8,
-      completionRate: 95,
+      totalEarnings,
+      monthlyEarnings,
+      totalTrips,
+      averageRating,
+      completionRate,
     };
 
-    const subscription = {
-      plan: { name: 'Plano Premium' },
-      status: 'active',
-    };
+    // Get recent payments (last 5)
+    const recentPayments = payments
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
 
-    const recentPayments = [
-      { id: 'P001', amount: 450.75, date: '2024-01-20' },
-      { id: 'P002', amount: 320.50, date: '2024-01-15' },
-      { id: 'P003', amount: 280.25, date: '2024-01-10' },
-    ];
+    // Get recent trips (last 5)
+    const recentTrips = trips
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
 
-    const recentTrips = [
-      { from: 'Centro', to: 'Aeroporto', earnings: 25.50, rating: 5.0, date: '2024-01-20' },
-      { from: 'Shopping', to: 'Hospital', earnings: 18.75, rating: 4.5, date: '2024-01-19' },
-      { from: 'Universidade', to: 'Estação', earnings: 12.30, rating: 4.8, date: '2024-01-18' },
-    ];
-
-    const notifications = [
-      { id: '1', message: 'Novo pagamento disponível', type: 'payment' },
-      { id: '2', message: 'Documento aprovado', type: 'document' },
-    ];
+    // Get notifications
+    const notificationsSnap = await adminDb.collection('notifications').where('driverId', '==', driverDoc.id).get();
+    const notifications = notificationsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     return {
       props: {

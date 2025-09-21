@@ -37,8 +37,7 @@ const handler = requireAdmin(async (req: NextApiRequest, res: NextApiResponse, c
       context.user.userId!,
       context.role,
       driverId,
-      validatedData,
-      existingDriver.email
+      validatedData
     );
 
     res.status(200).json({ 

@@ -23,6 +23,9 @@ export const DriverAdminFieldsSchema = z.object({
   // Status e ativação
   status: z.enum(['pending', 'active', 'inactive', 'suspended']).default('pending'),
   isActive: z.boolean().default(false),
+  isApproved: z.boolean().default(false),
+  approvedAt: z.any().nullable().optional(),
+  approvedBy: z.string().nullable().optional(),
   statusUpdatedAt: z.any().nullable().optional(),
   statusUpdatedBy: z.string().nullable().optional(),
   
@@ -71,6 +74,11 @@ export const DriverAdminFieldsSchema = z.object({
   // Último pagamento (gerenciado pelo sistema)
   lastPayoutAt: z.any().nullable().optional(),
   lastPayoutAmount: z.number().default(0),
+  
+  // Campos de check-in
+  lastCheckin: z.number().nullable().optional(),
+  nextCheckin: z.number().nullable().optional(),
+  checkinCount: z.number().default(0),
 });
 
 // Schema completo do driver (combinação dos dois)

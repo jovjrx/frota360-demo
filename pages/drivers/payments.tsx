@@ -1,5 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { getSession } from '@/lib/session/ironSession';
 import { withDriver } from '@/lib/auth/withDriver';
 import {
   Box,
@@ -347,52 +349,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock data - replace with actual data fetching
+    // Get user data from session
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', session.userId).limit(1).get();
+    
+    if (driverSnap.empty) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    const driverDoc = driverSnap.docs[0];
     const driver = {
-      id: '1',
-      name: 'João Silva',
-      email: 'joao@example.com',
-      status: 'active',
-      avatar: null,
+      id: driverDoc.id,
+      ...driverDoc.data(),
     };
 
-    const payments = [
-      {
-        id: 'P001',
-        date: '2024-01-22',
-        amount: 450.75,
-        status: 'paid',
-        description: 'Pagamento semanal - Semana 3',
-      },
-      {
-        id: 'P002',
-        date: '2024-01-15',
-        amount: 320.50,
-        status: 'paid',
-        description: 'Pagamento semanal - Semana 2',
-      },
-      {
-        id: 'P003',
-        date: '2024-01-08',
-        amount: 280.25,
-        status: 'paid',
-        description: 'Pagamento semanal - Semana 1',
-      },
-      {
-        id: 'P004',
-        date: '2024-01-29',
-        amount: 380.00,
-        status: 'pending',
-        description: 'Pagamento semanal - Semana 4',
-      },
-      {
-        id: 'P005',
-        date: '2023-12-25',
-        amount: 150.00,
-        status: 'paid',
-        description: 'Bônus de Natal',
-      },
-    ];
+    // Get real payments data
+    const paymentsSnap = await adminDb.collection('payments').where('driverId', '==', driverDoc.id).get();
+    const payments = paymentsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
+    }));
 
     return {
       props: {

@@ -1,45 +1,54 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getSession } from '@/lib/session/ironSession';
+import { UpdateDriverStatusSchema } from '@/schemas/checkin';
+import { getPortugalTimestamp, addPortugalTime } from '@/lib/timezone';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'PUT') {
+    return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
-    const { userId } = req.query;
-    
-    if (!userId || typeof userId !== 'string') {
-      return res.status(400).json({ error: 'userId é obrigatório' });
+    // Verificar sessão
+    const session = await getSession(req, res);
+    if (!session.userId) {
+      return res.status(401).json({ error: 'Não autorizado' });
     }
 
-    const docRef = adminDb.collection('drivers').doc(userId);
-    const snap = await docRef.get();
+    // Validar dados
+    const validatedData = UpdateDriverStatusSchema.parse(req.body);
     
-    if (!snap.exists) {
-      return res.status(404).json({ 
-        success: false, 
-        active: false, 
-        error: 'Motorista não encontrado' 
-      });
+    // Obter timestamp atual em Portugal
+    const now = getPortugalTimestamp();
+
+    // Atualizar status do motorista
+    const driverRef = adminDb.collection('drivers').doc(session.driverId);
+    const driverDoc = await driverRef.get();
+    
+    if (!driverDoc.exists) {
+      return res.status(404).json({ error: 'Motorista não encontrado' });
     }
-    
-    const data = snap.data();
-    const isActive = data?.active !== false; // Default para true se não especificado
-    
-    return res.status(200).json({ 
-      success: true, 
-      active: isActive,
-      statusUpdatedAt: data?.statusUpdatedAt,
-      statusUpdatedBy: data?.statusUpdatedBy
+
+    // Calcular próximo check-in se estiver ativo
+    let nextCheckin = null;
+    if (validatedData.isActive) {
+      nextCheckin = addPortugalTime(5, 'minutes').toMillis();
+    }
+
+    await driverRef.update({
+      isActive: validatedData.isActive,
+      nextCheckin,
+      updatedAt: now
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Status atualizado com sucesso'
     });
 
   } catch (error) {
-    console.error('Erro ao verificar status:', error);
-    return res.status(500).json({ 
-      success: false, 
-      active: false, 
-      error: 'Erro interno do servidor' 
-    });
+    console.error('Erro ao atualizar status:', error);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }

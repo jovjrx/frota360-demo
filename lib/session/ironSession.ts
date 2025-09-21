@@ -15,7 +15,7 @@ export interface SessionRequest extends NextApiRequest {
   session: SessionData;
 }
 
-const sessionOptions = {
+export const sessionOptions = {
   password: process.env.SESSION_SECRET || 'fallback-secret-key-change-in-production',
   cookieName: 'conduz-session',
   cookieOptions: {

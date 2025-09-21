@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userDoc = await adminDb.collection('users').doc(uid).get();
     const driverSnap = await adminDb.collection('drivers').where('uid', '==', uid).limit(1).get();
     
-    let role = 'driver'; // Default
+    let role: 'admin' | 'driver' = 'driver'; // Default
     let name = email.split('@')[0];
     let driverId = null;
     
