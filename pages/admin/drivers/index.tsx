@@ -1,6 +1,6 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withAdmin } from '@/lib/auth/rbac';
+import { withAdmin } from '@/lib/auth/withAdmin';
 import { store } from '@/lib/store';
 import {
   Box,
@@ -14,7 +14,6 @@ import {
   CardHeader,
   Heading,
   Button,
-  useColorModeValue,
   Input,
   InputGroup,
   InputLeftElement,
@@ -29,13 +28,6 @@ import {
   Avatar,
   IconButton,
   useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
   Alert,
   AlertIcon,
@@ -56,6 +48,9 @@ import {
   MenuItem,
   Flex,
   Spacer,
+  FormControl,
+  FormLabel,
+  Textarea,
 } from '@chakra-ui/react';
 import { 
   FiSearch,
@@ -80,6 +75,8 @@ import {
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
 import { useState, useMemo } from 'react';
+import StandardLayout from '@/components/layouts/StandardLayout';
+import StandardModal from '@/components/modals/StandardModal';
 
 interface DriversManagementProps {
   drivers: any[];
@@ -90,19 +87,19 @@ interface DriversManagementProps {
     rejected: number;
     suspended: number;
   };
-  tCommon: any;
-  tAdmin: any;
+  translations: Record<string, any>;
+  userData: any;
 }
 
 export default function DriversManagement({ 
   drivers, 
   stats,
-  tCommon,
-  tAdmin 
+  translations,
+  userData
 }: DriversManagementProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const tCommon = (key: string) => translations.common?.[key] || key;
+  const tAdmin = (key: string) => translations.admin?.[key] || key;
+  
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   
@@ -110,6 +107,8 @@ export default function DriversManagement({
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const filteredDrivers = useMemo(() => {
     return drivers.filter(driver => {
@@ -126,59 +125,50 @@ export default function DriversManagement({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'green';
+      case 'active': return 'green';
       case 'pending': return 'yellow';
-      case 'rejected': return 'red';
       case 'suspended': return 'red';
+      case 'inactive': return 'gray';
       default: return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'approved': return 'Aprovado';
+      case 'active': return 'Ativo';
       case 'pending': return 'Pendente';
-      case 'rejected': return 'Rejeitado';
       case 'suspended': return 'Suspenso';
-      default: return status;
+      case 'inactive': return 'Inativo';
+      default: return 'Desconhecido';
     }
   };
 
   const handleStatusChange = async (driverId: string, newStatus: string) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/drivers', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          driverId,
-          status: newStatus,
-        }),
+      const response = await fetch(`/api/admin/toggle-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId, status: newStatus }),
       });
 
       if (response.ok) {
         toast({
-          title: 'Status atualizado',
-          description: newStatus === 'approved' 
-            ? 'Motorista aprovado com sucesso'
-            : newStatus === 'rejected'
-            ? 'Motorista rejeitado com sucesso'
-            : `Status alterado para ${getStatusText(newStatus)}`,
+          title: 'Status atualizado!',
+          description: `Motorista ${newStatus === 'approved' ? 'aprovado' : 'rejeitado'} com sucesso.`,
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        // Refresh page or update drivers list
+        // Atualizar lista local ou recarregar página
         window.location.reload();
       } else {
-        throw new Error('Failed to update status');
+        throw new Error('Erro ao atualizar status');
       }
     } catch (error) {
       toast({
-        title: 'Erro',
-        description: 'Falha ao atualizar status do motorista',
+        title: 'Erro!',
+        description: 'Não foi possível atualizar o status do motorista.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -193,10 +183,19 @@ export default function DriversManagement({
     onOpen();
   };
 
+  const handleEditDriver = (driver: any) => {
+    setSelectedDriver(driver);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteDriver = (driver: any) => {
+    setSelectedDriver(driver);
+    setIsDeleteModalOpen(true);
+  };
+
   const exportDrivers = () => {
-    // Implementation for CSV export
     const csvContent = [
-      ['Nome', 'Email', 'Telefone', 'Status', 'Data de Criação'],
+      ['Nome', 'Email', 'Telefone', 'Status', 'Data de Cadastro'],
       ...filteredDrivers.map(driver => [
         driver.name || '',
         driver.email || '',
@@ -221,392 +220,307 @@ export default function DriversManagement({
         <title>Gerenciar Motoristas - Conduz.pt</title>
       </Head>
       
-      <Box minH="100vh" bg={bgColor}>
-        {/* Header */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" py={6} shadow="sm">
-          <Box maxW="7xl" mx="auto" px={4}>
-            <Flex align="center">
-              <VStack align="flex-start" spacing={1}>
-                <Heading size="lg" color="gray.800">
-                  Gerenciar Motoristas
-                </Heading>
-                <Text color="gray.600">
-                  Gerencie todos os motoristas da plataforma
-                </Text>
-              </VStack>
-              <Spacer />
-              <HStack spacing={4}>
-                <Button leftIcon={<FiDownload />} variant="outline" onClick={exportDrivers}>
-                  Exportar CSV
-                </Button>
-                <Button leftIcon={<FiPlus />} colorScheme="purple">
-                  Adicionar Motorista
-                </Button>
-              </HStack>
-            </Flex>
-          </Box>
-        </Box>
+      <StandardLayout
+        title="Gerenciar Motoristas"
+        subtitle="Gerencie todos os motoristas da plataforma"
+        user={{
+          name: userData?.name || 'Administrador',
+          role: 'admin',
+          status: 'active'
+        }}
+        notifications={0}
+        actions={
+          <HStack spacing={4}>
+            <Button leftIcon={<FiDownload />} variant="outline" onClick={exportDrivers}>
+              Exportar CSV
+            </Button>
+            <Button leftIcon={<FiPlus />} colorScheme="purple">
+              Adicionar Motorista
+            </Button>
+          </HStack>
+        }
+      >
+        {/* Stats Cards */}
+        <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
+          <Card bg="white" borderColor="gray.200">
+            <CardBody>
+              <Stat>
+                <StatLabel>Total</StatLabel>
+                <StatNumber>{stats.total}</StatNumber>
+                <StatHelpText>Motoristas</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
-          <VStack spacing={6} align="stretch">
-            {/* Stats Cards */}
-            <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Total</StatLabel>
-                    <StatNumber>{stats.total}</StatNumber>
-                    <StatHelpText>Motoristas</StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
+          <Card bg="white" borderColor="gray.200">
+            <CardBody>
+              <Stat>
+                <StatLabel>Aprovados</StatLabel>
+                <StatNumber color="green.500">{stats.approved}</StatNumber>
+                <StatHelpText>Ativos</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Aprovados</StatLabel>
-                    <StatNumber color="green.500">{stats.approved}</StatNumber>
-                    <StatHelpText>Ativos</StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
+          <Card bg="white" borderColor="gray.200">
+            <CardBody>
+              <Stat>
+                <StatLabel>Pendentes</StatLabel>
+                <StatNumber color="yellow.500">{stats.pending}</StatNumber>
+                <StatHelpText>Aguardando</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Pendentes</StatLabel>
-                    <StatNumber color="yellow.500">{stats.pending}</StatNumber>
-                    <StatHelpText>Aguardando</StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
+          <Card bg="white" borderColor="gray.200">
+            <CardBody>
+              <Stat>
+                <StatLabel>Rejeitados</StatLabel>
+                <StatNumber color="red.500">{stats.rejected}</StatNumber>
+                <StatHelpText>Negados</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Rejeitados</StatLabel>
-                    <StatNumber color="red.500">{stats.rejected}</StatNumber>
-                    <StatHelpText>Negados</StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
+          <Card bg="white" borderColor="gray.200">
+            <CardBody>
+              <Stat>
+                <StatLabel>Suspensos</StatLabel>
+                <StatNumber color="red.500">{stats.suspended}</StatNumber>
+                <StatHelpText>Bloqueados</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
 
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Suspensos</StatLabel>
-                    <StatNumber color="orange.500">{stats.suspended}</StatNumber>
-                    <StatHelpText>Bloqueados</StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-            </SimpleGrid>
+        {/* Filters */}
+        <Card bg="white" borderColor="gray.200">
+          <CardBody>
+            <HStack spacing={4}>
+              <InputGroup maxW="300px">
+                <InputLeftElement>
+                  <FiSearch />
+                </InputLeftElement>
+                <Input
+                  placeholder="Buscar motoristas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                maxW="200px"
+              >
+                <option value="all">Todos os Status</option>
+                <option value="pending">Pendentes</option>
+                <option value="active">Aprovados</option>
+                <option value="suspended">Suspensos</option>
+                <option value="inactive">Inativos</option>
+              </Select>
+            </HStack>
+          </CardBody>
+        </Card>
 
-            {/* Filters */}
-            <Card bg={cardBg} borderColor={borderColor}>
-              <CardBody>
-                <HStack spacing={4} wrap="wrap">
-                  <InputGroup maxW="300px">
-                    <InputLeftElement>
-                      <FiSearch />
-                    </InputLeftElement>
-                    <Input
-                      placeholder="Buscar motoristas..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </InputGroup>
-
-                  <Select
-                    maxW="200px"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="all">Todos</option>
-                    <option value="pending">Pendentes</option>
-                    <option value="approved">Aprovados</option>
-                    <option value="rejected">Rejeitados</option>
-                    <option value="suspended">Suspensos</option>
-                  </Select>
-
-                  <Text fontSize="sm" color="gray.600">
-                    {filteredDrivers.length} de {drivers.length} motoristas
-                  </Text>
-                </HStack>
-              </CardBody>
-            </Card>
-
-            {/* Drivers Table */}
-            <Card bg={cardBg} borderColor={borderColor}>
-              <CardBody p={0}>
-                <TableContainer>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Motorista</Th>
-                        <Th>Contacto</Th>
-                        <Th>Status</Th>
-                        <Th>Data de Criação</Th>
-                        <Th>Ações</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {filteredDrivers.map((driver) => (
-                        <Tr key={driver.id}>
-                          <Td>
-                            <HStack>
-                              <Avatar 
-                                size="sm" 
-                                name={driver.name || 'Motorista'} 
-                                src={driver.avatar}
-                              />
-                              <VStack align="flex-start" spacing={0}>
-                                <Text fontWeight="medium">
-                                  {driver.name || 'Sem nome'}
-                                </Text>
-                                <Text fontSize="sm" color="gray.500">
-                                  ID: {driver.id.slice(0, 8)}...
-                                </Text>
-                              </VStack>
-                            </HStack>
-                          </Td>
-                          <Td>
-                            <VStack align="flex-start" spacing={0}>
-                              <HStack>
-                                <FiMail size={12} />
-                                <Text fontSize="sm">{driver.email}</Text>
-                              </HStack>
-                              {driver.phone && (
-                                <HStack>
-                                  <FiPhone size={12} />
-                                  <Text fontSize="sm">{driver.phone}</Text>
-                                </HStack>
-                              )}
-                            </VStack>
-                          </Td>
-                          <Td>
-                            <Badge colorScheme={getStatusColor(driver.status)}>
-                              {getStatusText(driver.status)}
-                            </Badge>
-                          </Td>
-                          <Td>
-                            <HStack>
-                              <FiCalendar size={12} />
-                              <Text fontSize="sm">
-                                {new Date(driver.createdAt).toLocaleDateString('pt-BR')}
-                              </Text>
-                            </HStack>
-                          </Td>
-                          <Td>
-                            <HStack spacing={2}>
-                              <IconButton
-                                aria-label="Ver detalhes"
-                                icon={<FiEye />}
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleViewDriver(driver)}
-                              />
-                              
-                              <Menu>
-                                <MenuButton
-                                  as={IconButton}
-                                  aria-label="Mais ações"
-                                  icon={<FiMoreVertical />}
-                                  size="sm"
-                                  variant="outline"
-                                />
-                                <MenuList>
-                                  {driver.status === 'pending' && (
-                                    <>
-                                      <MenuItem 
-                                        icon={<FiCheck />}
-                                        onClick={() => handleStatusChange(driver.id, 'approved')}
-                                      >
-                                        Aprovar
-                                      </MenuItem>
-                                      <MenuItem 
-                                        icon={<FiX />}
-                                        onClick={() => handleStatusChange(driver.id, 'rejected')}
-                                      >
-                                        Rejeitar
-                                      </MenuItem>
-                                    </>
-                                  )}
-                                  
-                                  {driver.status === 'approved' && (
-                                    <MenuItem 
-                                      icon={<FiPause />}
-                                      onClick={() => handleStatusChange(driver.id, 'suspended')}
-                                    >
-                                      Suspender
-                                    </MenuItem>
-                                  )}
-                                  
-                                  {driver.status === 'suspended' && (
-                                    <MenuItem 
-                                      icon={<FiPlay />}
-                                      onClick={() => handleStatusChange(driver.id, 'approved')}
-                                    >
-                                      Reativar
-                                    </MenuItem>
-                                  )}
-                                  
-                                  <MenuItem icon={<FiEdit />}>
-                                    Editar
-                                  </MenuItem>
-                                  <MenuItem icon={<FiFileText />}>
-                                    Ver Documentos
-                                  </MenuItem>
-                                  <MenuItem icon={<FiDollarSign />}>
-                                    Ver Pagamentos
-                                  </MenuItem>
-                                </MenuList>
-                              </Menu>
-                            </HStack>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-
-                {filteredDrivers.length === 0 && (
-                  <Box p={8} textAlign="center">
-                    <Text color="gray.500">
-                      Nenhum motorista encontrado com os filtros aplicados.
-                    </Text>
-                  </Box>
-                )}
-              </CardBody>
-            </Card>
-          </VStack>
-        </Box>
-
-        {/* Driver Details Modal */}
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>
-              Detalhes do Motorista
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {selectedDriver && (
-                <Tabs>
-                  <TabList>
-                    <Tab>Informações Gerais</Tab>
-                    <Tab>Documentos</Tab>
-                    <Tab>Histórico</Tab>
-                  </TabList>
-
-                  <TabPanels>
-                    <TabPanel>
-                      <VStack spacing={4} align="stretch">
+        {/* Drivers Table */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Lista de Motoristas ({filteredDrivers.length})</Heading>
+          </CardHeader>
+          <CardBody>
+            <TableContainer>
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Motorista</Th>
+                    <Th>Contato</Th>
+                    <Th>Status</Th>
+                    <Th>Cadastro</Th>
+                    <Th>Ações</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {filteredDrivers.map((driver) => (
+                    <Tr key={driver.id}>
+                      <Td>
                         <HStack>
-                          <Avatar 
-                            size="lg" 
-                            name={selectedDriver.name || 'Motorista'} 
-                            src={selectedDriver.avatar}
-                          />
-                          <VStack align="flex-start" spacing={1}>
-                            <Text fontSize="xl" fontWeight="bold">
-                              {selectedDriver.name || 'Sem nome'}
-                            </Text>
-                            <Badge colorScheme={getStatusColor(selectedDriver.status)}>
-                              {getStatusText(selectedDriver.status)}
-                            </Badge>
+                          <Avatar size="sm" name={driver.name} />
+                          <VStack align="flex-start" spacing={0}>
+                            <Text fontWeight="medium">{driver.name}</Text>
+                            <Text fontSize="sm" color="gray.600">ID: {driver.id}</Text>
                           </VStack>
                         </HStack>
-
-                        <SimpleGrid columns={2} spacing={4}>
-                          <Box>
-                            <Text fontSize="sm" color="gray.500">Email</Text>
-                            <Text>{selectedDriver.email}</Text>
-                          </Box>
-                          <Box>
-                            <Text fontSize="sm" color="gray.500">Telefone</Text>
-                            <Text>{selectedDriver.phone || 'Não informado'}</Text>
-                          </Box>
-                          <Box>
-                            <Text fontSize="sm" color="gray.500">Data de Criação</Text>
-                            <Text>
-                              {new Date(selectedDriver.createdAt).toLocaleDateString('pt-BR')}
-                            </Text>
-                          </Box>
-                          <Box>
-                            <Text fontSize="sm" color="gray.500">Última Atualização</Text>
-                            <Text>
-                              {new Date(selectedDriver.updatedAt).toLocaleDateString('pt-BR')}
-                            </Text>
-                          </Box>
-                        </SimpleGrid>
-
-                        {selectedDriver.address && (
-                          <Box>
-                            <Text fontSize="sm" color="gray.500">Morada</Text>
-                            <Text>{selectedDriver.address}</Text>
-                          </Box>
-                        )}
-                      </VStack>
-                    </TabPanel>
-
-                    <TabPanel>
-                      <VStack spacing={3} align="stretch">
-                        <Alert status="info">
-                          <AlertIcon />
-                          <AlertDescription fontSize="sm">
-                            Documentos enviados pelo motorista para verificação.
-                          </AlertDescription>
-                        </Alert>
-                        
-                        <Text color="gray.500" textAlign="center" py={4}>
-                          Funcionalidade de documentos será implementada em breve.
+                      </Td>
+                      <Td>
+                        <VStack align="flex-start" spacing={1}>
+                          <Text fontSize="sm">{driver.email}</Text>
+                          <Text fontSize="sm" color="gray.600">{driver.phone}</Text>
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <Badge colorScheme={getStatusColor(driver.status)}>
+                          {getStatusText(driver.status)}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Text fontSize="sm">
+                          {new Date(driver.createdAt).toLocaleDateString('pt-BR')}
                         </Text>
-                      </VStack>
-                    </TabPanel>
+                      </Td>
+                      <Td>
+                        <Menu>
+                          <MenuButton as={IconButton} icon={<FiMoreVertical />} variant="ghost" size="sm" />
+                          <MenuList>
+                            <MenuItem icon={<FiEye />} onClick={() => handleViewDriver(driver)}>
+                              Ver Detalhes
+                            </MenuItem>
+                            <MenuItem icon={<FiEdit />} onClick={() => handleEditDriver(driver)}>
+                              Editar
+                            </MenuItem>
+                            {driver.status === 'pending' && (
+                              <>
+                                <MenuItem icon={<FiCheck />} onClick={() => handleStatusChange(driver.id, 'active')}>
+                                  Aprovar
+                                </MenuItem>
+                                <MenuItem icon={<FiX />} onClick={() => handleStatusChange(driver.id, 'inactive')}>
+                                  Rejeitar
+                                </MenuItem>
+                              </>
+                            )}
+                            <MenuItem icon={<FiTrash2 />} onClick={() => handleDeleteDriver(driver)} color="red.500">
+                              Excluir
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </CardBody>
+        </Card>
 
-                    <TabPanel>
-                      <VStack spacing={3} align="stretch">
-                        <Text color="gray.500" textAlign="center" py={4}>
-                          Histórico de atividades do motorista será implementado em breve.
-                        </Text>
+        {/* Driver Details Modal */}
+        <StandardModal
+          isOpen={isOpen}
+          onClose={onClose}
+          title="Detalhes do Motorista"
+          size="xl"
+          showSave={false}
+        >
+          {selectedDriver && (
+            <Tabs>
+              <TabList>
+                <Tab>Informações Gerais</Tab>
+                <Tab>Documentos</Tab>
+                <Tab>Histórico</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
+                    <HStack>
+                      <Avatar size="lg" name={selectedDriver.name} />
+                      <VStack align="flex-start" spacing={1}>
+                        <Text fontSize="lg" fontWeight="bold">{selectedDriver.name}</Text>
+                        <Text color="gray.600">{selectedDriver.email}</Text>
+                        <Badge colorScheme={getStatusColor(selectedDriver.status)}>
+                          {getStatusText(selectedDriver.status)}
+                        </Badge>
                       </VStack>
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-              )}
-            </ModalBody>
+                    </HStack>
+                    
+                    <SimpleGrid columns={2} spacing={4}>
+                      <Box>
+                        <Text fontSize="sm" color="gray.500">Telefone</Text>
+                        <Text>{selectedDriver.phone || 'Não informado'}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="sm" color="gray.500">Data de Cadastro</Text>
+                        <Text>{new Date(selectedDriver.createdAt).toLocaleDateString('pt-BR')}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="sm" color="gray.500">Última Atividade</Text>
+                        <Text>{new Date(selectedDriver.lastActivity).toLocaleDateString('pt-BR')}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="sm" color="gray.500">Avaliação</Text>
+                        <Text>{selectedDriver.rating || 'N/A'}</Text>
+                      </Box>
+                    </SimpleGrid>
+                  </VStack>
+                </TabPanel>
+                <TabPanel>
+                  <Text>Documentos do motorista serão exibidos aqui.</Text>
+                </TabPanel>
+                <TabPanel>
+                  <Text>Histórico de atividades será exibido aqui.</Text>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          )}
+        </StandardModal>
 
-            <ModalFooter>
-              <Button variant="ghost" mr={3} onClick={onClose}>
-                Fechar
-              </Button>
-              {selectedDriver && selectedDriver.status === 'pending' && (
-                <HStack>
-                  <Button 
-                    colorScheme="red" 
-                    onClick={() => {
-                      handleStatusChange(selectedDriver.id, 'rejected');
-                      onClose();
-                    }}
-                  >
-                    Rejeitar
-                  </Button>
-                  <Button 
-                    colorScheme="green" 
-                    onClick={() => {
-                      handleStatusChange(selectedDriver.id, 'approved');
-                      onClose();
-                    }}
-                  >
-                    Aprovar
-                  </Button>
-                </HStack>
-              )}
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </Box>
+        {/* Edit Driver Modal */}
+        <StandardModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          title="Editar Motorista"
+          onSave={async () => {
+            // Implementar edição
+            console.log('Editar motorista:', selectedDriver);
+          }}
+          saveText="Salvar Alterações"
+        >
+          {selectedDriver && (
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel>Nome</FormLabel>
+                <Input defaultValue={selectedDriver.name} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Email</FormLabel>
+                <Input defaultValue={selectedDriver.email} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Telefone</FormLabel>
+                <Input defaultValue={selectedDriver.phone} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Status</FormLabel>
+                <Select defaultValue={selectedDriver.status}>
+                  <option value="pending">Pendente</option>
+                  <option value="active">Aprovado</option>
+                  <option value="inactive">Rejeitado</option>
+                  <option value="suspended">Suspenso</option>
+                </Select>
+              </FormControl>
+            </VStack>
+          )}
+        </StandardModal>
+
+        {/* Delete Driver Modal */}
+        <StandardModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Excluir Motorista"
+          onDelete={async () => {
+            // Implementar exclusão
+            console.log('Excluir motorista:', selectedDriver);
+          }}
+          showSave={false}
+          showDelete={true}
+          deleteText="Excluir Motorista"
+        >
+          <Alert status="warning">
+            <AlertIcon />
+            <AlertDescription>
+              Tem certeza que deseja excluir o motorista <strong>{selectedDriver?.name}</strong>? 
+              Esta ação não pode ser desfeita.
+            </AlertDescription>
+          </Alert>
+        </StandardModal>
+      </StandardLayout>
     </>
   );
 }
@@ -614,55 +528,16 @@ export default function DriversManagement({
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     // Load translations
-    const translations = await loadTranslations(context.locale || 'pt', ['common', 'admin']);
+    const translations = await loadTranslations('pt', ['common', 'admin']);
 
     // Get all drivers
-    // Mock drivers data
-    const drivers = [
-      {
-        id: '1',
-        name: 'João Silva',
-        email: 'joao@example.com',
-        phone: '+351 912 345 678',
-        status: 'approved',
-        createdAt: '2024-01-15',
-        lastActivity: '2024-01-20',
-        earnings: 2450.75,
-        trips: 156,
-        rating: 4.8
-      },
-      {
-        id: '2',
-        name: 'Maria Santos',
-        email: 'maria@example.com',
-        phone: '+351 913 456 789',
-        status: 'pending',
-        createdAt: '2024-01-18',
-        lastActivity: '2024-01-18',
-        earnings: 0,
-        trips: 0,
-        rating: 0
-      },
-      {
-        id: '3',
-        name: 'Pedro Costa',
-        email: 'pedro@example.com',
-        phone: '+351 914 567 890',
-        status: 'suspended',
-        createdAt: '2024-01-10',
-        lastActivity: '2024-01-19',
-        earnings: 1850.25,
-        trips: 98,
-        rating: 4.2
-      }
-    ];
+    const drivers = await store.drivers.findAll();
 
-    // Calculate stats
     const stats = {
       total: drivers.length,
-      approved: drivers.filter(d => d.status === 'approved').length,
+      approved: drivers.filter(d => d.status === 'active').length,
       pending: drivers.filter(d => d.status === 'pending').length,
-      rejected: drivers.filter(d => d.status === 'rejected').length,
+      rejected: drivers.filter(d => d.status === 'inactive').length,
       suspended: drivers.filter(d => d.status === 'suspended').length,
     };
 
@@ -671,6 +546,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         drivers,
         stats,
         translations,
+        userData: { name: 'Administrador' }, // Mock data
       },
     };
   } catch (error) {
@@ -685,7 +561,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           rejected: 0,
           suspended: 0,
         },
-        translations: {},
+        translations: { common: {}, admin: {} },
+        userData: { name: 'Administrador' },
       },
     };
   }
