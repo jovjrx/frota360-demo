@@ -35,7 +35,7 @@ interface HeaderProps {
 
 export default function Header({ t }: HeaderProps) {
   const [open, setOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, role } = useAuth();
   const router = useRouter();
 
   const isActive = (path: string) => router.pathname === path;
@@ -144,6 +144,7 @@ export default function Header({ t }: HeaderProps) {
                 <Menu>
                   <MenuButton
                     as={Button}
+                    size="sm"
                     variant="ghost"
                     leftIcon={<Avatar size="sm" name={user.displayName || user.email} />}
                     rightIcon={<ChevronDownIcon />}
@@ -154,10 +155,10 @@ export default function Header({ t }: HeaderProps) {
                   </MenuButton>
                   <MenuList>
                     <MenuItem icon={<FiUser />} onClick={() => {
-                      const isAdmin = user?.email?.endsWith('@conduz.pt') || user?.email === 'conduzcontacto@gmail.com';
-                      router.push(isAdmin ? '/dashboard/admin' : '/drivers/dashboard');
+                      const isAdmin = role == 'admin';
+                      router.push(isAdmin ? '/admin' : '/drivers');
                     }}>
-                      Dashboard
+                      Painel
                     </MenuItem>
                     <MenuDivider />
                     <MenuItem icon={<FiLogOut />} onClick={handleLogout}>
@@ -170,7 +171,7 @@ export default function Header({ t }: HeaderProps) {
                   <Button as={NextLink} href="/login" variant="ghost" size="sm">
                     Entrar
                   </Button>
-                  <Button as={NextLink} href="/signup" colorScheme="green" size="sm">
+                  <Button as={NextLink} href="/signup" colorScheme="red" size="sm">
                     Cadastrar
                   </Button>
                 </>

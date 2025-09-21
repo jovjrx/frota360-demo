@@ -144,7 +144,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
       }
 
       // Redirecionar para o dashboard do motorista
-      router.push('/drivers/dashboard');
+      router.push('/drivers');
     } catch (err: any) {
       console.error('Erro ao criar conta:', err);
       if (err.code === 'auth/email-already-in-use') {

@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { createSession } from '@/lib/session/ironSession';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Verificar o token do Firebase
-    const decodedToken = await getAuth().verifyIdToken(idToken);
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
     const email = decodedToken.email;
 
@@ -25,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Verificar se é admin na coleção admins
-    const adminDoc = await getFirestore()
+    const adminDoc = await adminDb
       .collection('admins')
       .doc(uid)
       .get();
@@ -43,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     } else {
       // Verificar se é motorista
-      const driverDoc = await getFirestore()
+      const driverDoc = await adminDb
         .collection('drivers')
         .where('uid', '==', uid)
         .limit(1)

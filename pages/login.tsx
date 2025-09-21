@@ -75,12 +75,12 @@ export default function LoginPage({ translations }: LoginPageProps) {
 
       const sessionData = await sessionResponse.json();
 
-        // Redirecionar baseado no tipo de usuário
-        const redirectPath = router.query.redirect as string;
-        if (redirectPath) {
-          router.push(redirectPath);
-        } else {
-        router.push(sessionData.role === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
+      // Redirecionar baseado no tipo de usuário
+      const redirectPath = router.query.redirect as string;
+      if (redirectPath) {
+        router.push(redirectPath);
+      } else {
+        router.push(sessionData.role === 'admin' ? '/admin' : '/drivers');
       }
     } catch (err: any) {
       console.error('Erro de login:', err);

@@ -28,10 +28,8 @@ export default function App({ Component, pageProps }: AppProps) {
   const tArray = useMemo(() => makeTArray(translations), [translations]);
   const scopedNs = useMemo(() => ns(makeT(translations)), [translations]);
 
-  // Verifica se é uma rota logada
-  const isLoggedInRoute = router.pathname.startsWith('/dashboard') || 
-                         router.pathname.startsWith('/drivers') ||
-                         router.pathname.startsWith('/admin');
+  // Verifica se é uma rota que NÃO deve ter Header/Footer
+  const isIsolatedRoute = router.pathname.startsWith('/dashboard');
 
   const getCurrentPage = () => {
     const path = router.pathname;
@@ -68,7 +66,7 @@ export default function App({ Component, pageProps }: AppProps) {
               locale={router.locale ?? "pt"}
             />
 
-            {isLoggedInRoute ? (
+            {isIsolatedRoute ? (
               <Component
                 key={router.locale}
                 {...pageProps}

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getFirestore } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Verificar se está na coleção admins
-    const adminDoc = await getFirestore()
+    const adminDoc = await adminDb
       .collection('admins')
       .doc(uid)
       .get();

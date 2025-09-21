@@ -47,33 +47,7 @@ export default function AdminDashboard({ stats, recentDrivers, recentPayouts }: 
         <title>Painel Administrativo - Conduz.pt</title>
       </Head>
       
-      <Box minH="100vh" bg="gray.50">
-        {/* Header */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" py={4} shadow="sm">
-          <Box maxW="7xl" mx="auto" px={4}>
-            <HStack justifyContent="space-between" alignItems="center">
-              <VStack align="flex-start" spacing={0}>
-                <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                  Conduz.pt
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  Painel Administrativo
-                </Text>
-              </VStack>
-              <HStack spacing={4}>
-                <Button leftIcon={<FiBell />} variant="outline" size="sm">
-                  Notificações
-                </Button>
-                <Button leftIcon={<FiSettings />} variant="outline" size="sm">
-                  Configurações
-                </Button>
-              </HStack>
-            </HStack>
-          </Box>
-        </Box>
-
-        {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
+      <Box maxW="7xl" mx="auto" px={4} py={8}>
           <VStack spacing={8} align="stretch">
             {/* Stats Grid */}
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
@@ -202,7 +176,6 @@ export default function AdminDashboard({ stats, recentDrivers, recentPayouts }: 
               </Card>
             </SimpleGrid>
           </VStack>
-        </Box>
       </Box>
     </>
   );
