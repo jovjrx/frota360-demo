@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
-import { createSession } from '@/lib/session/ironSession';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -11,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { idToken } = req.body;
     
     if (!idToken) {
-      return res.status(400).json({ error: 'ID token é obrigatório' });
+      return res.status(400).json({ error: 'ID Token é obrigatório' });
     }
 
     // Verificar o token do Firebase
@@ -23,25 +22,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Email não encontrado no token' });
     }
 
+    let userData = null;
+    let role: 'admin' | 'driver' | null = null;
+
     // Verificar se é admin na coleção admins
     const adminDoc = await adminDb
       .collection('admins')
       .doc(uid)
       .get();
 
-    let role: 'admin' | 'ops' | 'driver';
-    let userId = uid;
-    let driverId = null;
-
     if (adminDoc.exists) {
       const adminData = adminDoc.data();
       if (adminData?.role === 'admin') {
         role = 'admin';
-      } else {
-        role = 'ops';
+        userData = {
+          uid,
+          email,
+          role: 'admin',
+          name: adminData.name || email.split('@')[0],
+          ...adminData,
+        };
       }
-    } else {
-      // Verificar se é motorista
+    }
+
+    // Se não é admin, verificar se é motorista
+    if (!userData) {
       const driverDoc = await adminDb
         .collection('drivers')
         .where('uid', '==', uid)
@@ -50,38 +55,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (!driverDoc.empty) {
         const driverData = driverDoc.docs[0].data();
-        driverId = driverDoc.docs[0].id;
+        const driverId = driverDoc.docs[0].id;
         role = 'driver';
-      } else {
-        return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
+        userData = {
+          uid,
+          email,
+          role: 'driver',
+          driverId,
+          name: driverData.name || driverData.fullName || email.split('@')[0],
+          ...driverData,
+        };
       }
     }
 
-    // Criar sessão
-    await createSession(req, res, {
-      userId: uid,
-      role: role,
-      email: email,
-      name: decodedToken.name || email.split('@')[0],
-      driverId: driverId,
-    });
+    if (!userData || !role) {
+      return res.status(404).json({ error: 'Usuário não encontrado no sistema' });
+    }
 
     return res.status(200).json({ 
-      success: true,
+      success: true, 
+      user: userData,
       role: role,
-      userId: uid,
-      email: email
     });
 
   } catch (error: any) {
-    console.error('Erro ao criar sessão:', error);
-    
-    if (error.code === 'auth/invalid-id-token') {
-      return res.status(401).json({ error: 'Token inválido' });
-    } else if (error.code === 'auth/id-token-expired') {
-      return res.status(401).json({ error: 'Token expirado' });
-    }
-    
-    return res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('Erro ao buscar dados do usuário:', error);
+    return res.status(500).json({ error: error.message || 'Erro interno do servidor' });
   }
 }

@@ -1,33 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useAuth } from '@/lib/auth';
 
 export function withDriver(WrappedComponent: React.ComponentType<any>) {
   return function DriverComponent(props: any) {
-    const { user, loading } = useAuth();
+    const { user, loading, isDriver, userData } = useAuth();
     const router = useRouter();
-    const [isDriver, setIsDriver] = useState<boolean | null>(null);
 
     useEffect(() => {
-      if (!loading && user?.email) {
-        // Verificar se não é admin (se for admin, redirecionar para admin)
-        const isAdmin = user.email.endsWith('@conduz.pt') || user.email === 'conduzcontacto@gmail.com';
-        
-        if (isAdmin) {
-          router.push('/dashboard/admin');
+      if (!loading && user && !isDriver) {
+        // Se não é driver, redirecionar para admin se for admin, senão para home
+        if (userData?.role === 'admin') {
+          router.push('/admin');
         } else {
-          // Se não é admin, é motorista
-          setIsDriver(true);
+          router.push('/');
         }
       }
-    }, [user, loading]);
-
-    useEffect(() => {
-      if (isDriver === false) {
-        router.push('/dashboard/admin');
-      }
-    }, [isDriver, router]);
+    }, [loading, user, isDriver, userData, router]);
 
     // Se ainda está carregando
     if (loading) {
@@ -40,17 +30,12 @@ export function withDriver(WrappedComponent: React.ComponentType<any>) {
       return <LoadingSpinner message="Redirecionando..." />;
     }
 
-    // Se ainda está verificando permissões
-    if (isDriver === null) {
-      return <LoadingSpinner message="Verificando permissões..." />;
-    }
-
-    // Se não é motorista, redirecionar
-    if (isDriver === false) {
+    // Se não é driver, mostrar loading (redirecionamento em andamento)
+    if (!isDriver) {
       return <LoadingSpinner message="Redirecionando..." />;
     }
 
-    // Se é motorista, mostrar o componente
-    return <WrappedComponent {...props} user={user} />;
+    // Se é driver, mostrar o componente
+    return <WrappedComponent {...props} user={user} userData={userData} />;
   };
 }

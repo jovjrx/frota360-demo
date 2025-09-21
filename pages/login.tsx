@@ -37,7 +37,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    userType: 'driver' as 'driver' | 'admin',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -64,7 +63,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
         },
         body: JSON.stringify({
           idToken: idToken,
-          userType: formData.userType,
         }),
       });
 
@@ -124,19 +122,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>
-              {/* User Type Selection */}
-                <FormControl id="userType" isRequired>
-                  <FormLabel>Tipo de Utilizador</FormLabel>
-                  <Select
-                  value={formData.userType}
-                  onChange={handleInputChange}
-                    name="userType"
-                    size="lg"
-                >
-                  <option value="driver">Motorista</option>
-                  <option value="admin">Administrador</option>
-                  </Select>
-                </FormControl>
 
               {/* Email */}
                 <FormControl id="email" isRequired>

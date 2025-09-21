@@ -35,7 +35,7 @@ interface HeaderProps {
 
 export default function Header({ t }: HeaderProps) {
   const [open, setOpen] = useState(false);
-  const { user, signOut, role } = useAuth();
+  const { user, signOut, isAdmin, userData } = useAuth();
   const router = useRouter();
 
   const isActive = (path: string) => router.pathname === path;
@@ -150,12 +150,11 @@ export default function Header({ t }: HeaderProps) {
                     rightIcon={<ChevronDownIcon />}
                   >
                     <Text display={{ base: "none", lg: "block" }}>
-                      {user.displayName || user.email}
+                      {userData?.name || user.displayName || user.email}
                     </Text>
                   </MenuButton>
                   <MenuList>
                     <MenuItem icon={<FiUser />} onClick={() => {
-                      const isAdmin = role == 'admin';
                       router.push(isAdmin ? '/admin' : '/drivers');
                     }}>
                       Painel
