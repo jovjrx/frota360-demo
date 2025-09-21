@@ -15,11 +15,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  i18n: {
-    locales: ['pt', 'en'],
-    defaultLocale: 'pt',
-    localeDetection: false,
-  },
+  // i18n removido - usando sistema customizado de traduções
+  // i18n: {
+  //   locales: ['pt', 'en'],
+  //   defaultLocale: 'pt',
+  //   localeDetection: false,
+  // },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [320, 420, 640, 768, 1024, 1280, 1536, 1920],
@@ -64,18 +65,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/drivers/:path*',
-        destination: '/api/drivers/:path*',
-      },
-      {
-        source: '/api/admin/:path*',
-        destination: '/api/admin/:path*',
-      },
-    ];
-  },
+  // rewrites removidos - eram redundantes
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/drivers/:path*',
+  //       destination: '/api/drivers/:path*',
+  //     },
+  //     {
+  //       source: '/api/admin/:path*',
+  //       destination: '/api/admin/:path*',
+  //     },
+  //   ];
+  // },
 };
 
 export default nextConfig;

@@ -2,45 +2,41 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const { pathname, locale } = request.nextUrl;
+  const { pathname } = request.nextUrl;
   
   // Verificar se é uma rota protegida
   const isAdminRoute = pathname.startsWith('/admin');
   const isDriverRoute = pathname.startsWith('/drivers');
-  const isApiRoute = pathname.startsWith('/api');
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
   
   // Verificar autenticação para rotas protegidas
   if (isAdminRoute || isDriverRoute) {
-    const token = request.cookies.get('auth-token');
-    const userType = request.cookies.get('user-type');
+    // Verificar se há sessão ativa (Iron Session)
+    const sessionCookie = request.cookies.get('conduz-session');
     
-    // Se não há token, redirecionar para login
-    if (!token) {
+    // Se não há sessão, redirecionar para login
+    if (!sessionCookie) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
     
-    // Verificar se o tipo de usuário corresponde à rota
-    if (isAdminRoute && userType?.value !== 'admin') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-    
-    if (isDriverRoute && userType?.value !== 'driver') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
+    // Para rotas específicas, verificar se o usuário está logado via Firebase
+    // Isso será verificado no lado do cliente pelos componentes withAuth/withAdmin
   }
   
   // Configurar headers de segurança
   const response = NextResponse.next();
-  // Adicionar locale aos headers para uso nas páginas
-  response.headers.set('x-locale', locale || 'pt');
   
   return response;
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    // Proteger rotas de admin e drivers
+    '/admin/:path*',
+    '/drivers/:path*',
+    // Excluir arquivos estáticos e APIs
+    '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
   ],
 };
