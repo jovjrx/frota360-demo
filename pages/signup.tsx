@@ -123,9 +123,25 @@ export default function SignupPage({ translations }: SignupPageProps) {
       // Salvar dados do motorista no Firestore
       await addDoc(collection(db, 'drivers'), driverData);
 
-      // Definir cookies de autenticação
-      document.cookie = `auth-token=${user.uid}; path=/; max-age=86400; secure; samesite=strict`;
-      document.cookie = `user-type=driver; path=/; max-age=86400; secure; samesite=strict`;
+      // Obter ID token para criar sessão no servidor
+      const idToken = await user.getIdToken();
+
+      // Criar sessão no servidor
+      const sessionResponse = await fetch('/api/auth/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: idToken,
+          userType: 'driver',
+        }),
+      });
+
+      if (!sessionResponse.ok) {
+        const errorData = await sessionResponse.json();
+        throw new Error(errorData.error || 'Erro ao criar sessão');
+      }
 
       // Redirecionar para o dashboard do motorista
       router.push('/drivers/dashboard');

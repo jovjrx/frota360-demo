@@ -53,16 +53,34 @@ export default function LoginPage({ translations }: LoginPageProps) {
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // Definir cookies de autenticação
-      document.cookie = `auth-token=${user.uid}; path=/; max-age=86400; secure; samesite=strict`;
-      document.cookie = `user-type=${formData.userType}; path=/; max-age=86400; secure; samesite=strict`;
+      // Obter ID token para criar sessão no servidor
+      const idToken = await user.getIdToken();
+
+      // Criar sessão no servidor
+      const sessionResponse = await fetch('/api/auth/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: idToken,
+          userType: formData.userType,
+        }),
+      });
+
+      if (!sessionResponse.ok) {
+        const errorData = await sessionResponse.json();
+        throw new Error(errorData.error || 'Erro ao criar sessão');
+      }
+
+      const sessionData = await sessionResponse.json();
 
       // Redirecionar baseado no tipo de usuário
       const redirectPath = router.query.redirect as string;
       if (redirectPath) {
         router.push(redirectPath);
       } else {
-        router.push(formData.userType === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
+        router.push(sessionData.role === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
       }
     } catch (err: any) {
       console.error('Erro de login:', err);
