@@ -102,12 +102,12 @@ export default function StandardModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={size}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
+    <Modal isOpen={isOpen} onClose={onClose} size={size} isCentered>
+      <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+      <ModalContent mx={4} maxW="90vw">
+        <ModalHeader fontSize="lg" fontWeight="bold" pb={2}>{title}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
+        <ModalBody pb={6}>
           <VStack spacing={4} align="stretch">
             {error && (
               <Alert status="error">
@@ -118,7 +118,7 @@ export default function StandardModal({
             {children}
           </VStack>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter pt={0}>
           <HStack spacing={2}>
             <Button variant="outline" onClick={onClose} leftIcon={<FiX />}>
               Cancelar
