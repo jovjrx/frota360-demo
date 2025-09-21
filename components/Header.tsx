@@ -27,7 +27,7 @@ import {
   MenuDivider,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -159,6 +159,20 @@ export default function Header({ t }: HeaderProps) {
                     }}>
                       Painel
                     </MenuItem>
+                    {isAdmin && (
+                      <>
+                        <MenuDivider />
+                        <MenuItem icon={<FiUsers />} onClick={() => router.push('/admin/drivers')}>
+                          Motoristas
+                        </MenuItem>
+                        <MenuItem icon={<FiDollarSign />} onClick={() => router.push('/admin/payouts')}>
+                          Pagamentos
+                        </MenuItem>
+                        <MenuItem icon={<FiSettings />} onClick={() => router.push('/admin/plans')}>
+                          Planos
+                        </MenuItem>
+                      </>
+                    )}
                     <MenuDivider />
                     <MenuItem icon={<FiLogOut />} onClick={handleLogout}>
                       Sair
