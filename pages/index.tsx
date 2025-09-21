@@ -42,7 +42,7 @@ export default function Home({ tPage, tCommon }: PageProps) {
           <HStack spacing={4}>
             <Button
               as={NextLink}
-              href={tCommon("company.whats")}
+              href="/signup"
               size="lg"
               px={8}
               py={4}
@@ -50,7 +50,24 @@ export default function Home({ tPage, tCommon }: PageProps) {
               colorScheme="green"
               rightIcon={<ArrowRightIcon />}
             >
-              {tPage("hero.cta")}
+              {tPage("hero.ctaPrimary")}
+            </Button>
+            <Button
+              as={NextLink}
+              href={tCommon("company.whats")}
+              size="lg"
+              px={8}
+              py={4}
+              variant="outline"
+              colorScheme="whiteAlpha"
+              borderColor="whiteAlpha.400"
+              color="white"
+              _hover={{
+                bg: "whiteAlpha.100",
+                borderColor: "whiteAlpha.600"
+              }}
+            >
+              {tPage("hero.ctaSecondary")}
             </Button>
           </HStack>
         }
