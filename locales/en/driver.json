@@ -160,57 +160,51 @@
     }
   },
   "documents": {
-    "title": "Documents",
-    "subtitle": "Manage your documents and certifications",
-    "required_documents": {
-      "title": "Required Documents",
-      "driving_license": "Driving License",
-      "id_card": "ID Card/Passport",
-      "criminal_record": "Criminal Record",
-      "medical_certificate": "Medical Certificate",
-      "tvde_license": "TVDE License",
-      "vehicle_registration": "Vehicle Registration",
-      "insurance": "Vehicle Insurance",
-      "inspection": "Technical Inspection"
-    },
-    "optional_documents": {
-      "title": "Optional Documents",
-      "professional_certificate": "Professional Certificate",
-      "training_certificate": "Training Certificate",
-      "language_certificate": "Language Certificate"
-    },
-    "document_status": {
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "expired": "Expired",
-      "missing": "Missing"
-    },
-    "actions": {
-      "upload": "Upload Document",
-      "replace": "Replace",
-      "download": "Download",
-      "view": "View",
-      "delete": "Delete"
-    },
-    "upload": {
+    "title": "My Documents",
+    "subtitle": "Manage your documentation",
+    "progress": "Progress",
+    "verified": "Verified",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "completeness": "Document Completeness",
+    "verifiedCount": "of {{total}} documents",
+    "awaitingAnalysis": "Awaiting analysis",
+    "needCorrection": "Need correction",
+    "uploadDocument": "Upload Document",
+    "progressTitle": "Documentation Progress",
+    "completeAll": "Complete all documents to start working.",
+    "verifiedOn": "Verified on",
+    "sentOn": "Sent on",
+    "rejectedOn": "Rejected on",
+    "reason": "Reason",
+    "resend": "Resend",
+    "view": "View",
+    "download": "Download",
+    "uploadModal": {
       "title": "Upload Document",
-      "drag_drop": "Drag and drop file here or click to select",
-      "file_types": "Accepted file types: PDF, JPG, PNG",
-      "max_size": "Maximum size: 10MB",
-      "expiry_date": "Expiry Date",
-      "notes": "Notes (optional)"
+      "description": "Select the document type and upload the file.",
+      "dragFile": "Drag the file here or click to select",
+      "acceptedFormats": "Accepted formats: PDF, JPG, PNG (max. 10MB)",
+      "sendDocument": "Send Document"
     },
-    "messages": {
-      "document_uploaded": "Document uploaded successfully!",
-      "document_updated": "Document updated successfully!",
-      "document_deleted": "Document deleted successfully!",
-      "error_uploading": "Error uploading document. Please try again.",
-      "file_too_large": "File too large. Maximum 10MB.",
-      "invalid_file_type": "Invalid file type.",
-      "document_expired": "This document is expired. Please upload an updated version."
-    }
-  },
+    "types": {
+      "drivingLicense": "Driving License",
+      "vehicleInsurance": "Vehicle Insurance",
+      "tvdeCertificate": "TVDE Certificate",
+      "technicalInspection": "Technical Inspection"
+    },
+    "descriptions": {
+      "drivingLicense": "Valid driving license",
+      "vehicleInsurance": "Vehicle insurance policy",
+      "tvdeCertificate": "Passenger transport certificate",
+      "technicalInspection": "Vehicle technical inspection certificate"
+    },
+    "status": {
+      "verified": "Verified",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "notUploaded": "Not uploaded"
+    },
   "earnings": {
     "title": "Earnings",
     "subtitle": "Track your earnings and payments",

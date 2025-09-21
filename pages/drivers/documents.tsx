@@ -1,6 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withDriver } from '@/lib/auth/withDriver';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   VStack,
@@ -22,8 +23,8 @@ import {
   SimpleGrid,
 } from '@chakra-ui/react';
 import { 
-  FiUpload, 
-  FiFileText, 
+  FiUpload,
+  FiFileText,
   FiCheckCircle, 
   FiAlertCircle, 
   FiXCircle,
@@ -32,9 +33,10 @@ import {
   FiEdit
 } from 'react-icons/fi';
 import { loadTranslations } from '@/lib/translations';
-import StandardLayout from '@/components/layouts/StandardLayout';
+import DriverLayout from '@/components/layouts/DriverLayout';
 import StandardModal from '@/components/modals/StandardModal';
 import { useState } from 'react';
+import { formatPortugalTime } from '@/lib/timezone';
 
 interface DriverDocumentsProps {
   driver: any;
@@ -45,7 +47,7 @@ interface DriverDocumentsProps {
 
 export default function DriverDocuments({ 
   driver, 
-  documents,
+  documents, 
   translations,
   userData
 }: DriverDocumentsProps) {
@@ -59,13 +61,13 @@ export default function DriverDocuments({
   const getDocumentStatus = (status: string) => {
     switch (status) {
       case 'verified':
-        return { color: 'green', icon: FiCheckCircle, text: 'Verificado' };
+        return { color: 'green', icon: FiCheckCircle, text: tDriver('documents.status.verified') };
       case 'pending':
-        return { color: 'yellow', icon: FiAlertCircle, text: 'Pendente' };
+        return { color: 'yellow', icon: FiAlertCircle, text: tDriver('documents.status.pending') };
       case 'rejected':
-        return { color: 'red', icon: FiXCircle, text: 'Rejeitado' };
+        return { color: 'red', icon: FiXCircle, text: tDriver('documents.status.rejected') };
       default:
-        return { color: 'gray', icon: FiAlertCircle, text: 'Não enviado' };
+        return { color: 'gray', icon: FiAlertCircle, text: tDriver('documents.status.notUploaded') };
     }
   };
 
@@ -73,13 +75,13 @@ export default function DriverDocuments({
     try {
       // Implementar upload
       console.log('Uploading document:', documentType, file);
-      toast({
+        toast({
         title: 'Documento enviado!',
         description: 'Seu documento foi enviado para análise.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
     } catch (error) {
       throw new Error('Erro ao enviar documento');
     }
@@ -102,12 +104,12 @@ export default function DriverDocuments({
   return (
     <>
       <Head>
-        <title>Documentos - Conduz.pt</title>
+        <title>{`${tDriver('documents.title')} - Conduz.pt`}</title>
       </Head>
       
-      <StandardLayout
-        title="Meus Documentos"
-        subtitle="Gerencie sua documentação"
+      <DriverLayout
+        title={tDriver('documents.title')}
+        subtitle={tDriver('documents.subtitle')}
         user={{
           name: driver?.name || 'Motorista',
           avatar: driver?.avatar,
@@ -117,27 +119,27 @@ export default function DriverDocuments({
         notifications={0}
         stats={[
           {
-            label: 'Progresso',
+            label: tDriver('documents.progress'),
             value: `${completionPercentage}%`,
-            helpText: 'Documentos verificados',
+            helpText: tDriver('documents.verified'),
             color: completionPercentage === 100 ? 'green.500' : 'blue.500'
           },
           {
-            label: 'Verificados',
+            label: tDriver('documents.verified'),
             value: documents.filter(doc => doc.status === 'verified').length,
-            helpText: 'de ' + documents.length + ' documentos',
+            helpText: tDriver('documents.verifiedCount').replace('{{total}}', documents.length.toString()),
             color: 'green.500'
           },
           {
-            label: 'Pendentes',
+            label: tDriver('documents.pending'),
             value: documents.filter(doc => doc.status === 'pending').length,
-            helpText: 'Aguardando análise',
+            helpText: tDriver('documents.awaitingAnalysis'),
             color: 'yellow.500'
           },
           {
-            label: 'Rejeitados',
+            label: tDriver('documents.rejected'),
             value: documents.filter(doc => doc.status === 'rejected').length,
-            helpText: 'Precisam de correção',
+            helpText: tDriver('documents.needCorrection'),
             color: 'red.500'
           }
         ]}
@@ -147,38 +149,38 @@ export default function DriverDocuments({
             colorScheme="blue"
             onClick={() => setIsUploadModalOpen(true)}
           >
-            Upload Documento
+            {tDriver('documents.uploadDocument')}
           </Button>
         }
       >
         {/* Progress Overview */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
-            <Heading size="md">Progresso da Documentação</Heading>
+            <Heading size="md">{tDriver('documents.progressTitle')}</Heading>
           </CardHeader>
           <CardBody>
             <VStack spacing={4} align="stretch">
               <Box>
                 <HStack justify="space-between" mb={2}>
-                  <Text fontSize="sm" fontWeight="medium">Completude dos Documentos</Text>
+                  <Text fontSize="sm" fontWeight="medium">{tDriver('documents.completeness')}</Text>
                   <Text fontSize="sm" color="gray.600">{completionPercentage}%</Text>
                 </HStack>
                 <Progress 
                   value={completionPercentage} 
                   colorScheme={completionPercentage === 100 ? 'green' : 'blue'}
-                  size="lg"
+                  size="lg" 
                   borderRadius="md"
                 />
-              </Box>
-              
+        </Box>
+
               {completionPercentage < 100 && (
                 <Alert status="warning">
-                  <AlertIcon />
+                <AlertIcon />
                   <AlertDescription>
-                    Complete todos os documentos para começar a trabalhar.
+                    {tDriver('documents.completeAll')}
                   </AlertDescription>
-                </Alert>
-              )}
+              </Alert>
+            )}
             </VStack>
           </CardBody>
         </Card>
@@ -188,23 +190,23 @@ export default function DriverDocuments({
           {documents.map((document) => {
             const status = getDocumentStatus(document.status);
             const StatusIcon = status.icon;
-            
-            return (
+                
+                return (
               <Card key={document.id} bg="white" borderColor="gray.200">
                 <CardHeader>
-                  <HStack justify="space-between">
-                    <HStack>
+                      <HStack justify="space-between">
+                        <HStack>
                       <Icon as={FiFileText} color="blue.500" />
                       <Heading size="sm">{document.name}</Heading>
-                    </HStack>
+                        </HStack>
                     <Badge colorScheme={status.color}>
                       {status.text}
                     </Badge>
-                  </HStack>
-                </CardHeader>
+                      </HStack>
+                    </CardHeader>
                 <CardBody>
-                  <VStack spacing={3} align="stretch">
-                    <Text fontSize="sm" color="gray.600">
+                      <VStack spacing={3} align="stretch">
+                        <Text fontSize="sm" color="gray.600">
                       {document.description}
                     </Text>
                     
@@ -220,14 +222,14 @@ export default function DriverDocuments({
                           <Button size="xs" leftIcon={<FiDownload />} variant="outline">
                             Baixar
                           </Button>
-                        </HStack>
-                      </HStack>
-                    )}
-                    
+                            </HStack>
+                              </HStack>
+                            )}
+
                     {document.status === 'pending' && (
                       <Text fontSize="xs" color="yellow.600">
                         Enviado em {new Date(document.uploadedAt).toLocaleDateString('pt-BR')} - Aguardando análise
-                      </Text>
+                                </Text>
                     )}
                     
                     {document.status === 'rejected' && (
@@ -247,14 +249,14 @@ export default function DriverDocuments({
                     {document.status === 'not_uploaded' && (
                       <Button size="sm" leftIcon={<FiUpload />} colorScheme="blue" variant="outline">
                         Upload Documento
-                      </Button>
-                    )}
-                  </VStack>
-                </CardBody>
-              </Card>
-            );
-          })}
-        </SimpleGrid>
+                          </Button>
+                        )}
+                      </VStack>
+                    </CardBody>
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
 
         {/* Upload Modal */}
         <StandardModal
@@ -267,7 +269,7 @@ export default function DriverDocuments({
           }}
           saveText="Enviar Documento"
         >
-          <VStack spacing={4} align="stretch">
+              <VStack spacing={4} align="stretch">
             <Text fontSize="sm" color="gray.600">
               Selecione o tipo de documento e faça o upload do arquivo.
             </Text>
@@ -285,11 +287,11 @@ export default function DriverDocuments({
               </Text>
               <Text fontSize="xs" color="gray.500">
                 Formatos aceitos: PDF, JPG, PNG (máx. 10MB)
-              </Text>
-            </Box>
-          </VStack>
+                        </Text>
+                  </Box>
+              </VStack>
         </StandardModal>
-      </StandardLayout>
+      </DriverLayout>
     </>
   );
 }
@@ -298,47 +300,78 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock data - replace with actual data fetching
+    // Get user data from context (passed by withDriver HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
+    
+    if (driverSnap.empty) {
+      throw new Error('Driver not found');
+    }
+
+    const driverDoc = driverSnap.docs[0];
     const driver = {
-      id: '1',
-      name: 'João Silva',
-      email: 'joao@example.com',
-      status: 'active',
-      avatar: null,
+      id: driverDoc.id,
+      ...driverDoc.data(),
     };
 
-    const documents = [
-      {
-        id: '1',
-        name: 'Carta de Condução',
-        description: 'Carteira de habilitação válida',
-        status: 'verified',
-        verifiedAt: '2024-01-15',
-        uploadedAt: '2024-01-10',
-      },
-      {
-        id: '2',
-        name: 'Seguro do Veículo',
-        description: 'Apólice de seguro do veículo',
-        status: 'pending',
-        uploadedAt: '2024-01-18',
-      },
-      {
-        id: '3',
-        name: 'Certificado TVDE',
-        description: 'Certificado de transporte de passageiros',
-        status: 'rejected',
-        uploadedAt: '2024-01-12',
-        rejectedAt: '2024-01-14',
-        rejectionReason: 'Documento ilegível',
-      },
-      {
-        id: '4',
-        name: 'Inspeção Técnica',
-        description: 'Certificado de inspeção técnica do veículo',
-        status: 'not_uploaded',
-      },
-    ];
+    // Get documents from Firestore
+    const documentsSnap = await adminDb.collection('driver_documents').where('driverId', '==', driverDoc.id).get();
+    const documents = documentsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      verifiedAt: doc.data().verifiedAt?.toDate?.() || doc.data().verifiedAt,
+      uploadedAt: doc.data().uploadedAt?.toDate?.() || doc.data().uploadedAt,
+      rejectedAt: doc.data().rejectedAt?.toDate?.() || doc.data().rejectedAt,
+    }));
+
+    // If no documents found, create default document types
+    if (documents.length === 0) {
+      const defaultDocuments = [
+        {
+          id: 'driving_license',
+          name: translations.driver?.documents?.types?.drivingLicense || 'Carta de Condução',
+          description: translations.driver?.documents?.descriptions?.drivingLicense || 'Carteira de habilitação válida',
+          status: 'not_uploaded',
+          type: 'driving_license'
+        },
+        {
+          id: 'vehicle_insurance',
+          name: translations.driver?.documents?.types?.vehicleInsurance || 'Seguro do Veículo',
+          description: translations.driver?.documents?.descriptions?.vehicleInsurance || 'Apólice de seguro do veículo',
+          status: 'not_uploaded',
+          type: 'vehicle_insurance'
+        },
+        {
+          id: 'tvde_certificate',
+          name: translations.driver?.documents?.types?.tvdeCertificate || 'Certificado TVDE',
+          description: translations.driver?.documents?.descriptions?.tvdeCertificate || 'Certificado de transporte de passageiros',
+          status: 'not_uploaded',
+          type: 'tvde_certificate'
+        },
+        {
+          id: 'technical_inspection',
+          name: translations.driver?.documents?.types?.technicalInspection || 'Inspeção Técnica',
+          description: translations.driver?.documents?.descriptions?.technicalInspection || 'Certificado de inspeção técnica do veículo',
+          status: 'not_uploaded',
+          type: 'technical_inspection'
+        }
+      ];
+
+      return {
+        props: {
+          driver,
+          documents: defaultDocuments,
+          translations,
+          userData: driver,
+        },
+      };
+    }
 
     return {
       props: {

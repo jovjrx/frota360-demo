@@ -169,57 +169,51 @@
     }
   },
   "documents": {
-    "title": "Documentos",
-    "subtitle": "Gerencie os seus documentos e certificações",
-    "required_documents": {
-      "title": "Documentos Obrigatórios",
-      "driving_license": "Carta de Condução",
-      "id_card": "Cartão de Cidadão/Passaporte",
-      "criminal_record": "Registo Criminal",
-      "medical_certificate": "Certificado Médico",
-      "tvde_license": "Licença TVDE",
-      "vehicle_registration": "Registo do Veículo",
-      "insurance": "Seguro do Veículo",
-      "inspection": "Inspeção Técnica"
+    "title": "Meus Documentos",
+    "subtitle": "Gerencie sua documentação",
+    "progress": "Progresso",
+    "verified": "Verificados",
+    "pending": "Pendentes",
+    "rejected": "Rejeitados",
+    "completeness": "Completude dos Documentos",
+    "verifiedCount": "de {{total}} documentos",
+    "awaitingAnalysis": "Aguardando análise",
+    "needCorrection": "Precisam de correção",
+    "uploadDocument": "Upload Documento",
+    "progressTitle": "Progresso da Documentação",
+    "completeAll": "Complete todos os documentos para começar a trabalhar.",
+    "verifiedOn": "Verificado em",
+    "sentOn": "Enviado em",
+    "rejectedOn": "Rejeitado em",
+    "reason": "Motivo",
+    "resend": "Reenviar",
+    "view": "Ver",
+    "download": "Baixar",
+    "uploadModal": {
+      "title": "Upload de Documento",
+      "description": "Selecione o tipo de documento e faça o upload do arquivo.",
+      "dragFile": "Arraste o arquivo aqui ou clique para selecionar",
+      "acceptedFormats": "Formatos aceitos: PDF, JPG, PNG (máx. 10MB)",
+      "sendDocument": "Enviar Documento"
     },
-    "optional_documents": {
-      "title": "Documentos Opcionais",
-      "professional_certificate": "Certificado Profissional",
-      "training_certificate": "Certificado de Formação",
-      "language_certificate": "Certificado de Idiomas"
+    "types": {
+      "drivingLicense": "Carta de Condução",
+      "vehicleInsurance": "Seguro do Veículo",
+      "tvdeCertificate": "Certificado TVDE",
+      "technicalInspection": "Inspeção Técnica"
     },
-    "document_status": {
+    "descriptions": {
+      "drivingLicense": "Carteira de habilitação válida",
+      "vehicleInsurance": "Apólice de seguro do veículo",
+      "tvdeCertificate": "Certificado de transporte de passageiros",
+      "technicalInspection": "Certificado de inspeção técnica do veículo"
+    },
+    "status": {
+      "verified": "Verificado",
       "pending": "Pendente",
-      "approved": "Aprovado",
       "rejected": "Rejeitado",
-      "expired": "Expirado",
-      "missing": "Em Falta"
+      "notUploaded": "Não enviado"
     },
-    "actions": {
-      "upload": "Carregar Documento",
-      "replace": "Substituir",
-      "download": "Descarregar",
-      "view": "Ver",
-      "delete": "Eliminar"
-    },
-    "upload": {
-      "title": "Carregar Documento",
-      "drag_drop": "Arraste e largue o ficheiro aqui ou clique para selecionar",
-      "file_types": "Tipos de ficheiro aceites: PDF, JPG, PNG",
-      "max_size": "Tamanho máximo: 10MB",
-      "expiry_date": "Data de Validade",
-      "notes": "Notas (opcional)"
-    },
-    "messages": {
-      "document_uploaded": "Documento carregado com sucesso!",
-      "document_updated": "Documento atualizado com sucesso!",
-      "document_deleted": "Documento eliminado com sucesso!",
-      "error_uploading": "Erro ao carregar documento. Tente novamente.",
-      "file_too_large": "Ficheiro muito grande. Máximo 10MB.",
-      "invalid_file_type": "Tipo de ficheiro inválido.",
-      "document_expired": "Este documento está expirado. Por favor, carregue uma versão atualizada."
-    }
-  },
   "earnings": {
     "title": "Ganhos",
     "subtitle": "Acompanhe os seus ganhos e pagamentos",
