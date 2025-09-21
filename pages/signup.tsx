@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, setDoc, doc, updateDoc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
@@ -70,15 +70,10 @@ export default function SignupPage({ translations }: SignupPageProps) {
     setError(null);
     
     try {
-      // Criar usuário no Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Criar documento do motorista no Firestore (apenas campos essenciais)
+      // 1. PRIMEIRO: Criar documento do motorista no Firestore (sem UID ainda)
       const driverData = {
-        // Campos preenchidos pelo motorista
-        uid: user.uid,
-        userId: user.uid, // Para compatibilidade
+        uid: '', // Será preenchido depois
+        userId: '', // Será preenchido depois
         email: email,
         firstName: firstName,
         lastName: lastName,
@@ -131,20 +126,27 @@ export default function SignupPage({ translations }: SignupPageProps) {
         }
       };
 
-      // Criar apenas documento do motorista (não criar em users)
-      try {
-        console.log('Criando documento do motorista...', driverData);
-        const driverDocRef = await addDoc(collection(db, 'drivers'), driverData);
-        console.log('Documento do motorista criado com ID:', driverDocRef.id);
-      } catch (firestoreError) {
-        console.error('Erro ao criar documento do motorista:', firestoreError);
-        throw new Error('Erro ao salvar dados do motorista. Tente novamente.');
-      }
+      console.log('1. Criando documento do motorista no Firestore...', driverData);
+      const driverDocRef = await addDoc(collection(db, 'drivers'), driverData);
+      console.log('✅ Documento do motorista criado com ID:', driverDocRef.id);
 
-      // Obter ID token para criar sessão no servidor
+      // 2. SEGUNDO: Criar usuário no Firebase Auth
+      console.log('2. Criando usuário no Firebase Auth...');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('✅ Usuário Firebase criado com UID:', user.uid);
+
+      // 3. TERCEIRO: Atualizar documento do motorista com UID
+      console.log('3. Atualizando documento do motorista com UID...');
+      await updateDoc(driverDocRef, {
+        uid: user.uid,
+        userId: user.uid
+      });
+      console.log('✅ Documento do motorista atualizado com UID');
+
+      // 4. QUARTO: Criar sessão no servidor
+      console.log('4. Criando sessão no servidor...');
       const idToken = await user.getIdToken();
-
-      // Criar sessão no servidor
       const sessionResponse = await fetch('/api/auth/create-session', {
         method: 'POST',
         headers: {
@@ -159,24 +161,63 @@ export default function SignupPage({ translations }: SignupPageProps) {
         const errorData = await sessionResponse.json();
         throw new Error(errorData.error || 'Erro ao criar sessão');
       }
+      console.log('✅ Sessão criada com sucesso');
 
-      // Redirecionar para o dashboard do motorista
+      // 5. QUINTO: Redirecionar para o dashboard do motorista
+      console.log('5. Redirecionando para dashboard...');
       router.push('/drivers');
+
     } catch (err: any) {
-      console.error('Erro ao criar conta:', err);
+      console.error('❌ Erro no processo de cadastro:', err);
       
-      // Se o erro for de email já em uso, sugerir login
+      // ROLLBACK: Se houve erro após criar o documento em drivers, deletá-lo
       if (err.code === 'auth/email-already-in-use') {
+        console.log('🔄 Email já existe, verificando se precisa limpar documento...');
+        // Verificar se existe documento órfão em drivers
+        const driversSnap = await getDocs(query(
+          collection(db, 'drivers'),
+          where('email', '==', email),
+          where('uid', '==', '')
+        ));
+        
+        if (!driversSnap.empty) {
+          console.log('🗑️ Deletando documento órfão em drivers...');
+          await deleteDoc(driversSnap.docs[0].ref);
+          console.log('✅ Documento órfão deletado');
+        }
+        
         setError('Este email já está cadastrado. Tente fazer login.');
         return;
+      }
+      
+      // Se houve erro após criar documento em drivers, tentar deletá-lo
+      if (err.message.includes('Firebase Auth') || err.message.includes('sessão')) {
+        console.log('🔄 Erro após criar documento, tentando rollback...');
+        try {
+          const driversSnap = await getDocs(query(
+            collection(db, 'drivers'),
+            where('email', '==', email),
+            where('uid', '==', '')
+          ));
+          
+          if (!driversSnap.empty) {
+            console.log('🗑️ Deletando documento órfão em drivers...');
+            await deleteDoc(driversSnap.docs[0].ref);
+            console.log('✅ Rollback realizado com sucesso');
+          }
+        } catch (rollbackError) {
+          console.error('❌ Erro no rollback:', rollbackError);
+        }
       }
       
       if (err.code === 'auth/invalid-email') {
         setError('Email inválido.');
       } else if (err.code === 'auth/weak-password') {
         setError('A senha é muito fraca.');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('Este email já está cadastrado. Tente fazer login.');
       } else {
-        setError('Erro ao criar conta. Tente novamente.');
+        setError(err.message || 'Erro ao criar conta. Tente novamente.');
       }
     } finally {
       setLoading(false);
