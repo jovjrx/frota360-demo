@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
@@ -120,8 +120,21 @@ export default function SignupPage({ translations }: SignupPageProps) {
         }
       };
 
-      // Salvar dados do motorista no Firestore
-      await addDoc(collection(db, 'drivers'), driverData);
+      // Criar documento do usuário na coleção users
+      const userData = {
+        uid: user.uid,
+        email: email,
+        name: `${firstName} ${lastName}`,
+        role: 'driver',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      // Criar ambos os documentos
+      await Promise.all([
+        addDoc(collection(db, 'drivers'), driverData),
+        setDoc(doc(db, 'users', user.uid), userData)
+      ]);
 
       // Obter ID token para criar sessão no servidor
       const idToken = await user.getIdToken();
@@ -134,7 +147,6 @@ export default function SignupPage({ translations }: SignupPageProps) {
         },
         body: JSON.stringify({
           idToken: idToken,
-          userType: 'driver',
         }),
       });
 

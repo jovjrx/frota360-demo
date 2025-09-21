@@ -23,25 +23,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Email não encontrado no token' });
     }
 
-    // Verificar se é admin na coleção admins
-    const adminDoc = await adminDb
-      .collection('admins')
+    // Verificar na coleção users
+    const userDoc = await adminDb
+      .collection('users')
       .doc(uid)
       .get();
 
-    let role: 'admin' | 'ops' | 'driver';
-    let userId = uid;
-    let driverId = null;
+    if (!userDoc.exists) {
+      return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
+    }
 
-    if (adminDoc.exists) {
-      const adminData = adminDoc.data();
-      if (adminData?.role === 'admin') {
-        role = 'admin';
-      } else {
-        role = 'ops';
-      }
-    } else {
-      // Verificar se é motorista
+    const userData = userDoc.data();
+    const role = userData?.role || 'driver';
+    const name = userData?.name || email.split('@')[0];
+    
+    let driverId = null;
+    
+    // Se for driver, buscar o driverId na coleção drivers
+    if (role === 'driver') {
       const driverDoc = await adminDb
         .collection('drivers')
         .where('uid', '==', uid)
@@ -49,11 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .get();
       
       if (!driverDoc.empty) {
-        const driverData = driverDoc.docs[0].data();
         driverId = driverDoc.docs[0].id;
-        role = 'driver';
-      } else {
-        return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
       }
     }
 
@@ -62,26 +57,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       userId: uid,
       role: role,
       email: email,
-      name: decodedToken.name || email.split('@')[0],
+      name: name,
       driverId: driverId,
     });
 
-    return res.status(200).json({ 
-      success: true,
-      role: role,
-      userId: uid,
-      email: email
-    });
+    return res.status(200).json({ success: true, role: role });
 
   } catch (error: any) {
     console.error('Erro ao criar sessão:', error);
-    
-    if (error.code === 'auth/invalid-id-token') {
-      return res.status(401).json({ error: 'Token inválido' });
-    } else if (error.code === 'auth/id-token-expired') {
-      return res.status(401).json({ error: 'Token expirado' });
-    }
-    
-    return res.status(500).json({ error: 'Erro interno do servidor' });
+    return res.status(500).json({ error: error.message || 'Erro interno do servidor' });
   }
 }

@@ -8,26 +8,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { uid } = req.body;
-    
+
     if (!uid) {
       return res.status(400).json({ error: 'UID é obrigatório' });
     }
 
-    // Verificar se está na coleção admins
-    const adminDoc = await adminDb
-      .collection('admins')
+    const userDoc = await adminDb
+      .collection('users')
       .doc(uid)
       .get();
 
-    const isAdmin = adminDoc.exists && adminDoc.data()?.role === 'admin';
-    
+    const isAdmin = userDoc.exists && userDoc.data()?.role === 'admin';
+
     return res.status(200).json({ isAdmin });
 
   } catch (error) {
     console.error('Erro ao verificar admin:', error);
-    return res.status(500).json({ 
-      isAdmin: false,
-      error: 'Erro interno do servidor' 
-    });
+    return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }

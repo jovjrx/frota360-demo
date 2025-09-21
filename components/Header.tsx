@@ -180,7 +180,7 @@ export default function Header({ t }: HeaderProps) {
                               </Text>
                               <Badge 
                                 size="sm" 
-                                colorScheme={isAdmin ? "blue" : "green"}
+                                colorScheme={isAdmin ? "red" : "green"}
                               >
                                 {isAdmin ? "Administrador" : "Motorista"}
                               </Badge>
