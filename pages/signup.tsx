@@ -74,33 +74,44 @@ export default function SignupPage({ translations }: SignupPageProps) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Criar documento do motorista no Firestore
+      // Criar documento do motorista no Firestore (apenas campos essenciais)
       const driverData = {
+        // Campos preenchidos pelo motorista
         uid: user.uid,
+        userId: user.uid, // Para compatibilidade
         email: email,
         firstName: firstName,
         lastName: lastName,
+        name: `${firstName} ${lastName}`,
         fullName: `${firstName} ${lastName}`,
         phone: phone,
-        birthDate: birthDate,
-        city: city,
-        licenseNumber: licenseNumber,
-        licenseExpiry: licenseExpiry,
+        birthDate: birthDate || null,
+        city: city || null,
+        licenseNumber: licenseNumber || null,
+        licenseExpiry: licenseExpiry || null,
         vehicleType: vehicleType || null,
-        status: 'pending', // pending, active, inactive, suspended
-        isActive: false, // Para controle rápido de ativação
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        createdBy: 'self', // self, admin
-        lastLoginAt: null,
+        
+        // Campos administrativos (valores padrão)
+        status: 'pending',
+        isActive: false,
         weeklyEarnings: 0,
         monthlyEarnings: 0,
         totalTrips: 0,
         rating: 0,
-        // Campos adicionais para administração
         statusUpdatedAt: null,
         statusUpdatedBy: null,
         notes: '',
+        lastPayoutAt: null,
+        lastPayoutAmount: 0,
+        
+        // Campos técnicos
+        locale: 'pt',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        createdBy: 'self',
+        lastLoginAt: null,
+        
+        // Documentos (estrutura padrão)
         documents: {
           license: {
             uploaded: false,
@@ -243,8 +254,10 @@ export default function SignupPage({ translations }: SignupPageProps) {
                       </FormControl>
                     </GridItem>
                     <GridItem>
-                      <FormControl id="birthDate" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.birthDate')}</FormLabel>
+                      <FormControl id="birthDate">
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">
+                          {t('user.birthDate')} <Text as="span" color="gray.500" fontSize="sm">(opcional)</Text>
+                        </FormLabel>
                         <Input
                           type="date"
                           value={birthDate}
@@ -259,8 +272,10 @@ export default function SignupPage({ translations }: SignupPageProps) {
 
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
-                      <FormControl id="city" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.city')}</FormLabel>
+                      <FormControl id="city">
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">
+                          {t('user.city')} <Text as="span" color="gray.500" fontSize="sm">(opcional)</Text>
+                        </FormLabel>
                         <Input
                           type="text"
                           value={city}
@@ -279,13 +294,18 @@ export default function SignupPage({ translations }: SignupPageProps) {
 
                 {/* Informações de Condução */}
                 <Box>
-                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
+                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={2}>
                     {t('signup.drivingInfo')}
+                  </Text>
+                  <Text fontSize="sm" color="gray.600" mb={4}>
+                    Os campos de condução são opcionais. Você pode preenchê-los agora ou depois no seu painel.
                   </Text>
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
-                      <FormControl id="licenseNumber" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.licenseNumber')}</FormLabel>
+                      <FormControl id="licenseNumber">
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">
+                          {t('user.licenseNumber')} <Text as="span" color="gray.500" fontSize="sm">(opcional)</Text>
+                        </FormLabel>
                         <Input
                           type="text"
                           value={licenseNumber}
@@ -298,8 +318,10 @@ export default function SignupPage({ translations }: SignupPageProps) {
                       </FormControl>
                     </GridItem>
                     <GridItem>
-                      <FormControl id="licenseExpiry" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.licenseExpiry')}</FormLabel>
+                      <FormControl id="licenseExpiry">
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">
+                          {t('user.licenseExpiry')} <Text as="span" color="gray.500" fontSize="sm">(opcional)</Text>
+                        </FormLabel>
                         <Input
                           type="date"
                           value={licenseExpiry}
