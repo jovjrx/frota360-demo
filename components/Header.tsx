@@ -217,7 +217,7 @@ export default function Header({ t }: HeaderProps) {
                       w="full"
                       onClick={() => {
                         const isAdmin = user?.email?.endsWith('@conduz.pt') || user?.email === 'conduzcontacto@gmail.com';
-                        router.push(isAdmin ? '/dashboard/admin' : '/drivers/dashboard');
+                        router.push(isAdmin ? '/admin' : '/drivers');
                       }}
                     >
                       Dashboard

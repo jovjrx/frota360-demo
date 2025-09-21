@@ -43,7 +43,6 @@ export default function LoggedInLayout({
   const router = useRouter();
 
   const defaultBreadcrumbs = [
-    { label: 'Dashboard', href: '/dashboard' },
     ...breadcrumbs
   ];
 

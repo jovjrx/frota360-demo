@@ -51,20 +51,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: '/admin',
-        destination: '/admin/dashboard',
-        permanent: true,
-      },
-      {
-        source: '/drivers',
-        destination: '/drivers/dashboard',
-        permanent: true,
-      },
-    ];
-  },
+        // redirects removidos - agora /admin e /drivers são diretos
   // rewrites removidos - eram redundantes
   // async rewrites() {
   //   return [
