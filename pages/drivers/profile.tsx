@@ -1,6 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withDriver } from '@/lib/auth/withDriver';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   VStack,
@@ -23,9 +24,10 @@ import {
 } from '@chakra-ui/react';
 import { FiSave, FiEdit, FiUser, FiMail, FiPhone, FiCalendar, FiMapPin } from 'react-icons/fi';
 import { loadTranslations } from '@/lib/translations';
-import StandardLayout from '@/components/layouts/StandardLayout';
+import DriverLayout from '@/components/layouts/DriverLayout';
 import StandardModal from '@/components/modals/StandardModal';
 import { useState } from 'react';
+import { formatPortugalTime } from '@/lib/timezone';
 
 interface DriverProfileProps {
   driver: any;
@@ -64,26 +66,26 @@ export default function DriverProfile({
       // Implementar salvamento
       console.log('Salvando perfil:', formData);
       toast({
-        title: 'Perfil atualizado!',
-        description: 'Suas informações foram salvas com sucesso.',
+        title: tDriver('profile.messages.profileUpdated'),
+        description: tDriver('profile.messages.profileUpdatedDesc'),
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
-      throw new Error('Erro ao salvar perfil');
+      throw new Error(tDriver('profile.messages.errorSaving'));
     }
   };
 
   return (
     <>
       <Head>
-        <title>Perfil - Conduz.pt</title>
+        <title>{`${tDriver('profile.title')} - Conduz.pt`}</title>
       </Head>
       
-      <StandardLayout
-        title="Meu Perfil"
-        subtitle="Gerencie suas informações pessoais"
+      <DriverLayout
+        title={tDriver('profile.title')}
+        subtitle={tDriver('profile.subtitle')}
         user={{
           name: driver?.name || 'Motorista',
           avatar: driver?.avatar,
@@ -91,20 +93,24 @@ export default function DriverProfile({
           status: driver?.status
         }}
         notifications={0}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/drivers' },
+          { label: tDriver('profile.title') }
+        ]}
         actions={
           <Button 
             leftIcon={<FiEdit />} 
             colorScheme="blue"
             onClick={() => setIsEditModalOpen(true)}
           >
-            Editar Perfil
+            {tDriver('profile.editProfile')}
           </Button>
         }
       >
         {/* Profile Overview */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
-            <Heading size="md">Informações Pessoais</Heading>
+            <Heading size="md">{tDriver('profile.personalInfo')}</Heading>
           </CardHeader>
           <CardBody>
             <HStack spacing={6} align="flex-start">
@@ -121,24 +127,24 @@ export default function DriverProfile({
                   </Text>
                   <Text color="gray.600">{driver?.email}</Text>
                   <HStack mt={2}>
-                    <Badge colorScheme="green">Motorista Ativo</Badge>
-                    <Badge colorScheme="blue">{driver?.vehicleType || 'Veículo não informado'}</Badge>
+                    <Badge colorScheme="green">{tDriver('profile.activeDriver')}</Badge>
+                    <Badge colorScheme="blue">{driver?.vehicleType || tDriver('profile.vehicleNotInformed')}</Badge>
                   </HStack>
                 </Box>
                 
                 <VStack align="flex-start" spacing={2}>
                   <HStack>
                     <FiPhone size={16} />
-                    <Text fontSize="sm">{driver?.phone || 'Telefone não informado'}</Text>
+                    <Text fontSize="sm">{driver?.phone || tDriver('profile.phoneNotInformed')}</Text>
                   </HStack>
                   <HStack>
                     <FiMapPin size={16} />
-                    <Text fontSize="sm">{driver?.city || 'Cidade não informada'}</Text>
+                    <Text fontSize="sm">{driver?.city || tDriver('profile.cityNotInformed')}</Text>
                   </HStack>
                   <HStack>
                     <FiCalendar size={16} />
                     <Text fontSize="sm">
-                      Nascimento: {driver?.birthDate || 'Data não informada'}
+                      {tDriver('profile.birthDate')}: {driver?.birthDate || tDriver('profile.birthNotInformed')}
                     </Text>
                   </HStack>
                 </VStack>
@@ -150,23 +156,23 @@ export default function DriverProfile({
         {/* Driver Information */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
-            <Heading size="md">Informações de Condução</Heading>
+            <Heading size="md">{tDriver('profile.drivingInfo')}</Heading>
           </CardHeader>
           <CardBody>
             <VStack spacing={4} align="stretch">
               <HStack justify="space-between">
-                <Text fontWeight="medium">Número da Carta de Condução:</Text>
-                <Text>{driver?.licenseNumber || 'Não informado'}</Text>
+                <Text fontWeight="medium">{tDriver('profile.licenseNumber')}:</Text>
+                <Text>{driver?.licenseNumber || tDriver('profile.notInformed')}</Text>
               </HStack>
               <Divider />
               <HStack justify="space-between">
-                <Text fontWeight="medium">Validade da Carta:</Text>
-                <Text>{driver?.licenseExpiry || 'Não informada'}</Text>
+                <Text fontWeight="medium">{tDriver('profile.licenseValidity')}:</Text>
+                <Text>{driver?.licenseExpiry || tDriver('profile.notInformed')}</Text>
               </HStack>
               <Divider />
               <HStack justify="space-between">
-                <Text fontWeight="medium">Tipo de Veículo:</Text>
-                <Text>{driver?.vehicleType || 'Não informado'}</Text>
+                <Text fontWeight="medium">{tDriver('profile.vehicleType')}:</Text>
+                <Text>{driver?.vehicleType || tDriver('profile.notInformed')}</Text>
               </HStack>
             </VStack>
           </CardBody>
@@ -176,13 +182,13 @@ export default function DriverProfile({
         <StandardModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          title="Editar Perfil"
+          title={tDriver('profile.editProfile')}
           onSave={handleSave}
-          saveText="Salvar Alterações"
+          saveText={tDriver('profile.saveChanges')}
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
-              <FormLabel>Nome</FormLabel>
+              <FormLabel>{tDriver('profile.firstName')}</FormLabel>
               <Input 
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -190,7 +196,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Sobrenome</FormLabel>
+              <FormLabel>{tDriver('profile.lastName')}</FormLabel>
               <Input 
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -198,7 +204,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{tDriver('profile.email')}</FormLabel>
               <Input 
                 type="email"
                 value={formData.email}
@@ -207,7 +213,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Telefone</FormLabel>
+              <FormLabel>{tDriver('profile.phone')}</FormLabel>
               <Input 
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
@@ -215,7 +221,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Data de Nascimento</FormLabel>
+              <FormLabel>{tDriver('profile.birthDate')}</FormLabel>
               <Input 
                 type="date"
                 value={formData.birthDate}
@@ -224,7 +230,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Cidade</FormLabel>
+              <FormLabel>{tDriver('profile.city')}</FormLabel>
               <Input 
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
@@ -232,7 +238,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Número da Carta de Condução</FormLabel>
+              <FormLabel>{tDriver('profile.licenseNumberField')}</FormLabel>
               <Input 
                 value={formData.licenseNumber}
                 onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
@@ -240,7 +246,7 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Validade da Carta</FormLabel>
+              <FormLabel>{tDriver('profile.licenseExpiry')}</FormLabel>
               <Input 
                 type="date"
                 value={formData.licenseExpiry}
@@ -249,21 +255,21 @@ export default function DriverProfile({
             </FormControl>
             
             <FormControl>
-              <FormLabel>Tipo de Veículo</FormLabel>
+              <FormLabel>{tDriver('profile.vehicleType')}</FormLabel>
               <Select 
                 value={formData.vehicleType}
                 onChange={(e) => handleInputChange('vehicleType', e.target.value)}
               >
-                <option value="">Selecione o tipo</option>
-                <option value="carro">Carro</option>
-                <option value="moto">Moto</option>
-                <option value="van">Van</option>
-                <option value="outro">Outro</option>
+                <option value="">{tDriver('profile.selectType')}</option>
+                <option value="carro">{tDriver('profile.car')}</option>
+                <option value="moto">{tDriver('profile.motorcycle')}</option>
+                <option value="van">{tDriver('profile.van')}</option>
+                <option value="outro">{tDriver('profile.other')}</option>
               </Select>
             </FormControl>
           </VStack>
         </StandardModal>
-      </StandardLayout>
+      </DriverLayout>
     </>
   );
 }
@@ -272,21 +278,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock data - replace with actual data fetching
+    // Get user data from context (passed by withDriver HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
+    
+    if (driverSnap.empty) {
+      throw new Error('Driver not found');
+    }
+
+    const driverDoc = driverSnap.docs[0];
     const driver = {
-      id: '1',
-      firstName: 'João',
-      lastName: 'Silva',
-      name: 'João Silva',
-      email: 'joao@example.com',
-      phone: '+351 912 345 678',
-      birthDate: '1985-03-15',
-      city: 'Lisboa',
-      licenseNumber: '123456789',
-      licenseExpiry: '2025-03-15',
-      vehicleType: 'carro',
-      status: 'active',
-      avatar: null,
+      id: driverDoc.id,
+      ...driverDoc.data(),
     };
 
     return {
