@@ -11,13 +11,8 @@ import {
   Badge,
   Card,
   CardBody,
+  CardHeader,
   Heading,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
-  useColorModeValue,
   Button,
   Avatar,
   Progress,
@@ -28,6 +23,9 @@ import {
   Divider,
   Icon,
   Flex,
+  List,
+  ListItem,
+  ListIcon,
 } from '@chakra-ui/react';
 import { 
   FiDollarSign, 
@@ -40,10 +38,14 @@ import {
   FiUpload,
   FiCalendar,
   FiMapPin,
-  FiClock
+  FiClock,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiXCircle
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
+import StandardLayout from '@/components/layouts/StandardLayout';
 
 interface DriverDashboardProps {
   driver: any;
@@ -58,8 +60,8 @@ interface DriverDashboardProps {
   recentPayments: any[];
   recentTrips: any[];
   notifications: any[];
-  tCommon: any;
-  tDriver: any;
+  translations: Record<string, any>;
+  userData: any;
 }
 
 export default function DriverDashboard({ 
@@ -69,30 +71,29 @@ export default function DriverDashboard({
   recentPayments, 
   recentTrips, 
   notifications,
-  tCommon,
-  tDriver 
+  translations,
+  userData
 }: DriverDashboardProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const tCommon = (key: string) => translations.common?.[key] || key;
+  const tDriver = (key: string) => translations.driver?.[key] || key;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'green';
+      case 'active': return 'green';
       case 'pending': return 'yellow';
-      case 'rejected': return 'red';
       case 'suspended': return 'red';
+      case 'inactive': return 'gray';
       default: return 'gray';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'approved': return 'Aprovado';
+      case 'active': return 'Ativo';
       case 'pending': return 'Pendente';
-      case 'rejected': return 'Rejeitado';
       case 'suspended': return 'Suspenso';
-      default: return status;
+      case 'inactive': return 'Inativo';
+      default: return 'Desconhecido';
     }
   };
 
@@ -102,364 +103,279 @@ export default function DriverDashboard({
         <title>{tDriver('dashboard.title')} - Conduz.pt</title>
       </Head>
       
-      <Box minH="100vh" bg={bgColor}>
-        {/* Header */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" py={4} shadow="sm">
-          <Box maxW="7xl" mx="auto" px={4}>
-            <HStack justifyContent="space-between" alignItems="center">
-              <HStack spacing={4}>
-                <Avatar 
-                  size="md" 
-                  name={driver?.name || 'Motorista'} 
-                  src={driver?.avatar}
-                />
-                <VStack align="flex-start" spacing={0}>
-                  <Text fontSize="xl" fontWeight="bold" color="gray.800">
-                    {tDriver('dashboard.welcome')}, {driver?.name || 'Motorista'}!
+      <StandardLayout
+        title={`${tDriver('dashboard.welcome')}, ${driver?.name || 'Motorista'}!`}
+        subtitle="Gerencie suas atividades e ganhos"
+        user={{
+          name: driver?.name || 'Motorista',
+          avatar: driver?.avatar,
+          role: 'driver',
+          status: driver?.status
+        }}
+        notifications={notifications.length}
+        alerts={[
+          ...(driver?.status === 'pending' ? [{
+            type: 'warning' as const,
+            title: tDriver('dashboard.accountPending'),
+            description: 'Sua documentação está sendo analisada. Você receberá uma notificação quando for aprovado.'
+          }] : []),
+          ...(driver?.status === 'suspended' ? [{
+            type: 'error' as const,
+            title: tDriver('dashboard.accountSuspended'),
+            description: 'Entre em contato com o suporte para mais informações.'
+          }] : [])
+        ]}
+        stats={[
+          {
+            label: tDriver('dashboard.totalEarnings'),
+            value: `€${stats.totalEarnings.toFixed(2)}`,
+            helpText: `€${stats.monthlyEarnings.toFixed(2)} este mês`,
+            arrow: 'increase',
+            color: 'green.500'
+          },
+          {
+            label: tDriver('dashboard.totalTrips'),
+            value: stats.totalTrips,
+            helpText: `Taxa de conclusão: ${stats.completionRate}%`,
+            color: 'blue.500'
+          },
+          {
+            label: 'Avaliação',
+            value: stats.averageRating.toFixed(1),
+            helpText: 'Média de avaliações',
+            color: 'yellow.500'
+          },
+          {
+            label: 'Plano Ativo',
+            value: subscription?.plan?.name || 'Sem plano',
+            helpText: subscription?.status === 'active' ? 'Ativo' : 'Inativo',
+            color: 'purple.500'
+          }
+        ]}
+        actions={
+          <HStack spacing={4}>
+            <Button leftIcon={<FiUpload />} variant="outline" size="sm">
+              Upload Documentos
+            </Button>
+            <Button leftIcon={<FiSettings />} variant="outline" size="sm">
+              Configurações
+            </Button>
+          </HStack>
+        }
+      >
+        {/* Quick Actions */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Ações Rápidas</Heading>
+          </CardHeader>
+          <CardBody>
+            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+              <Button
+                leftIcon={<FiUpload />}
+                colorScheme="blue"
+                variant="outline"
+                h="60px"
+                flexDirection="column"
+                gap={2}
+              >
+                <Text fontSize="sm">Upload</Text>
+                <Text fontSize="xs" color="gray.600">Documentos</Text>
+              </Button>
+              <Button
+                leftIcon={<FiUser />}
+                colorScheme="green"
+                variant="outline"
+                h="60px"
+                flexDirection="column"
+                gap={2}
+              >
+                <Text fontSize="sm">Perfil</Text>
+                <Text fontSize="xs" color="gray.600">Editar</Text>
+              </Button>
+              <Button
+                leftIcon={<FiCreditCard />}
+                colorScheme="purple"
+                variant="outline"
+                h="60px"
+                flexDirection="column"
+                gap={2}
+              >
+                <Text fontSize="sm">Pagamentos</Text>
+                <Text fontSize="xs" color="gray.600">Histórico</Text>
+              </Button>
+              <Button
+                leftIcon={<FiSettings />}
+                colorScheme="gray"
+                variant="outline"
+                h="60px"
+                flexDirection="column"
+                gap={2}
+              >
+                <Text fontSize="sm">Configurações</Text>
+                <Text fontSize="xs" color="gray.600">Conta</Text>
+              </Button>
+            </SimpleGrid>
+          </CardBody>
+        </Card>
+
+        {/* Recent Activity */}
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+          {/* Recent Payments */}
+          <Card bg="white" borderColor="gray.200">
+            <CardHeader>
+              <Heading size="md">Pagamentos Recentes</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={3} align="stretch">
+                {recentPayments.length > 0 ? (
+                  recentPayments.slice(0, 5).map((payment, index) => (
+                    <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                      <HStack>
+                        <Icon as={FiDollarSign} color="green.500" />
+                        <VStack align="flex-start" spacing={0}>
+                          <Text fontSize="sm" fontWeight="medium">
+                            Pagamento #{payment.id}
+                          </Text>
+                          <Text fontSize="xs" color="gray.600">
+                            {new Date(payment.date).toLocaleDateString('pt-BR')}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                      <Text fontWeight="bold" color="green.500">
+                        €{payment.amount.toFixed(2)}
+                      </Text>
+                    </HStack>
+                  ))
+                ) : (
+                  <Text color="gray.500" textAlign="center" py={4}>
+                    Nenhum pagamento recente
                   </Text>
-                  <HStack>
-                    <Badge colorScheme={getStatusColor(driver?.status)}>
-                      {getStatusText(driver?.status)}
-                    </Badge>
-                    {subscription && (
-                      <Badge colorScheme="purple">
-                        {subscription.plan?.name || 'Plano Ativo'}
-                      </Badge>
-                    )}
-                  </HStack>
-                </VStack>
+                )}
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* Recent Trips */}
+          <Card bg="white" borderColor="gray.200">
+            <CardHeader>
+              <Heading size="md">Corridas Recentes</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={3} align="stretch">
+                {recentTrips.length > 0 ? (
+                  recentTrips.slice(0, 5).map((trip, index) => (
+                    <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                      <HStack>
+                        <Icon as={FiMapPin} color="blue.500" />
+                        <VStack align="flex-start" spacing={0}>
+                          <Text fontSize="sm" fontWeight="medium">
+                            {trip.from} → {trip.to}
+                          </Text>
+                          <Text fontSize="xs" color="gray.600">
+                            {new Date(trip.date).toLocaleDateString('pt-BR')}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                      <VStack align="flex-end" spacing={0}>
+                        <Text fontWeight="bold" color="blue.500">
+                          €{trip.earnings.toFixed(2)}
+                        </Text>
+                        <Text fontSize="xs" color="gray.600">
+                          ⭐ {trip.rating}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                  ))
+                ) : (
+                  <Text color="gray.500" textAlign="center" py={4}>
+                    Nenhuma corrida recente
+                  </Text>
+                )}
+              </VStack>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+
+        {/* Document Status */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Status dos Documentos</Heading>
+          </CardHeader>
+          <CardBody>
+            <VStack spacing={4} align="stretch">
+              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                <HStack>
+                  <Icon as={FiCheckCircle} color="green.500" />
+                  <Text fontSize="sm" fontWeight="medium">Carta de Condução</Text>
+                </HStack>
+                <Badge colorScheme="green">Verificado</Badge>
               </HStack>
-              <HStack spacing={4}>
-                <Button leftIcon={<FiBell />} variant="outline" size="sm">
-                  {tCommon('notifications')} ({notifications.length})
-                </Button>
-                <Button leftIcon={<FiSettings />} variant="outline" size="sm">
-                  {tCommon('settings')}
-                </Button>
+              
+              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                <HStack>
+                  <Icon as={FiAlertCircle} color="yellow.500" />
+                  <Text fontSize="sm" fontWeight="medium">Seguro do Veículo</Text>
+                </HStack>
+                <Badge colorScheme="yellow">Pendente</Badge>
               </HStack>
-            </HStack>
-          </Box>
-        </Box>
-
-        {/* Status Alerts */}
-        {driver?.status === 'pending' && (
-          <Box maxW="7xl" mx="auto" px={4} pt={4}>
-            <Alert status="warning" borderRadius="md">
-              <AlertIcon />
-              <Box>
-                <AlertTitle>{tDriver('dashboard.accountPending')}</AlertTitle>
-                <AlertDescription>
-                  Sua documentação está sendo analisada. Você receberá uma notificação quando for aprovado.
-                </AlertDescription>
-              </Box>
-            </Alert>
-          </Box>
-        )}
-
-        {driver?.status === 'suspended' && (
-          <Box maxW="7xl" mx="auto" px={4} pt={4}>
-            <Alert status="error" borderRadius="md">
-              <AlertIcon />
-              <Box>
-                <AlertTitle>{tDriver('dashboard.accountSuspended')}</AlertTitle>
-                <AlertDescription>
-                  Entre em contato com o suporte para mais informações.
-                </AlertDescription>
-              </Box>
-            </Alert>
-          </Box>
-        )}
-
-        {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
-          <VStack spacing={8} align="stretch">
-            {/* Stats Grid */}
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>{tDriver('dashboard.totalEarnings')}</StatLabel>
-                    <StatNumber>€{stats.totalEarnings.toFixed(2)}</StatNumber>
-                    <StatHelpText>
-                      <StatArrow type="increase" />
-                      €{stats.monthlyEarnings.toFixed(2)} este mês
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>{tDriver('dashboard.totalTrips')}</StatLabel>
-                    <StatNumber>{stats.totalTrips}</StatNumber>
-                    <StatHelpText>
-                      Taxa de conclusão: {stats.completionRate}%
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Avaliação Média</StatLabel>
-                    <StatNumber>{stats.averageRating.toFixed(1)}</StatNumber>
-                    <StatHelpText>
-                      ⭐ Baseado em {stats.totalTrips} corridas
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>{tDriver('dashboard.subscription')}</StatLabel>
-                    <StatNumber fontSize="lg">
-                      {subscription?.plan?.name || 'Sem plano'}
-                    </StatNumber>
-                    <StatHelpText>
-                      {subscription?.status === 'active' ? 'Ativo' : 'Inativo'}
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-            </SimpleGrid>
-
-            {/* Quick Actions */}
-            <Card bg={cardBg} borderColor={borderColor}>
-              <CardBody>
-                <Heading size="md" mb={4}>{tDriver('dashboard.quickActions')}</Heading>
-                <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-                  <Link href="/drivers/subscription" passHref>
-                    <Button as="a" leftIcon={<FiCreditCard />} colorScheme="purple" variant="outline" w="full">
-                      {tDriver('dashboard.manageSubscription')}
-                    </Button>
-                  </Link>
-                  <Link href="/drivers/profile" passHref>
-                    <Button as="a" leftIcon={<FiUser />} colorScheme="blue" variant="outline" w="full">
-                      {tDriver('dashboard.myProfile')}
-                    </Button>
-                  </Link>
-                  <Link href="/drivers/documents" passHref>
-                    <Button as="a" leftIcon={<FiUpload />} colorScheme="green" variant="outline" w="full">
-                      {tDriver('dashboard.documents')}
-                    </Button>
-                  </Link>
-                  <Link href="/drivers/earnings" passHref>
-                    <Button as="a" leftIcon={<FiDollarSign />} colorScheme="orange" variant="outline" w="full">
-                      Ganhos Detalhados
-                    </Button>
-                  </Link>
-                </SimpleGrid>
-              </CardBody>
-            </Card>
-
-            {/* Recent Activity */}
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-              {/* Recent Payments */}
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Heading size="md" mb={4}>{tDriver('dashboard.recentPayments')}</Heading>
-                  <VStack spacing={3} align="stretch">
-                    {recentPayments.length > 0 ? (
-                      recentPayments.map((payment) => (
-                        <HStack key={payment.id} justifyContent="space-between" p={3} bg="gray.50" borderRadius="md">
-                          <VStack align="flex-start" spacing={0}>
-                            <Text fontWeight="medium">
-                              {new Date(payment.periodStart).toLocaleDateString('pt-BR')} - {new Date(payment.periodEnd).toLocaleDateString('pt-BR')}
-                            </Text>
-                            <Text fontSize="sm" color="gray.500">
-                              {payment.status === 'paid' ? 'Pago' : 'Pendente'}
-                            </Text>
-                          </VStack>
-                          <VStack align="flex-end" spacing={0}>
-                            <Text fontWeight="bold" color="green.600">
-                              €{(payment.netCents / 100).toFixed(2)}
-                            </Text>
-                            <Badge colorScheme={payment.status === 'paid' ? 'green' : 'yellow'}>
-                              {payment.status}
-                            </Badge>
-                          </VStack>
-                        </HStack>
-                      ))
-                    ) : (
-                      <Text color="gray.500" textAlign="center" py={4}>
-                        {tDriver('dashboard.noPayments')}
-                      </Text>
-                    )}
-                  </VStack>
-                </CardBody>
-              </Card>
-
-              {/* Recent Trips */}
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Heading size="md" mb={4}>{tDriver('dashboard.recentTrips')}</Heading>
-                  <VStack spacing={3} align="stretch">
-                    {recentTrips.length > 0 ? (
-                      recentTrips.map((trip, index) => (
-                        <HStack key={index} justifyContent="space-between" p={3} bg="gray.50" borderRadius="md">
-                          <VStack align="flex-start" spacing={0}>
-                            <HStack>
-                              <Icon as={FiMapPin} color="gray.500" />
-                              <Text fontWeight="medium" fontSize="sm">
-                                {trip.startLocation} → {trip.endLocation}
-                              </Text>
-                            </HStack>
-                            <HStack>
-                              <Icon as={FiClock} color="gray.500" />
-                              <Text fontSize="sm" color="gray.500">
-                                {new Date(trip.date).toLocaleDateString('pt-BR')}
-                              </Text>
-                            </HStack>
-                          </VStack>
-                          <VStack align="flex-end" spacing={0}>
-                            <Text fontWeight="bold" color="green.600">
-                              €{trip.earnings.toFixed(2)}
-                            </Text>
-                            <Text fontSize="sm" color="gray.500">
-                              ⭐ {trip.rating}
-                            </Text>
-                          </VStack>
-                        </HStack>
-                      ))
-                    ) : (
-                      <Text color="gray.500" textAlign="center" py={4}>
-                        {tDriver('dashboard.noTrips')}
-                      </Text>
-                    )}
-                  </VStack>
-                </CardBody>
-              </Card>
-            </SimpleGrid>
-
-            {/* Subscription Status */}
-            {subscription && (
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Heading size="md" mb={4}>{tDriver('dashboard.subscriptionStatus')}</Heading>
-                  <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">{tDriver('dashboard.activePlan')}</Text>
-                      <Text fontSize="lg" fontWeight="bold">{subscription.plan?.name}</Text>
-                      <Text fontSize="sm" color="gray.600">
-                        €{(subscription.plan?.price / 100).toFixed(2)}/{subscription.plan?.interval === 'month' ? 'mês' : 'ano'}
-                      </Text>
-                    </VStack>
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">{tDriver('dashboard.nextBilling')}</Text>
-                      <Text fontSize="lg" fontWeight="bold">
-                        {subscription.nextBilling ? new Date(subscription.nextBilling).toLocaleDateString('pt-BR') : 'N/A'}
-                      </Text>
-                      <Badge colorScheme={subscription.status === 'active' ? 'green' : 'red'}>
-                        {subscription.status === 'active' ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                    </VStack>
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">Progresso do Período</Text>
-                      <Progress value={65} colorScheme="purple" size="lg" w="full" />
-                      <Text fontSize="sm" color="gray.600">
-                        15 de 30 dias utilizados
-                      </Text>
-                    </VStack>
-                  </SimpleGrid>
-                </CardBody>
-              </Card>
-            )}
-          </VStack>
-        </Box>
-      </Box>
+              
+              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                <HStack>
+                  <Icon as={FiXCircle} color="red.500" />
+                  <Text fontSize="sm" fontWeight="medium">Certificado TVDE</Text>
+                </HStack>
+                <Badge colorScheme="red">Rejeitado</Badge>
+              </HStack>
+            </VStack>
+          </CardBody>
+        </Card>
+      </StandardLayout>
     </>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Simulate user authentication check
-    const userType = context.req.cookies['user-type'];
-    const authToken = context.req.cookies['auth-token'];
-    
-    if (!authToken || userType !== 'driver') {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-    
     // Load translations
-    const translations = await loadTranslations(context.locale || 'pt', ['common', 'driver']);
+    const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Mock driver data for demonstration
+    // Mock data - replace with actual data fetching
     const driver = {
-      id: 'demo-driver-1',
+      id: '1',
       name: 'João Silva',
-      email: 'motorista@conduz.pt',
-      status: 'approved',
-      avatar: null
+      email: 'joao@example.com',
+      status: 'active',
+      avatar: null,
     };
-    
-    // Get driver stats (mock data for now)
+
     const stats = {
       totalEarnings: 2450.75,
-      monthlyEarnings: 680.25,
+      monthlyEarnings: 850.50,
       totalTrips: 156,
       averageRating: 4.8,
-      completionRate: 95
+      completionRate: 95,
     };
 
-    // Mock subscription data
     const subscription = {
-      id: 'sub-1',
-      planName: 'Plano Básico',
+      plan: { name: 'Plano Premium' },
       status: 'active',
-      nextBilling: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      amount: 29.99
     };
 
-    // Mock recent payments
     const recentPayments = [
-      {
-        id: 'pay-1',
-        amount: 450.25,
-        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'paid'
-      },
-      {
-        id: 'pay-2',
-        amount: 380.50,
-        date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'paid'
-      }
+      { id: 'P001', amount: 450.75, date: '2024-01-20' },
+      { id: 'P002', amount: 320.50, date: '2024-01-15' },
+      { id: 'P003', amount: 280.25, date: '2024-01-10' },
     ];
 
-    // Mock recent trips data
     const recentTrips = [
-      {
-        id: 'trip-1',
-        startLocation: 'Lisboa Centro',
-        endLocation: 'Aeroporto',
-        date: new Date().toISOString(),
-        earnings: 25.50,
-        rating: 5.0
-      },
-      {
-        id: 'trip-2',
-        startLocation: 'Cascais',
-        endLocation: 'Sintra',
-        date: new Date(Date.now() - 86400000).toISOString(),
-        earnings: 18.75,
-        rating: 4.8
-      }
+      { from: 'Centro', to: 'Aeroporto', earnings: 25.50, rating: 5.0, date: '2024-01-20' },
+      { from: 'Shopping', to: 'Hospital', earnings: 18.75, rating: 4.5, date: '2024-01-19' },
+      { from: 'Universidade', to: 'Estação', earnings: 12.30, rating: 4.8, date: '2024-01-18' },
     ];
 
-    // Mock notifications
     const notifications = [
-      { id: 1, message: 'Novo pagamento processado', read: false },
-      { id: 2, message: 'Documento aprovado', read: true }
+      { id: '1', message: 'Novo pagamento disponível', type: 'payment' },
+      { id: '2', message: 'Documento aprovado', type: 'document' },
     ];
 
     return {
@@ -471,6 +387,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         recentTrips,
         notifications,
         translations,
+        userData: driver,
       },
     };
   } catch (error) {
@@ -483,15 +400,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           monthlyEarnings: 0,
           totalTrips: 0,
           averageRating: 0,
-          completionRate: 0
+          completionRate: 0,
         },
         subscription: null,
         recentPayments: [],
         recentTrips: [],
         notifications: [],
-        translations: {},
+        translations: { common: {}, driver: {} },
+        userData: null,
       },
     };
   }
 };
-

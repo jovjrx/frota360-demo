@@ -128,8 +128,8 @@ export default function Header({ t }: HeaderProps) {
             <Image
               src="/img/logo.png"
               alt="Conduz.pt"
-              h={{ base: 12, md: 16 }}
-              w="auto"
+              h='64px'
+              w='160px'
             />
           </Link>
 
