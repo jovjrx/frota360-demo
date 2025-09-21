@@ -1,103 +1,28 @@
 {
-  "dashboard": {
-    "title": "Driver Dashboard",
-    "welcome": "Welcome",
-    "welcome_back": "Welcome back",
-    "account_status": {
-      "pending": "Your account is pending approval",
-      "suspended": "Your account is suspended",
-      "approved": "Your account is approved and active",
-      "rejected": "Your account has been rejected"
+    "dashboard": {
+      "title": "Driver Dashboard",
+      "welcome": "Welcome",
+      "welcome_back": "Welcome back",
+      "subtitle": "Manage your activities and earnings",
+      "accountPending": "Your account is pending approval",
+      "accountSuspended": "Your account is suspended",
+      "totalEarnings": "Total Earnings",
+      "monthlyEarnings": "Monthly Earnings",
+      "totalTrips": "Total Trips",
+      "averageRating": "Average Rating",
+      "completionRate": "Completion Rate",
+      "recentPayments": "Recent Payments",
+      "recentTrips": "Recent Trips",
+      "documentStatus": "Document Status",
+      "noPayments": "No recent payments",
+      "noTrips": "No recent trips",
+      "drivingLicense": "Driving License",
+      "vehicleInsurance": "Vehicle Insurance",
+      "tvdeCertificate": "TVDE Certificate",
+      "verified": "Verified",
+      "pending": "Pending",
+      "rejected": "Rejected"
     },
-    "stats": {
-      "total_earnings": "Total Earnings",
-      "monthly_earnings": "Monthly Earnings",
-      "weekly_earnings": "Weekly Earnings",
-      "daily_earnings": "Daily Earnings",
-      "total_trips": "Total Trips",
-      "monthly_trips": "Monthly Trips",
-      "weekly_trips": "Weekly Trips",
-      "daily_trips": "Daily Trips",
-      "average_rating": "Average Rating",
-      "completion_rate": "Completion Rate",
-      "acceptance_rate": "Acceptance Rate",
-      "online_hours": "Online Hours"
-    },
-    "subscription": {
-      "title": "Subscription",
-      "status": "Subscription Status",
-      "plan": "Current Plan",
-      "next_billing": "Next Billing",
-      "trial_ends": "Trial ends in",
-      "manage": "Manage Subscription"
-    },
-    "quick_actions": {
-      "title": "Quick Actions",
-      "manage_subscription": "Manage Subscription",
-      "update_profile": "Update Profile",
-      "view_documents": "View Documents",
-      "earnings_report": "Earnings Report",
-      "trip_history": "Trip History",
-      "support": "Support"
-    },
-    "recent_activity": {
-      "title": "Recent Activity",
-      "recent_trips": "Recent Trips",
-      "recent_payments": "Recent Payments",
-      "no_trips": "No trips recorded",
-      "no_payments": "No payments yet",
-      "view_all": "View All"
-    },
-    "notifications": {
-      "title": "Notifications",
-      "no_notifications": "No notifications",
-      "mark_all_read": "Mark all as read"
-    },
-    "checkin": {
-      "title": "Check-in System",
-      "subtitle": "Manage your location and operational status",
-      "status": {
-        "active": "Operating",
-        "inactive": "Inactive",
-        "operating": "Operating",
-        "not_operating": "Not Operating"
-      },
-      "actions": {
-        "check_in": "Check-in",
-        "start_operation": "Start Operation",
-        "pause_operation": "Pause Operation",
-        "quick_checkin": "Quick Check-in"
-      },
-      "info": {
-        "last_checkin": "Last check-in",
-        "next_checkin": "Next check-in",
-        "total_checkins": "Total check-ins",
-        "automatic_active": "Automatic check-ins active every 5 minutes",
-        "automatic_paused": "Automatic check-ins paused"
-      },
-      "history": {
-        "title": "Check-in History",
-        "date": "Date",
-        "time": "Time",
-        "type": "Type",
-        "status": "Status",
-        "location": "Location",
-        "ip": "IP",
-        "automatic": "Automatic",
-        "manual": "Manual",
-        "export_csv": "Export CSV",
-        "view_details": "View Details",
-        "no_checkins": "No check-ins recorded"
-      },
-      "messages": {
-        "checkin_success": "Check-in completed successfully!",
-        "checkin_error": "Error performing check-in",
-        "status_updated": "Status updated successfully!",
-        "status_error": "Error updating status",
-        "location_error": "Error getting location"
-      }
-    }
-  },
   "subscription": {
     "title": "My Subscription",
     "subtitle": "Manage your subscription and plans",

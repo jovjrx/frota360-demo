@@ -109,7 +109,7 @@ export default function DriverDashboard({
       
       <DriverLayout
         title={`${tDriver('dashboard.welcome')}, ${driver?.name || 'Motorista'}!`}
-        subtitle="Gerencie suas atividades e ganhos"
+        subtitle={tDriver('dashboard.subtitle')}
         user={{
           name: driver?.name || 'Motorista',
           avatar: driver?.avatar,
@@ -147,7 +147,7 @@ export default function DriverDashboard({
             color: 'blue.500'
           },
           {
-            label: 'Avaliação',
+            label: tDriver('dashboard.averageRating'),
             value: stats.averageRating.toFixed(1),
             helpText: 'Média de avaliações',
             color: 'yellow.500'
@@ -198,7 +198,7 @@ export default function DriverDashboard({
               {/* Recent Payments */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
-              <Heading size="md">Pagamentos Recentes</Heading>
+              <Heading size="md">{tDriver('dashboard.recentPayments')}</Heading>
             </CardHeader>
                 <CardBody>
                   <VStack spacing={3} align="stretch">
@@ -223,7 +223,7 @@ export default function DriverDashboard({
                       ))
                     ) : (
                       <Text color="gray.500" textAlign="center" py={4}>
-                    Nenhum pagamento recente
+                        {tDriver('dashboard.noPayments')}
                       </Text>
                     )}
                   </VStack>
@@ -233,7 +233,7 @@ export default function DriverDashboard({
               {/* Recent Trips */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
-              <Heading size="md">Corridas Recentes</Heading>
+              <Heading size="md">{tDriver('dashboard.recentTrips')}</Heading>
             </CardHeader>
                 <CardBody>
                   <VStack spacing={3} align="stretch">
@@ -263,7 +263,7 @@ export default function DriverDashboard({
                       ))
                     ) : (
                       <Text color="gray.500" textAlign="center" py={4}>
-                    Nenhuma corrida recente
+                        {tDriver('dashboard.noTrips')}
                       </Text>
                     )}
                   </VStack>
@@ -274,32 +274,32 @@ export default function DriverDashboard({
         {/* Document Status */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
-            <Heading size="md">Status dos Documentos</Heading>
+            <Heading size="md">{tDriver('dashboard.documentStatus')}</Heading>
           </CardHeader>
                 <CardBody>
             <VStack spacing={4} align="stretch">
               <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
                 <HStack>
                   <Icon as={FiCheckCircle} color="green.500" />
-                  <Text fontSize="sm" fontWeight="medium">Carta de Condução</Text>
+                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.drivingLicense')}</Text>
                 </HStack>
-                <Badge colorScheme="green">Verificado</Badge>
+                <Badge colorScheme="green">{tDriver('dashboard.verified')}</Badge>
               </HStack>
               
               <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
                 <HStack>
                   <Icon as={FiAlertCircle} color="yellow.500" />
-                  <Text fontSize="sm" fontWeight="medium">Seguro do Veículo</Text>
+                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.vehicleInsurance')}</Text>
                 </HStack>
-                <Badge colorScheme="yellow">Pendente</Badge>
+                <Badge colorScheme="yellow">{tDriver('dashboard.pending')}</Badge>
               </HStack>
               
               <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
                 <HStack>
                   <Icon as={FiXCircle} color="red.500" />
-                  <Text fontSize="sm" fontWeight="medium">Certificado TVDE</Text>
+                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.tvdeCertificate')}</Text>
                 </HStack>
-                <Badge colorScheme="red">Rejeitado</Badge>
+                <Badge colorScheme="red">{tDriver('dashboard.rejected')}</Badge>
               </HStack>
                     </VStack>
                 </CardBody>

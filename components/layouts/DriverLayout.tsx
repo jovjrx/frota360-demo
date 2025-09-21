@@ -97,7 +97,7 @@ export default function DriverLayout({
         ))}
 
         {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
+        <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }} py={{ base: 4, md: 8 }}>
           <VStack spacing={8} align="stretch">
             {/* Stats Grid - Always one row on desktop */}
             {stats.length > 0 && (

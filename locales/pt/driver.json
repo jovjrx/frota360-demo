@@ -1,103 +1,28 @@
 {
-  "dashboard": {
-    "title": "Painel do Motorista",
-    "welcome": "Bem-vindo",
-    "welcome_back": "Bem-vindo de volta",
-    "account_status": {
-      "pending": "A sua conta está pendente de aprovação",
-      "suspended": "A sua conta está suspensa",
-      "approved": "A sua conta está aprovada e ativa",
-      "rejected": "A sua conta foi rejeitada"
+    "dashboard": {
+      "title": "Painel do Motorista",
+      "welcome": "Bem-vindo",
+      "welcome_back": "Bem-vindo de volta",
+      "subtitle": "Gerencie suas atividades e ganhos",
+      "accountPending": "Sua conta está pendente de aprovação",
+      "accountSuspended": "Sua conta está suspensa",
+      "totalEarnings": "Ganhos Totais",
+      "monthlyEarnings": "Ganhos Mensais",
+      "totalTrips": "Total de Corridas",
+      "averageRating": "Avaliação Média",
+      "completionRate": "Taxa de Conclusão",
+      "recentPayments": "Pagamentos Recentes",
+      "recentTrips": "Corridas Recentes",
+      "documentStatus": "Status dos Documentos",
+      "noPayments": "Nenhum pagamento recente",
+      "noTrips": "Nenhuma corrida recente",
+      "drivingLicense": "Carta de Condução",
+      "vehicleInsurance": "Seguro do Veículo",
+      "tvdeCertificate": "Certificado TVDE",
+      "verified": "Verificado",
+      "pending": "Pendente",
+      "rejected": "Rejeitado"
     },
-    "stats": {
-      "total_earnings": "Ganhos Totais",
-      "monthly_earnings": "Ganhos Mensais",
-      "weekly_earnings": "Ganhos Semanais",
-      "daily_earnings": "Ganhos Diários",
-      "total_trips": "Total de Corridas",
-      "monthly_trips": "Corridas Mensais",
-      "weekly_trips": "Corridas Semanais",
-      "daily_trips": "Corridas Diárias",
-      "average_rating": "Avaliação Média",
-      "completion_rate": "Taxa de Conclusão",
-      "acceptance_rate": "Taxa de Aceitação",
-      "online_hours": "Horas Online"
-    },
-    "subscription": {
-      "title": "Assinatura",
-      "status": "Estado da Assinatura",
-      "plan": "Plano Atual",
-      "next_billing": "Próxima Cobrança",
-      "trial_ends": "Período de teste termina em",
-      "manage": "Gerir Assinatura"
-    },
-    "quick_actions": {
-      "title": "Ações Rápidas",
-      "manage_subscription": "Gerir Assinatura",
-      "update_profile": "Atualizar Perfil",
-      "view_documents": "Ver Documentos",
-      "earnings_report": "Relatório de Ganhos",
-      "trip_history": "Histórico de Corridas",
-      "support": "Suporte"
-    },
-    "recent_activity": {
-      "title": "Atividade Recente",
-      "recent_trips": "Corridas Recentes",
-      "recent_payments": "Pagamentos Recentes",
-      "no_trips": "Nenhuma corrida registada",
-      "no_payments": "Nenhum pagamento ainda",
-      "view_all": "Ver Tudo"
-    },
-    "notifications": {
-      "title": "Notificações",
-      "no_notifications": "Nenhuma notificação",
-      "mark_all_read": "Marcar todas como lidas"
-    },
-    "checkin": {
-      "title": "Sistema de Check-in",
-      "subtitle": "Gerencie sua localização e status operacional",
-      "status": {
-        "active": "Operando",
-        "inactive": "Inativo",
-        "operating": "Operando",
-        "not_operating": "Não Operando"
-      },
-      "actions": {
-        "check_in": "Fazer Check-in",
-        "start_operation": "Iniciar Operação",
-        "pause_operation": "Pausar Operação",
-        "quick_checkin": "Check-in Rápido"
-      },
-      "info": {
-        "last_checkin": "Último check-in",
-        "next_checkin": "Próximo check-in",
-        "total_checkins": "Total de check-ins",
-        "automatic_active": "Check-ins automáticos ativos a cada 5 minutos",
-        "automatic_paused": "Check-ins automáticos pausados"
-      },
-      "history": {
-        "title": "Histórico de Check-ins",
-        "date": "Data",
-        "time": "Hora",
-        "type": "Tipo",
-        "status": "Status",
-        "location": "Localização",
-        "ip": "IP",
-        "automatic": "Automático",
-        "manual": "Manual",
-        "export_csv": "Exportar CSV",
-        "view_details": "Ver Detalhes",
-        "no_checkins": "Nenhum check-in registrado"
-      },
-      "messages": {
-        "checkin_success": "Check-in realizado com sucesso!",
-        "checkin_error": "Erro ao realizar check-in",
-        "status_updated": "Status atualizado com sucesso!",
-        "status_error": "Erro ao atualizar status",
-        "location_error": "Erro ao obter localização"
-      }
-    }
-  },
   "subscription": {
     "title": "Minha Assinatura",
     "subtitle": "Gerencie a sua assinatura e planos",

@@ -14,9 +14,9 @@ import {
   BreadcrumbSeparator,
   Tooltip,
 } from '@chakra-ui/react';
-import { FiBell, FiSettings, FiHome, FiChevronRight, FiMapPin } from 'react-icons/fi';
+import { FiBell, FiSettings, FiHome, FiChevronRight } from 'react-icons/fi';
 import Link from 'next/link';
-import { useCheckIn } from '@/lib/hooks/useCheckIn';
+import { CompactCheckIn } from '@/components/checkin/CompactCheckIn';
 
 interface TopBarProps {
   user: {
@@ -40,8 +40,6 @@ export default function TopBar({
   breadcrumbs = [],
   basePath = '/admin'
 }: TopBarProps) {
-  const { doCheckIn, isLoading } = useCheckIn();
-
   const getRoleText = (role: string) => {
     switch (role) {
       case 'admin': return 'Administrador';
@@ -64,20 +62,12 @@ export default function TopBar({
     return name.substring(0, maxLength) + '...';
   };
 
-  const handleQuickCheckIn = async () => {
-    try {
-      await doCheckIn('manual');
-    } catch (error) {
-      console.error('Erro no check-in rápido:', error);
-    }
-  };
-
   return (
     <Box bg="white" borderBottom="1px" borderColor="gray.200" py={3} shadow="sm">
-      <Box maxW="7xl" mx="auto" px={4}>
+      <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }}>
         <HStack justifyContent="space-between" alignItems="center">
           {/* Left side - Breadcrumbs and Page Info */}
-          <VStack align="flex-start" spacing={1}>
+          <VStack align="flex-start" spacing={1} flex={1} minW={0}>
             <Breadcrumb separator={<FiChevronRight size={12} />} fontSize="sm" color="gray.500">
               <BreadcrumbItem>
                 <BreadcrumbLink as={Link} href={basePath} _hover={{ color: 'gray.700' }}>
@@ -99,32 +89,16 @@ export default function TopBar({
                 </BreadcrumbItem>
               ))}
             </Breadcrumb>
-            <Text fontSize="xl" fontWeight="bold" color="gray.800">
+            <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="gray.800" noOfLines={1}>
               {currentPage}
             </Text>
           </VStack>
 
           {/* Right side - Notifications and User Info */}
-          <HStack spacing={3}>
-            {/* Quick Check-in for Drivers */}
+          <HStack spacing={{ base: 2, md: 3 }} flexShrink={0}>
+            {/* Check-in para Motoristas */}
             {user.role === 'driver' && (
-              <Tooltip label="Check-in Rápido" placement="bottom">
-                <Button
-                  leftIcon={<FiMapPin />}
-                  variant="outline"
-                  size="sm"
-                  colorScheme="green"
-                  borderRadius="full"
-                  px={4}
-                  isLoading={isLoading}
-                  loadingText="Check-in..."
-                  onClick={handleQuickCheckIn}
-                  _hover={{ transform: 'translateY(-1px)', shadow: 'md' }}
-                  transition="all 0.2s"
-                >
-                  Check-in
-                </Button>
-              </Tooltip>
+              <CompactCheckIn isMobile={false} />
             )}
 
             {/* Notifications */}
