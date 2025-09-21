@@ -11,9 +11,7 @@ import {
   FormLabel,
   Input,
   Stack,
-  Heading,
   Text,
-  Container,
   VStack,
   Link as ChakraLink,
   Alert,
@@ -23,6 +21,8 @@ import {
   InputGroup,
   InputRightElement,
 } from '@chakra-ui/react';
+import { Title } from '@/components/Title';
+import { Container } from '@/components/Container';
 import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface LoginPageProps {
@@ -87,98 +87,100 @@ export default function LoginPage({ translations }: LoginPageProps) {
         <meta name="description" content="Faça login na plataforma Conduz.pt" />
       </Head>
 
-      <Box py={8}>
-        <Container maxW="md">
-          <VStack spacing={8} align="stretch">
-            <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
-              <form onSubmit={handleSubmit}>
-                <Stack spacing={6}>
-                  {/* User Type Selection */}
-                  <FormControl id="userType" isRequired>
-                    <FormLabel>Tipo de Utilizador</FormLabel>
-                    <Select
-                      value={formData.userType}
-                      onChange={handleInputChange}
-                      name="userType"
-                      size="lg"
-                    >
-                      <option value="driver">Motorista</option>
-                      <option value="admin">Administrador</option>
-                    </Select>
-                  </FormControl>
+      <Container softBg maxW="md">
+        <Title
+          title={t('navigation.login')}
+          description="Acesse a sua conta na plataforma"
+          feature="ACESSO"
+        />
+        <VStack spacing={8} align="stretch">
+          <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={6}>
+                {/* User Type Selection */}
+                <FormControl id="userType" isRequired>
+                  <FormLabel>Tipo de Utilizador</FormLabel>
+                  <Select
+                    value={formData.userType}
+                    onChange={handleInputChange}
+                    name="userType"
+                    size="lg"
+                  >
+                    <option value="driver">Motorista</option>
+                    <option value="admin">Administrador</option>
+                  </Select>
+                </FormControl>
 
-                  {/* Email */}
-                  <FormControl id="email" isRequired>
-                    <FormLabel>{t('user.email')}</FormLabel>
+                {/* Email */}
+                <FormControl id="email" isRequired>
+                  <FormLabel>{t('user.email')}</FormLabel>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="seu@email.com"
+                    size="lg"
+                  />
+                </FormControl>
+
+                {/* Password */}
+                <FormControl id="password" isRequired>
+                  <FormLabel>{t('user.password')}</FormLabel>
+                  <InputGroup>
                     <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="seu@email.com"
+                      placeholder="••••••••"
                       size="lg"
                     />
-                  </FormControl>
+                    <InputRightElement h="full">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <FiEyeOff /> : <FiEye />}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
 
-                  {/* Password */}
-                  <FormControl id="password" isRequired>
-                    <FormLabel>{t('user.password')}</FormLabel>
-                    <InputGroup>
-                      <Input
-                        type={showPassword ? 'text' : 'password'}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="••••••••"
-                        size="lg"
-                      />
-                      <InputRightElement h="full">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <FiEyeOff /> : <FiEye />}
-                        </Button>
-                      </InputRightElement>
-                    </InputGroup>
-                  </FormControl>
+                {error && (
+                  <Alert status="error" borderRadius="md">
+                    <AlertIcon />
+                    {error}
+                  </Alert>
+                )}
 
-                  {error && (
-                    <Alert status="error" borderRadius="md">
-                      <AlertIcon />
-                      {error}
-                    </Alert>
-                  )}
+                <Button
+                  type="submit"
+                  colorScheme="green"
+                  size="lg"
+                  isLoading={isLoading}
+                  loadingText="Entrando..."
+                  rightIcon={<FiArrowRight />}
+                >
+                  {t('navigation.login')}
+                </Button>
+              </Stack>
+            </form>
+          </Box>
 
-                  <Button
-                    type="submit"
-                    colorScheme="green"
-                    size="lg"
-                    isLoading={isLoading}
-                    loadingText="Entrando..."
-                    rightIcon={<FiArrowRight />}
-                  >
-                    {t('navigation.login')}
-                  </Button>
-                </Stack>
-              </form>
-            </Box>
-
-            {/* Links */}
-            <VStack spacing={4}>
-              <Divider />
-              <Text color="gray.600" fontSize="sm">
-                Não tem uma conta?{' '}
-                <ChakraLink as={Link} href="/signup" color="green.500" fontWeight="medium">
-                  Criar conta
-                </ChakraLink>
-              </Text>
-            </VStack>
-
+          {/* Links */}
+          <VStack spacing={4}>
+            <Divider />
+            <Text color="gray.600" fontSize="sm">
+              Não tem uma conta?{' '}
+              <ChakraLink as={Link} href="/signup" color="green.500" fontWeight="medium">
+                Criar conta
+              </ChakraLink>
+            </Text>
           </VStack>
-        </Container>
-      </Box>
+        </VStack>
+      </Container>
     </>
   );
 }

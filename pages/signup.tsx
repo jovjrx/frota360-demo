@@ -12,23 +12,22 @@ import {
   FormLabel,
   Input,
   Stack,
-  Heading,
   Text,
-  Container,
   VStack,
   Link as ChakraLink,
   Alert,
   AlertIcon,
   Divider,
-  Icon,
   InputGroup,
   InputRightElement,
   Select,
   Grid,
   GridItem,
 } from '@chakra-ui/react';
+import { Title } from '@/components/Title';
+import { Container } from '@/components/Container';
 import Link from 'next/link';
-import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff, FiUser, FiPhone, FiCalendar, FiMapPin } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface SignupPageProps {
   translations: Record<string, any>;
@@ -87,8 +86,12 @@ export default function SignupPage({ translations }: SignupPageProps) {
         <meta name="keywords" content="cadastro motorista, registro TVDE, ser motorista, cadastro Conduz" />
       </Head>
 
-      <Box py={8}>
-        <Container maxW="4xl">
+      <Container softBg maxW="4xl">
+        <Title
+          title={t('signup.title')}
+          description={t('signup.subtitle')}
+          feature="CADASTRO"
+        />
         <VStack spacing={8} align="stretch">
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
@@ -329,7 +332,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                   loadingText="Criando conta..."
                   rightIcon={<FiArrowRight />}
                 >
-{t('signup.createAccount')}
+                  {t('signup.createAccount')}
                 </Button>
               </Stack>
             </form>
@@ -339,7 +342,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
           <VStack spacing={4}>
             <Divider />
             <Text color="gray.600" fontSize="sm">
-{t('signup.alreadyHaveAccount')}{' '}
+              {t('signup.alreadyHaveAccount')}{' '}
               <ChakraLink as={Link} href="/login" color="green.500" fontWeight="medium">
                 {t('signup.loginLink')}
               </ChakraLink>
@@ -347,7 +350,6 @@ export default function SignupPage({ translations }: SignupPageProps) {
           </VStack>
         </VStack>
       </Container>
-    </Box>
     </>
   );
 }
