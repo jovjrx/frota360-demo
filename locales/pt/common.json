@@ -6,7 +6,9 @@
     "companies": "Para Empresas",
     "contact": "Contacto",
     "login": "Entrar",
-    "loading": "Carregando..."
+    "loading": "Carregando...",
+    "forgotPassword": "Esqueci a senha",
+    "resetPassword": "Redefinir senha"
   },
   "user": {
     "email": "E-mail",

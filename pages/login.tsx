@@ -75,11 +75,11 @@ export default function LoginPage({ translations }: LoginPageProps) {
 
       const sessionData = await sessionResponse.json();
 
-      // Redirecionar baseado no tipo de usuário
-      const redirectPath = router.query.redirect as string;
-      if (redirectPath) {
-        router.push(redirectPath);
-      } else {
+        // Redirecionar baseado no tipo de usuário
+        const redirectPath = router.query.redirect as string;
+        if (redirectPath) {
+          router.push(redirectPath);
+        } else {
         router.push(sessionData.role === 'admin' ? '/admin/dashboard' : '/drivers/dashboard');
       }
     } catch (err: any) {
@@ -124,43 +124,43 @@ export default function LoginPage({ translations }: LoginPageProps) {
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>
-                {/* User Type Selection */}
+              {/* User Type Selection */}
                 <FormControl id="userType" isRequired>
                   <FormLabel>Tipo de Utilizador</FormLabel>
                   <Select
-                    value={formData.userType}
-                    onChange={handleInputChange}
+                  value={formData.userType}
+                  onChange={handleInputChange}
                     name="userType"
                     size="lg"
-                  >
-                    <option value="driver">Motorista</option>
-                    <option value="admin">Administrador</option>
+                >
+                  <option value="driver">Motorista</option>
+                  <option value="admin">Administrador</option>
                   </Select>
                 </FormControl>
 
-                {/* Email */}
+              {/* Email */}
                 <FormControl id="email" isRequired>
                   <FormLabel>{t('user.email')}</FormLabel>
                   <Input
                     type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="seu@email.com"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="seu@email.com"
                     size="lg"
-                  />
+                />
                 </FormControl>
 
-                {/* Password */}
+              {/* Password */}
                 <FormControl id="password" isRequired>
                   <FormLabel>{t('user.password')}</FormLabel>
                   <InputGroup>
                     <Input
                       type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="••••••••"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="••••••••"
                       size="lg"
                     />
                     <InputRightElement h="full">
@@ -175,7 +175,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
                   </InputGroup>
                 </FormControl>
 
-                {error && (
+            {error && (
                   <Alert status="error" borderRadius="md">
                     <AlertIcon />
                     {error}
@@ -183,7 +183,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
                 )}
 
                 <Button
-                  type="submit"
+                type="submit"
                   colorScheme="green"
                   size="lg"
                   isLoading={isLoading}
@@ -196,13 +196,18 @@ export default function LoginPage({ translations }: LoginPageProps) {
             </form>
           </Box>
 
-          {/* Links */}
+            {/* Links */}
           <VStack spacing={4}>
             <Divider />
+            <Text color="gray.600" fontSize="sm" textAlign="center">
+              <ChakraLink as={Link} href="/forgot-password" color="blue.500" fontWeight="medium">
+                Esqueci a senha
+              </ChakraLink>
+            </Text>
             <Text color="gray.600" fontSize="sm">
               Não tem uma conta?{' '}
               <ChakraLink as={Link} href="/signup" color="green.500" fontWeight="medium">
-                Criar conta
+                  Criar conta
               </ChakraLink>
             </Text>
           </VStack>
