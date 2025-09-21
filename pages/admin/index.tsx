@@ -11,6 +11,7 @@ import {
   Badge,
   Card,
   CardBody,
+  CardHeader,
   Heading,
   Stat,
   StatLabel,
@@ -26,6 +27,9 @@ import {
   Divider,
   Icon,
   Flex,
+  List,
+  ListItem,
+  ListIcon,
 } from '@chakra-ui/react';
 import { 
   FiUsers, 
@@ -39,10 +43,15 @@ import {
   FiUpload,
   FiCalendar,
   FiMapPin,
-  FiClock
+  FiClock,
+  FiEye,
+  FiEdit,
+  FiCheckCircle,
+  FiAlertCircle
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
+import AdminLayout from '@/components/layouts/AdminLayout';
 
 interface AdminDashboardProps {
   stats: {
@@ -57,15 +66,18 @@ interface AdminDashboardProps {
   recentDrivers: any[];
   recentPayouts: any[];
   translations: Record<string, any>;
+  userData: any;
 }
 
-export default function AdminDashboard({ stats, recentDrivers, recentPayouts, translations }: AdminDashboardProps) {
+export default function AdminDashboard({ 
+  stats,
+  recentDrivers,
+  recentPayouts,
+  translations,
+  userData
+}: AdminDashboardProps) {
   const tCommon = (key: string) => translations.common?.[key] || key;
   const tAdmin = (key: string) => translations.admin?.[key] || key;
-  
-  const cardBg = "white";
-  const borderColor = "gray.200";
-  const bgColor = "gray.50";
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -93,200 +105,184 @@ export default function AdminDashboard({ stats, recentDrivers, recentPayouts, tr
         <title>Painel Administrativo - Conduz.pt</title>
       </Head>
       
-      <Box minH="100vh" bg={bgColor}>
-        {/* Header */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" py={4} shadow="sm">
-          <Box maxW="7xl" mx="auto" px={4}>
-            <HStack justifyContent="space-between" alignItems="center">
-              <HStack spacing={4}>
-                <Avatar 
-                  size="md" 
-                  name="Administrador" 
-                  bg="blue.500"
-                />
-                <VStack align="flex-start" spacing={0}>
-                  <Text fontSize="xl" fontWeight="bold" color="gray.800">
-                    Bem-vindo, Administrador!
-                  </Text>
-                  <HStack>
-                    <Badge colorScheme="blue">
-                      Administrador
-                    </Badge>
-                    <Badge colorScheme="green">
-                      Sistema Ativo
-                    </Badge>
-                  </HStack>
-                </VStack>
-              </HStack>
-              <HStack spacing={4}>
-                <Button leftIcon={<FiBell />} variant="outline" size="sm">
-                  Notificações (0)
-                </Button>
-                <Button leftIcon={<FiSettings />} variant="outline" size="sm">
-                  Configurações
-                </Button>
-              </HStack>
-            </HStack>
-          </Box>
-        </Box>
-
-        {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
-          <VStack spacing={8} align="stretch">
-            {/* Stats Grid */}
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Total de Motoristas</StatLabel>
-                    <StatNumber>{stats.totalDrivers}</StatNumber>
-                    <StatHelpText>
-                      <StatArrow type="increase" />
-                      {stats.activeDrivers} ativos
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Receita Total</StatLabel>
-                    <StatNumber>€{stats.totalRevenue.toFixed(2)}</StatNumber>
-                    <StatHelpText>
-                      <StatArrow type="increase" />
-                      €{stats.monthlyRevenue.toFixed(2)} este mês
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Pagamentos</StatLabel>
-                    <StatNumber>{stats.totalPayouts}</StatNumber>
-                    <StatHelpText>
-                      {stats.pendingPayouts} pendentes
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <Stat>
-                    <StatLabel>Motoristas Pendentes</StatLabel>
-                    <StatNumber>{stats.pendingDrivers}</StatNumber>
-                    <StatHelpText>
-                      Aguardando aprovação
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
+      <AdminLayout
+        title="Painel Administrativo"
+        subtitle="Visão geral do sistema e atividades recentes"
+        user={{
+          name: userData?.name || 'Administrador',
+          avatar: userData?.avatar,
+          role: 'admin',
+          status: 'active'
+        }}
+        notifications={0}
+        breadcrumbs={[
+          { label: 'Dashboard' }
+        ]}
+        stats={[
+          {
+            label: 'Total Motoristas',
+            value: stats.totalDrivers,
+            helpText: 'Cadastrados',
+            color: 'blue.500'
+          },
+          {
+            label: 'Motoristas Ativos',
+            value: stats.activeDrivers,
+            helpText: 'Aprovados',
+            color: 'green.500'
+          },
+          {
+            label: 'Pendentes',
+            value: stats.pendingDrivers,
+            helpText: 'Aguardando',
+            color: 'yellow.500'
+          },
+          {
+            label: 'Receita Total',
+            value: `€${stats.totalRevenue.toLocaleString()}`,
+            helpText: 'Acumulada',
+            color: 'purple.500'
+          },
+          {
+            label: 'Pagamentos',
+            value: stats.totalPayouts,
+            helpText: 'Processados',
+            color: 'orange.500'
+          }
+        ]}
+      >
+        {/* Quick Actions */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Ações Rápidas</Heading>
+          </CardHeader>
+          <CardBody>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+              <Button
+                as={Link}
+                href="/admin/drivers"
+                leftIcon={<FiUsers />}
+                colorScheme="blue"
+                size="lg"
+                h="60px"
+              >
+                Gerenciar Motoristas
+              </Button>
+              <Button
+                as={Link}
+                href="/admin/payouts"
+                leftIcon={<FiDollarSign />}
+                colorScheme="green"
+                size="lg"
+                h="60px"
+              >
+                Pagamentos
+              </Button>
+              <Button
+                as={Link}
+                href="/admin/plans"
+                leftIcon={<FiSettings />}
+                colorScheme="purple"
+                size="lg"
+                h="60px"
+              >
+                Planos
+              </Button>
             </SimpleGrid>
+          </CardBody>
+        </Card>
 
-            {/* Quick Actions */}
-            <Card bg={cardBg} borderColor={borderColor}>
-              <CardBody>
-                <Heading size="md" mb={4}>Ações Rápidas</Heading>
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                  <Button 
-                    as={Link} 
-                    href="/admin/drivers" 
-                    leftIcon={<FiUsers />} 
-                    colorScheme="blue" 
-                    variant="outline"
-                    size="lg"
-                    h="60px"
-                  >
-                    Gerenciar Motoristas
-                  </Button>
-                  <Button 
-                    as={Link} 
-                    href="/admin/payouts" 
-                    leftIcon={<FiDollarSign />} 
-                    colorScheme="green" 
-                    variant="outline"
-                    size="lg"
-                    h="60px"
-                  >
-                    Pagamentos
-                  </Button>
-                  <Button 
-                    as={Link} 
-                    href="/admin/plans" 
-                    leftIcon={<FiSettings />} 
-                    colorScheme="purple" 
-                    variant="outline"
-                    size="lg"
-                    h="60px"
-                  >
-                    Planos
-                  </Button>
-                </SimpleGrid>
-              </CardBody>
-            </Card>
-
-            {/* Recent Activity */}
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-              {/* Recent Drivers */}
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <HStack justifyContent="space-between" mb={4}>
-                    <Heading size="md">Motoristas Recentes</Heading>
-                    <Button as={Link} href="/admin/drivers" size="sm" variant="outline">
-                      Ver Todos
-                    </Button>
+        {/* Recent Activity */}
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+          {/* Recent Drivers */}
+          <Card bg="white" borderColor="gray.200">
+            <CardHeader>
+              <Heading size="md">Motoristas Recentes</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={3} align="stretch">
+                {recentDrivers.map((driver) => (
+                  <HStack key={driver.id} justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                    <HStack>
+                      <Avatar size="sm" name={driver.name} />
+                      <VStack align="flex-start" spacing={0}>
+                        <Text fontWeight="medium">{driver.name}</Text>
+                        <Text fontSize="sm" color="gray.600">{driver.email}</Text>
+                      </VStack>
+                    </HStack>
+                    <HStack>
+                      <Badge colorScheme={getStatusColor(driver.status)}>
+                        {getStatusText(driver.status)}
+                      </Badge>
+                      <Button size="sm" variant="outline" as={Link} href={`/admin/drivers`}>
+                        <FiEye />
+                      </Button>
+                    </HStack>
                   </HStack>
-                  <VStack spacing={3} align="stretch">
-                    {recentDrivers.slice(0, 5).map((driver) => (
-                      <HStack key={driver.id} p={3} bg="gray.50" borderRadius="md">
-                        <Avatar size="sm" name={driver.name} />
-                        <VStack align="flex-start" spacing={0} flex={1}>
-                          <Text fontWeight="medium">{driver.name}</Text>
-                          <Text fontSize="sm" color="gray.600">{driver.email}</Text>
-                        </VStack>
-                        <Badge colorScheme={getStatusColor(driver.status)}>
-                          {getStatusText(driver.status)}
-                        </Badge>
-                      </HStack>
-                    ))}
-                  </VStack>
-                </CardBody>
-              </Card>
+                ))}
+                <Button variant="outline" as={Link} href="/admin/drivers" w="full">
+                  Ver Todos os Motoristas
+                </Button>
+              </VStack>
+            </CardBody>
+          </Card>
 
-              {/* Recent Payouts */}
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardBody>
-                  <HStack justifyContent="space-between" mb={4}>
-                    <Heading size="md">Pagamentos Recentes</Heading>
-                    <Button as={Link} href="/admin/payouts" size="sm" variant="outline">
-                      Ver Todos
-                    </Button>
+          {/* Recent Payouts */}
+          <Card bg="white" borderColor="gray.200">
+            <CardHeader>
+              <Heading size="md">Pagamentos Recentes</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={3} align="stretch">
+                {recentPayouts.map((payout) => (
+                  <HStack key={payout.id} justify="space-between" p={3} bg="gray.50" borderRadius="md">
+                    <VStack align="flex-start" spacing={0}>
+                      <Text fontWeight="medium">{payout.driverName}</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {new Date(payout.createdAt).toLocaleDateString('pt-BR')}
+                      </Text>
+                    </VStack>
+                    <VStack align="flex-end" spacing={0}>
+                      <Text fontWeight="bold" color="green.500">
+                        €{payout.amount.toLocaleString()}
+                      </Text>
+                      <Badge colorScheme={payout.status === 'paid' ? 'green' : 'yellow'}>
+                        {payout.status === 'paid' ? 'Pago' : 'Pendente'}
+                      </Badge>
+                    </VStack>
                   </HStack>
-                  <VStack spacing={3} align="stretch">
-                    {recentPayouts.slice(0, 5).map((payout) => (
-                      <HStack key={payout.id} p={3} bg="gray.50" borderRadius="md">
-                        <Icon as={FiDollarSign} color="green.500" />
-                        <VStack align="flex-start" spacing={0} flex={1}>
-                          <Text fontWeight="medium">€{(payout.grossCents / 100).toFixed(2)}</Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {new Date(payout.createdAt).toLocaleDateString('pt-PT')}
-                          </Text>
-                        </VStack>
-                        <Badge colorScheme={payout.status === 'completed' ? 'green' : 'yellow'}>
-                          {payout.status === 'completed' ? 'Pago' : 'Pendente'}
-                        </Badge>
-                      </HStack>
-                    ))}
-                  </VStack>
-                </CardBody>
-              </Card>
+                ))}
+                <Button variant="outline" as={Link} href="/admin/payouts" w="full">
+                  Ver Todos os Pagamentos
+                </Button>
+              </VStack>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+
+        {/* System Status */}
+        <Card bg="white" borderColor="gray.200">
+          <CardHeader>
+            <Heading size="md">Status do Sistema</Heading>
+          </CardHeader>
+          <CardBody>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+              <HStack>
+                <Icon as={FiCheckCircle} color="green.500" />
+                <Text>Sistema Operacional</Text>
+              </HStack>
+              <HStack>
+                <Icon as={FiCheckCircle} color="green.500" />
+                <Text>Base de Dados Conectada</Text>
+              </HStack>
+              <HStack>
+                <Icon as={FiCheckCircle} color="green.500" />
+                <Text>Pagamentos Ativos</Text>
+              </HStack>
             </SimpleGrid>
-          </VStack>
-        </Box>
-      </Box>
+          </CardBody>
+        </Card>
+      </AdminLayout>
     </>
   );
 }
@@ -296,20 +292,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Load translations
     const translations = await loadTranslations('pt', ['common', 'admin']);
 
-    // Get basic stats
-    const [drivers, payouts] = await Promise.all([
-      store.drivers.findAll(),
-      store.payouts.findAll(),
-    ]);
+    // Get all drivers
+    const drivers = await store.drivers.findAll();
+    
+    // Get all payouts
+    const payouts = await store.payouts.findAll();
 
     const stats = {
       totalDrivers: drivers.length,
       activeDrivers: drivers.filter(d => d.status === 'active').length,
       pendingDrivers: drivers.filter(d => d.status === 'pending').length,
-      totalRevenue: payouts.reduce((sum, p) => sum + (p.grossCents / 100), 0),
+      totalRevenue: payouts.reduce((sum, p) => sum + (p.amount || 0), 0),
       monthlyRevenue: payouts
-        .filter(p => p.createdAt > Date.now() - 30 * 24 * 60 * 60 * 1000)
-        .reduce((sum, p) => sum + (p.grossCents / 100), 0),
+        .filter(p => new Date(p.createdAt).getMonth() === new Date().getMonth())
+        .reduce((sum, p) => sum + (p.amount || 0), 0),
       totalPayouts: payouts.length,
       pendingPayouts: payouts.filter(p => p.status === 'pending').length,
     };
@@ -330,6 +326,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         recentDrivers,
         recentPayouts,
         translations,
+        userData: { name: 'Administrador' }, // Mock data
       },
     };
   } catch (error) {
@@ -348,6 +345,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         recentDrivers: [],
         recentPayouts: [],
         translations: { common: {}, admin: {} },
+        userData: { name: 'Administrador' },
       },
     };
   }

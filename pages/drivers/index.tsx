@@ -45,7 +45,7 @@ import {
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
-import StandardLayout from '@/components/layouts/StandardLayout';
+import DriverLayout from '@/components/layouts/DriverLayout';
 
 interface DriverDashboardProps {
   driver: any;
@@ -103,7 +103,7 @@ export default function DriverDashboard({
         <title>{tDriver('dashboard.title')} - Conduz.pt</title>
       </Head>
       
-      <StandardLayout
+      <DriverLayout
         title={`${tDriver('dashboard.welcome')}, ${driver?.name || 'Motorista'}!`}
         subtitle="Gerencie suas atividades e ganhos"
         user={{
@@ -113,6 +113,9 @@ export default function DriverDashboard({
           status: driver?.status
         }}
         notifications={notifications.length}
+        breadcrumbs={[
+          { label: 'Dashboard' }
+        ]}
         alerts={[
           ...(driver?.status === 'pending' ? [{
             type: 'warning' as const,
@@ -329,7 +332,7 @@ export default function DriverDashboard({
             </VStack>
           </CardBody>
         </Card>
-      </StandardLayout>
+      </DriverLayout>
     </>
   );
 }

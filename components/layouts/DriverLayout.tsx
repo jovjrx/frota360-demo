@@ -32,7 +32,7 @@ interface StatItem {
   color?: string;
 }
 
-interface AdminLayoutProps {
+interface DriverLayoutProps {
   title: string;
   subtitle?: string;
   user: {
@@ -56,7 +56,7 @@ interface AdminLayoutProps {
   }>;
 }
 
-export default function AdminLayout({
+export default function DriverLayout({
   title,
   subtitle,
   user,
@@ -66,19 +66,19 @@ export default function AdminLayout({
   children,
   actions,
   breadcrumbs = []
-}: AdminLayoutProps) {
+}: DriverLayoutProps) {
   const bgColor = "gray.50";
 
   return (
     <>
       <Box minH="100vh" bg={bgColor}>
-        {/* Admin Top Bar */}
+        {/* Driver Top Bar */}
         <TopBar
           user={user}
           currentPage={title}
           notifications={notifications}
           breadcrumbs={breadcrumbs}
-          basePath="/admin"
+          basePath="/drivers"
         />
 
         {/* Status Alerts */}
