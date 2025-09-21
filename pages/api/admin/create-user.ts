@@ -20,11 +20,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       emailVerified: true,
     });
     
-    // Adicionar o usuário como admin na coleção de admins
-    await adminDb.collection('admins').doc(userRecord.uid).set({
+    // Adicionar o usuário na coleção users
+    await adminDb.collection('users').doc(userRecord.uid).set({
+      uid: userRecord.uid,
       email,
+      name: email.split('@')[0], // Usar parte do email como nome padrão
       role: 'admin',
       createdAt: Date.now(),
+      updatedAt: Date.now(),
       createdBy: 'system'
     });
     

@@ -16,9 +16,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ...doc.data()
       }));
 
-      // Backup de admins
-      const adminsSnap = await adminDb.collection('admins').get();
-      const admins = adminsSnap.docs.map((doc: any) => ({
+      // Backup de users (inclui admins e drivers)
+      const usersSnap = await adminDb.collection('users').get();
+      const users = usersSnap.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }));
@@ -39,12 +39,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdBy: adminId || 'system',
         data: {
           drivers,
-          admins,
+          users,
           auditLogs,
         },
         stats: {
           driversCount: drivers.length,
-          adminsCount: admins.length,
+          usersCount: users.length,
           auditLogsCount: auditLogs.length,
         },
       };
