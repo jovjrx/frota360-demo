@@ -160,27 +160,33 @@ export default function Header({ t }: HeaderProps) {
                       </Text>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent w="280px" shadow="xl" border="none" borderRadius="lg">
+                  <PopoverContent w="320px" shadow="2xl" border="1px" borderColor="gray.200" borderRadius="xl" bg="white">
                     <PopoverBody p={0}>
                       <VStack spacing={0} align="stretch">
                         {/* User Info Header */}
-                        <Box p={4} bg="gray.50" borderRadius="lg 0 0 0">
-                          <HStack spacing={3}>
+                        <Box p={6} bg="gradient-to-r" bgGradient="linear(to-r, blue.50, purple.50)" borderRadius="xl 0 0 0">
+                          <HStack spacing={4}>
                             <Avatar 
-                              size="md" 
+                              size="lg" 
                               name={userData?.name || user.displayName || user.email}
                               bg={isAdmin ? "blue.500" : "green.500"}
+                              border="3px solid"
+                              borderColor="white"
+                              shadow="md"
                             />
-                            <VStack align="flex-start" spacing={1} flex={1}>
-                              <Text fontWeight="bold" fontSize="sm">
+                            <VStack align="flex-start" spacing={2} flex={1}>
+                              <Text fontWeight="bold" fontSize="md" color="gray.800">
                                 {userData?.name || user.displayName || user.email}
                               </Text>
-                              <Text fontSize="xs" color="gray.600">
+                              <Text fontSize="sm" color="gray.600">
                                 {userData?.email || user.email}
                               </Text>
                               <Badge 
-                                size="sm" 
-                                colorScheme={isAdmin ? "red" : "green"}
+                                size="md" 
+                                colorScheme={isAdmin ? "blue" : "green"}
+                                borderRadius="full"
+                                px={3}
+                                py={1}
                               >
                                 {isAdmin ? "Administrador" : "Motorista"}
                               </Badge>
@@ -191,66 +197,81 @@ export default function Header({ t }: HeaderProps) {
                         <Divider />
 
                         {/* Menu Items */}
-                        <VStack spacing={0} align="stretch">
+                        <VStack spacing={1} align="stretch" p={2}>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="md"
                             justifyContent="flex-start"
                             leftIcon={<FiUser />}
                             onClick={() => {
                               router.push(isAdmin ? '/admin' : '/drivers');
                             }}
-                            borderRadius="0"
-                            _hover={{ bg: "gray.100" }}
+                            borderRadius="lg"
+                            _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                            transition="all 0.2s"
+                            h="48px"
+                            px={4}
                           >
-                            Painel
+                            <Text fontWeight="medium">Painel</Text>
                           </Button>
                           
                           {isAdmin && (
                             <>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="md"
                                 justifyContent="flex-start"
                                 leftIcon={<FiUsers />}
                                 onClick={() => router.push('/admin/drivers')}
-                                borderRadius="0"
-                                _hover={{ bg: "gray.100" }}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
                               >
-                                Motoristas
+                                <Text fontWeight="medium">Motoristas</Text>
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="md"
                                 justifyContent="flex-start"
                                 leftIcon={<FiUserCheck />}
                                 onClick={() => router.push('/admin/users')}
-                                borderRadius="0"
-                                _hover={{ bg: "gray.100" }}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
                               >
-                                Usuários
+                                <Text fontWeight="medium">Usuários</Text>
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="md"
                                 justifyContent="flex-start"
                                 leftIcon={<FiDollarSign />}
                                 onClick={() => router.push('/admin/payouts')}
-                                borderRadius="0"
-                                _hover={{ bg: "gray.100" }}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
                               >
-                                Pagamentos
+                                <Text fontWeight="medium">Pagamentos</Text>
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="md"
                                 justifyContent="flex-start"
                                 leftIcon={<FiSettings />}
                                 onClick={() => router.push('/admin/plans')}
-                                borderRadius="0"
-                                _hover={{ bg: "gray.100" }}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
                               >
-                                Planos
+                                <Text fontWeight="medium">Planos</Text>
                               </Button>
                             </>
                           )}
@@ -259,18 +280,24 @@ export default function Header({ t }: HeaderProps) {
                         <Divider />
 
                         {/* Logout */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          justifyContent="flex-start"
-                          leftIcon={<FiLogOut />}
-                          onClick={handleLogout}
-                          borderRadius="0 0 lg lg"
-                          color="red.500"
-                          _hover={{ bg: "red.50" }}
-                        >
-                          Sair
-                        </Button>
+                        <Box p={2}>
+                          <Button
+                            variant="ghost"
+                            size="md"
+                            justifyContent="flex-start"
+                            leftIcon={<FiLogOut />}
+                            onClick={handleLogout}
+                            borderRadius="lg"
+                            color="red.500"
+                            _hover={{ bg: "red.50", transform: "translateX(4px)" }}
+                            transition="all 0.2s"
+                            h="48px"
+                            px={4}
+                            w="full"
+                          >
+                            <Text fontWeight="medium">Sair</Text>
+                          </Button>
+                        </Box>
                       </VStack>
                     </PopoverBody>
                   </PopoverContent>

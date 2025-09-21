@@ -1,8 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CreateDriverSchema } from '@/schemas/driver';
-import { store } from '@/lib/store';
-import { auditLogger } from '@/lib/audit/logger';
-import { emailService } from '@/lib/email/mailer';
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -10,53 +7,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const validatedData = CreateDriverSchema.parse(req.body);
-    
-    // Check if driver already exists
-    const existingDriver = await store.drivers.findByUserId(validatedData.userId);
-    if (existingDriver) {
-      return res.status(400).json({ error: 'Driver already exists for this user' });
+    const { idToken, driverData } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ error: 'ID Token é obrigatório' });
     }
 
-    // Create driver
-    const driverId = await store.drivers.create({
-      ...validatedData,
-      status: 'pending',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+    if (!driverData) {
+      return res.status(400).json({ error: 'Dados do motorista são obrigatórios' });
+    }
+
+    // Verificar o token do Firebase
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    const email = decodedToken.email;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email não encontrado no token' });
+    }
+
+    // Verificar se já existe um motorista com este UID
+    const existingDriverSnap = await adminDb
+      .collection('drivers')
+      .where('uid', '==', uid)
+      .limit(1)
+      .get();
+
+    if (!existingDriverSnap.empty) {
+      return res.status(400).json({ error: 'Motorista já existe com este UID' });
+    }
+
+    // Criar documento do motorista usando adminDb (server-side)
+    const driverDocRef = await adminDb.collection('drivers').add({
+      ...driverData,
+      uid: uid,
+      userId: uid,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
-    // Log audit trail
-    await auditLogger.logDriverCreation(
-      validatedData.userId,
-      'system',
-      driverId,
-      validatedData.email
-    );
+    console.log('✅ Documento do motorista criado com ID:', driverDocRef.id);
 
-    // Send welcome email
-    try {
-      await emailService.sendDriverWelcomeEmail(validatedData.email, validatedData.name);
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
-      // Don't fail the request if email fails
-    }
-
-    res.status(201).json({ 
+    return res.status(200).json({ 
       success: true, 
-      driverId,
-      message: 'Driver created successfully' 
+      driverId: driverDocRef.id,
+      message: 'Motorista criado com sucesso' 
     });
+
   } catch (error: any) {
-    console.error('Create driver error:', error);
-    
-    if (error.name === 'ZodError') {
-      return res.status(400).json({ 
-        error: 'Validation error',
-        details: error.errors 
-      });
-    }
-    
-    res.status(500).json({ error: error.message || 'Failed to create driver' });
+    console.error('Erro ao criar motorista:', error);
+    return res.status(500).json({ 
+      error: error.message || 'Erro interno do servidor' 
+    });
   }
 }

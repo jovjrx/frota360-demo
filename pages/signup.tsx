@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { loadTranslations, createTranslationFunction } from '../lib/translations';
@@ -76,10 +75,8 @@ export default function SignupPage({ translations }: SignupPageProps) {
       const user = userCredential.user;
       console.log('✅ Usuário Firebase criado com UID:', user.uid);
 
-      // 2. SEGUNDO: Criar documento do motorista no Firestore com o UID
+      // 2. SEGUNDO: Criar documento do motorista via API server-side
       const driverData = {
-        uid: user.uid,
-        userId: user.uid, // Para compatibilidade
         email: email,
         firstName: firstName,
         lastName: lastName,
@@ -107,8 +104,6 @@ export default function SignupPage({ translations }: SignupPageProps) {
         
         // Campos técnicos
         locale: 'pt',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
         createdBy: 'self',
         lastLoginAt: null,
         
@@ -132,13 +127,30 @@ export default function SignupPage({ translations }: SignupPageProps) {
         }
       };
 
-      console.log('2. Criando documento do motorista no Firestore...', driverData);
-      const driverDocRef = await addDoc(collection(db, 'drivers'), driverData);
-      console.log('✅ Documento do motorista criado com ID:', driverDocRef.id);
+      console.log('2. Criando documento do motorista via API server-side...', driverData);
+      const idToken = await user.getIdToken();
+      
+      const createDriverResponse = await fetch('/api/drivers/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: idToken,
+          driverData: driverData,
+        }),
+      });
+
+      if (!createDriverResponse.ok) {
+        const errorData = await createDriverResponse.json();
+        throw new Error(errorData.error || 'Erro ao criar documento do motorista');
+      }
+
+      const createDriverData = await createDriverResponse.json();
+      console.log('✅ Documento do motorista criado com ID:', createDriverData.driverId);
 
       // 3. TERCEIRO: Criar sessão no servidor
       console.log('3. Criando sessão no servidor...');
-      const idToken = await user.getIdToken();
       const sessionResponse = await fetch('/api/auth/create-session', {
         method: 'POST',
         headers: {
@@ -164,9 +176,133 @@ export default function SignupPage({ translations }: SignupPageProps) {
       
       // ROLLBACK: Se houve erro após criar o Firebase Auth, deletar o usuário
       if (err.code === 'auth/email-already-in-use') {
-        console.log('🔄 Email já existe, não é necessário rollback');
-        setError('Este email já está cadastrado. Tente fazer login.');
-        return;
+        console.log('🔄 Email já existe, verificando se precisa completar cadastro...');
+        
+        try {
+          // Tentar fazer login com as credenciais para verificar se o usuário existe
+          const { signInWithEmailAndPassword } = await import('firebase/auth');
+          const loginCredential = await signInWithEmailAndPassword(auth, email, password);
+          const existingUser = loginCredential.user;
+          console.log('✅ Usuário existe no Firebase Auth:', existingUser.uid);
+          
+          // Verificar se existe documento em drivers
+          const checkDriverResponse = await fetch('/api/drivers/check', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uid: existingUser.uid,
+            }),
+          });
+          
+          if (checkDriverResponse.ok) {
+            const checkData = await checkDriverResponse.json();
+            
+            if (!checkData.exists) {
+              console.log('🔄 Usuário existe no Firebase Auth mas não tem documento em drivers, completando cadastro...');
+              
+              // Completar cadastro criando documento em drivers
+              const driverData = {
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                name: `${firstName} ${lastName}`,
+                fullName: `${firstName} ${lastName}`,
+                phone: phone,
+                birthDate: birthDate || null,
+                city: city || null,
+                licenseNumber: licenseNumber || null,
+                licenseExpiry: licenseExpiry || null,
+                vehicleType: vehicleType || null,
+                
+                // Campos administrativos (valores padrão)
+                status: 'pending',
+                isActive: false,
+                weeklyEarnings: 0,
+                monthlyEarnings: 0,
+                totalTrips: 0,
+                rating: 0,
+                statusUpdatedAt: null,
+                statusUpdatedBy: null,
+                notes: '',
+                lastPayoutAt: null,
+                lastPayoutAmount: 0,
+                
+                // Campos técnicos
+                locale: 'pt',
+                createdBy: 'self',
+                lastLoginAt: null,
+                
+                // Documentos (estrutura padrão)
+                documents: {
+                  license: {
+                    uploaded: false,
+                    verified: false,
+                    url: null
+                  },
+                  insurance: {
+                    uploaded: false,
+                    verified: false,
+                    url: null
+                  },
+                  vehicle: {
+                    uploaded: false,
+                    verified: false,
+                    url: null
+                  }
+                }
+              };
+              
+              const idToken = await existingUser.getIdToken();
+              const createDriverResponse = await fetch('/api/drivers/create', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  idToken: idToken,
+                  driverData: driverData,
+                }),
+              });
+              
+              if (createDriverResponse.ok) {
+                const createDriverData = await createDriverResponse.json();
+                console.log('✅ Documento do motorista criado com ID:', createDriverData.driverId);
+                
+                // Criar sessão no servidor
+                const sessionResponse = await fetch('/api/auth/create-session', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    idToken: idToken,
+                  }),
+                });
+                
+                if (sessionResponse.ok) {
+                  console.log('✅ Sessão criada com sucesso');
+                  router.push('/drivers');
+                  return;
+                }
+              }
+            } else {
+              console.log('✅ Usuário já tem documento em drivers, redirecionando para login');
+              setError('Este email já está cadastrado. Tente fazer login.');
+              return;
+            }
+          }
+          
+          // Se chegou aqui, algo deu errado
+          setError('Erro ao verificar status do cadastro. Tente fazer login.');
+          return;
+          
+        } catch (loginError) {
+          console.error('❌ Erro ao verificar usuário existente:', loginError);
+          setError('Este email já está cadastrado. Tente fazer login.');
+          return;
+        }
       }
       
       // Se houve erro após criar Firebase Auth mas antes de criar documento, tentar deletar usuário
