@@ -10,15 +10,22 @@ export function withAdmin(WrappedComponent: React.ComponentType<any>) {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
     useEffect(() => {
-      if (!loading && user?.email) {
-        const isConduzPt = user.email.endsWith('@conduz.pt');
-        const isConduzContacto = user.email === 'conduzcontacto@gmail.com';
-        
-        if (isConduzPt || isConduzContacto) {
-          setIsAdmin(true);
-        } else {
+      if (!loading && user?.uid) {
+        // Verificar se o usuário está na coleção admins
+        fetch('/api/auth/check-admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ uid: user.uid }),
+        })
+        .then(res => res.json())
+        .then(data => {
+          setIsAdmin(data.isAdmin || false);
+        })
+        .catch(() => {
           setIsAdmin(false);
-        }
+        });
       }
     }, [user, loading]);
 

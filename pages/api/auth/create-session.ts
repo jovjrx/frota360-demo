@@ -24,44 +24,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Email não encontrado no token' });
     }
 
-    // Determinar o tipo de usuário e buscar dados
-    let role: 'admin' | 'ops' | 'driver' = 'driver';
+    // Verificar se é admin na coleção admins
+    const adminDoc = await getFirestore()
+      .collection('admins')
+      .doc(uid)
+      .get();
+
+    let role: 'admin' | 'ops' | 'driver';
     let userId = uid;
     let driverId = null;
 
-    // Verificar se é admin
-    const adminEmails = [
-      'conduzcontacto@gmail.com',
-      'admin@conduz.pt'
-    ];
-    
-    const isConduzPt = email.endsWith('@conduz.pt');
-    const isInAdminList = adminEmails.includes(email.toLowerCase());
-    const isAdmin = isConduzPt || isInAdminList;
-
-    if (isAdmin) {
-      role = 'admin';
-      
-      // Buscar dados do admin no Firestore
-      const adminDoc = await getFirestore()
-        .collection('admins')
-        .doc(uid)
-        .get();
-      
-      if (adminDoc.exists) {
-        const adminData = adminDoc.data();
-        // Admin encontrado no Firestore
+    if (adminDoc.exists) {
+      const adminData = adminDoc.data();
+      if (adminData?.role === 'admin') {
+        role = 'admin';
       } else {
-        // Criar admin no Firestore se não existir
-        await getFirestore()
-          .collection('admins')
-          .doc(uid)
-          .set({
-            email: email,
-            role: 'admin',
-            createdAt: Date.now(),
-            createdBy: 'system'
-          });
+        role = 'ops';
       }
     } else {
       // Verificar se é motorista
