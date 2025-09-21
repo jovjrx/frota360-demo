@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { loadTranslations, createTranslationFunction } from '../lib/translations';
 import {
   Box,
   Button,
@@ -28,7 +30,13 @@ import {
 import Link from 'next/link';
 import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff, FiUser, FiPhone, FiCalendar, FiMapPin } from 'react-icons/fi';
 
-export default function SignupPage() {
+interface SignupPageProps {
+  translations: Record<string, any>;
+}
+
+export default function SignupPage({ translations }: SignupPageProps) {
+  const router = useRouter();
+  const t = createTranslationFunction(translations.common);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -80,7 +88,7 @@ export default function SignupPage() {
         <meta name="keywords" content="cadastro motorista, registro TVDE, ser motorista, cadastro Conduz" />
       </Head>
 
-      <Box py={16} bg="white">
+      <Box py={16} bg="gray.50">
         <Container maxW="4xl">
         <VStack spacing={8} align="stretch">
           {/* Logo e Título */}
@@ -101,10 +109,10 @@ export default function SignupPage() {
             </Box>
               <VStack spacing={2}>
                 <Heading size="lg" color="gray.900">
-                  Criar conta de Motorista
+                  {t('signup.title')}
                 </Heading>
                 <Text color="gray.600">
-                  Junte-se à plataforma Conduz.pt como motorista
+                  {t('signup.subtitle')}
                 </Text>
               </VStack>
           </VStack>
@@ -116,12 +124,12 @@ export default function SignupPage() {
                 {/* Informações Pessoais */}
                 <Box>
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
-                    Informações Pessoais
+                    {t('signup.personalInfo')}
                   </Text>
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
                       <FormControl id="firstName" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Nome</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.firstName')}</FormLabel>
                         <Input
                           type="text"
                           value={firstName}
@@ -135,7 +143,7 @@ export default function SignupPage() {
                     </GridItem>
                     <GridItem>
                       <FormControl id="lastName" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Sobrenome</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.lastName')}</FormLabel>
                         <Input
                           type="text"
                           value={lastName}
@@ -152,7 +160,7 @@ export default function SignupPage() {
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="phone" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Telefone</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.phone')}</FormLabel>
                         <Input
                           type="tel"
                           value={phone}
@@ -166,7 +174,7 @@ export default function SignupPage() {
                     </GridItem>
                     <GridItem>
                       <FormControl id="birthDate" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Data de Nascimento</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.birthDate')}</FormLabel>
                         <Input
                           type="date"
                           value={birthDate}
@@ -182,7 +190,7 @@ export default function SignupPage() {
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="city" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Cidade</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.city')}</FormLabel>
                         <Input
                           type="text"
                           value={city}
@@ -202,12 +210,12 @@ export default function SignupPage() {
                 {/* Informações de Condução */}
                 <Box>
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
-                    Informações de Condução
+                    {t('signup.drivingInfo')}
                   </Text>
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
                       <FormControl id="licenseNumber" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Número da Carta de Condução</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.licenseNumber')}</FormLabel>
                         <Input
                           type="text"
                           value={licenseNumber}
@@ -221,7 +229,7 @@ export default function SignupPage() {
                     </GridItem>
                     <GridItem>
                       <FormControl id="licenseExpiry" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Validade da Carta</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.licenseExpiry')}</FormLabel>
                         <Input
                           type="date"
                           value={licenseExpiry}
@@ -237,7 +245,7 @@ export default function SignupPage() {
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="vehicleType">
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Tipo de Veículo (Opcional)</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('signup.vehicleOptional')}</FormLabel>
                         <Select
                           value={vehicleType}
                           onChange={(e) => setVehicleType(e.target.value)}
@@ -261,12 +269,12 @@ export default function SignupPage() {
                 {/* Informações de Conta */}
                 <Box>
                   <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
-                    Informações de Conta
+                    {t('signup.accountInfo')}
                   </Text>
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                     <GridItem>
                       <FormControl id="email" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">E-mail</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.email')}</FormLabel>
                         <Input
                           type="email"
                           value={email}
@@ -283,7 +291,7 @@ export default function SignupPage() {
                   <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={6}>
                     <GridItem>
                       <FormControl id="password" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Senha</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.password')}</FormLabel>
                         <InputGroup>
                           <Input
                             type={showPassword ? 'text' : 'password'}
@@ -308,7 +316,7 @@ export default function SignupPage() {
                     </GridItem>
                     <GridItem>
                       <FormControl id="confirmPassword" isRequired>
-                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">Confirmar senha</FormLabel>
+                        <FormLabel fontSize="md" fontWeight="semibold" color="gray.700">{t('user.confirmPassword')}</FormLabel>
                         <InputGroup>
                           <Input
                             type={showConfirmPassword ? 'text' : 'password'}
@@ -349,7 +357,7 @@ export default function SignupPage() {
                   loadingText="Criando conta..."
                   rightIcon={<FiArrowRight />}
                 >
-                  Criar conta
+{t('signup.createAccount')}
                 </Button>
               </Stack>
             </form>
@@ -359,9 +367,9 @@ export default function SignupPage() {
           <VStack spacing={4}>
             <Divider />
             <Text color="gray.600" fontSize="sm">
-              Já tem uma conta?{' '}
+{t('signup.alreadyHaveAccount')}{' '}
               <ChakraLink as={Link} href="/login" color="green.500" fontWeight="medium">
-                Fazer login
+                {t('signup.loginLink')}
               </ChakraLink>
             </Text>
           </VStack>
@@ -371,3 +379,13 @@ export default function SignupPage() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+  const translations = await loadTranslations(locale || 'pt', ['common']);
+
+  return {
+    props: {
+      translations,
+    },
+  };
+};

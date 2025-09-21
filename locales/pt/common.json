@@ -10,7 +10,27 @@
   },
   "user": {
     "email": "E-mail",
-    "password": "Senha"
+    "password": "Senha",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "phone": "Telefone",
+    "birthDate": "Data de Nascimento",
+    "city": "Cidade",
+    "licenseNumber": "Número da Carta de Condução",
+    "licenseExpiry": "Validade da Carta",
+    "vehicleType": "Tipo de Veículo",
+    "confirmPassword": "Confirmar senha"
+  },
+  "signup": {
+    "title": "Criar conta de Motorista",
+    "subtitle": "Junte-se à plataforma Conduz.pt como motorista",
+    "personalInfo": "Informações Pessoais",
+    "drivingInfo": "Informações de Condução",
+    "accountInfo": "Informações de Conta",
+    "vehicleOptional": "Tipo de Veículo (Opcional)",
+    "createAccount": "Criar conta",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "loginLink": "Fazer login"
   },
   "header": {
     "logo": "Conduz.pt",

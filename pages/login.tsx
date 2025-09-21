@@ -87,7 +87,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
         <meta name="description" content="Faça login na plataforma Conduz.pt" />
       </Head>
 
-      <Box py={16} bg="white">
+      <Box py={16} bg="gray.50">
         <Container maxW="md">
           <VStack spacing={8} align="stretch">
             {/* Logo e Título */}
