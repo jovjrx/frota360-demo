@@ -52,7 +52,6 @@ export default function SignupPage({ translations }: SignupPageProps) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,36 +87,9 @@ export default function SignupPage({ translations }: SignupPageProps) {
         <meta name="keywords" content="cadastro motorista, registro TVDE, ser motorista, cadastro Conduz" />
       </Head>
 
-      <Box py={16} bg="gray.50">
+      <Box py={8}>
         <Container maxW="4xl">
         <VStack spacing={8} align="stretch">
-          {/* Logo e Título */}
-          <VStack spacing={4} textAlign="center">
-            <Box
-              w="60px"
-              h="60px"
-              bg="green.500"
-              borderRadius="xl"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              color="white"
-              fontWeight="bold"
-              fontSize="2xl"
-            >
-              C
-            </Box>
-              <VStack spacing={2}>
-                <Heading size="lg" color="gray.900">
-                  {t('signup.title')}
-                </Heading>
-                <Text color="gray.600">
-                  {t('signup.subtitle')}
-                </Text>
-              </VStack>
-          </VStack>
-
-          {/* Formulário */}
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>

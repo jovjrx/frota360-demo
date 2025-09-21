@@ -87,37 +87,9 @@ export default function LoginPage({ translations }: LoginPageProps) {
         <meta name="description" content="Faça login na plataforma Conduz.pt" />
       </Head>
 
-      <Box py={16} bg="gray.50">
+      <Box py={8}>
         <Container maxW="md">
           <VStack spacing={8} align="stretch">
-            {/* Logo e Título */}
-            <VStack spacing={4} textAlign="center">
-              <Box
-                w="60px"
-                h="60px"
-                bg="green.500"
-                borderRadius="xl"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                color="white"
-                fontWeight="bold"
-                fontSize="2xl"
-              >
-                C
-              </Box>
-              <VStack spacing={2}>
-                <Heading size="lg" color="gray.900">
-                  {t('navigation.login')}
-                </Heading>
-                <Text color="gray.600">
-                  Acesse a sua conta na plataforma
-                </Text>
-              </VStack>
-            </VStack>
-
-
-            {/* Formulário */}
             <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
               <form onSubmit={handleSubmit}>
                 <Stack spacing={6}>
