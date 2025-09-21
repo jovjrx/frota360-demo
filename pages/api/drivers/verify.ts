@@ -38,16 +38,22 @@ const handler = requireAdmin(async (req: NextApiRequest, res: NextApiResponse, c
 
     // Send appropriate email notification
     try {
-      if (validatedData.status === 'approved') {
+      if (validatedData.status === 'active') {
         await emailService.sendDriverApprovalEmail(
           existingDriver.email,
           existingDriver.name
         );
-      } else if (validatedData.status === 'rejected') {
+      } else if (validatedData.status === 'inactive') {
         await emailService.sendDriverRejectionEmail(
           existingDriver.email,
           existingDriver.name,
           validatedData.reason
+        );
+      } else if (validatedData.status === 'suspended') {
+        await emailService.sendDriverRejectionEmail(
+          existingDriver.email,
+          existingDriver.name,
+          validatedData.reason || 'Conta suspensa'
         );
       }
     } catch (emailError) {
