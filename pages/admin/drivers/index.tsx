@@ -229,177 +229,156 @@ export default function DriversManagement({
           status: 'active'
         }}
         notifications={0}
+        stats={[
+          {
+            label: 'Total',
+            value: stats.total,
+            helpText: 'Motoristas',
+            color: 'gray.500'
+          },
+          {
+            label: 'Aprovados',
+            value: stats.approved,
+            helpText: 'Ativos',
+            color: 'green.500'
+          },
+          {
+            label: 'Pendentes',
+            value: stats.pending,
+            helpText: 'Aguardando',
+            color: 'yellow.500'
+          },
+          {
+            label: 'Rejeitados',
+            value: stats.rejected,
+            helpText: 'Negados',
+            color: 'red.500'
+          },
+          {
+            label: 'Suspensos',
+            value: stats.suspended,
+            helpText: 'Bloqueados',
+            color: 'red.500'
+          }
+        ]}
         actions={
-          <HStack spacing={4}>
-            <Button leftIcon={<FiDownload />} variant="outline" onClick={exportDrivers}>
-              Exportar CSV
-            </Button>
-            <Button leftIcon={<FiPlus />} colorScheme="purple">
-              Adicionar Motorista
-            </Button>
-          </HStack>
+              <HStack spacing={4}>
+                <Button leftIcon={<FiDownload />} variant="outline" onClick={exportDrivers}>
+                  Exportar CSV
+                </Button>
+                <Button leftIcon={<FiPlus />} colorScheme="purple">
+                  Adicionar Motorista
+                </Button>
+              </HStack>
         }
       >
-        {/* Stats Cards */}
-        <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
-          <Card bg="white" borderColor="gray.200">
-            <CardBody>
-              <Stat>
-                <StatLabel>Total</StatLabel>
-                <StatNumber>{stats.total}</StatNumber>
-                <StatHelpText>Motoristas</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="white" borderColor="gray.200">
-            <CardBody>
-              <Stat>
-                <StatLabel>Aprovados</StatLabel>
-                <StatNumber color="green.500">{stats.approved}</StatNumber>
-                <StatHelpText>Ativos</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="white" borderColor="gray.200">
-            <CardBody>
-              <Stat>
-                <StatLabel>Pendentes</StatLabel>
-                <StatNumber color="yellow.500">{stats.pending}</StatNumber>
-                <StatHelpText>Aguardando</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="white" borderColor="gray.200">
-            <CardBody>
-              <Stat>
-                <StatLabel>Rejeitados</StatLabel>
-                <StatNumber color="red.500">{stats.rejected}</StatNumber>
-                <StatHelpText>Negados</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="white" borderColor="gray.200">
-            <CardBody>
-              <Stat>
-                <StatLabel>Suspensos</StatLabel>
-                <StatNumber color="red.500">{stats.suspended}</StatNumber>
-                <StatHelpText>Bloqueados</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-
         {/* Filters */}
         <Card bg="white" borderColor="gray.200">
-          <CardBody>
+              <CardBody>
             <HStack spacing={4}>
-              <InputGroup maxW="300px">
-                <InputLeftElement>
-                  <FiSearch />
-                </InputLeftElement>
-                <Input
-                  placeholder="Buscar motoristas..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                  <InputGroup maxW="300px">
+                    <InputLeftElement>
+                      <FiSearch />
+                    </InputLeftElement>
+                    <Input
+                      placeholder="Buscar motoristas..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </InputGroup>
+                  <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                 maxW="200px"
-              >
+                  >
                 <option value="all">Todos os Status</option>
-                <option value="pending">Pendentes</option>
+                    <option value="pending">Pendentes</option>
                 <option value="active">Aprovados</option>
-                <option value="suspended">Suspensos</option>
+                    <option value="suspended">Suspensos</option>
                 <option value="inactive">Inativos</option>
-              </Select>
-            </HStack>
-          </CardBody>
-        </Card>
+                  </Select>
+                </HStack>
+              </CardBody>
+            </Card>
 
-        {/* Drivers Table */}
+            {/* Drivers Table */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
             <Heading size="md">Lista de Motoristas ({filteredDrivers.length})</Heading>
           </CardHeader>
           <CardBody>
-            <TableContainer>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Motorista</Th>
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Motorista</Th>
                     <Th>Contato</Th>
-                    <Th>Status</Th>
+                        <Th>Status</Th>
                     <Th>Cadastro</Th>
-                    <Th>Ações</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {filteredDrivers.map((driver) => (
-                    <Tr key={driver.id}>
-                      <Td>
-                        <HStack>
+                        <Th>Ações</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {filteredDrivers.map((driver) => (
+                        <Tr key={driver.id}>
+                          <Td>
+                            <HStack>
                           <Avatar size="sm" name={driver.name} />
-                          <VStack align="flex-start" spacing={0}>
+                              <VStack align="flex-start" spacing={0}>
                             <Text fontWeight="medium">{driver.name}</Text>
                             <Text fontSize="sm" color="gray.600">ID: {driver.id}</Text>
-                          </VStack>
-                        </HStack>
-                      </Td>
-                      <Td>
+                              </VStack>
+                            </HStack>
+                          </Td>
+                          <Td>
                         <VStack align="flex-start" spacing={1}>
-                          <Text fontSize="sm">{driver.email}</Text>
+                                <Text fontSize="sm">{driver.email}</Text>
                           <Text fontSize="sm" color="gray.600">{driver.phone}</Text>
-                        </VStack>
-                      </Td>
-                      <Td>
-                        <Badge colorScheme={getStatusColor(driver.status)}>
-                          {getStatusText(driver.status)}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        <Text fontSize="sm">
-                          {new Date(driver.createdAt).toLocaleDateString('pt-BR')}
-                        </Text>
-                      </Td>
-                      <Td>
-                        <Menu>
+                            </VStack>
+                          </Td>
+                          <Td>
+                            <Badge colorScheme={getStatusColor(driver.status)}>
+                              {getStatusText(driver.status)}
+                            </Badge>
+                          </Td>
+                          <Td>
+                              <Text fontSize="sm">
+                                {new Date(driver.createdAt).toLocaleDateString('pt-BR')}
+                              </Text>
+                          </Td>
+                          <Td>
+                              <Menu>
                           <MenuButton as={IconButton} icon={<FiMoreVertical />} variant="ghost" size="sm" />
-                          <MenuList>
+                                <MenuList>
                             <MenuItem icon={<FiEye />} onClick={() => handleViewDriver(driver)}>
                               Ver Detalhes
                             </MenuItem>
                             <MenuItem icon={<FiEdit />} onClick={() => handleEditDriver(driver)}>
                               Editar
                             </MenuItem>
-                            {driver.status === 'pending' && (
-                              <>
+                                  {driver.status === 'pending' && (
+                                    <>
                                 <MenuItem icon={<FiCheck />} onClick={() => handleStatusChange(driver.id, 'active')}>
-                                  Aprovar
-                                </MenuItem>
+                                        Aprovar
+                                      </MenuItem>
                                 <MenuItem icon={<FiX />} onClick={() => handleStatusChange(driver.id, 'inactive')}>
-                                  Rejeitar
-                                </MenuItem>
-                              </>
-                            )}
+                                        Rejeitar
+                                      </MenuItem>
+                                    </>
+                                  )}
                             <MenuItem icon={<FiTrash2 />} onClick={() => handleDeleteDriver(driver)} color="red.500">
                               Excluir
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </CardBody>
-        </Card>
+                                  </MenuItem>
+                                </MenuList>
+                              </Menu>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </CardBody>
+            </Card>
 
         {/* Driver Details Modal */}
         <StandardModal
@@ -409,56 +388,56 @@ export default function DriversManagement({
           size="xl"
           showSave={false}
         >
-          {selectedDriver && (
-            <Tabs>
-              <TabList>
-                <Tab>Informações Gerais</Tab>
-                <Tab>Documentos</Tab>
-                <Tab>Histórico</Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <VStack spacing={4} align="stretch">
-                    <HStack>
+              {selectedDriver && (
+                <Tabs>
+                  <TabList>
+                    <Tab>Informações Gerais</Tab>
+                    <Tab>Documentos</Tab>
+                    <Tab>Histórico</Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <VStack spacing={4} align="stretch">
+                        <HStack>
                       <Avatar size="lg" name={selectedDriver.name} />
-                      <VStack align="flex-start" spacing={1}>
+                          <VStack align="flex-start" spacing={1}>
                         <Text fontSize="lg" fontWeight="bold">{selectedDriver.name}</Text>
                         <Text color="gray.600">{selectedDriver.email}</Text>
-                        <Badge colorScheme={getStatusColor(selectedDriver.status)}>
-                          {getStatusText(selectedDriver.status)}
-                        </Badge>
-                      </VStack>
-                    </HStack>
-                    
-                    <SimpleGrid columns={2} spacing={4}>
-                      <Box>
-                        <Text fontSize="sm" color="gray.500">Telefone</Text>
-                        <Text>{selectedDriver.phone || 'Não informado'}</Text>
-                      </Box>
-                      <Box>
+                            <Badge colorScheme={getStatusColor(selectedDriver.status)}>
+                              {getStatusText(selectedDriver.status)}
+                            </Badge>
+                          </VStack>
+                        </HStack>
+
+                        <SimpleGrid columns={2} spacing={4}>
+                          <Box>
+                            <Text fontSize="sm" color="gray.500">Telefone</Text>
+                            <Text>{selectedDriver.phone || 'Não informado'}</Text>
+                          </Box>
+                          <Box>
                         <Text fontSize="sm" color="gray.500">Data de Cadastro</Text>
                         <Text>{new Date(selectedDriver.createdAt).toLocaleDateString('pt-BR')}</Text>
                       </Box>
                       <Box>
                         <Text fontSize="sm" color="gray.500">Última Atividade</Text>
                         <Text>{new Date(selectedDriver.lastActivity).toLocaleDateString('pt-BR')}</Text>
-                      </Box>
-                      <Box>
+                          </Box>
+                          <Box>
                         <Text fontSize="sm" color="gray.500">Avaliação</Text>
                         <Text>{selectedDriver.rating || 'N/A'}</Text>
-                      </Box>
-                    </SimpleGrid>
-                  </VStack>
-                </TabPanel>
-                <TabPanel>
+                          </Box>
+                        </SimpleGrid>
+                      </VStack>
+                    </TabPanel>
+                    <TabPanel>
                   <Text>Documentos do motorista serão exibidos aqui.</Text>
-                </TabPanel>
-                <TabPanel>
+                    </TabPanel>
+                    <TabPanel>
                   <Text>Histórico de atividades será exibido aqui.</Text>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          )}
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              )}
         </StandardModal>
 
         {/* Edit Driver Modal */}

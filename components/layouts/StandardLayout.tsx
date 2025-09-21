@@ -12,8 +12,24 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  SimpleGrid,
+  Card,
+  CardBody,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
 } from '@chakra-ui/react';
 import { FiBell, FiSettings } from 'react-icons/fi';
+
+interface StatItem {
+  label: string;
+  value: string | number;
+  helpText?: string;
+  arrow?: 'increase' | 'decrease';
+  color?: string;
+}
 
 interface StandardLayoutProps {
   title: string;
@@ -30,6 +46,7 @@ interface StandardLayoutProps {
     title: string;
     description: string;
   }>;
+  stats?: StatItem[];
   children: React.ReactNode;
   actions?: React.ReactNode;
 }
@@ -40,6 +57,7 @@ export default function StandardLayout({
   user,
   notifications = 0,
   alerts = [],
+  stats = [],
   children,
   actions,
 }: StandardLayoutProps) {
@@ -149,6 +167,29 @@ export default function StandardLayout({
         {/* Main Content */}
         <Box maxW="7xl" mx="auto" px={4} py={8}>
           <VStack spacing={8} align="stretch">
+            {/* Stats Grid */}
+            {stats.length > 0 && (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: stats.length > 4 ? 4 : stats.length }} spacing={6}>
+                {stats.map((stat, index) => (
+                  <Card key={index} bg="white" borderColor="gray.200">
+                    <CardBody>
+                      <Stat>
+                        <StatLabel>{stat.label}</StatLabel>
+                        <StatNumber color={stat.color}>{stat.value}</StatNumber>
+                        {stat.helpText && (
+                          <StatHelpText>
+                            {stat.arrow && <StatArrow type={stat.arrow} />}
+                            {stat.helpText}
+                          </StatHelpText>
+                        )}
+                      </Stat>
+                    </CardBody>
+                  </Card>
+                ))}
+              </SimpleGrid>
+            )}
+
+            {/* Page Content */}
             {children}
           </VStack>
         </Box>

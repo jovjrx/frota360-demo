@@ -25,9 +25,11 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
+  Badge,
+  Divider,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -138,47 +140,130 @@ export default function Header({ t }: HeaderProps) {
           </HStack>
 
           <HStack spacing={4}>
+            {/* Language Selector */}
+            <LanguageSelector />
+            
             {/* Desktop: Login/User Menu */}
             <HStack spacing={2} display={{ base: "none", md: "flex" }}>
               {user ? (
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    size="sm"
-                    variant="ghost"
-                    leftIcon={<Avatar size="sm" name={user.displayName || user.email} />}
-                    rightIcon={<ChevronDownIcon />}
-                  >
-                    <Text display={{ base: "none", lg: "block" }}>
-                      {userData?.name || user.displayName || user.email}
-                    </Text>
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<FiUser />} onClick={() => {
-                      router.push(isAdmin ? '/admin' : '/drivers');
-                    }}>
-                      Painel
-                    </MenuItem>
-                    {isAdmin && (
-                      <>
-                        <MenuDivider />
-                        <MenuItem icon={<FiUsers />} onClick={() => router.push('/admin/drivers')}>
-                          Motoristas
-                        </MenuItem>
-                        <MenuItem icon={<FiDollarSign />} onClick={() => router.push('/admin/payouts')}>
-                          Pagamentos
-                        </MenuItem>
-                        <MenuItem icon={<FiSettings />} onClick={() => router.push('/admin/plans')}>
-                          Planos
-                        </MenuItem>
-                      </>
-                    )}
-                    <MenuDivider />
-                    <MenuItem icon={<FiLogOut />} onClick={handleLogout}>
-                      Sair
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                <Popover placement="bottom-end">
+                  <PopoverTrigger>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      leftIcon={<Avatar size="sm" name={userData?.name || user.displayName || user.email} />}
+                      rightIcon={<ChevronDownIcon />}
+                      _hover={{ bg: "gray.100" }}
+                    >
+                      <Text display={{ base: "none", lg: "block" }}>
+                        {userData?.name || user.displayName || user.email}
+                      </Text>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent w="280px" shadow="xl" border="none" borderRadius="lg">
+                    <PopoverBody p={0}>
+                      <VStack spacing={0} align="stretch">
+                        {/* User Info Header */}
+                        <Box p={4} bg="gray.50" borderRadius="lg 0 0 0">
+                          <HStack spacing={3}>
+                            <Avatar 
+                              size="md" 
+                              name={userData?.name || user.displayName || user.email}
+                              bg={isAdmin ? "blue.500" : "green.500"}
+                            />
+                            <VStack align="flex-start" spacing={1} flex={1}>
+                              <Text fontWeight="bold" fontSize="sm">
+                                {userData?.name || user.displayName || user.email}
+                              </Text>
+                              <Text fontSize="xs" color="gray.600">
+                                {userData?.email || user.email}
+                              </Text>
+                              <Badge 
+                                size="sm" 
+                                colorScheme={isAdmin ? "blue" : "green"}
+                              >
+                                {isAdmin ? "Administrador" : "Motorista"}
+                              </Badge>
+                            </VStack>
+                          </HStack>
+                        </Box>
+
+                        <Divider />
+
+                        {/* Menu Items */}
+                        <VStack spacing={0} align="stretch">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            justifyContent="flex-start"
+                            leftIcon={<FiUser />}
+                            onClick={() => {
+                              router.push(isAdmin ? '/admin' : '/drivers');
+                            }}
+                            borderRadius="0"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Painel
+                          </Button>
+                          
+                          {isAdmin && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                justifyContent="flex-start"
+                                leftIcon={<FiUsers />}
+                                onClick={() => router.push('/admin/drivers')}
+                                borderRadius="0"
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                Motoristas
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                justifyContent="flex-start"
+                                leftIcon={<FiDollarSign />}
+                                onClick={() => router.push('/admin/payouts')}
+                                borderRadius="0"
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                Pagamentos
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                justifyContent="flex-start"
+                                leftIcon={<FiSettings />}
+                                onClick={() => router.push('/admin/plans')}
+                                borderRadius="0"
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                Planos
+                              </Button>
+                            </>
+                          )}
+                        </VStack>
+
+                        <Divider />
+
+                        {/* Logout */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          justifyContent="flex-start"
+                          leftIcon={<FiLogOut />}
+                          onClick={handleLogout}
+                          borderRadius="0 0 lg lg"
+                          color="red.500"
+                          _hover={{ bg: "red.50" }}
+                        >
+                          Sair
+                        </Button>
+                      </VStack>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <>
                   <Button as={NextLink} href="/login" variant="ghost" size="sm">
@@ -200,7 +285,6 @@ export default function Header({ t }: HeaderProps) {
                 setOpen((s) => !s);
               }}
             />
-            <LanguageSelector />
           </HStack>
         </Flex>
       </Container>
