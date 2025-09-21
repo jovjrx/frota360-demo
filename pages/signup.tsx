@@ -131,27 +131,13 @@ export default function SignupPage({ translations }: SignupPageProps) {
         }
       };
 
-      // Criar documento do usuário na coleção users
-      const userData = {
-        uid: user.uid,
-        email: email,
-        name: `${firstName} ${lastName}`,
-        role: 'driver',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      // Criar ambos os documentos com tratamento de erro individual
+      // Criar apenas documento do motorista (não criar em users)
       try {
         console.log('Criando documento do motorista...', driverData);
         const driverDocRef = await addDoc(collection(db, 'drivers'), driverData);
         console.log('Documento do motorista criado com ID:', driverDocRef.id);
-        
-        console.log('Criando documento do usuário...', userData);
-        await setDoc(doc(db, 'users', user.uid), userData);
-        console.log('Documento do usuário criado com sucesso');
       } catch (firestoreError) {
-        console.error('Erro ao criar documentos no Firestore:', firestoreError);
+        console.error('Erro ao criar documento do motorista:', firestoreError);
         throw new Error('Erro ao salvar dados do motorista. Tente novamente.');
       }
 
@@ -179,109 +165,10 @@ export default function SignupPage({ translations }: SignupPageProps) {
     } catch (err: any) {
       console.error('Erro ao criar conta:', err);
       
-      // Se o erro for de email já em uso, verificar se precisa completar o cadastro
+      // Se o erro for de email já em uso, sugerir login
       if (err.code === 'auth/email-already-in-use') {
-        try {
-          console.log('Email já existe, verificando status do cadastro...');
-          
-          // Verificar status do usuário
-          const checkResponse = await fetch('/api/auth/check-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-          });
-
-          if (!checkResponse.ok) {
-            throw new Error('Erro ao verificar status do usuário');
-          }
-
-          const checkData = await checkResponse.json();
-          
-          if (checkData.needsDriverDoc) {
-            console.log('Completando cadastro do motorista...');
-            
-            // Completar cadastro via API
-            const completeResponse = await fetch('/api/auth/complete-signup', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                email,
-                driverData: {
-                  firstName,
-                  lastName,
-                  name: `${firstName} ${lastName}`,
-                  fullName: `${firstName} ${lastName}`,
-                  email,
-                  phone,
-                  birthDate: birthDate || null,
-                  city: city || null,
-                  licenseNumber: licenseNumber || null,
-                  licenseExpiry: licenseExpiry || null,
-                  vehicleType: vehicleType || null,
-                  status: 'pending',
-                  isActive: false,
-                  weeklyEarnings: 0,
-                  monthlyEarnings: 0,
-                  totalTrips: 0,
-                  rating: 0,
-                  statusUpdatedAt: null,
-                  statusUpdatedBy: null,
-                  notes: '',
-                  lastPayoutAt: null,
-                  lastPayoutAmount: 0,
-                  locale: 'pt',
-                  createdBy: 'self',
-                  lastLoginAt: null,
-                  documents: {
-                    license: { uploaded: false, verified: false, url: null },
-                    insurance: { uploaded: false, verified: false, url: null },
-                    vehicle: { uploaded: false, verified: false, url: null }
-                  }
-                }
-              }),
-            });
-
-            if (!completeResponse.ok) {
-              const errorData = await completeResponse.json();
-              throw new Error(errorData.error || 'Erro ao completar cadastro');
-            }
-
-            console.log('Cadastro completado com sucesso');
-          }
-          
-          // Fazer login com as credenciais existentes
-          const { signInWithEmailAndPassword } = await import('firebase/auth');
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          
-          // Criar sessão
-          const idToken = await user.getIdToken();
-          const sessionResponse = await fetch('/api/auth/create-session', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              idToken: idToken,
-            }),
-          });
-
-          if (!sessionResponse.ok) {
-            const errorData = await sessionResponse.json();
-            throw new Error(errorData.error || 'Erro ao criar sessão');
-          }
-
-          router.push('/drivers');
-          return;
-        } catch (recoveryError) {
-          console.error('Erro ao recuperar cadastro:', recoveryError);
-          setError('Este email já está cadastrado. Tente fazer login ou entre em contato com o suporte.');
-          return;
-        }
+        setError('Este email já está cadastrado. Tente fazer login.');
+        return;
       }
       
       if (err.code === 'auth/invalid-email') {

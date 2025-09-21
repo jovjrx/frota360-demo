@@ -23,33 +23,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Email não encontrado no token' });
     }
 
-    // Verificar na coleção users
-    const userDoc = await adminDb
-      .collection('users')
-      .doc(uid)
-      .get();
-
-    if (!userDoc.exists) {
-      return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
-    }
-
-    const userData = userDoc.data();
-    const role = userData?.role || 'driver';
-    const name = userData?.name || email.split('@')[0];
+    // Verificar se é admin (coleção users) ou motorista (coleção drivers)
+    const userDoc = await adminDb.collection('users').doc(uid).get();
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', uid).limit(1).get();
     
+    let role = 'driver'; // Default
+    let name = email.split('@')[0];
     let driverId = null;
     
-    // Se for driver, buscar o driverId na coleção drivers
-    if (role === 'driver') {
-      const driverDoc = await adminDb
-        .collection('drivers')
-        .where('uid', '==', uid)
-        .limit(1)
-        .get();
-      
-      if (!driverDoc.empty) {
-        driverId = driverDoc.docs[0].id;
-      }
+    if (userDoc.exists) {
+      // É admin
+      const userData = userDoc.data();
+      role = 'admin';
+      name = userData?.name || name;
+    } else if (!driverSnap.empty) {
+      // É motorista
+      const driverData = driverSnap.docs[0].data();
+      driverId = driverSnap.docs[0].id;
+      name = driverData?.name || name;
+    } else {
+      return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
     }
 
     // Criar sessão

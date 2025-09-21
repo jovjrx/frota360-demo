@@ -29,7 +29,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -218,6 +218,17 @@ export default function Header({ t }: HeaderProps) {
                                 _hover={{ bg: "gray.100" }}
                               >
                                 Motoristas
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                justifyContent="flex-start"
+                                leftIcon={<FiUserCheck />}
+                                onClick={() => router.push('/admin/users')}
+                                borderRadius="0"
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                Usuários
                               </Button>
                               <Button
                                 variant="ghost"
