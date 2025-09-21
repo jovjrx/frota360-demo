@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withDriver } from '@/lib/auth/withDriver';
-import { store } from '@/lib/store';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -14,7 +14,6 @@ import {
   CardHeader,
   Heading,
   Button,
-  useColorModeValue,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -48,25 +47,27 @@ import {
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
 import { useState } from 'react';
+import DriverLayout from '@/components/layouts/DriverLayout';
+import { formatPortugalTime } from '@/lib/timezone';
 
 interface SubscriptionPageProps {
   driver: any;
   currentSubscription: any;
   availablePlans: any[];
-  tCommon: any;
-  tDriver: any;
+  translations: Record<string, any>;
+  userData: any;
 }
 
 export default function SubscriptionPage({ 
   driver, 
   currentSubscription, 
   availablePlans,
-  tCommon,
-  tDriver 
+  translations,
+  userData
 }: SubscriptionPageProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const tCommon = (key: string) => translations.common?.[key] || key;
+  const tDriver = (key: string) => translations.driver?.[key] || key;
+  
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -188,176 +189,174 @@ export default function SubscriptionPage({
         <title>{`${tDriver('subscription.title')} - Conduz.pt`}</title>
       </Head>
       
-      <Box minH="100vh" bg={bgColor}>
-        {/* Header */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" py={6} shadow="sm">
-          <Box maxW="7xl" mx="auto" px={4}>
-            <VStack spacing={2} align="center">
-              <Heading size="lg" color="gray.800">
-                {tDriver('subscription.title')}
-              </Heading>
-              <Text color="gray.600" textAlign="center">
-                {tDriver('subscription.manageSubscription')}
-              </Text>
-            </VStack>
-          </Box>
-        </Box>
+      <DriverLayout
+        title={tDriver('subscription.title')}
+        subtitle={tDriver('subscription.subtitle')}
+        user={{
+          name: driver?.name || 'Motorista',
+          avatar: driver?.avatar,
+          role: 'driver',
+          status: driver?.status
+        }}
+        notifications={0}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/drivers' },
+          { label: tDriver('subscription.title') }
+        ]}
+      >
+        <VStack spacing={8} align="stretch">
+          {/* Current Subscription */}
+          {currentSubscription ? (
+            <Card bg="white" borderColor="gray.200">
+              <CardHeader>
+                <Heading size="md">{tDriver('subscription.currentSubscription')}</Heading>
+              </CardHeader>
+              <CardBody>
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+                  <VStack align="flex-start">
+                    <Text fontSize="sm" color="gray.500">{tDriver('subscription.status')}</Text>
+                    <Badge colorScheme={currentSubscription.status === 'active' ? 'green' : 'red'} fontSize="md" p={2}>
+                      {currentSubscription.status === 'active' ? 'Ativo' : 'Inativo'}
+                    </Badge>
+                    {currentSubscription.trialEnd && new Date(currentSubscription.trialEnd) > new Date() && (
+                      <Alert status="info" size="sm">
+                        <AlertIcon />
+                        <Box>
+                          <AlertTitle fontSize="sm">{tDriver('subscription.trialActive')}</AlertTitle>
+                          <AlertDescription fontSize="xs">
+                            {tDriver('subscription.trialEnds')} {formatPortugalTime(new Date(currentSubscription.trialEnd))}
+                          </AlertDescription>
+                        </Box>
+                      </Alert>
+                    )}
+                  </VStack>
+                  
+                  <VStack align="flex-start">
+                    <Text fontSize="sm" color="gray.500">{tDriver('subscription.plan')}</Text>
+                    <Text fontSize="xl" fontWeight="bold">{currentSubscription.plan?.name}</Text>
+                    <Text fontSize="sm" color="gray.600">
+                      €{(currentSubscription.plan?.price / 100).toFixed(2)}/{currentSubscription.plan?.interval === 'month' ? tDriver('subscription.perMonth') : tDriver('subscription.perYear')}
+                    </Text>
+                  </VStack>
 
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
-          <VStack spacing={8} align="stretch">
-            {/* Current Subscription */}
-            {currentSubscription ? (
-              <Card bg={cardBg} borderColor={borderColor}>
-                <CardHeader>
-                  <Heading size="md">{tDriver('subscription.currentSubscription')}</Heading>
-                </CardHeader>
-                <CardBody>
-                  <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">{tDriver('subscription.status')}</Text>
-                      <Badge colorScheme={currentSubscription.status === 'active' ? 'green' : 'red'} fontSize="md" p={2}>
-                        {currentSubscription.status === 'active' ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                      {currentSubscription.trialEnd && new Date(currentSubscription.trialEnd) > new Date() && (
-                        <Alert status="info" size="sm">
-                          <AlertIcon />
-                          <Box>
-                            <AlertTitle fontSize="sm">{tDriver('subscription.trialActive')}</AlertTitle>
-                            <AlertDescription fontSize="xs">
-                              {tDriver('subscription.trialEnds')} {new Date(currentSubscription.trialEnd).toLocaleDateString('pt-BR')}
-                            </AlertDescription>
-                          </Box>
-                        </Alert>
+                  <VStack align="flex-start">
+                    <Text fontSize="sm" color="gray.500">{tDriver('subscription.nextBilling')}</Text>
+                    <Text fontSize="lg" fontWeight="bold">
+                      {currentSubscription.nextBilling ? formatPortugalTime(new Date(currentSubscription.nextBilling)) : 'N/A'}
+                    </Text>
+                    <HStack spacing={2}>
+                      <Button size="sm" colorScheme="blue" variant="outline">
+                        {tDriver('subscription.changePlan')}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        colorScheme="red" 
+                        variant="outline"
+                        onClick={handleCancelSubscription}
+                        isLoading={loading}
+                      >
+                        {tDriver('subscription.cancelSubscription')}
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </SimpleGrid>
+              </CardBody>
+            </Card>
+          ) : (
+            <Alert status="info" borderRadius="md">
+              <AlertIcon />
+              <Box>
+                <AlertTitle>{tDriver('subscription.noSubscription')}</AlertTitle>
+                <AlertDescription>
+                  {tDriver('subscription.choosePlanDescription')}
+                </AlertDescription>
+              </Box>
+            </Alert>
+          )}
+
+          {/* Available Plans */}
+          <Box>
+            <Heading size="md" mb={6} textAlign="center">
+              {tDriver('subscription.availablePlans')}
+            </Heading>
+            
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+              {availablePlans.map((plan) => (
+                <Card 
+                  key={plan.id} 
+                  bg="white" 
+                  borderColor={plan.featured ? 'purple.500' : 'gray.200'}
+                  borderWidth={plan.featured ? '2px' : '1px'}
+                  position="relative"
+                  shadow={plan.featured ? 'lg' : 'sm'}
+                >
+                  {plan.featured && (
+                    <Badge 
+                      colorScheme="purple" 
+                      position="absolute" 
+                      top="-10px" 
+                      left="50%" 
+                      transform="translateX(-50%)"
+                      px={3}
+                      py={1}
+                    >
+                      Mais Popular
+                    </Badge>
+                  )}
+                  
+                  <CardHeader textAlign="center" pb={2}>
+                    <VStack spacing={2}>
+                      <Heading size="md" color={plan.featured ? 'purple.600' : 'gray.800'}>
+                        {plan.name}
+                      </Heading>
+                      <HStack align="baseline">
+                        <Text fontSize="3xl" fontWeight="bold" color={plan.featured ? 'purple.600' : 'gray.800'}>
+                          €{(plan.price / 100).toFixed(0)}
+                        </Text>
+                        <Text color="gray.500">
+                          {tDriver('subscription.' + (plan.interval === 'month' ? 'perMonth' : 'perYear'))}
+                        </Text>
+                      </HStack>
+                      {plan.trialDays > 0 && (
+                        <Badge colorScheme="green">
+                          {plan.trialDays} {tDriver('subscription.freeDays')}
+                        </Badge>
                       )}
                     </VStack>
-                    
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">{tDriver('subscription.plan')}</Text>
-                      <Text fontSize="xl" fontWeight="bold">{currentSubscription.plan?.name}</Text>
-                      <Text fontSize="sm" color="gray.600">
-                        €{(currentSubscription.plan?.price / 100).toFixed(2)}/{currentSubscription.plan?.interval === 'month' ? 'mês' : 'ano'}
-                      </Text>
-                    </VStack>
+                  </CardHeader>
 
-                    <VStack align="flex-start">
-                      <Text fontSize="sm" color="gray.500">{tDriver('subscription.nextBilling')}</Text>
-                      <Text fontSize="lg" fontWeight="bold">
-                        {currentSubscription.nextBilling ? new Date(currentSubscription.nextBilling).toLocaleDateString('pt-BR') : 'N/A'}
-                      </Text>
-                      <HStack spacing={2}>
-                        <Button size="sm" colorScheme="blue" variant="outline">
-                          {tDriver('subscription.changePlan')}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          colorScheme="red" 
-                          variant="outline"
-                          onClick={handleCancelSubscription}
-                          isLoading={loading}
-                        >
-                          {tDriver('subscription.cancelSubscription')}
-                        </Button>
-                      </HStack>
-                    </VStack>
-                  </SimpleGrid>
-                </CardBody>
-              </Card>
-            ) : (
-              <Alert status="info" borderRadius="md">
-                <AlertIcon />
-                <Box>
-                  <AlertTitle>{tDriver('subscription.noSubscription')}</AlertTitle>
-                  <AlertDescription>
-                    {tDriver('subscription.choosePlanDescription')}
-                  </AlertDescription>
-                </Box>
-              </Alert>
-            )}
+                  <CardBody>
+                    <VStack spacing={4} align="stretch">
+                      <List spacing={2}>
+                        {getPlanFeatures(plan.name).map((feature, index) => (
+                          <ListItem key={index} fontSize="sm">
+                            <ListIcon as={FiCheck} color="green.500" />
+                            {feature}
+                          </ListItem>
+                        ))}
+                      </List>
 
-            {/* Available Plans */}
-            <Box>
-              <Heading size="md" mb={6} textAlign="center">
-                {tDriver('subscription.availablePlans')}
-              </Heading>
-              
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                {availablePlans.map((plan) => (
-                  <Card 
-                    key={plan.id} 
-                    bg={cardBg} 
-                    borderColor={plan.featured ? 'purple.500' : borderColor}
-                    borderWidth={plan.featured ? '2px' : '1px'}
-                    position="relative"
-                    shadow={plan.featured ? 'lg' : 'sm'}
-                  >
-                    {plan.featured && (
-                      <Badge 
-                        colorScheme="purple" 
-                        position="absolute" 
-                        top="-10px" 
-                        left="50%" 
-                        transform="translateX(-50%)"
-                        px={3}
-                        py={1}
+                      <Divider />
+
+                      <Button
+                        colorScheme={plan.featured ? 'purple' : 'gray'}
+                        size="lg"
+                        w="full"
+                        onClick={() => handleSelectPlan(plan)}
+                        isDisabled={currentSubscription?.plan?.id === plan.id}
                       >
-                        Mais Popular
-                      </Badge>
-                    )}
-                    
-                    <CardHeader textAlign="center" pb={2}>
-                      <VStack spacing={2}>
-                        <Heading size="md" color={plan.featured ? 'purple.600' : 'gray.800'}>
-                          {plan.name}
-                        </Heading>
-                        <HStack align="baseline">
-                          <Text fontSize="3xl" fontWeight="bold" color={plan.featured ? 'purple.600' : 'gray.800'}>
-                            €{(plan.price / 100).toFixed(0)}
-                          </Text>
-                          <Text color="gray.500">
-                            {tDriver('subscription.' + (plan.interval === 'month' ? 'perMonth' : 'perYear'))}
-                          </Text>
-                        </HStack>
-                        {plan.trialDays > 0 && (
-                          <Badge colorScheme="green">
-                            {plan.trialDays} {tDriver('subscription.freeDays')}
-                          </Badge>
-                        )}
-                      </VStack>
-                    </CardHeader>
-
-                    <CardBody>
-                      <VStack spacing={4} align="stretch">
-                        <List spacing={2}>
-                          {getPlanFeatures(plan.name).map((feature, index) => (
-                            <ListItem key={index} fontSize="sm">
-                              <ListIcon as={FiCheck} color="green.500" />
-                              {feature}
-                            </ListItem>
-                          ))}
-                        </List>
-
-                        <Divider />
-
-                        <Button
-                          colorScheme={plan.featured ? 'purple' : 'gray'}
-                          size="lg"
-                          w="full"
-                          onClick={() => handleSelectPlan(plan)}
-                          isDisabled={currentSubscription?.plan?.id === plan.id}
-                        >
-                          {currentSubscription?.plan?.id === plan.id 
-                            ? tDriver('subscription.currentPlan')
-                            : tDriver('subscription.chooseThisPlan')
-                          }
-                        </Button>
-                      </VStack>
-                    </CardBody>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            </Box>
-          </VStack>
-        </Box>
+                        {currentSubscription?.plan?.id === plan.id 
+                          ? tDriver('subscription.currentPlan')
+                          : tDriver('subscription.chooseThisPlan')
+                        }
+                      </Button>
+                    </VStack>
+                  </CardBody>
+                </Card>
+              ))}
+            </SimpleGrid>
+          </Box>
+        </VStack>
 
         {/* Confirmation Modal */}
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -373,7 +372,7 @@ export default function SubscriptionPage({
                       <VStack spacing={2} align="center">
                         <Heading size="md">{selectedPlan.name}</Heading>
                         <Text fontSize="2xl" fontWeight="bold" color="purple.600">
-                          €{(selectedPlan.price / 100).toFixed(2)}/{selectedPlan.interval === 'month' ? 'mês' : 'ano'}
+                          €{(selectedPlan.price / 100).toFixed(2)}/{selectedPlan.interval === 'month' ? tDriver('subscription.perMonth') : tDriver('subscription.perYear')}
                         </Text>
                         {selectedPlan.trialDays > 0 && (
                           <Badge colorScheme="green" fontSize="sm">
@@ -419,35 +418,57 @@ export default function SubscriptionPage({
             </ModalFooter>
           </ModalContent>
         </Modal>
-      </Box>
+      </DriverLayout>
     </>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    
-    
     // Load translations
-    const translations = await loadTranslations(context.locale || 'pt', ['common', 'driver']);
-    const { common: tCommon, driver: tDriver } = translations;
+    const translations = await loadTranslations('pt', ['common', 'driver']);
 
-    // Get driver data
-    const driver = { id: "demo-driver-1", name: "João Silva", email: "motorista@conduz.pt", status: "approved" };
+    // Get user data from context (passed by withDriver HOC)
+    const userData = (context as any).userData || null;
     
-    // Get current subscription
-    const currentSubscription = []
+    if (!userData) {
+      throw new Error('User data not found');
+    }
 
-    // Get available plans
-    const availablePlans = []
+    // Get driver data from Firestore
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
+    
+    if (driverSnap.empty) {
+      throw new Error('Driver not found');
+    }
+
+    const driverDoc = driverSnap.docs[0];
+    const driver = {
+      id: driverDoc.id,
+      ...driverDoc.data(),
+    };
+
+    // Get current subscription from Firestore
+    const subscriptionSnap = await adminDb.collection('subscriptions').where('driverId', '==', driverDoc.id).limit(1).get();
+    const currentSubscription = subscriptionSnap.empty ? null : {
+      id: subscriptionSnap.docs[0].id,
+      ...subscriptionSnap.docs[0].data(),
+    };
+
+    // Get available plans from Firestore
+    const plansSnap = await adminDb.collection('plans').where('active', '==', true).get();
+    const availablePlans = plansSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     return {
       props: {
         driver,
         currentSubscription,
         availablePlans,
-        tCommon,
-        tDriver,
+        translations,
+        userData: driver,
       },
     };
   } catch (error) {
@@ -457,8 +478,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         driver: null,
         currentSubscription: null,
         availablePlans: [],
-        tCommon: {},
-        tDriver: {},
+        translations: { common: {}, driver: {} },
+        userData: null,
       },
     };
   }
