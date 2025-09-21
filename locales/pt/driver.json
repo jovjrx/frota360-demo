@@ -118,7 +118,16 @@
       "cancellation_scheduled": "A sua assinatura será cancelada no final do período atual",
       "error_creating": "Erro ao criar assinatura. Tente novamente.",
       "error_updating": "Erro ao atualizar assinatura. Tente novamente.",
-      "error_cancelling": "Erro ao cancelar assinatura. Tente novamente."
+      "error_cancelling": "Erro ao cancelar assinatura. Tente novamente.",
+      "subscriptionCreated": "Assinatura criada com sucesso!",
+      "failedToCreate": "Erro ao criar assinatura. Tente novamente.",
+      "subscriptionCanceled": "Assinatura cancelada",
+      "subscriptionWillBeCanceled": "A sua assinatura será cancelada no final do período atual",
+      "failedToCancel": "Erro ao cancelar assinatura. Tente novamente.",
+      "manageSubscription": "Gerir Assinatura",
+      "currentSubscription": "Assinatura Atual",
+      "changePlan": "Alterar Plano",
+      "cancelSubscription": "Cancelar Assinatura"
     }
   },
   "profile": {

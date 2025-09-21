@@ -108,7 +108,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
   return (
     <>
       <Head>
-        <title>{t('navigation.login')} - Conduz.pt</title>
+        <title>{`${t('navigation.login')} - Conduz.pt`}</title>
         <meta name="description" content="Faça login na plataforma Conduz.pt" />
       </Head>
 

@@ -8,7 +8,33 @@
     "login": "Entrar",
     "loading": "Carregando...",
     "forgotPassword": "Esqueci a senha",
-    "resetPassword": "Redefinir senha"
+    "resetPassword": "Redefinir senha",
+    "logout": "Sair",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "dashboard": "Painel",
+    "analytics": "Relatórios",
+    "documents": "Documentos",
+    "payments": "Pagamentos",
+    "subscription": "Assinatura",
+    "support": "Suporte",
+    "help": "Ajuda"
+  },
+  "menu": {
+    "driver": {
+      "profile": "Meu Perfil",
+      "documents": "Documentos",
+      "payments": "Pagamentos",
+      "analytics": "Relatórios",
+      "dashboard": "Painel"
+    },
+    "admin": {
+      "dashboard": "Painel",
+      "drivers": "Motoristas",
+      "users": "Usuários",
+      "payments": "Pagamentos",
+      "plans": "Planos"
+    }
   },
   "user": {
     "email": "E-mail",

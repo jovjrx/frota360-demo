@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withDriver } from '@/lib/auth/withDriver';
-import { store } from '@/lib/store';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -46,6 +46,7 @@ import {
 import Link from 'next/link';
 import { loadTranslations } from '@/lib/translations';
 import DriverLayout from '@/components/layouts/DriverLayout';
+import QuickActions from '@/components/QuickActions';
 
 interface DriverDashboardProps {
   driver: any;
@@ -100,7 +101,7 @@ export default function DriverDashboard({
   return (
     <>
       <Head>
-        <title>{tDriver('dashboard.title')} - Conduz.pt</title>
+        <title>{`${tDriver('dashboard.title')} - Conduz.pt`}</title>
       </Head>
       
       <DriverLayout
@@ -167,59 +168,7 @@ export default function DriverDashboard({
         }
       >
         {/* Quick Actions */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">Ações Rápidas</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
-              <Button
-                leftIcon={<FiUpload />}
-                colorScheme="blue"
-                variant="outline"
-                h="60px"
-                flexDirection="column"
-                gap={2}
-              >
-                <Text fontSize="sm">Upload</Text>
-                <Text fontSize="xs" color="gray.600">Documentos</Text>
-              </Button>
-              <Button
-                leftIcon={<FiUser />}
-                colorScheme="green"
-                variant="outline"
-                h="60px"
-                flexDirection="column"
-                gap={2}
-              >
-                <Text fontSize="sm">Perfil</Text>
-                <Text fontSize="xs" color="gray.600">Editar</Text>
-              </Button>
-              <Button
-                leftIcon={<FiCreditCard />}
-                colorScheme="purple"
-                variant="outline"
-                h="60px"
-                flexDirection="column"
-                gap={2}
-              >
-                <Text fontSize="sm">Pagamentos</Text>
-                <Text fontSize="xs" color="gray.600">Histórico</Text>
-              </Button>
-              <Button
-                leftIcon={<FiSettings />}
-                colorScheme="gray"
-                variant="outline"
-                h="60px"
-                flexDirection="column"
-                gap={2}
-              >
-                <Text fontSize="sm">Configurações</Text>
-                <Text fontSize="xs" color="gray.600">Conta</Text>
-              </Button>
-            </SimpleGrid>
-          </CardBody>
-        </Card>
+        <QuickActions userRole="driver" userData={driver} />
 
         {/* Recent Activity */}
         <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>

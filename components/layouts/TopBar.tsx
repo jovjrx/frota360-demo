@@ -123,33 +123,6 @@ export default function TopBar({
                 transition="all 0.2s"
               />
             </Tooltip>
-
-            {/* User Info */}
-            <HStack spacing={3} px={3} py={2} bg="gray.50" borderRadius="full" _hover={{ bg: 'gray.100' }} transition="all 0.2s">
-              <Avatar 
-                size="sm" 
-                name={user.name}
-                bg={`${getRoleColor(user.role)}.500`}
-                border="2px solid"
-                borderColor="white"
-                shadow="sm"
-              />
-              <VStack align="flex-start" spacing={0}>
-                <Tooltip label={user.name} placement="bottom">
-                  <Text fontSize="sm" fontWeight="semibold" color="gray.800" maxW="120px" isTruncated>
-                    {truncateName(user.name, 15)}
-                  </Text>
-                </Tooltip>
-                <HStack spacing={1}>
-                  <Badge colorScheme={getRoleColor(user.role)} size="sm" borderRadius="full">
-                    {getRoleText(user.role)}
-                  </Badge>
-                  <Badge colorScheme="green" size="sm" borderRadius="full">
-                    Online
-                  </Badge>
-                </HStack>
-              </VStack>
-            </HStack>
           </HStack>
         </HStack>
       </Box>

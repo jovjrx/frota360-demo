@@ -14,15 +14,13 @@ export function middleware(request: NextRequest) {
     // Verificar se há sessão ativa (Iron Session)
     const sessionCookie = request.cookies.get('conduz-session');
     
-    // Se não há sessão, redirecionar para login
+    // Se não há sessão Iron Session, permitir acesso mas o cliente deve criar a sessão
+    // O componente withAuth/withAdmin vai verificar o Firebase Auth no cliente
     if (!sessionCookie) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      // Não redirecionar automaticamente, deixar o cliente lidar com isso
+      // Isso permite que usuários logados no Firebase Auth acessem as páginas
+      // e criem a sessão Iron Session automaticamente
     }
-    
-    // Para rotas específicas, verificar se o usuário está logado via Firebase
-    // Isso será verificado no lado do cliente pelos componentes withAuth/withAdmin
   }
   
   // Configurar headers de segurança

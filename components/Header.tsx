@@ -24,12 +24,12 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuDivider,
   Badge,
   Divider,
+  Icon,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -80,8 +80,8 @@ export default function Header({ t }: HeaderProps) {
 
   const ToolsMenu = () => (
     <Box position="relative">
-      <Popover 
-        placement="bottom-start" 
+      <Popover
+        placement="bottom-start"
         closeOnBlur={true}
         closeOnEsc={true}
       >
@@ -142,7 +142,7 @@ export default function Header({ t }: HeaderProps) {
           <HStack spacing={4}>
             {/* Language Selector */}
             <LanguageSelector />
-            
+
             {/* Desktop: Login/User Menu */}
             <HStack spacing={2} display={{ base: "none", md: "flex" }}>
               {user ? (
@@ -151,12 +151,12 @@ export default function Header({ t }: HeaderProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      leftIcon={<Avatar size="sm" name={userData?.name || user.displayName || user.email} />}
+                      leftIcon={<Icon as={FiUser} boxSize={5} />}
                       rightIcon={<ChevronDownIcon />}
                       _hover={{ bg: "gray.100" }}
                     >
                       <Text display={{ base: "none", lg: "block" }}>
-                        {userData?.name || user.displayName || user.email}
+                        Menu
                       </Text>
                     </Button>
                   </PopoverTrigger>
@@ -165,33 +165,26 @@ export default function Header({ t }: HeaderProps) {
                       <VStack spacing={0} align="stretch">
                         {/* User Info Header */}
                         <Box p={6} bg="gradient-to-r" bgGradient="linear(to-r, blue.50, purple.50)" borderRadius="xl 0 0 0">
-                          <HStack spacing={4}>
-                            <Avatar 
-                              size="lg" 
-                              name={userData?.name || user.displayName || user.email}
-                              bg={isAdmin ? "blue.500" : "green.500"}
-                              border="3px solid"
-                              borderColor="white"
-                              shadow="md"
-                            />
-                            <VStack align="flex-start" spacing={2} flex={1}>
-                              <Text fontWeight="bold" fontSize="md" color="gray.800">
-                                {userData?.name || user.displayName || user.email}
-                              </Text>
-                              <Text fontSize="sm" color="gray.600">
-                                {userData?.email || user.email}
-                              </Text>
-                              <Badge 
-                                size="md" 
-                                colorScheme={isAdmin ? "blue" : "green"}
-                                borderRadius="full"
-                                px={3}
-                                py={1}
-                              >
-                                {isAdmin ? "Administrador" : "Motorista"}
-                              </Badge>
-                            </VStack>
-                          </HStack>
+                          <Badge
+                            size="md"
+                            colorScheme={isAdmin ? "blue" : "green"}
+                            borderRadius="full"
+                            px={3}
+                            py={1}
+                            mb={4}
+                          >
+                            {isAdmin ? "Administrador" : "Motorista"}
+                          </Badge>
+                          <VStack align="flex-start" spacing={1} flex={1}>
+                            <Text fontWeight="bold" fontSize="md" color="gray.800">
+                              {userData?.name || user.displayName || user.email}
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                              {userData?.email || user.email}
+                            </Text>
+
+                          </VStack>
+
                         </Box>
 
                         <Divider />
@@ -214,7 +207,7 @@ export default function Header({ t }: HeaderProps) {
                           >
                             <Text fontWeight="medium">Painel</Text>
                           </Button>
-                          
+
                           {isAdmin && (
                             <>
                               <Button
@@ -272,6 +265,67 @@ export default function Header({ t }: HeaderProps) {
                                 px={4}
                               >
                                 <Text fontWeight="medium">Planos</Text>
+                              </Button>
+                            </>
+                          )}
+
+                          {!isAdmin && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiUser />}
+                                onClick={() => router.push('/drivers/profile')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Meu Perfil</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiFileText />}
+                                onClick={() => router.push('/drivers/documents')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Documentos</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiDollarSign />}
+                                onClick={() => router.push('/drivers/payments')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Pagamentos</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiTrendingUp />}
+                                onClick={() => router.push('/drivers/analytics')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Relatórios</Text>
                               </Button>
                             </>
                           )}
@@ -338,7 +392,7 @@ export default function Header({ t }: HeaderProps) {
               {items.map((item) => (
                 <NavLink key={item.href} href={item.href} label={item.label} />
               ))}
-              
+
               {/* Mobile Login/Logout */}
               <Box pt={3} borderTop="1px solid" borderColor="gray.200">
                 {user ? (

@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Buscar dados completos do usuário
+  // Buscar dados completos do usuário e criar sessão se necessário
   const fetchUserData = async (firebaseUser: User) => {
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -52,6 +52,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setUserData(data.user);
+        
+        // Verificar se precisa criar sessão Iron Session
+        const sessionResponse = await fetch('/api/auth/session-status');
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          if (!sessionData.authenticated) {
+            console.log('🔄 Criando sessão Iron Session...');
+            // Criar sessão Iron Session
+            const syncResponse = await fetch('/api/auth/sync-session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ idToken }),
+            });
+            
+            if (syncResponse.ok) {
+              console.log('✅ Sessão Iron Session criada com sucesso');
+            } else {
+              console.error('❌ Erro ao criar sessão Iron Session');
+            }
+          }
+        }
       } else {
         console.error('Erro ao buscar dados do usuário:', await response.text());
         setUserData(null);

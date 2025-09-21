@@ -185,7 +185,7 @@ export default function SubscriptionPage({
   return (
     <>
       <Head>
-        <title>{tDriver('subscription.title')} - Conduz.pt</title>
+        <title>{`${tDriver('subscription.title')} - Conduz.pt`}</title>
       </Head>
       
       <Box minH="100vh" bg={bgColor}>
