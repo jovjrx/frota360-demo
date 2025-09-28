@@ -21,6 +21,10 @@ import {
   AlertIcon,
   AlertDescription,
   SimpleGrid,
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
 } from '@chakra-ui/react';
 import { 
   FiUpload,
@@ -73,17 +77,40 @@ export default function DriverDocuments({
 
   const handleUpload = async (documentType: string, file: File) => {
     try {
-      // Implementar upload
-      console.log('Uploading document:', documentType, file);
-        toast({
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', documentType);
+      formData.append('driverId', driver?.id);
+
+      const response = await fetch('/api/drivers/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Falha no upload');
+      }
+
+      toast({
         title: 'Documento enviado!',
         description: 'Seu documento foi enviado para análise.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Reload page to show updated documents
+      window.location.reload();
     } catch (error) {
-      throw new Error('Erro ao enviar documento');
+      console.error('Erro ao enviar documento:', error);
+      toast({
+        title: 'Erro no upload',
+        description: error instanceof Error ? error.message : 'Não foi possível enviar o documento.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -247,7 +274,16 @@ export default function DriverDocuments({
                     )}
                     
                     {document.status === 'not_uploaded' && (
-                      <Button size="sm" leftIcon={<FiUpload />} colorScheme="blue" variant="outline">
+                      <Button 
+                        size="sm" 
+                        leftIcon={<FiUpload />} 
+                        colorScheme="blue" 
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDocument(document);
+                          setIsUploadModalOpen(true);
+                        }}
+                      >
                         Upload Documento
                           </Button>
                         )}
@@ -264,8 +300,33 @@ export default function DriverDocuments({
           onClose={() => setIsUploadModalOpen(false)}
           title="Upload de Documento"
           onSave={async () => {
-            // Implementar upload
-            console.log('Upload document');
+            const fileInput = document.getElementById('document-file') as HTMLInputElement;
+            const typeSelect = document.getElementById('document-type') as HTMLSelectElement;
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+              toast({
+                title: 'Arquivo necessário',
+                description: 'Por favor, selecione um arquivo.',
+                status: 'warning',
+                duration: 3000,
+                isClosable: true,
+              });
+              return;
+            }
+
+            if (!typeSelect.value) {
+              toast({
+                title: 'Tipo necessário',
+                description: 'Por favor, selecione o tipo de documento.',
+                status: 'warning',
+                duration: 3000,
+                isClosable: true,
+              });
+              return;
+            }
+
+            await handleUpload(typeSelect.value, fileInput.files[0]);
+            setIsUploadModalOpen(false);
           }}
           saveText="Enviar Documento"
         >
@@ -273,6 +334,20 @@ export default function DriverDocuments({
             <Text fontSize="sm" color="gray.600">
               Selecione o tipo de documento e faça o upload do arquivo.
             </Text>
+            
+            <FormControl>
+              <FormLabel>Tipo de Documento</FormLabel>
+              <Select 
+                id="document-type" 
+                placeholder="Selecione o tipo"
+                defaultValue={selectedDocument?.type || ''}
+              >
+                <option value="driving_license">Carta de Condução</option>
+                <option value="vehicle_insurance">Seguro do Veículo</option>
+                <option value="tvde_certificate">Certificado TVDE</option>
+                <option value="technical_inspection">Inspeção Técnica</option>
+              </Select>
+            </FormControl>
             
             <Box
               border="2px dashed"
@@ -285,10 +360,36 @@ export default function DriverDocuments({
               <Text fontSize="sm" color="gray.600" mb={2}>
                 Arraste o arquivo aqui ou clique para selecionar
               </Text>
+              <Input
+                id="document-file"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                display="none"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    // Update UI to show selected file
+                    const fileName = document.getElementById('file-name');
+                    if (fileName) {
+                      fileName.textContent = file.name;
+                    }
+                  }
+                }}
+              />
+              <Button
+                onClick={() => document.getElementById('document-file')?.click()}
+                variant="outline"
+                size="sm"
+              >
+                Selecionar Arquivo
+              </Button>
+              <Text id="file-name" fontSize="xs" color="gray.500" mt={2}>
+                Nenhum arquivo selecionado
+              </Text>
               <Text fontSize="xs" color="gray.500">
                 Formatos aceitos: PDF, JPG, PNG (máx. 10MB)
-                        </Text>
-                  </Box>
+              </Text>
+            </Box>
               </VStack>
         </StandardModal>
       </DriverLayout>
@@ -298,13 +399,35 @@ export default function DriverDocuments({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const translations = await loadTranslations('pt', ['common', 'driver']);
-
-    // Get user data from context (passed by withDriver HOC)
-    const userData = (context as any).userData || null;
+    // Get locale from context or default to 'pt'
+    const locale = context.locale || 'pt';
     
-    if (!userData) {
-      throw new Error('User data not found');
+    const translations = await loadTranslations(locale, ['common', 'driver']);
+
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'driver') {
+      return {
+        redirect: {
+          destination: '/admin',
+          permanent: false,
+        },
+      };
     }
 
     // Get driver data from Firestore
@@ -322,7 +445,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Get documents from Firestore
     const documentsSnap = await adminDb.collection('driver_documents').where('driverId', '==', driverDoc.id).get();
-    const documents = documentsSnap.docs.map((doc: any) => ({
+    const uploadedDocuments = documentsSnap.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       verifiedAt: doc.data().verifiedAt?.toDate?.() || doc.data().verifiedAt,
@@ -330,48 +453,49 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       rejectedAt: doc.data().rejectedAt?.toDate?.() || doc.data().rejectedAt,
     }));
 
-    // If no documents found, create default document types
-    if (documents.length === 0) {
-      const defaultDocuments = [
+    // Create default document types with status based on uploaded documents
+    const defaultDocumentTypes = [
         {
           id: 'driving_license',
           name: translations.driver?.documents?.types?.drivingLicense || 'Carta de Condução',
           description: translations.driver?.documents?.descriptions?.drivingLicense || 'Carteira de habilitação válida',
-          status: 'not_uploaded',
           type: 'driving_license'
         },
         {
           id: 'vehicle_insurance',
           name: translations.driver?.documents?.types?.vehicleInsurance || 'Seguro do Veículo',
           description: translations.driver?.documents?.descriptions?.vehicleInsurance || 'Apólice de seguro do veículo',
-          status: 'not_uploaded',
           type: 'vehicle_insurance'
         },
         {
           id: 'tvde_certificate',
           name: translations.driver?.documents?.types?.tvdeCertificate || 'Certificado TVDE',
           description: translations.driver?.documents?.descriptions?.tvdeCertificate || 'Certificado de transporte de passageiros',
-          status: 'not_uploaded',
           type: 'tvde_certificate'
         },
         {
           id: 'technical_inspection',
           name: translations.driver?.documents?.types?.technicalInspection || 'Inspeção Técnica',
           description: translations.driver?.documents?.descriptions?.technicalInspection || 'Certificado de inspeção técnica do veículo',
-          status: 'not_uploaded',
           type: 'technical_inspection'
         }
       ];
 
+    // Merge default types with uploaded documents
+    const documents = defaultDocumentTypes.map(docType => {
+      const uploadedDoc = uploadedDocuments.find(doc => doc.type === docType.type);
+      if (uploadedDoc) {
+        return {
+          ...docType,
+          ...uploadedDoc,
+          status: uploadedDoc.status || 'pending'
+        };
+      }
       return {
-        props: {
-          driver,
-          documents: defaultDocuments,
-          translations,
-          userData: driver,
-        },
+        ...docType,
+        status: 'not_uploaded'
       };
-    }
+    });
 
     return {
       props: {

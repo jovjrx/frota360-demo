@@ -276,13 +276,37 @@ export default function DriverProfile({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const translations = await loadTranslations('pt', ['common', 'driver']);
-
-    // Get user data from context (passed by withDriver HOC)
-    const userData = (context as any).userData || null;
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
     
-    if (!userData) {
-      throw new Error('User data not found');
+    const translations = await loadTranslations(locale, ['common', 'driver']);
+
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'driver') {
+      return {
+        redirect: {
+          destination: '/admin',
+          permanent: false,
+        },
+      };
     }
 
     // Get driver data from Firestore
@@ -296,7 +320,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const driver = {
       id: driverDoc.id,
       ...driverDoc.data(),
-    };
+    } as any;
+
+    // Verificar se o motorista completou o onboarding
+    const hasSelectedPlan = driver.selectedPlan && driver.selectedPlan !== null;
+    const documentsUploaded = driver.documents ? 
+      Object.values(driver.documents).filter((doc: any) => doc.uploaded).length : 0;
+    
+    // Se não completou o onboarding, redirecionar
+    if (!hasSelectedPlan || documentsUploaded === 0) {
+      return {
+        redirect: {
+          destination: '/drivers/onboarding',
+          permanent: false,
+        },
+      };
+    }
 
     return {
       props: {

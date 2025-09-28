@@ -6,15 +6,15 @@ import path from 'path';
 // variáveis de ambiente, arquivo JSON ou variáveis individuais.
 let serviceAccount: any;
 
-// Método 1: Arquivo JSON (mais fácil)
+// Método 1: Arquivo JSON (prioritário para produção)
 const serviceAccountPath = path.join(process.cwd(), 'conduz-pt.json');
 if (fs.existsSync(serviceAccountPath)) {
   try {
     const serviceAccountFile = fs.readFileSync(serviceAccountPath, 'utf8');
     serviceAccount = JSON.parse(serviceAccountFile);
-    console.log('Firebase Admin SDK: Usando arquivo conduz-pt.json');
+    console.log('✅ Firebase Admin SDK: Usando arquivo conduz-pt.json');
   } catch (error) {
-    console.error('Erro ao ler conduz-pt.json:', error);
+    console.error('❌ Erro ao ler conduz-pt.json:', error);
   }
 }
 // Método 2: Variável de ambiente com JSON completo

@@ -8,7 +8,6 @@ import {
   VStack,
   HStack,
   Badge,
-  useColorModeValue,
 } from '@chakra-ui/react';
 import {
   FiUsers,

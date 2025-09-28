@@ -1,32 +1,83 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const SUPPORTED_LOCALES = ['pt', 'en'];
+const DEFAULT_LOCALE = 'pt';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Verificar se é uma rota protegida
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isDriverRoute = pathname.startsWith('/drivers');
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
-  
-  // Verificar autenticação para rotas protegidas
-  if (isAdminRoute || isDriverRoute) {
-    // Verificar se há sessão ativa (Iron Session)
-    const sessionCookie = request.cookies.get('conduz-session');
+  // Se a URL começa com /en/, remover o /en e continuar com header de idioma
+  if (pathname.startsWith('/en/')) {
+    const newPath = pathname.replace('/en', '') || '/';
+    const newUrl = new URL(newPath, request.url);
     
-    // Se não há sessão Iron Session, permitir acesso mas o cliente deve criar a sessão
-    // O componente withAuth/withAdmin vai verificar o Firebase Auth no cliente
-    if (!sessionCookie) {
-      // Não redirecionar automaticamente, deixar o cliente lidar com isso
-      // Isso permite que usuários logados no Firebase Auth acessem as páginas
-      // e criem a sessão Iron Session automaticamente
-    }
+    // Criar resposta que continua para a nova URL com header de idioma
+    const response = NextResponse.rewrite(newUrl);
+    response.headers.set('x-locale', 'en');
+    return response;
   }
   
-  // Configurar headers de segurança
+  // Se a URL é exatamente /en, reescrever para / com header de idioma
+  if (pathname === '/en') {
+    const newUrl = new URL('/', request.url);
+    const response = NextResponse.rewrite(newUrl);
+    response.headers.set('x-locale', 'en');
+    return response;
+  }
+  
+  // Para todas as outras rotas, verificar se é uma rota pública
+  const isPublicPage = pathname === '/' || 
+                      pathname.startsWith('/about') || 
+                      pathname.startsWith('/contact') || 
+                      pathname.startsWith('/services');
+  
+  // Se não é uma rota pública, permitir acesso normal (português padrão)
+  if (!isPublicPage) {
+    const response = NextResponse.next();
+    response.headers.set('x-locale', 'pt');
+    return response;
+  }
+  
+  // Para rotas públicas, verificar se precisa redirecionar para inglês
+  const acceptLanguage = request.headers.get('accept-language') || '';
+  const preferredLocale = getPreferredLocale(acceptLanguage);
+  
+  // Se o idioma preferido é inglês, redirecionar para /en/version da página
+  if (preferredLocale === 'en') {
+    const redirectUrl = new URL(`/en${pathname}`, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+  
+  // Para português (padrão), permitir acesso normal
   const response = NextResponse.next();
+  response.headers.set('x-locale', 'pt');
   
   return response;
+}
+
+function getPreferredLocale(acceptLanguage: string): string {
+  // Parse accept-language header
+  const languages = acceptLanguage
+    .split(',')
+    .map(lang => {
+      const [locale, qValue] = lang.trim().split(';q=');
+      return {
+        locale: locale ? locale.split('-')[0].toLowerCase() : DEFAULT_LOCALE,
+        quality: qValue ? parseFloat(qValue) : 1.0
+      };
+    })
+    .sort((a, b) => b.quality - a.quality);
+
+  // Encontrar primeiro idioma suportado
+  for (const { locale } of languages) {
+    if (SUPPORTED_LOCALES.includes(locale)) {
+      return locale;
+    }
+  }
+
+  // Fallback para português
+  return DEFAULT_LOCALE;
 }
 
 export const config = {

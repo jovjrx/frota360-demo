@@ -34,9 +34,11 @@ export default async function handler(
     }
 
     // Gmail-only transport with fallbacks
-    const gmailUser = "conduzcontacto@gmail.com";
-    const gmailAppPassword = "mogu muee ptnp ebbs";
-    const fromEmail = "conduz@alvoradamagistral.eu";
+    const gmailUser = process.env.EMAIL_USER || "conduzcontacto@gmail.com";
+    const gmailAppPassword = process.env.EMAIL_PASSWORD || "mogu muee ptnp ebbs"; // Fallback para produção
+    const fromEmail = process.env.EMAIL_FROM || "conduz@alvoradamagistral.eu";
+    
+    console.log('📧 Usando configuração de email:', { user: gmailUser, hasPassword: !!gmailAppPassword });
 
     console.log("Using Gmail transport with user:", gmailUser);
 

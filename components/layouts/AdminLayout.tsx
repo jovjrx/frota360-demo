@@ -1,36 +1,5 @@
 import React from 'react';
-import Head from 'next/head';
-import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Badge,
-  Avatar,
-  Button,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  SimpleGrid,
-  Card,
-  CardBody,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
-} from '@chakra-ui/react';
-import { FiBell, FiSettings } from 'react-icons/fi';
-import TopBar from './TopBar';
-
-interface StatItem {
-  label: string;
-  value: string | number;
-  helpText?: string;
-  arrow?: 'increase' | 'decrease';
-  color?: string;
-}
+import UnifiedLayout from './UnifiedLayout';
 
 interface AdminLayoutProps {
   title: string;
@@ -47,7 +16,13 @@ interface AdminLayoutProps {
     title: string;
     description: string;
   }>;
-  stats?: StatItem[];
+  stats?: Array<{
+    label: string;
+    value: string | number;
+    helpText?: string;
+    arrow?: 'increase' | 'decrease';
+    color?: string;
+  }>;
   children: React.ReactNode;
   actions?: React.ReactNode;
   breadcrumbs?: Array<{
@@ -56,79 +31,6 @@ interface AdminLayoutProps {
   }>;
 }
 
-export default function AdminLayout({
-  title,
-  subtitle,
-  user,
-  notifications = 0,
-  alerts = [],
-  stats = [],
-  children,
-  actions,
-  breadcrumbs = []
-}: AdminLayoutProps) {
-  const bgColor = "gray.50";
-
-  return (
-    <>
-      <Box minH="100vh" bg={bgColor}>
-        {/* Admin Top Bar */}
-        <TopBar
-          user={user}
-          currentPage={title}
-          notifications={notifications}
-          breadcrumbs={breadcrumbs}
-          basePath="/admin"
-        />
-
-        {/* Status Alerts */}
-        {alerts.map((alert, index) => (
-          <Box key={index} maxW="7xl" mx="auto" px={4} pt={4}>
-            <Alert status={alert.type} borderRadius="md">
-              <AlertIcon />
-              <Box>
-                <AlertTitle>{alert.title}</AlertTitle>
-                <AlertDescription>
-                  {alert.description}
-                </AlertDescription>
-              </Box>
-            </Alert>
-          </Box>
-        ))}
-
-        {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={4} py={8}>
-          <VStack spacing={8} align="stretch">
-            {/* Stats Grid - Always one row on desktop */}
-            {stats.length > 0 && (
-              <SimpleGrid 
-                columns={{ base: 1, md: 2, lg: stats.length > 5 ? 5 : stats.length }} 
-                spacing={6}
-              >
-                {stats.map((stat, index) => (
-                  <Card key={index} bg="white" borderColor="gray.200">
-                    <CardBody>
-                      <Stat>
-                        <StatLabel>{stat.label}</StatLabel>
-                        <StatNumber color={stat.color}>{stat.value}</StatNumber>
-                        {stat.helpText && (
-                          <StatHelpText>
-                            {stat.arrow && <StatArrow type={stat.arrow} />}
-                            {stat.helpText}
-                          </StatHelpText>
-                        )}
-                      </Stat>
-                    </CardBody>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            )}
-
-            {/* Page Content */}
-            {children}
-          </VStack>
-        </Box>
-      </Box>
-    </>
-  );
+export default function AdminLayout(props: AdminLayoutProps) {
+  return <UnifiedLayout {...props} basePath="/admin" />;
 }

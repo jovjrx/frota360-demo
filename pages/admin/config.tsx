@@ -76,9 +76,9 @@ interface AdminConfigProps {
 export default function AdminConfig({ 
   config, 
   translations,
-  userData
-}: AdminConfigProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
+  userData,
+  tCommon
+}: AdminConfigProps & { tCommon: (key: string) => string }) {
   const tAdmin = (key: string) => translations.admin?.[key] || key;
   
   const toast = useToast();
@@ -583,15 +583,38 @@ export default function AdminConfig({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Get user data from context (passed by withAdmin HOC)
-    const userData = (context as any).userData || null;
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
     
-    if (!userData) {
-      throw new Error('User data not found');
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
     }
 
-    // Load translations
-    const translations = await loadTranslations('pt', ['common', 'admin']);
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'admin') {
+      return {
+        redirect: {
+          destination: '/drivers',
+          permanent: false,
+        },
+      };
+    }
+
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
+    const translations = await loadTranslations(locale, ['common', 'admin']);
 
     // Get system configuration
     const configDoc = await adminDb.collection('system_config').doc('main').get();

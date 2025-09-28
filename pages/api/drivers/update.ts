@@ -1,52 +1,49 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { UpdateDriverSchema } from '@/schemas/driver';
-import { store } from '@/lib/store';
-import { auditLogger } from '@/lib/audit/logger';
-import { requireAdmin } from '@/lib/auth/rbac';
+import { getSession } from '@/lib/session/ironSession';
+import { adminDb } from '@/lib/firebaseAdmin';
 
-const handler = requireAdmin(async (req: NextApiRequest, res: NextApiResponse, context) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'PUT') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
-    const { driverId } = req.query;
-    
-    if (!driverId || typeof driverId !== 'string') {
+    // Check authentication
+    const session = await getSession(req, res);
+    if (!session.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { driverId, selectedPlan, planName, planPrice } = req.body;
+
+    if (!driverId) {
       return res.status(400).json({ error: 'Driver ID is required' });
     }
 
-    const validatedData = UpdateDriverSchema.parse(req.body);
-    
-    // Check if driver exists
-    const existingDriver = await store.drivers.findById(driverId);
-    if (!existingDriver) {
-      return res.status(404).json({ error: 'Driver not found' });
+    // Verify driver ownership
+    const driverSnap = await adminDb.collection('drivers').where('uid', '==', session.userId).limit(1).get();
+    if (driverSnap.empty || driverSnap.docs[0].id !== driverId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
-    // Update driver
-    await store.drivers.update(driverId, validatedData);
+    // Update driver data
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
 
-    // Log audit trail
-    await auditLogger.logDriverUpdate(
-      context.user.userId!,
-      context.role,
-      driverId,
-      validatedData
-    );
+    if (selectedPlan) updateData.selectedPlan = selectedPlan;
+    if (planName) updateData.planName = planName;
+    if (planPrice) updateData.planPrice = planPrice;
 
-    res.status(200).json({ 
+    await adminDb.collection('drivers').doc(driverId).update(updateData);
+
+    return res.status(200).json({
       success: true,
-      message: 'Driver updated successfully' 
+      message: 'Driver updated successfully'
     });
-  } catch (error: any) {
-    console.error('Update driver error:', error);
-    
-    if (error.name === 'ZodError') {
-      return res.status(400).json({ 
-        error: 'Validation error',
-        details: error.errors 
-      });
-    }
-    
-    res.status(500).json({ error: error.message || 'Failed to update driver' });
-  }
-});
 
-export default handler;
+  } catch (error) {
+    console.error('Error updating driver:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}

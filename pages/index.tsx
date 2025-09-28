@@ -1,4 +1,4 @@
-import { GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import NextLink from "next/link";
 
 import {
@@ -27,16 +27,19 @@ import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { CheckIcon, ArrowRightIcon } from "@chakra-ui/icons";
+import { PlansSection } from "@/components/PlansSection";
+import { ContentManager } from "@/components/ContentManager";
 
-export default function Home({ tPage, tCommon }: PageProps) {
-
+export default function Home({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   return (
-    <>
-      <Hero
-        title={tPage("hero.title")}
-        subtitle={tPage("hero.subtitle")}
+    <ContentManager page="home" locale={locale} translations={{ page: tPage, common: tCommon }}>
+      {(content) => (
+        <>
+          <Hero
+        title={content.page("hero.title") || tPage("hero.title")}
+        subtitle={content.page("hero.subtitle") || tPage("hero.subtitle")}
         backgroundImage="/img/bg-portugal.jpg"
-        badge={tPage("hero.badge") as string}
+        badge={content.page("hero.badge") || tPage("hero.badge") as string}
         overlay
         actions={
           <HStack spacing={4}>
@@ -50,7 +53,7 @@ export default function Home({ tPage, tCommon }: PageProps) {
               colorScheme="green"
               rightIcon={<ArrowRightIcon />}
             >
-              {tPage("hero.ctaPrimary")}
+              {content.page("hero.ctaPrimary") || tPage("hero.ctaPrimary")}
             </Button>
             <Button
               as={NextLink}
@@ -67,14 +70,14 @@ export default function Home({ tPage, tCommon }: PageProps) {
                 borderColor: "whiteAlpha.600"
               }}
             >
-              {tPage("hero.ctaSecondary")}
+              {content.page("hero.ctaSecondary") || tPage("hero.ctaSecondary")}
             </Button>
           </HStack>
         }
       >
         <Highlight
-          title={tPage("hero.highlight.title")}
-          description={tPage("hero.highlight.description")}
+          title={content.page("hero.highlight.title") || tPage("hero.highlight.title")}
+          description={content.page("hero.highlight.description") || tPage("hero.highlight.description")}
           bgImage="/img/driver-app.jpg"
           delayImage={0.5}
           delayBox={0.8}
@@ -172,6 +175,9 @@ export default function Home({ tPage, tCommon }: PageProps) {
           </Card>
         </ContainerDivisions>
       </Container>
+
+      {/* Planos */}
+      <PlansSection locale={locale} />
 
       {/* Métricas */}
       <Container>
@@ -279,28 +285,35 @@ export default function Home({ tPage, tCommon }: PageProps) {
           center
         />
       </Container>
-    </>
+        </>
+      )}
+    </ContentManager>
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale = "pt" }) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
     const translations = await loadTranslations(locale, ["common", "home"]);
     const { common, home: page } = translations;
 
     return {
       props: {
         translations: { common, page },
+        locale,
       },
-      revalidate: 3600,
     };
   } catch (error) {
     console.error("Failed to load translations:", error);
     return {
       props: {
         translations: { common: {}, page: {} },
+        locale: 'pt',
       },
-      revalidate: 3600,
     };
   }
 };

@@ -74,9 +74,9 @@ export default function AdminDashboard({
   recentDrivers,
   recentPayouts,
   translations,
-  userData
-}: AdminDashboardProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
+  userData,
+  tCommon
+}: AdminDashboardProps & { tCommon: (key: string) => string }) {
   const tAdmin = (key: string) => translations.admin?.[key] || key;
 
   const getStatusColor = (status: string) => {
@@ -153,6 +153,23 @@ export default function AdminDashboard({
       >
             {/* Quick Actions */}
         <QuickActions userRole="admin" userData={userData} />
+
+        {/* Content Management Link */}
+        <Card bg="white" borderColor="gray.200">
+          <CardBody>
+            <HStack justify="space-between" align="center">
+              <VStack align="flex-start" spacing={1}>
+                <Heading size="md">Gestão de Conteúdo</Heading>
+                <Text color="gray.600">
+                  Gerencie o conteúdo das páginas públicas com suporte multilíngue
+                </Text>
+              </VStack>
+              <Button as={Link} href="/admin/content" colorScheme="blue" leftIcon={<FiEdit />}>
+                Gerenciar Conteúdo
+              </Button>
+            </HStack>
+          </CardBody>
+        </Card>
 
             {/* Recent Activity */}
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
@@ -251,29 +268,61 @@ export default function AdminDashboard({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Get user data from context (passed by withAdmin HOC)
-    const userData = (context as any).userData || null;
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
     
-    if (!userData) {
-      throw new Error('User data not found');
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
     }
 
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'admin') {
+      return {
+        redirect: {
+          destination: '/drivers',
+          permanent: false,
+        },
+      };
+    }
+
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
     // Load translations
-    const translations = await loadTranslations('pt', ['common', 'admin']);
+    const translations = await loadTranslations(locale, ['common', 'admin']);
     const driversSnap = await adminDb.collection('drivers').get();
-    const drivers = driversSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt),
-    }));
+    const drivers = driversSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: createdAt.toISOString(), // Convert to string for JSON serialization
+      };
+    });
     
     // Get real payouts data from Firestore
     const payoutsSnap = await adminDb.collection('payouts').get();
-    const payouts = payoutsSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt),
-    }));
+    const payouts = payoutsSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: createdAt.toISOString(), // Convert to string for JSON serialization
+      };
+    });
 
     const stats = {
       totalDrivers: drivers.length,

@@ -202,8 +202,13 @@ export default function LoginPage({ translations }: LoginPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const translations = await loadTranslations(locale || 'pt', ['common']);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Extract locale from middleware header
+  const headerLocale = Array.isArray(context.req.headers['x-locale']) 
+    ? context.req.headers['x-locale'][0] 
+    : context.req.headers['x-locale'] || 'pt';
+  
+  const translations = await loadTranslations(headerLocale || 'pt', ['common']);
 
   return {
     props: {

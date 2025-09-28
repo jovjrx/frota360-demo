@@ -23,6 +23,10 @@ import {
   Select,
   Grid,
   GridItem,
+  Card,
+  CardBody,
+  Badge,
+  Heading,
 } from '@chakra-ui/react';
 import { Title } from '@/components/Title';
 import { Container } from '@/components/Container';
@@ -47,10 +51,28 @@ export default function SignupPage({ translations }: SignupPageProps) {
   const [licenseNumber, setLicenseNumber] = useState('');
   const [licenseExpiry, setLicenseExpiry] = useState('');
   const [vehicleType, setVehicleType] = useState('');
+  // Removido: selectedPlan - será selecionado no onboarding
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Estilos para inputs em tema claro
+  const inputStyles = {
+    bg: "white",
+    borderColor: "gray.300",
+    color: "gray.800",
+    _placeholder: { color: "gray.500" },
+    _focus: { borderColor: "green.500", boxShadow: "0 0 0 1px var(--chakra-colors-green-500)" },
+    _hover: { borderColor: "gray.400" }
+  };
+
+  const selectStyles = {
+    bg: "white",
+    borderColor: "gray.300",
+    color: "gray.800",
+    _focus: { borderColor: "green.500", boxShadow: "0 0 0 1px var(--chakra-colors-green-500)" }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +86,8 @@ export default function SignupPage({ translations }: SignupPageProps) {
       setError('A senha deve ter pelo menos 6 caracteres');
       return;
     }
+    
+    // Removido: seleção de plano no cadastro para não afugentar usuários
     
     setLoading(true);
     setError(null);
@@ -124,7 +148,11 @@ export default function SignupPage({ translations }: SignupPageProps) {
             verified: false,
             url: null
           }
-        }
+        },
+        
+        // Plano será selecionado no onboarding
+        selectedPlan: null,
+        planPrice: 0,
       };
 
       console.log('2. Criando documento do motorista via API server-side...', driverData);
@@ -167,9 +195,9 @@ export default function SignupPage({ translations }: SignupPageProps) {
       }
       console.log('✅ Sessão criada com sucesso');
 
-      // 4. QUARTO: Redirecionar para o dashboard do motorista
-      console.log('4. Redirecionando para dashboard...');
-      router.push('/drivers');
+      // 4. QUARTO: Redirecionar para o onboarding
+      console.log('4. Redirecionando para onboarding...');
+      router.push('/drivers/onboarding');
 
     } catch (err: any) {
       console.error('❌ Erro no processo de cadastro:', err);
@@ -349,7 +377,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
           feature="CADASTRO"
         />
         <VStack spacing={8} align="stretch">
-          <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
+          <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200" color="gray.800">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>
                 {/* Informações Pessoais */}
@@ -369,6 +397,8 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -383,6 +413,8 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -400,6 +432,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -415,6 +448,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -434,6 +468,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -464,6 +499,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -479,6 +515,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -495,6 +532,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...selectStyles}
                         >
                           <option value="car">Automóvel</option>
                           <option value="motorcycle">Motociclo</option>
@@ -525,6 +563,7 @@ export default function SignupPage({ translations }: SignupPageProps) {
                           size="lg"
                           height="50px"
                           fontSize="md"
+                          {...inputStyles}
                         />
                       </FormControl>
                     </GridItem>
@@ -621,8 +660,13 @@ export default function SignupPage({ translations }: SignupPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const translations = await loadTranslations(locale || 'pt', ['common']);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Extract locale from middleware header
+  const headerLocale = Array.isArray(context.req.headers['x-locale']) 
+    ? context.req.headers['x-locale'][0] 
+    : context.req.headers['x-locale'] || 'pt';
+  
+  const translations = await loadTranslations(headerLocale || 'pt', ['common']);
 
   return {
     props: {

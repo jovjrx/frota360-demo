@@ -62,6 +62,7 @@ export function getTranslation(
   keyPath: string,
   variables?: Record<string, any>
 ): string {
+  if (!keyPath || typeof keyPath !== 'string') return keyPath || '';
   const keys = keyPath.split('.');
   let value: any = translations;
 
@@ -197,8 +198,9 @@ export function formatRelativeTime(
  */
 export function getBrowserLocale(): string {
   if (typeof window !== 'undefined' && window.navigator) {
-    const browserLocale = window.navigator.language.split('-')[0];
-    return isLocaleSupported(browserLocale) ? browserLocale : DEFAULT_LOCALE;
+    const browserLocale = window.navigator.language || '';
+    const langCode = browserLocale ? browserLocale.split('-')[0] : DEFAULT_LOCALE;
+    return isLocaleSupported(langCode) ? langCode : DEFAULT_LOCALE;
   }
   return DEFAULT_LOCALE;
 }

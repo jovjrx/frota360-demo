@@ -1,4 +1,4 @@
-import { GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
@@ -13,18 +13,20 @@ import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
 import { PageProps } from "@/interface/Global";
-import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
+import { ContentManager } from "@/components/ContentManager";
 
-export default function About({ tPage }: PageProps) {
+export default function About({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   return (
-    <>
+    <ContentManager page="about" locale={locale} translations={{ page: tPage, common: tCommon }}>
+      {(content) => (
+        <>
       <Container softBg>
         <Title
-          title={tPage("mission.title")}
-          description={tPage("mission.subtitle")}
-          feature={tPage("mission.feature")}
+          title={content.page("mission.title") || tPage("mission.title")}
+          description={content.page("mission.subtitle") || tPage("mission.subtitle")}
+          feature={content.page("mission.feature") || tPage("mission.feature")}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
           <Card
@@ -215,28 +217,35 @@ export default function About({ tPage }: PageProps) {
           center
         />
       </Container>
-    </>
+        </>
+      )}
+    </ContentManager>
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale = "pt" }) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
     const translations = await loadTranslations(locale, ["common", "about"]);
     const { common, about: page } = translations;
 
     return {
       props: {
         translations: { common, page },
+        locale,
       },
-      revalidate: 3600,
     };
   } catch (error) {
     console.error("Failed to load translations:", error);
     return {
       props: {
         translations: { common: {}, page: {} },
+        locale: 'pt',
       },
-      revalidate: 3600,
     };
   }
 };

@@ -95,9 +95,9 @@ export default function UsersManagement({
   users, 
   stats,
   translations,
-  userData
-}: UsersManagementProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
+  userData,
+  tCommon
+}: UsersManagementProps & { tCommon: (key: string) => string }) {
   const tAdmin = (key: string) => translations.admin?.[key] || key;
   
   const toast = useToast();
@@ -151,6 +151,55 @@ export default function UsersManagement({
   const handleDeleteUser = (user: any) => {
     setSelectedUser(user);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleUserAction = async (action: string, userData?: any) => {
+    if (!selectedUser) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/user-management', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: selectedUser.id, 
+          action,
+          userData
+        }),
+      });
+
+      if (response.ok) {
+        const actionText = {
+          'update_user': 'atualizado',
+          'delete_user': 'excluído',
+          'change_role': 'role alterado'
+        }[action] || 'atualizado';
+
+        toast({
+          title: 'Usuário atualizado!',
+          description: `O usuário foi ${actionText} com sucesso.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Reload page to show updated data
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao gerenciar usuário');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro!',
+        description: error instanceof Error ? error.message : 'Não foi possível gerenciar o usuário.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const exportUsers = () => {
@@ -374,8 +423,28 @@ export default function UsersManagement({
           onClose={() => setIsEditModalOpen(false)}
           title="Editar Usuário"
           onSave={async () => {
-            // Implementar edição
-            console.log('Editar usuário:', selectedUser);
+            const nameInput = document.getElementById('edit-name') as HTMLInputElement;
+            const emailInput = document.getElementById('edit-email') as HTMLInputElement;
+            const roleSelect = document.getElementById('edit-role') as HTMLSelectElement;
+            
+            if (!nameInput.value || !emailInput.value || !roleSelect.value) {
+              toast({
+                title: 'Campos obrigatórios',
+                description: 'Por favor, preencha todos os campos.',
+                status: 'warning',
+                duration: 3000,
+                isClosable: true,
+              });
+              return;
+            }
+
+            await handleUserAction('update_user', {
+              name: nameInput.value,
+              email: emailInput.value,
+              role: roleSelect.value
+            });
+            
+            setIsEditModalOpen(false);
           }}
           saveText="Salvar Alterações"
         >
@@ -383,15 +452,15 @@ export default function UsersManagement({
             <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel>Nome</FormLabel>
-                <Input defaultValue={selectedUser.name} />
+                <Input id="edit-name" defaultValue={selectedUser.name} />
               </FormControl>
               <FormControl>
                 <FormLabel>Email</FormLabel>
-                <Input defaultValue={selectedUser.email} />
+                <Input id="edit-email" defaultValue={selectedUser.email} />
               </FormControl>
               <FormControl>
                 <FormLabel>Role</FormLabel>
-                <Select defaultValue={selectedUser.role}>
+                <Select id="edit-role" defaultValue={selectedUser.role}>
                   <option value="admin">Administrador</option>
                   <option value="driver">Motorista</option>
                 </Select>
@@ -406,8 +475,8 @@ export default function UsersManagement({
           onClose={() => setIsDeleteModalOpen(false)}
           title="Excluir Usuário"
           onDelete={async () => {
-            // Implementar exclusão
-            console.log('Excluir usuário:', selectedUser);
+            await handleUserAction('delete_user');
+            setIsDeleteModalOpen(false);
           }}
           showSave={false}
           showDelete={true}
@@ -428,20 +497,70 @@ export default function UsersManagement({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Load translations
-    const translations = await loadTranslations('pt', ['common', 'admin']);
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'admin') {
+      return {
+        redirect: {
+          destination: '/drivers',
+          permanent: false,
+        },
+      };
+    }
+
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
+    const translations = await loadTranslations(locale, ['common', 'admin']);
 
     // Get all users (admins)
     const usersSnap = await adminDb.collection('users').get();
-    const users = usersSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const adminUsers = usersSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        role: 'admin',
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      };
+    });
+
+    // Get all drivers
+    const driversSnap = await adminDb.collection('drivers').get();
+    const drivers = driversSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        role: 'driver',
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      };
+    });
+
+    // Combine all users
+    const users = [...adminUsers, ...drivers];
 
     const stats = {
       total: users.length,
-      admins: users.filter(u => u.role === 'admin').length,
-      drivers: 0, // Drivers não estão na coleção users
+      admins: adminUsers.length,
+      drivers: drivers.length,
     };
 
     return {

@@ -95,6 +95,7 @@ export default function AnalyticsPage({
   userData 
 }: AnalyticsPageProps) {
   const tDriver = (key: string) => {
+    if (!key || typeof key !== 'string') return key || '';
     const keys = key.split('.');
     let value = translations.driver;
     for (const k of keys) {
@@ -349,13 +350,37 @@ export default function AnalyticsPage({
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     // Load translations
-    const translations = await loadTranslations('pt', ['common', 'driver']);
-
-    // Get user data from context (passed by withDriver HOC)
-    const userData = (context as any).userData || null;
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
     
-    if (!userData) {
-      throw new Error('User data not found');
+    const translations = await loadTranslations(locale, ['common', 'driver']);
+
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'driver') {
+      return {
+        redirect: {
+          destination: '/admin',
+          permanent: false,
+        },
+      };
     }
 
     // Get driver data from Firestore

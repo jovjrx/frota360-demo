@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://www.conduz.pt</loc><lastmod>2025-09-21T08:26:41.531Z</lastmod><changefreq>monthly</changefreq><priority>1</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en"/></url>
-<url><loc>https://www.conduz.pt/about</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt/about/about"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en/about/about"/></url>
-<url><loc>https://www.conduz.pt/admin</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/admin/config</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/admin/drivers</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/admin/payouts</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/admin/plans</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/admin/users</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/contact</loc><lastmod>2025-09-21T08:26:41.532Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt/contact/contact"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en/contact/contact"/></url>
-<url><loc>https://www.conduz.pt/drivers</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/drivers/analytics</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/drivers/documents</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/drivers/payments</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/drivers/profile</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/drivers/subscription</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/forgot-password</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/login</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/reset-password</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/signup</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/services/drivers</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.conduz.pt/services/companies</loc><lastmod>2025-09-21T08:26:41.533Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt/services/companies/services/companies"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en/services/companies/services/companies"/></url>
+<url><loc>https://www.conduz.pt</loc><lastmod>2025-09-28T00:48:07.834Z</lastmod><changefreq>monthly</changefreq><priority>1</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en"/></url>
+<url><loc>https://www.conduz.pt/about</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt/about/about"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en/about/about"/></url>
+<url><loc>https://www.conduz.pt/admin</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/config</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/content</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/drivers</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/payouts</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/plans</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/admin/users</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/contact</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><xhtml:link rel="alternate" hreflang="pt-PT" href="https://www.conduz.pt/contact/contact"/><xhtml:link rel="alternate" hreflang="en-GB" href="https://www.conduz.pt/en/contact/contact"/></url>
+<url><loc>https://www.conduz.pt/drivers</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/analytics</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/documents</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/onboarding</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/payments</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/profile</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/drivers/subscription</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/forgot-password</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/login</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/reset-password</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.conduz.pt/signup</loc><lastmod>2025-09-28T00:48:07.835Z</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

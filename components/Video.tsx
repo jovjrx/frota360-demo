@@ -6,7 +6,6 @@ import {
   HStack,
   IconButton,
   Button,
-  useColorModeValue,
   Heading,
   Text,
   VStack,

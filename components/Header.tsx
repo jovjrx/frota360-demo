@@ -29,7 +29,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -62,6 +62,7 @@ export default function Header({ t }: HeaderProps) {
     ],
     [t]
   );
+
 
   const NavLink = ({ href, label }: { href: string; label: string }) => (
     <Button
@@ -256,7 +257,7 @@ export default function Header({ t }: HeaderProps) {
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiSettings />}
+                                leftIcon={<FiFileText />}
                                 onClick={() => router.push('/admin/plans')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
@@ -265,6 +266,34 @@ export default function Header({ t }: HeaderProps) {
                                 px={4}
                               >
                                 <Text fontWeight="medium">Planos</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiDollarSign />}
+                                onClick={() => router.push('/admin/payouts')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Pagamentos</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiEdit />}
+                                onClick={() => router.push('/admin/content')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Gestão de Conteúdo</Text>
                               </Button>
                             </>
                           )}

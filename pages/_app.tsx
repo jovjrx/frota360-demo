@@ -28,8 +28,6 @@ export default function App({ Component, pageProps }: AppProps) {
   const tArray = useMemo(() => makeTArray(translations), [translations]);
   const scopedNs = useMemo(() => ns(makeT(translations)), [translations]);
 
-  // Verifica se é uma rota que NÃO deve ter Header/Footer
-  const isIsolatedRoute = router.pathname.startsWith('/dashboard');
 
   const getCurrentPage = () => {
     const path = router.pathname;
@@ -49,10 +47,12 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <style jsx global>{`
-        :root { --font-rubik: ${fonts.rubik.style.fontFamily}; }
+        :root { 
+          --font-rubik: ${fonts.rubik.style.fontFamily};
+        }
       `}</style>
 
-      <ColorModeScript initialColorMode={theme.config?.initialColorMode} />
+      <ColorModeScript initialColorMode="light" />
 
       <ChakraProvider theme={theme}>
         <LanguageProvider>
@@ -66,29 +66,16 @@ export default function App({ Component, pageProps }: AppProps) {
               locale={router.locale ?? "pt"}
             />
 
-            {isIsolatedRoute ? (
-              <Component
-                key={router.locale}
-                {...pageProps}
-                tCommon={tCommon}
-                tPage={tPage}
-                tArray={tArray}
-                ns={scopedNs}
-              />
-            ) : (
-              <>
-                <Header t={tCommon} />
-                <Component
-                  key={router.locale}
-                  {...pageProps}
-                  tCommon={tCommon}
-                  tPage={tPage}
-                  tArray={tArray}
-                  ns={scopedNs}
-                />
-                <Footer t={tCommon} />
-              </>
-            )}
+            <Header t={tCommon} />
+            <Component
+              key={router.locale}
+              {...pageProps}
+              tCommon={tCommon}
+              tPage={tPage}
+              tArray={tArray}
+              ns={scopedNs}
+            />
+            <Footer t={tCommon} />
             <GoogleAnalytics gaMeasurementId={GA_ID} trackPageViews />
             <Analytics />
             <SpeedInsights />

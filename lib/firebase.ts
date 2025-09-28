@@ -4,8 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 
-// Configuração do Firebase obtida via variáveis de ambiente. O usuário deve
-// fornecer seus próprios valores no arquivo `.env.local`.
+// Configuração do Firebase (hardcoded para produção)
 const firebaseConfig = {
   apiKey: "AIzaSyAWGGU-8_johpBlIds2aZO_vmI4Mtrx0mE",
   authDomain: "conduz-pt.firebaseapp.com",

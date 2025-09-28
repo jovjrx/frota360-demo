@@ -18,7 +18,7 @@ export function useLanguage() {
     const browserLang = navigator.language || navigator.languages?.[0] || '';
     
     // Extrair código de idioma (ex: 'pt-BR' -> 'pt')
-    const langCode = browserLang.split('-')[0].toLowerCase();
+    const langCode = browserLang ? browserLang.split('-')[0].toLowerCase() : DEFAULT_LOCALE;
     
     // Verificar se é suportado
     if (SUPPORTED_LOCALES.includes(langCode)) {
@@ -44,53 +44,53 @@ export function useLanguage() {
     return DEFAULT_LOCALE;
   };
 
+  // Função para detectar idioma baseado na URL
+  const detectLocaleFromUrl = () => {
+    if (typeof window === 'undefined') return DEFAULT_LOCALE;
+    
+    const currentPath = window.location.pathname;
+    if (currentPath.startsWith('/en')) {
+      return 'en';
+    }
+    return 'pt';
+  };
+
   // Inicializar idioma
   useEffect(() => {
     const initializeLanguage = () => {
       setIsDetecting(true);
       
       try {
-        // 1. Tentar usar locale da URL (se existir)
-        if (router.locale && SUPPORTED_LOCALES.includes(router.locale)) {
-          setCurrentLocale(router.locale);
-          setIsDetecting(false);
-          return;
-        }
-        
-        // 2. Tentar usar locale salvo no localStorage
-        const savedLocale = localStorage.getItem('alvorada-locale');
-        if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
-          setCurrentLocale(savedLocale);
-          // Atualizar URL se necessário
-          if (router.locale !== savedLocale) {
-            router.push(router.pathname, router.asPath, { locale: savedLocale });
-          }
-          setIsDetecting(false);
-          return;
-        }
-        
-        // 3. Detectar idioma do navegador
-        const detectedLang = detectBrowserLanguage();
-        setCurrentLocale(detectedLang);
-        
-        // Salvar no localStorage
-        localStorage.setItem('alvorada-locale', detectedLang);
-        
-        // Atualizar URL se necessário
-        if (router.locale !== detectedLang) {
-          router.push(router.pathname, router.asPath, { locale: detectedLang });
-        }
+        // 1. Detectar idioma baseado na URL atual
+        const urlLocale = detectLocaleFromUrl();
+        setCurrentLocale(urlLocale);
+        localStorage.setItem('alvorada-locale', urlLocale);
+        setIsDetecting(false);
         
       } catch (error) {
         console.warn('Erro ao detectar idioma:', error);
         setCurrentLocale(DEFAULT_LOCALE);
-      } finally {
         setIsDetecting(false);
       }
     };
 
     initializeLanguage();
-  }, [router.pathname]);
+    
+    // Listener para mudanças na URL
+    const handleRouteChange = () => {
+      const urlLocale = detectLocaleFromUrl();
+      setCurrentLocale(urlLocale);
+      localStorage.setItem('alvorada-locale', urlLocale);
+    };
+
+    // Adicionar listener para mudanças na URL
+    router.events?.on('routeChangeComplete', handleRouteChange);
+    
+    // Cleanup
+    return () => {
+      router.events?.off('routeChangeComplete', handleRouteChange);
+    };
+  }, []);
 
   // Função para mudar idioma
   const changeLanguage = async (newLocale: string) => {
@@ -103,11 +103,24 @@ export function useLanguage() {
       setCurrentLocale(newLocale);
       localStorage.setItem('alvorada-locale', newLocale);
       
-      // Atualizar URL
-      await router.push(router.pathname, router.asPath, { locale: newLocale });
+      // Get current path
+      const currentPath = router.asPath;
+      let newPath = currentPath;
       
-      // Recarregar página para aplicar traduções
-      window.location.reload();
+      if (newLocale === 'en') {
+        // Switching to English - add /en/ prefix
+        if (!currentPath.startsWith('/en')) {
+          newPath = `/en${currentPath === '/' ? '' : currentPath}`;
+        }
+      } else {
+        // Switching to Portuguese - remove /en/ prefix
+        if (currentPath.startsWith('/en')) {
+          newPath = currentPath.replace('/en', '') || '/';
+        }
+      }
+      
+      // Redirect to new URL
+      window.location.href = newPath;
     } catch (error) {
       console.error('Erro ao mudar idioma:', error);
     }

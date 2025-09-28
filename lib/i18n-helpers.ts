@@ -4,6 +4,7 @@ export type TArrayFn = (key: string) => string[];
 
 export function makeT(dict: any): TFn {
   return (path: string) => {
+    if (!path || typeof path !== 'string') return path || '';
     const keys = path.split(".");
     let cur: any = dict;
     for (const k of keys) {
@@ -16,6 +17,7 @@ export function makeT(dict: any): TFn {
 
 export function makeTArray(dict: any): TArrayFn {
   return (path: string) => {
+    if (!path || typeof path !== 'string') return [];
     const keys = path.split(".");
     let cur: any = dict;
     for (const k of keys) {

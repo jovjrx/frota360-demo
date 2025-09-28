@@ -1,11 +1,10 @@
-import { GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
   VStack,
   SimpleGrid,
   useToast,
-  useColorModeValue,
   Divider,
   Heading,
 } from "@chakra-ui/react";
@@ -16,16 +15,19 @@ import { Container } from "@/components/Container";
 import { PageProps } from "@/interface/Global";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { ContactForm } from "@/components/ContactForm";
+import { ContentManager } from "@/components/ContentManager";
 import Link from "next/link";
 
-export default function Contact({ tPage, tCommon }: PageProps) {
+export default function Contact({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   return (
-    <>
+    <ContentManager page="contact" locale={locale} translations={{ page: tPage, common: tCommon }}>
+      {(content) => (
+        <>
       <Container softBg>
         <Title
-          title={tPage("hero.title")}
-          description={tPage("hero.subtitle")}
-          feature={tPage("hero.feature")}
+          title={content.page("hero.title") || tPage("hero.title")}
+          description={content.page("hero.subtitle") || tPage("hero.subtitle")}
+          feature={content.page("hero.feature") || tPage("hero.feature")}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "2fr 1fr" }}>
           <ContactForm tPage={tPage} />
@@ -88,28 +90,35 @@ export default function Contact({ tPage, tCommon }: PageProps) {
           })()}
         </SimpleGrid>
       </Container>
-    </>
+        </>
+      )}
+    </ContentManager>
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale = "pt" }) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
     const translations = await loadTranslations(locale, ["common", "contact"]);
     const { common, contact: page } = translations;
 
     return {
       props: {
         translations: { common, page },
+        locale,
       },
-      revalidate: 3600,
     };
   } catch (error) {
     console.error("Failed to load translations:", error);
     return {
       props: {
         translations: { common: {}, page: {} },
+        locale: 'pt',
       },
-      revalidate: 3600,
     };
   }
 };

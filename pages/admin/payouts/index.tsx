@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withAdmin } from '@/lib/auth/rbac';
-import { store } from '@/lib/store';
+import { withAdmin } from '@/lib/auth/withAdmin';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   VStack,
@@ -19,7 +19,6 @@ import {
   Th,
   Td,
   TableContainer,
-  useColorModeValue,
   Select,
   Input,
   InputGroup,
@@ -52,8 +51,8 @@ export default function PayoutsPage({ payouts: initialPayouts, drivers }: Payout
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const cardBg = 'white';
+  const borderColor = 'gray.200';
 
   const filteredPayouts = payouts.filter(payout => {
     const matchesFilter = filter === 'all' || payout.status === filter;
@@ -433,14 +432,34 @@ function CalculatePayoutsModal({ isOpen, onClose }: CalculatePayoutsModalProps) 
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const [payouts, drivers] = await Promise.all([
-      store.payouts.findAll(),
-      store.drivers.findAll(),
-    ]);
+    // Get user data from context (passed by withAdmin HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
+    // Get payouts from Firestore
+    const payoutsSnap = await adminDb.collection('payouts').get();
+    const payouts = payoutsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt),
+      periodStart: doc.data().periodStart?.toDate?.() || new Date(doc.data().periodStart),
+      periodEnd: doc.data().periodEnd?.toDate?.() || new Date(doc.data().periodEnd),
+      paidAt: doc.data().paidAt?.toDate?.() || doc.data().paidAt,
+    }));
+
+    // Get drivers from Firestore
+    const driversSnap = await adminDb.collection('drivers').get();
+    const drivers = driversSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
     
     return {
       props: {
-        payouts: payouts.sort((a, b) => b.createdAt - a.createdAt),
+        payouts: payouts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         drivers,
       },
     };

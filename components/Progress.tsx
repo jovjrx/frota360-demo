@@ -1,4 +1,4 @@
-import { Box, Text, Progress as ChakraProgress, HStack, VStack, useColorModeValue, Badge } from "@chakra-ui/react";
+import { Box, Text, Progress as ChakraProgress, HStack, VStack, Badge } from "@chakra-ui/react";
 import { useEffect, useState, useMemo, useRef } from "react";
 
 interface ProgressProps {
@@ -48,9 +48,9 @@ export const Progress = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const bgColor = useColorModeValue("gray.100", "gray.700");
-  const textColor = useColorModeValue("gray.700", "gray.300");
-  const cardBg = useColorModeValue("white", "gray.800");
+  const bgColor = "gray.100";
+  const textColor = "gray.700";
+  const cardBg = "white";
 
   // IntersectionObserver: anima ao entrar em viewport (uma vez)
   useEffect(() => {

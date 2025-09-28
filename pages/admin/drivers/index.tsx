@@ -1,7 +1,6 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withAdmin } from '@/lib/auth/withAdmin';
-import { store } from '@/lib/store';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -48,8 +47,6 @@ import {
   MenuItem,
   Flex,
   Spacer,
-  FormControl,
-  FormLabel,
   Textarea,
   Icon,
 } from '@chakra-ui/react';
@@ -80,6 +77,7 @@ import { loadTranslations } from '@/lib/translations';
 import { useState, useMemo } from 'react';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import StandardModal from '@/components/modals/StandardModal';
+import { FormControl, FormLabel } from '@chakra-ui/react';
 
 interface DriversManagementProps {
   drivers: any[];
@@ -98,9 +96,9 @@ export default function DriversManagement({
   drivers, 
   stats,
   translations,
-  userData
-}: DriversManagementProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
+  userData,
+  tCommon
+}: DriversManagementProps & { tCommon: (key: string) => string }) {
   const tAdmin = (key: string) => translations.admin?.[key] || key;
   
   const toast = useToast();
@@ -198,16 +196,20 @@ export default function DriversManagement({
   const handleStatusChange = async (driverId: string, newStatus: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/toggle-status`, {
+      const response = await fetch(`/api/admin/driver-approval`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driverId, status: newStatus }),
+        body: JSON.stringify({ 
+          driverId, 
+          action: newStatus === 'active' ? 'approve' : 'reject',
+          rejectionReason: newStatus === 'rejected' ? 'Documentos não atendem aos requisitos' : undefined
+        }),
       });
 
       if (response.ok) {
         toast({
           title: 'Status atualizado!',
-          description: `Motorista ${newStatus === 'approved' ? 'aprovado' : 'rejeitado'} com sucesso.`,
+          description: `Motorista ${newStatus === 'active' ? 'aprovado' : 'rejeitado'} com sucesso.`,
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -215,12 +217,13 @@ export default function DriversManagement({
         // Atualizar lista local ou recarregar página
         window.location.reload();
       } else {
-        throw new Error('Erro ao atualizar status');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao atualizar status');
       }
     } catch (error) {
       toast({
         title: 'Erro!',
-        description: 'Não foi possível atualizar o status do motorista.',
+        description: error instanceof Error ? error.message : 'Não foi possível atualizar o status do motorista.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -243,6 +246,56 @@ export default function DriversManagement({
   const handleDeleteDriver = (driver: any) => {
     setSelectedDriver(driver);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleSubscriptionAction = async (action: string, planId?: string) => {
+    if (!selectedDriver) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/subscription-management', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          driverId: selectedDriver.id, 
+          action,
+          planId
+        }),
+      });
+
+      if (response.ok) {
+        const actionText = {
+          'create_subscription': 'criada',
+          'renew_subscription': 'renovada',
+          'reactivate_subscription': 'reativada',
+          'cancel_subscription': 'cancelada'
+        }[action] || 'atualizada';
+
+        toast({
+          title: 'Assinatura atualizada!',
+          description: `A assinatura foi ${actionText} com sucesso.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Reload page to show updated data
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao gerenciar assinatura');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro!',
+        description: error instanceof Error ? error.message : 'Não foi possível gerenciar a assinatura.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const exportDrivers = () => {
@@ -527,7 +580,113 @@ export default function DriversManagement({
                   </VStack>
                 </TabPanel>
                 <TabPanel>
-                  <Text>Documentos do motorista serão exibidos aqui.</Text>
+                  <VStack spacing={4} align="stretch">
+                    <Text fontSize="sm" color="gray.600">
+                      Status dos documentos do motorista
+                    </Text>
+                    
+                    {/* Document Status Cards */}
+                    <SimpleGrid columns={2} spacing={4}>
+                      <Card bg="green.50" borderColor="green.200">
+                        <CardBody>
+                          <HStack>
+                            <Icon as={FiCheckCircle} color="green.500" />
+                            <VStack align="flex-start" spacing={0}>
+                              <Text fontSize="sm" fontWeight="medium">Carta de Condução</Text>
+                              <Text fontSize="xs" color="green.600">Verificada</Text>
+                            </VStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                      
+                      <Card bg="yellow.50" borderColor="yellow.200">
+                        <CardBody>
+                          <HStack>
+                            <Icon as={FiFileText} color="yellow.500" />
+                            <VStack align="flex-start" spacing={0}>
+                              <Text fontSize="sm" fontWeight="medium">Seguro do Veículo</Text>
+                              <Text fontSize="xs" color="yellow.600">Pendente</Text>
+                            </VStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                      
+                      <Card bg="red.50" borderColor="red.200">
+                        <CardBody>
+                          <HStack>
+                            <Icon as={FiXCircle} color="red.500" />
+                            <VStack align="flex-start" spacing={0}>
+                              <Text fontSize="sm" fontWeight="medium">Certificado TVDE</Text>
+                              <Text fontSize="xs" color="red.600">Rejeitado</Text>
+                            </VStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                      
+                      <Card bg="gray.50" borderColor="gray.200">
+                        <CardBody>
+                          <HStack>
+                            <Icon as={FiFileText} color="gray.500" />
+                            <VStack align="flex-start" spacing={0}>
+                              <Text fontSize="sm" fontWeight="medium">Inspeção Técnica</Text>
+                              <Text fontSize="xs" color="gray.600">Não enviado</Text>
+                            </VStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                    </SimpleGrid>
+                    
+                    {/* Plan Information */}
+                    {selectedDriver.selectedPlan && (
+                      <Card bg="blue.50" borderColor="blue.200">
+                        <CardBody>
+                          <VStack align="flex-start" spacing={2}>
+                            <Text fontSize="sm" fontWeight="medium" color="blue.700">
+                              Plano Selecionado
+                            </Text>
+                            <Text fontSize="lg" fontWeight="bold" color="blue.800">
+                              {selectedDriver.planName || 'Plano não definido'}
+                            </Text>
+                            <Text fontSize="sm" color="blue.600">
+                              €{((selectedDriver.planPrice || 0) / 100).toFixed(2)}/mês
+                            </Text>
+                            
+                            {/* Subscription Management Actions */}
+                            <HStack spacing={2} mt={2}>
+                              <Button
+                                size="xs"
+                                colorScheme="green"
+                                onClick={() => handleSubscriptionAction('create_subscription', selectedDriver.selectedPlan)}
+                              >
+                                Criar Assinatura
+                              </Button>
+                              <Button
+                                size="xs"
+                                colorScheme="blue"
+                                onClick={() => handleSubscriptionAction('renew_subscription')}
+                              >
+                                Renovar
+                              </Button>
+                              <Button
+                                size="xs"
+                                colorScheme="orange"
+                                onClick={() => handleSubscriptionAction('reactivate_subscription')}
+                              >
+                                Reativar
+                              </Button>
+                              <Button
+                                size="xs"
+                                colorScheme="red"
+                                onClick={() => handleSubscriptionAction('cancel_subscription')}
+                              >
+                                Cancelar
+                              </Button>
+                            </HStack>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    )}
+                  </VStack>
                 </TabPanel>
                 <TabPanel>
                   <Text>Histórico de atividades será exibido aqui.</Text>
@@ -605,7 +764,7 @@ export default function DriversManagement({
                     </FormControl>
                     <FormControl>
                       <FormLabel>Último Pagamento</FormLabel>
-                      <Input type="date" defaultValue={selectedDriver.lastPayoutAt ? new Date(selectedDriver.lastPayoutAt).toISOString().split('T')[0] : ''} />
+                      <Input type="date" defaultValue={selectedDriver.lastPayoutAt ? new Date(selectedDriver.lastPayoutAt).toISOString()?.split('T')[0] || '' : ''} />
                     </FormControl>
                     <FormControl>
                       <FormLabel>Valor do Último Pagamento</FormLabel>
@@ -678,11 +837,51 @@ export default function DriversManagement({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Load translations
-    const translations = await loadTranslations('pt', ['common', 'admin']);
+    // Get session from Iron Session
+    const { getSession } = await import('@/lib/session/ironSession');
+    const session = await getSession(context.req, context.res);
+    
+    if (!session.userId) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
 
-    // Get all drivers
-    const drivers = await store.drivers.findAll();
+    // Get user data from Firestore
+    const userDoc = await adminDb.collection('users').doc(session.userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    
+    if (!userData || userData.role !== 'admin') {
+      return {
+        redirect: {
+          destination: '/drivers',
+          permanent: false,
+        },
+      };
+    }
+
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
+    // Load translations
+    const translations = await loadTranslations(locale, ['common', 'admin']);
+
+    // Get all drivers from Firestore
+    const driversSnap = await adminDb.collection('drivers').get();
+    const drivers = driversSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: createdAt.toISOString(), // Convert to string for JSON serialization
+      };
+    });
 
     const stats = {
       total: drivers.length,

@@ -86,20 +86,20 @@ export default function Footer({ t }: FooterProps) {
 
         <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }} gap={{ base: 2, md: 6 }}>
           <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-            <Link as={NextLink} fontSize="sm" href="/" _hover={{ textDecoration: "underline" }}>
+            <Link as={NextLink} fontSize="sm" href="/" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.home")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/about" _hover={{ textDecoration: "underline" }}>
+            <Link as={NextLink} fontSize="sm" href="/about" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.about")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/services/painels" _hover={{ textDecoration: "underline" }}>
+            <Link as={NextLink} fontSize="sm" href="/services/drivers" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.drivers")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/services/companies" _hover={{ textDecoration: "underline" }}>
+            <Link as={NextLink} fontSize="sm" href="/services/companies" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.companies")}
             </Link>
 
-            <Link as={NextLink} fontSize="sm" href="/contact" _hover={{ textDecoration: "underline" }}>
+            <Link as={NextLink} fontSize="sm" href="/contact" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.contact")}
             </Link>
           </HStack>
@@ -108,7 +108,7 @@ export default function Footer({ t }: FooterProps) {
             <Text color={colorSoft} fontSize="sm" textAlign="center" gap={2}>
               {t("footer.developerBy")}
             </Text>
-            <Link href="https://josejunior.com.br" fontSize="sm" _hover={{ textDecoration: "underline" }}>
+            <Link href="https://josejunior.com.br" fontSize="sm" color="brand.400" _hover={{ textDecoration: "underline", color: "brand.300" }}>
               {t("footer.developer")}
             </Link>
           </HStack>

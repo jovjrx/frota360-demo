@@ -1,494 +1,155 @@
 {
   "dashboard": {
     "title": "Painel Administrativo",
-    "subtitle": "Visão geral da plataforma",
-    "welcome": "Bem-vindo ao painel administrativo",
-    "overview": {
-      "title": "Resumo Geral",
-      "total_drivers": "Total de Motoristas",
-      "active_drivers": "Motoristas Ativos",
-      "pending_drivers": "Motoristas Pendentes",
-      "suspended_drivers": "Motoristas Suspensos",
-      "total_revenue": "Receita Total",
-      "monthly_revenue": "Receita Mensal",
-      "total_trips": "Total de Corridas",
-      "monthly_trips": "Corridas Mensais",
-      "total_subscriptions": "Total de Assinaturas",
-      "active_subscriptions": "Assinaturas Ativas",
-      "total_plans": "Total de Planos",
-      "active_plans": "Planos Ativos"
+    "subtitle": "Visão geral do sistema e atividades recentes",
+    "stats": {
+      "totalDrivers": "Total Motoristas",
+      "activeDrivers": "Motoristas Ativos",
+      "pendingDrivers": "Pendentes",
+      "totalRevenue": "Receita Total",
+      "monthlyRevenue": "Receita Mensal",
+      "totalPayouts": "Pagamentos",
+      "pendingPayouts": "Pendentes"
     },
-    "quick_actions": {
-      "title": "Ações Rápidas",
-      "manage_drivers": "Gerir Motoristas",
-      "manage_plans": "Gerir Planos",
-      "process_payouts": "Processar Pagamentos",
-      "view_reports": "Ver Relatórios",
-      "system_settings": "Configurações do Sistema"
-    },
-    "recent_activity": {
-      "title": "Atividade Recente",
-      "recent_registrations": "Registos Recentes",
-      "recent_payments": "Pagamentos Recentes",
-      "recent_trips": "Corridas Recentes",
-      "view_all": "Ver Tudo"
-    },
-    "charts": {
-      "revenue_trend": "Tendência de Receita",
-      "driver_growth": "Crescimento de Motoristas",
-      "trip_volume": "Volume de Corridas",
-      "subscription_distribution": "Distribuição de Assinaturas"
-    }
+    "recentDrivers": "Motoristas Recentes",
+    "recentPayouts": "Pagamentos Recentes",
+    "systemStatus": "Status do Sistema",
+    "systemOperational": "Sistema Operacional",
+    "databaseConnected": "Base de Dados Conectada",
+    "paymentsActive": "Pagamentos Ativos"
   },
   "drivers": {
-    "title": "Gerir Motoristas",
-    "subtitle": "Gerencie todos os motoristas da plataforma",
+    "title": "Gestão de Motoristas",
+    "subtitle": "Gerencie motoristas, documentos e aprovações",
     "stats": {
       "total": "Total",
       "approved": "Aprovados",
       "pending": "Pendentes",
       "rejected": "Rejeitados",
-      "suspended": "Suspensos",
-      "active": "Ativos",
-      "blocked": "Bloqueados"
+      "suspended": "Suspensos"
     },
     "actions": {
-      "add_driver": "Adicionar Motorista",
-      "export_csv": "Exportar CSV",
-      "bulk_actions": "Ações em Massa",
-      "approve_selected": "Aprovar Selecionados",
-      "reject_selected": "Rejeitar Selecionados",
-      "suspend_selected": "Suspender Selecionados"
-    },
-    "filters": {
-      "search_placeholder": "Pesquisar motoristas...",
-      "status_filter": "Filtrar por estado",
-      "all": "Todos",
-      "pending": "Pendentes",
-      "approved": "Aprovados",
-      "rejected": "Rejeitados",
-      "suspended": "Suspensos",
-      "date_range": "Período",
-      "registration_date": "Data de Registo"
-    },
-    "table": {
-      "driver": "Motorista",
-      "contact": "Contacto",
-      "status": "Estado",
-      "registration_date": "Data de Registo",
-      "last_activity": "Última Atividade",
-      "earnings": "Ganhos",
-      "trips": "Corridas",
-      "rating": "Avaliação",
-      "actions": "Ações"
-    },
-    "status": {
-      "pending": "Pendente",
-      "approved": "Aprovado",
-      "rejected": "Rejeitado",
-      "suspended": "Suspenso",
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "actions_menu": {
-      "view_details": "Ver Detalhes",
-      "edit": "Editar",
       "approve": "Aprovar",
       "reject": "Rejeitar",
       "suspend": "Suspender",
       "reactivate": "Reativar",
-      "view_documents": "Ver Documentos",
-      "view_earnings": "Ver Ganhos",
-      "view_trips": "Ver Corridas",
-      "send_message": "Enviar Mensagem",
-      "delete": "Eliminar"
-    },
-    "details_modal": {
-      "title": "Detalhes do Motorista",
-      "tabs": {
-        "general": "Informações Gerais",
-        "documents": "Documentos",
-        "earnings": "Ganhos",
-        "trips": "Corridas",
-        "history": "Histórico"
-      },
-      "general_info": {
-        "personal_details": "Dados Pessoais",
-        "contact_details": "Dados de Contacto",
-        "address": "Morada",
-        "emergency_contact": "Contacto de Emergência",
-        "bank_details": "Dados Bancários"
-      }
-    },
-    "messages": {
-      "driver_approved": "Motorista aprovado com sucesso",
-      "driver_rejected": "Motorista rejeitado com sucesso",
-      "driver_suspended": "Motorista suspenso com sucesso",
-      "driver_reactivated": "Motorista reativado com sucesso",
-      "status_updated": "Estado atualizado com sucesso",
-      "bulk_action_completed": "Ação em massa concluída",
-      "error_updating_status": "Erro ao atualizar estado do motorista",
-      "error_bulk_action": "Erro ao executar ação em massa",
-      "confirm_approve": "Tem certeza que deseja aprovar este motorista?",
-      "confirm_reject": "Tem certeza que deseja rejeitar este motorista?",
-      "confirm_suspend": "Tem certeza que deseja suspender este motorista?",
-      "confirm_delete": "Tem certeza que deseja eliminar este motorista? Esta ação não pode ser desfeita."
-    }
-  },
-  "plans": {
-    "title": "Gerir Planos",
-    "subtitle": "Gerencie os planos de assinatura da plataforma",
-    "stats": {
-      "total_plans": "Total de Planos",
-      "active_plans": "Planos Ativos",
-      "total_subscriptions": "Assinaturas",
-      "monthly_revenue": "Receita Mensal"
-    },
-    "actions": {
-      "new_plan": "Novo Plano",
-      "export_data": "Exportar Dados",
-      "bulk_actions": "Ações em Massa"
+      "edit": "Editar",
+      "delete": "Excluir",
+      "view": "Ver"
     },
     "filters": {
-      "search_placeholder": "Pesquisar planos...",
-      "status_filter": "Filtrar por estado",
+      "status": "Status",
+      "search": "Buscar motoristas...",
       "all": "Todos",
       "active": "Ativos",
+      "pending": "Pendentes",
       "inactive": "Inativos",
-      "featured": "Em Destaque"
-    },
-    "plan_card": {
-      "featured_badge": "Destaque",
-      "inactive_badge": "Inativo",
-      "per_month": "por mês",
-      "per_year": "por ano",
-      "free_trial": "{{days}} dias grátis",
-      "subscriptions": "Assinaturas",
-      "monthly_revenue": "Receita/mês",
-      "more_features": "+{{count}} mais funcionalidades"
-    },
-    "form": {
-      "create_title": "Criar Novo Plano",
-      "edit_title": "Editar Plano",
-      "plan_name": "Nome do Plano",
-      "plan_name_placeholder": "Ex: Plano Básico",
-      "description": "Descrição",
-      "description_placeholder": "Descrição do plano...",
-      "price": "Preço (€)",
-      "billing_interval": "Intervalo de Cobrança",
-      "monthly": "Mensal",
-      "yearly": "Anual",
-      "trial_days": "Dias de Trial",
-      "features": "Funcionalidades",
-      "add_feature": "Adicionar Funcionalidade",
-      "feature_placeholder": "Descreva uma funcionalidade...",
-      "plan_active": "Plano Ativo",
-      "plan_featured": "Plano em Destaque",
-      "save_plan": "Guardar Plano",
-      "create_plan": "Criar Plano",
-      "update_plan": "Atualizar Plano",
-      "cancel": "Cancelar"
-    },
-    "actions_menu": {
-      "view_details": "Ver Detalhes",
-      "edit": "Editar",
-      "duplicate": "Duplicar",
-      "toggle_status": "Alterar Estado",
-      "toggle_featured": "Alterar Destaque",
-      "view_subscriptions": "Ver Assinaturas",
-      "delete": "Eliminar"
-    },
-    "messages": {
-      "plan_created": "Plano criado com sucesso",
-      "plan_updated": "Plano atualizado com sucesso",
-      "plan_deleted": "Plano eliminado com sucesso",
-      "plan_duplicated": "Plano duplicado com sucesso",
-      "status_updated": "Estado do plano atualizado",
-      "error_creating": "Erro ao criar plano",
-      "error_updating": "Erro ao atualizar plano",
-      "error_deleting": "Erro ao eliminar plano",
-      "confirm_delete": "Tem certeza que deseja eliminar este plano?",
-      "no_plans_found": "Nenhum plano encontrado com os filtros aplicados"
-    }
-  },
-  "subscriptions": {
-    "title": "Gerir Assinaturas",
-    "subtitle": "Gerencie todas as assinaturas da plataforma",
-    "stats": {
-      "total_subscriptions": "Total de Assinaturas",
-      "active_subscriptions": "Assinaturas Ativas",
-      "trial_subscriptions": "Em Período de Teste",
-      "cancelled_subscriptions": "Canceladas",
-      "monthly_revenue": "Receita Mensal",
-      "churn_rate": "Taxa de Cancelamento"
-    },
-    "filters": {
-      "search_placeholder": "Pesquisar assinaturas...",
-      "status_filter": "Filtrar por estado",
-      "all": "Todas",
-      "active": "Ativas",
-      "trial": "Em Teste",
-      "cancelled": "Canceladas",
-      "expired": "Expiradas",
-      "plan_filter": "Filtrar por plano",
-      "date_range": "Período"
-    },
-    "table": {
-      "subscriber": "Assinante",
-      "plan": "Plano",
-      "status": "Estado",
-      "start_date": "Data de Início",
-      "next_billing": "Próxima Cobrança",
-      "amount": "Valor",
-      "actions": "Ações"
-    },
-    "status": {
-      "active": "Ativa",
-      "trial": "Em Teste",
-      "cancelled": "Cancelada",
-      "expired": "Expirada",
-      "past_due": "Em Atraso"
-    },
-    "actions_menu": {
-      "view_details": "Ver Detalhes",
-      "change_plan": "Alterar Plano",
-      "cancel_subscription": "Cancelar Assinatura",
-      "reactivate": "Reativar",
-      "extend_trial": "Estender Teste",
-      "view_billing_history": "Ver Histórico de Cobrança",
-      "send_invoice": "Enviar Fatura"
-    },
-    "messages": {
-      "subscription_cancelled": "Assinatura cancelada com sucesso",
-      "subscription_reactivated": "Assinatura reativada com sucesso",
-      "plan_changed": "Plano alterado com sucesso",
-      "trial_extended": "Período de teste estendido",
-      "invoice_sent": "Fatura enviada com sucesso",
-      "error_cancelling": "Erro ao cancelar assinatura",
-      "error_reactivating": "Erro ao reativar assinatura",
-      "confirm_cancel": "Tem certeza que deseja cancelar esta assinatura?"
-    }
-  },
-  "payouts": {
-    "title": "Gerir Pagamentos",
-    "subtitle": "Processe e gerencie pagamentos aos motoristas",
-    "stats": {
-      "total_payouts": "Total de Pagamentos",
-      "pending_payouts": "Pagamentos Pendentes",
-      "processed_payouts": "Pagamentos Processados",
-      "failed_payouts": "Pagamentos Falhados",
-      "total_amount": "Valor Total",
-      "pending_amount": "Valor Pendente"
-    },
-    "actions": {
-      "calculate_payouts": "Calcular Pagamentos",
-      "export_csv": "Exportar CSV",
-      "bulk_process": "Processar em Massa",
-      "mark_as_paid": "Marcar como Pagos"
-    },
-    "calculate_modal": {
-      "title": "Calcular Pagamentos",
-      "period_selection": "Seleção de Período",
-      "start_date": "Data de Início",
-      "end_date": "Data de Fim",
-      "commission_rate": "Taxa de Comissão (%)",
-      "include_bonuses": "Incluir Bónus",
-      "include_tips": "Incluir Gorjetas",
-      "calculate": "Calcular Pagamentos",
-      "preview": "Pré-visualizar"
-    },
-    "table": {
-      "driver": "Motorista",
-      "period": "Período",
-      "gross_earnings": "Ganhos Brutos",
-      "commission": "Comissão",
-      "fees": "Taxas",
-      "bonuses": "Bónus",
-      "tips": "Gorjetas",
-      "net_amount": "Valor Líquido",
-      "status": "Estado",
-      "payment_date": "Data de Pagamento",
-      "actions": "Ações"
-    },
-    "status": {
-      "pending": "Pendente",
-      "processing": "A Processar",
-      "paid": "Pago",
-      "failed": "Falhado",
-      "cancelled": "Cancelado"
-    },
-    "filters": {
-      "search_placeholder": "Pesquisar pagamentos...",
-      "status_filter": "Filtrar por estado",
-      "period_filter": "Filtrar por período",
-      "amount_range": "Intervalo de valores"
-    },
-    "messages": {
-      "payouts_calculated": "Pagamentos calculados com sucesso",
-      "payouts_processed": "Pagamentos processados com sucesso",
-      "payouts_marked_paid": "Pagamentos marcados como pagos",
-      "error_calculating": "Erro ao calcular pagamentos",
-      "error_processing": "Erro ao processar pagamentos",
-      "confirm_process": "Tem certeza que deseja processar os pagamentos selecionados?",
-      "no_payouts_selected": "Nenhum pagamento selecionado"
-    }
-  },
-  "reports": {
-    "title": "Relatórios",
-    "subtitle": "Análises e relatórios detalhados",
-    "categories": {
-      "financial": "Financeiro",
-      "operational": "Operacional",
-      "drivers": "Motoristas",
-      "performance": "Performance"
-    },
-    "financial_reports": {
-      "revenue_report": "Relatório de Receita",
-      "commission_report": "Relatório de Comissões",
-      "payout_report": "Relatório de Pagamentos",
-      "subscription_report": "Relatório de Assinaturas"
-    },
-    "operational_reports": {
-      "trip_report": "Relatório de Corridas",
-      "driver_activity": "Atividade de Motoristas",
-      "platform_usage": "Uso da Plataforma",
-      "geographic_analysis": "Análise Geográfica"
-    },
-    "filters": {
-      "date_range": "Período",
-      "report_type": "Tipo de Relatório",
-      "format": "Formato",
-      "pdf": "PDF",
-      "excel": "Excel",
-      "csv": "CSV"
-    },
-    "actions": {
-      "generate_report": "Gerar Relatório",
-      "schedule_report": "Agendar Relatório",
-      "export": "Exportar",
-      "share": "Partilhar"
-    }
-  },
-  "settings": {
-    "title": "Configurações do Sistema",
-    "subtitle": "Configure as definições da plataforma",
-    "categories": {
-      "general": "Geral",
-      "payments": "Pagamentos",
-      "notifications": "Notificações",
-      "integrations": "Integrações",
-      "security": "Segurança"
-    },
-    "general": {
-      "platform_name": "Nome da Plataforma",
-      "platform_description": "Descrição da Plataforma",
-      "default_language": "Idioma Padrão",
-      "default_currency": "Moeda Padrão",
-      "timezone": "Fuso Horário",
-      "maintenance_mode": "Modo de Manutenção"
-    },
-    "payments": {
-      "default_commission": "Comissão Padrão (%)",
-      "payment_frequency": "Frequência de Pagamentos",
-      "minimum_payout": "Pagamento Mínimo",
-      "payment_methods": "Métodos de Pagamento",
-      "auto_calculate_payouts": "Calcular Pagamentos Automaticamente"
-    },
-    "notifications": {
-      "email_notifications": "Notificações por Email",
-      "sms_notifications": "Notificações por SMS",
-      "push_notifications": "Notificações Push",
-      "admin_notifications": "Notificações de Admin",
-      "driver_notifications": "Notificações de Motoristas"
-    },
-    "messages": {
-      "settings_saved": "Configurações guardadas com sucesso",
-      "error_saving": "Erro ao guardar configurações"
-    }
-  },
-  "users": {
-    "title": "Gerir Utilizadores",
-    "subtitle": "Gerencie utilizadores administrativos",
-    "roles": {
-      "super_admin": "Super Administrador",
-      "admin": "Administrador",
-      "moderator": "Moderador",
-      "support": "Suporte"
-    },
-    "actions": {
-      "add_user": "Adicionar Utilizador",
-      "invite_user": "Convidar Utilizador",
-      "export_users": "Exportar Utilizadores"
+      "suspended": "Suspensos"
     },
     "table": {
       "name": "Nome",
       "email": "Email",
-      "role": "Função",
-      "status": "Estado",
-      "last_login": "Último Login",
+      "status": "Status",
+      "createdAt": "Data de Cadastro",
       "actions": "Ações"
     },
-    "form": {
-      "first_name": "Primeiro Nome",
-      "last_name": "Último Nome",
-      "email": "Email",
-      "role": "Função",
-      "permissions": "Permissões",
-      "send_invitation": "Enviar Convite"
+    "modal": {
+      "editDriver": "Editar Motorista",
+      "deleteDriver": "Excluir Motorista",
+      "driverDetails": "Detalhes do Motorista",
+      "basicInfo": "Informações Básicas",
+      "adminFields": "Campos Administrativos",
+      "documents": "Documentos",
+      "history": "Histórico"
     }
   },
-  "navigation": {
-    "dashboard": "Painel",
-    "drivers": "Motoristas",
-    "plans": "Planos",
-    "subscriptions": "Assinaturas",
-    "payouts": "Pagamentos",
-    "reports": "Relatórios",
-    "settings": "Configurações",
-    "users": "Utilizadores",
-    "support": "Suporte",
-    "logout": "Sair"
+  "users": {
+    "title": "Gestão de Usuários",
+    "subtitle": "Gerencie usuários e permissões",
+    "actions": {
+      "create": "Criar Usuário",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "changeRole": "Alterar Função"
+    }
+  },
+  "plans": {
+    "title": "Gestão de Planos",
+    "subtitle": "Configure planos e preços",
+    "actions": {
+      "create": "Criar Plano",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "activate": "Ativar",
+      "deactivate": "Desativar"
+    }
+  },
+  "payouts": {
+    "title": "Gestão de Pagamentos",
+    "subtitle": "Processe e gerencie pagamentos",
+    "actions": {
+      "calculate": "Calcular",
+      "export": "Exportar",
+      "markPaid": "Marcar como Pago"
+    }
+  },
+  "content": {
+    "title": "Gestão de Conteúdo",
+    "subtitle": "Gerencie o conteúdo das páginas públicas",
+    "actions": {
+      "create": "Criar Conteúdo",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "activate": "Ativar",
+      "deactivate": "Desativar"
+    },
+    "filters": {
+      "page": "Página",
+      "section": "Seção",
+      "locale": "Idioma",
+      "status": "Status"
+    },
+    "form": {
+      "page": "Página",
+      "section": "Seção",
+      "key": "Chave",
+      "content": "Conteúdo",
+      "locale": "Idioma",
+      "active": "Ativo"
+    }
   },
   "common": {
-    "actions": {
-      "create": "Criar",
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "view": "Ver",
-      "save": "Guardar",
-      "cancel": "Cancelar",
-      "confirm": "Confirmar",
-      "approve": "Aprovar",
-      "reject": "Rejeitar",
-      "suspend": "Suspender",
-      "activate": "Ativar",
-      "deactivate": "Desativar",
-      "export": "Exportar",
-      "import": "Importar",
-      "search": "Pesquisar",
-      "filter": "Filtrar",
-      "refresh": "Atualizar",
-      "reset": "Repor"
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo",
-      "pending": "Pendente",
-      "approved": "Aprovado",
-      "rejected": "Rejeitado",
-      "suspended": "Suspenso",
-      "cancelled": "Cancelado",
-      "completed": "Concluído",
-      "processing": "A Processar",
-      "failed": "Falhado"
-    },
-    "messages": {
-      "loading": "A carregar...",
-      "no_data": "Nenhum dado disponível",
-      "error_occurred": "Ocorreu um erro",
-      "success": "Operação realizada com sucesso",
-      "confirm_action": "Tem certeza que deseja realizar esta ação?",
-      "unsaved_changes": "Tem alterações não guardadas"
-    }
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "view": "Ver",
+    "create": "Criar",
+    "update": "Atualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Atualizar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "info": "Informação",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "close": "Fechar",
+    "open": "Abrir",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "total": "Total",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado",
+    "suspended": "Suspenso"
   }
 }

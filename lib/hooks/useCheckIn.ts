@@ -33,8 +33,20 @@ export function useCheckIn() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Obter localização
-      const location = await getLocationByIP();
+      // Obter localização (com fallback para Lisboa se falhar)
+      let location;
+      try {
+        location = await getLocationByIP();
+      } catch (locationError) {
+        console.warn('Erro ao obter localização, usando fallback:', locationError);
+        location = {
+          city: 'Lisboa',
+          country: 'Portugal',
+          region: 'Lisboa',
+          coordinates: { lat: 38.7223, lng: -9.1393 },
+          ip: 'unknown'
+        };
+      }
       
       // Criar dados do check-in
       const checkInData: CreateCheckIn = {

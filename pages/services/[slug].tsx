@@ -1,4 +1,4 @@
-import { GetStaticProps, GetStaticPaths } from "next";
+import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
@@ -18,27 +18,32 @@ import { PageProps } from "@/interface/Global";
 import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
+import { ContentManager } from "@/components/ContentManager";
 import { useRouter } from "next/router";
 import { FaCheckCircle, FaArrowRight, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
 
 interface ServicePageProps extends PageProps {
   slug: string;
+  locale: string;
 }
 
-export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) {
+export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePageProps) {
   const router = useRouter();
 
   // Determinar se é página de motoristas ou empresas
   const isDrivers = slug === 'drivers';
   const isCompanies = slug === 'companies';
+  const pageName = isDrivers ? 'services-drivers' : 'services-companies';
 
   return (
-    <>
+    <ContentManager page={pageName} locale={locale} translations={{ page: tPage, common: tCommon }}>
+      {(content) => (
+        <>
       <Container softBg>
         <Title
-          title={tPage("benefits.title")}
-          description={tPage("benefits.subtitle")}
-          feature={tPage("benefits.feature")}
+          title={content.page("benefits.title") || tPage("benefits.title")}
+          description={content.page("benefits.subtitle") || tPage("benefits.subtitle")}
+          feature={content.page("benefits.feature") || tPage("benefits.feature")}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
           <Card
@@ -188,24 +193,21 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
           center
         />
       </Container>
-    </>
+        </>
+      )}
+    </ContentManager>
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [
-      { params: { slug: 'drivers' } },
-      { params: { slug: 'companies' } }
-    ],
-    fallback: false,
-  };
-};
-
-export const getStaticProps: GetStaticProps = async ({ params, locale = "pt" }) => {
-  const slug = params?.slug as string;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const slug = context.params?.slug as string;
 
   try {
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
     const translations = await loadTranslations(locale, ["common", `services-${slug}`]);
     const { common, [`services-${slug}`]: page } = translations;
 
@@ -213,8 +215,8 @@ export const getStaticProps: GetStaticProps = async ({ params, locale = "pt" }) 
       props: {
         translations: { common, page },
         slug,
+        locale,
       },
-      revalidate: 3600,
     };
   } catch (error) {
     console.error("Failed to load translations:", error);
@@ -222,8 +224,8 @@ export const getStaticProps: GetStaticProps = async ({ params, locale = "pt" }) 
       props: {
         translations: { common: {}, page: {} },
         slug,
+        locale: 'pt',
       },
-      revalidate: 3600,
     };
   }
 };

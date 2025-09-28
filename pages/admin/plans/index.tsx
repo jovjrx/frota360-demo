@@ -1,5 +1,7 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import { withAdmin } from '@/lib/auth/withAdmin';
+import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   SimpleGrid,
@@ -12,7 +14,6 @@ import {
   CardHeader,
   Heading,
   Button,
-  useColorModeValue,
   Input,
   InputGroup,
   InputLeftElement,
@@ -82,9 +83,9 @@ export default function PlansManagement({
   tCommon,
   tAdmin 
 }: PlansManagementProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = 'white';
+  const borderColor = 'gray.200';
+  const bgColor = 'gray.50';
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   
@@ -178,14 +179,15 @@ export default function PlansManagement({
         onClose();
         window.location.reload();
       } else {
-        throw new Error('Failed to save plan');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save plan');
       }
     } catch (error) {
       toast({
         title: 'Erro',
-        description: isEditing 
+        description: error instanceof Error ? error.message : (isEditing 
           ? 'Falha ao atualizar plano'
-          : 'Falha ao criar plano',
+          : 'Falha ao criar plano'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -213,12 +215,13 @@ export default function PlansManagement({
         });
         window.location.reload();
       } else {
-        throw new Error('Failed to delete plan');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete plan');
       }
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'Falha ao deletar plano',
+        description: error instanceof Error ? error.message : 'Falha ao deletar plano',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -634,15 +637,35 @@ export default function PlansManagement({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
+    // Get user data from context (passed by withAdmin HOC)
+    const userData = (context as any).userData || null;
+    
+    if (!userData) {
+      throw new Error('User data not found');
+    }
+
     // Load translations
-    const translations = await loadTranslations(context.locale || 'pt', ['common', 'admin']);
+    // Extract locale from middleware header
+    const locale = Array.isArray(context.req.headers['x-locale']) 
+      ? context.req.headers['x-locale'][0] 
+      : context.req.headers['x-locale'] || 'pt';
+    
+    const translations = await loadTranslations(locale, ['common', 'admin']);
     const { common: tCommon, admin: tAdmin } = translations;
 
-    // Get all plans
-    const plans = []
+    // Get all plans from Firestore
+    const plansSnap = await adminDb.collection('plans').get();
+    const plans = plansSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     // Get subscriptions for revenue calculation
-    const subscriptions = []
+    const subscriptionsSnap = await adminDb.collection('subscriptions').get();
+    const subscriptions = subscriptionsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     // Calculate stats
     const stats = {

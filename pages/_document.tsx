@@ -11,6 +11,13 @@ export default function Document() {
           rel="stylesheet"
         />
         <meta charSet="utf-8" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Forçar tema claro antes do Chakra UI carregar
+            localStorage.setItem('chakra-ui-color-mode', 'light');
+            document.documentElement.setAttribute('data-theme', 'light');
+          `
+        }} />
       </Head>
       <body>
         <Main />

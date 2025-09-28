@@ -22,60 +22,99 @@ export async function getLocationByIP(ip?: string): Promise<LocationData> {
       ip = await getPublicIP();
     }
 
+    // Se ainda não tiver IP, usar fallback
+    if (!ip || ip === 'unknown') {
+      return getDefaultLocation();
+    }
+
     // Verificar cache
     const cached = locationCache.get(ip);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.data;
     }
 
-    // Fazer requisição para API de geolocalização
-    const response = await fetch(`https://ipapi.co/${ip}/json/`);
-    if (!response.ok) {
-      throw new Error('Falha ao obter localização');
+    // Fazer requisição para API de geolocalização com timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
+
+    try {
+      const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      const locationData: LocationData = {
+        city: data.city || 'Desconhecida',
+        country: data.country_name || 'Desconhecido',
+        region: data.region || 'Desconhecida',
+        coordinates: {
+          lat: data.latitude || 0,
+          lng: data.longitude || 0
+        },
+        ip: ip
+      };
+
+      // Salvar no cache
+      locationCache.set(ip, { data: locationData, timestamp: Date.now() });
+
+      return locationData;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
-
-    const data = await response.json();
-    
-    const locationData: LocationData = {
-      city: data.city || 'Desconhecida',
-      country: data.country_name || 'Desconhecido',
-      region: data.region || 'Desconhecida',
-      coordinates: {
-        lat: data.latitude || 0,
-        lng: data.longitude || 0
-      },
-      ip: ip
-    };
-
-    // Salvar no cache
-    locationCache.set(ip, { data: locationData, timestamp: Date.now() });
-
-    return locationData;
   } catch (error) {
-    console.error('Erro ao obter localização:', error);
-    
-    // Fallback para localização padrão (Lisboa)
-    return {
-      city: 'Lisboa',
-      country: 'Portugal',
-      region: 'Lisboa',
-      coordinates: {
-        lat: 38.7223,
-        lng: -9.1393
-      },
-      ip: ip || 'unknown'
-    };
+    console.warn('Erro ao obter localização, usando fallback:', error);
+    return getDefaultLocation(ip);
   }
+}
+
+// Função para obter localização padrão
+function getDefaultLocation(ip?: string): LocationData {
+  return {
+    city: 'Lisboa',
+    country: 'Portugal',
+    region: 'Lisboa',
+    coordinates: {
+      lat: 38.7223,
+      lng: -9.1393
+    },
+    ip: ip || 'unknown'
+  };
 }
 
 // Função para obter IP público
 async function getPublicIP(): Promise<string> {
   try {
-    const response = await fetch('https://api.ipify.org?format=json');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos timeout
+
+    const response = await fetch('https://api.ipify.org?format=json', {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const data = await response.json();
-    return data.ip;
+    return data.ip || 'unknown';
   } catch (error) {
-    console.error('Erro ao obter IP público:', error);
+    console.warn('Erro ao obter IP público:', error);
     return 'unknown';
   }
 }
