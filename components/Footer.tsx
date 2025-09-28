@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { Container } from "./Container";
 import { ContainerDivisions } from "./ContainerDivisions";
+import { useLocalizedHref } from "@/lib/linkUtils";
 
 interface FooterProps {
   t: (key: string) => string;
@@ -18,6 +19,7 @@ interface FooterProps {
 
 export default function Footer({ t }: FooterProps) {
   const year = new Date().getFullYear();
+  const getLocalizedHref = useLocalizedHref();
   const color = "white";
   const colorSoft = "whiteAlpha.600";
   const border = "whiteAlpha.300";
@@ -86,20 +88,20 @@ export default function Footer({ t }: FooterProps) {
 
         <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }} gap={{ base: 2, md: 6 }}>
           <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-            <Link as={NextLink} fontSize="sm" href="/" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
+            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.home")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/about" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
+            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/about")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.about")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/services/drivers" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
+            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/services/drivers")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.drivers")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href="/services/companies" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
+            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/services/companies")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.companies")}
             </Link>
 
-            <Link as={NextLink} fontSize="sm" href="/contact" color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
+            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/contact")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.contact")}
             </Link>
           </HStack>

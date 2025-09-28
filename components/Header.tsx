@@ -3,6 +3,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { LanguageSelector } from "./Language";
 import { useAuth } from "@/lib/auth";
+import { useLocalizedHref } from "@/lib/linkUtils";
 import {
   Box,
   Container,
@@ -39,6 +40,7 @@ export default function Header({ t }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { user, signOut, isAdmin, userData } = useAuth();
   const router = useRouter();
+  const getLocalizedHref = useLocalizedHref();
 
   const isActive = (path: string) => router.pathname === path;
 
@@ -54,13 +56,13 @@ export default function Header({ t }: HeaderProps) {
 
   const items = useMemo(
     () => [
-      { href: "/", label: t("navigation.home") },
-      { href: "/services/drivers", label: t("navigation.drivers") },
-      { href: "/services/companies", label: t("navigation.companies") },
-      { href: "/about", label: t("navigation.about") },
-      { href: "/contact", label: t("navigation.contact") }
+      { href: getLocalizedHref("/"), label: t("navigation.home") },
+      { href: getLocalizedHref("/services/drivers"), label: t("navigation.drivers") },
+      { href: getLocalizedHref("/services/companies"), label: t("navigation.companies") },
+      { href: getLocalizedHref("/about"), label: t("navigation.about") },
+      { href: getLocalizedHref("/contact"), label: t("navigation.contact") }
     ],
-    [t]
+    [t, getLocalizedHref]
   );
 
 

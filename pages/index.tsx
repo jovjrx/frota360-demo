@@ -1,5 +1,6 @@
 import { GetServerSideProps } from "next";
 import NextLink from "next/link";
+import { useLocalizedHref } from "@/lib/linkUtils";
 
 import {
   Box,
@@ -31,6 +32,8 @@ import { PlansSection } from "@/components/PlansSection";
 import { ContentManager } from "@/components/ContentManager";
 
 export default function Home({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+  const getLocalizedHref = useLocalizedHref();
+  
   return (
     <ContentManager page="home" locale={locale} translations={{ page: tPage, common: tCommon }}>
       {(content) => (
@@ -45,7 +48,7 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
           <HStack spacing={4}>
             <Button
               as={NextLink}
-              href="/signup"
+              href={getLocalizedHref("/signup")}
               size="lg"
               px={8}
               py={4}
@@ -144,7 +147,7 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
               </Text>
               <Button
                 as={NextLink}
-                href="/services/painels"
+                href={getLocalizedHref("/services/drivers")}
                 colorScheme="green"
                 size="sm"
                 rightIcon={<ArrowRightIcon />}
@@ -164,7 +167,7 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
               </Text>
               <Button
                 as={NextLink}
-                href="/services/companies"
+                href={getLocalizedHref("/services/companies")}
                 colorScheme="red"
                 size="sm"
                 rightIcon={<ArrowRightIcon />}

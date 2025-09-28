@@ -102,12 +102,12 @@ export default function AdminDashboard({
   return (
     <>
       <Head>
-        <title>Painel Administrativo - Conduz.pt</title>
+        <title>{tAdmin("dashboard.title")} - Conduz.pt</title>
       </Head>
       
       <AdminLayout
-        title="Painel Administrativo"
-        subtitle="Visão geral do sistema e atividades recentes"
+        title={tAdmin("dashboard.title")}
+        subtitle={tAdmin("dashboard.subtitle")}
         user={{
           name: userData?.name || 'Administrador',
           avatar: userData?.avatar,
@@ -116,35 +116,35 @@ export default function AdminDashboard({
         }}
         notifications={0}
         breadcrumbs={[
-          { label: 'Dashboard' }
+          { label: tAdmin("dashboard.title") }
         ]}
         stats={[
           {
-            label: 'Total Motoristas',
+            label: tAdmin("dashboard.stats.totalDrivers"),
             value: stats.totalDrivers,
             helpText: 'Cadastrados',
             color: 'blue.500'
           },
           {
-            label: 'Motoristas Ativos',
+            label: tAdmin("dashboard.stats.activeDrivers"),
             value: stats.activeDrivers,
             helpText: 'Aprovados',
             color: 'green.500'
           },
           {
-            label: 'Pendentes',
+            label: tAdmin("dashboard.stats.pendingDrivers"),
             value: stats.pendingDrivers,
             helpText: 'Aguardando',
             color: 'yellow.500'
           },
           {
-            label: 'Receita Total',
+            label: tAdmin("dashboard.stats.totalRevenue"),
             value: `€${stats.totalRevenue.toLocaleString()}`,
             helpText: 'Acumulada',
             color: 'purple.500'
           },
           {
-            label: 'Pagamentos',
+            label: tAdmin("dashboard.stats.totalPayouts"),
             value: stats.totalPayouts,
             helpText: 'Processados',
             color: 'orange.500'
@@ -176,7 +176,7 @@ export default function AdminDashboard({
           {/* Recent Drivers */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
-              <Heading size="md">Motoristas Recentes</Heading>
+              <Heading size="md">{tAdmin("dashboard.recentDrivers")}</Heading>
             </CardHeader>
                 <CardBody>
                   <VStack spacing={3} align="stretch">
@@ -200,7 +200,7 @@ export default function AdminDashboard({
                       </HStack>
                     ))}
                 <Button variant="outline" as={Link} href="/admin/drivers" w="full">
-                  Ver Todos os Motoristas
+                  {tAdmin("dashboard.manageDrivers")}
                 </Button>
                   </VStack>
                 </CardBody>
@@ -209,7 +209,7 @@ export default function AdminDashboard({
           {/* Recent Payouts */}
           <Card bg="white" borderColor="gray.200">
             <CardHeader>
-              <Heading size="md">Pagamentos Recentes</Heading>
+              <Heading size="md">{tAdmin("dashboard.recentPayouts")}</Heading>
             </CardHeader>
                 <CardBody>
                   <VStack spacing={3} align="stretch">
@@ -226,13 +226,13 @@ export default function AdminDashboard({
                         €{payout.amount.toLocaleString()}
                       </Text>
                           <Badge colorScheme={payout.status === 'paid' ? 'green' : 'yellow'}>
-                        {payout.status === 'paid' ? 'Pago' : 'Pendente'}
+                        {payout.status === 'paid' ? tAdmin("common.approved") : tAdmin("common.pending")}
                           </Badge>
                         </VStack>
                       </HStack>
                     ))}
                 <Button variant="outline" as={Link} href="/admin/payouts" w="full">
-                  Ver Todos os Pagamentos
+                  {tAdmin("dashboard.processPayouts")}
                 </Button>
                   </VStack>
                 </CardBody>
@@ -242,21 +242,21 @@ export default function AdminDashboard({
         {/* System Status */}
         <Card bg="white" borderColor="gray.200">
           <CardHeader>
-            <Heading size="md">Status do Sistema</Heading>
+            <Heading size="md">{tAdmin("dashboard.systemStatus")}</Heading>
           </CardHeader>
           <CardBody>
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               <HStack>
                 <Icon as={FiCheckCircle} color="green.500" />
-                <Text>Sistema Operacional</Text>
+                <Text>{tAdmin("dashboard.systemOperational")}</Text>
               </HStack>
               <HStack>
                 <Icon as={FiCheckCircle} color="green.500" />
-                <Text>Base de Dados Conectada</Text>
+                <Text>{tAdmin("dashboard.databaseConnected")}</Text>
               </HStack>
               <HStack>
                 <Icon as={FiCheckCircle} color="green.500" />
-                <Text>Pagamentos Ativos</Text>
+                <Text>{tAdmin("dashboard.paymentsActive")}</Text>
               </HStack>
             </SimpleGrid>
           </CardBody>
