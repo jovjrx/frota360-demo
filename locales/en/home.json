@@ -33,19 +33,19 @@
       }
     ]
   },
-  "segments": {
-    "title": "Solutions for everyone",
-    "subtitle": "Offers by segment",
-    "feature": "SEGMENTS",
-    "drivers": {
-      "title": "For Drivers",
-      "description": "Benefits, transparent commissions, own car or rental",
-      "cta": "Become a driver"
+  "driverTypes": {
+    "title": "Driver Types",
+    "subtitle": "Choose the option that best suits you",
+    "feature": "OPTIONS",
+    "affiliate": {
+      "title": "Affiliate Driver",
+      "description": "Work with your own vehicle and benefit from our support and partnerships with the main platforms",
+      "cta": "Learn More"
     },
-    "companies": {
-      "title": "For Companies",
-      "description": "Monthly invoicing, cost centers, reports",
-      "cta": "Request a proposal"
+    "renter": {
+      "title": "Renter Driver",
+      "description": "Don't have a vehicle? Rent one of our well-maintained vehicles and start working immediately",
+      "cta": "Learn More"
     }
   },
   "metrics": {

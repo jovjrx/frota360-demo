@@ -9,6 +9,12 @@ export interface SessionData {
   name?: string;
   driverId?: string;
   isLoggedIn: boolean;
+  user?: {
+    id: string;
+    role: 'admin' | 'ops' | 'driver';
+    email?: string;
+    name?: string;
+  };
 }
 
 export interface SessionRequest extends NextApiRequest {

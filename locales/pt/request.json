@@ -1,0 +1,20 @@
+{
+  "request": {
+    "title": "Junte-se à Conduz PT",
+    "subtitle": "Preencha o formulário abaixo para se candidatar como motorista",
+    "typeLabel": "Tipo de Motorista",
+    "typeAffiliate": "Afiliado",
+    "typeRenter": "Locatário",
+    "typeAffiliateDesc": "Trabalho com o meu próprio veículo",
+    "typeRenterDesc": "Pretendo alugar um veículo da Conduz PT",
+    "vehicleInfo": "Como motorista afiliado, por favor forneça informações sobre o seu veículo",
+    "vehicleMake": "Marca do Veículo",
+    "vehicleModel": "Modelo do Veículo",
+    "vehicleYear": "Ano do Veículo",
+    "vehiclePlate": "Matrícula do Veículo",
+    "additionalInfo": "Informações Adicionais (opcional)",
+    "submitButton": "Enviar Candidatura",
+    "successMessage": "Candidatura enviada com sucesso! Entraremos em contacto em breve.",
+    "errorMessage": "Erro ao enviar candidatura. Por favor, tente novamente."
+  }
+}

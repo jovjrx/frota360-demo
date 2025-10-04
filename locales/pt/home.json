@@ -33,19 +33,19 @@
       }
     ]
   },
-  "segments": {
-    "title": "Soluções para todos",
-    "subtitle": "Ofertas por segmento",
-    "feature": "SEGMENTOS",
-    "drivers": {
-      "title": "Para Motoristas",
-      "description": "Benefícios, comissões transparentes, carro próprio ou alugado",
-      "cta": "Seja motorista"
+  "driverTypes": {
+    "title": "Tipos de Motorista",
+    "subtitle": "Escolha a opção que melhor se adequa a si",
+    "feature": "OPÇÕES",
+    "affiliate": {
+      "title": "Motorista Afiliado",
+      "description": "Trabalhe com o seu próprio veículo e beneficie do nosso suporte e parcerias com as principais plataformas",
+      "cta": "Saber Mais"
     },
-    "companies": {
-      "title": "Para Empresas", 
-      "description": "Faturação mensal, centros de custo, relatórios",
-      "cta": "Pedir proposta"
+    "renter": {
+      "title": "Motorista Locatário",
+      "description": "Não tem veículo? Alugue um dos nossos veículos bem mantidos e comece a trabalhar imediatamente",
+      "cta": "Saber Mais"
     }
   },
   "metrics": {

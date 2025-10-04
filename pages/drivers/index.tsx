@@ -1,336 +1,195 @@
 import { GetServerSideProps } from 'next';
-import Head from 'next/head';
-import { withDriver } from '@/lib/auth/withDriver';
-import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
-  SimpleGrid,
-  VStack,
-  HStack,
+  Container,
+  Heading,
   Text,
-  Badge,
+  VStack,
   Card,
   CardBody,
-  CardHeader,
-  Heading,
-  Button,
-  Avatar,
-  Progress,
+  Badge,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Divider,
-  Icon,
-  Flex,
-  List,
-  ListItem,
-  ListIcon,
 } from '@chakra-ui/react';
-import { 
-  FiDollarSign, 
-  FiTrendingUp, 
-  FiFileText, 
-  FiSettings, 
-  FiBell,
-  FiUser,
-  FiCreditCard,
-  FiUpload,
-  FiCalendar,
-  FiMapPin,
-  FiClock,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiXCircle
-} from 'react-icons/fi';
-import Link from 'next/link';
-import { formatPortugalTime } from '@/lib/timezone';
 import { loadTranslations } from '@/lib/translations';
-import DriverLayout from '@/components/layouts/DriverLayout';
-import QuickActions from '@/components/QuickActions';
-import { CheckInManager } from '@/components/checkin/CheckInManager';
-import { CheckInHistory } from '@/components/checkin/CheckInHistory';
+import { PageProps } from '@/interface/Global';
+import LoggedInLayout from '@/components/LoggedInLayout';
+import { getSession } from '@/lib/session';
+import { db } from '@/lib/firebaseAdmin';
 
-interface DriverDashboardProps {
-  driver: any;
-  stats: {
-    totalEarnings: number;
-    monthlyEarnings: number;
-    totalTrips: number;
-    averageRating: number;
-    completionRate: number;
+interface DriverDashboardProps extends PageProps {
+  driver: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: string;
+    driverType: string;
+    isApproved: boolean;
   };
-  subscription: any;
-  recentPayments: any[];
-  recentTrips: any[];
-  notifications: any[];
-  translations: Record<string, any>;
-  userData: any;
-  onboardingComplete: boolean;
-  hasSelectedPlan: boolean;
-  documentsUploaded: number;
 }
 
-export default function DriverDashboard({ 
-  driver, 
-  stats, 
-  subscription, 
-  recentPayments, 
-  recentTrips, 
-  notifications,
-  translations,
-  userData,
-  onboardingComplete,
-  hasSelectedPlan,
-  documentsUploaded
-}: DriverDashboardProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
-  const tDriver = (key: string) => translations.driver?.[key] || key;
-
+export default function DriverDashboard({ tPage, tCommon, locale, driver }: DriverDashboardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'pending': return 'yellow';
-      case 'suspended': return 'red';
-      case 'inactive': return 'gray';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'inactive':
+        return 'gray';
+      case 'suspended':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'active': return 'Ativo';
-      case 'pending': return 'Pendente';
-      case 'suspended': return 'Suspenso';
-      case 'inactive': return 'Inativo';
-      default: return 'Desconhecido';
+      case 'active':
+        return 'Ativo';
+      case 'pending':
+        return 'Pendente';
+      case 'inactive':
+        return 'Inativo';
+      case 'suspended':
+        return 'Suspenso';
+      default:
+        return status;
     }
+  };
+
+  const getDriverTypeLabel = (type: string) => {
+    return type === 'affiliate' ? 'Afiliado' : 'Locatário';
   };
 
   return (
-    <>
-      <Head>
-        <title>{`${tDriver('dashboard.title')} - Conduz.pt`}</title>
-      </Head>
-      
-      <DriverLayout
-        title={`${tDriver('dashboard.welcome')}, ${driver?.name || 'Motorista'}!`}
-        subtitle={tDriver('dashboard.subtitle')}
-        user={{
-          name: driver?.name || 'Motorista',
-          avatar: driver?.avatar,
-          role: 'driver',
-          status: driver?.status
-        }}
-        notifications={notifications.length}
-        breadcrumbs={[
-          { label: 'Dashboard' }
-        ]}
-        alerts={[
-          // Outros alerts só aparecem se onboarding estiver completo
-          ...(driver?.status === 'pending' ? [{
-            type: 'warning' as const,
-            title: tDriver('dashboard.accountPending'),
-            description: 'Sua documentação está sendo analisada. Você receberá uma notificação quando for aprovado.'
-          }] : []),
-          ...(driver?.status === 'suspended' ? [{
-            type: 'error' as const,
-            title: tDriver('dashboard.accountSuspended'),
-            description: 'Entre em contato com o suporte para mais informações.'
-          }] : [])
-        ]}
-        stats={[
-          {
-            label: tDriver('dashboard.totalEarnings'),
-            value: `€${stats.totalEarnings.toFixed(2)}`,
-            helpText: `€${stats.monthlyEarnings.toFixed(2)} este mês`,
-            arrow: 'increase',
-            color: 'green.500'
-          },
-          {
-            label: tDriver('dashboard.totalTrips'),
-            value: stats.totalTrips,
-            helpText: `Taxa de conclusão: ${stats.completionRate}%`,
-            color: 'blue.500'
-          },
-          {
-            label: tDriver('dashboard.averageRating'),
-            value: stats.averageRating.toFixed(1),
-            helpText: 'Média de avaliações',
-            color: 'yellow.500'
-          },
-          {
-            label: 'Plano Ativo',
-            value: subscription?.plan?.name || 'Sem plano',
-            helpText: subscription?.status === 'active' ? 'Ativo' : 'Inativo',
-            color: 'purple.500'
-          }
-        ]}
-        actions={
-              <HStack spacing={4}>
-            <Button leftIcon={<FiUpload />} variant="outline" size="sm">
-              Upload Documentos
-                </Button>
-                <Button leftIcon={<FiSettings />} variant="outline" size="sm">
-              Configurações
-                </Button>
-              </HStack>
-        }
-      >
-            {/* Quick Actions */}
-        <QuickActions userRole="driver" userData={driver} />
+    <LoggedInLayout>
+      <Container maxW="container.lg" py={8}>
+        <VStack spacing={8} align="stretch">
+          {/* Header */}
+          <Box>
+            <Heading size="lg" mb={2}>
+              Bem-vindo, {driver.firstName}!
+            </Heading>
+            <Text color="gray.600">
+              Painel do Motorista
+            </Text>
+          </Box>
 
-        {/* Check-in System */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">Sistema de Check-in</Heading>
-          </CardHeader>
-                <CardBody>
-            <CheckInManager />
-                </CardBody>
-              </Card>
+          {/* Status da Conta */}
+          <Card>
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                <Heading size="md">Status da Sua Conta</Heading>
+                
+                <Box>
+                  <Text fontWeight="bold" mb={2}>Status Atual:</Text>
+                  <Badge colorScheme={getStatusColor(driver.status)} fontSize="lg" px={4} py={2}>
+                    {getStatusLabel(driver.status)}
+                  </Badge>
+                </Box>
 
-        {/* Check-in History */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">Histórico de Check-ins</Heading>
-          </CardHeader>
-                <CardBody>
-            <CheckInHistory />
+                <Box>
+                  <Text fontWeight="bold" mb={2}>Tipo de Motorista:</Text>
+                  <Badge colorScheme={driver.driverType === 'affiliate' ? 'green' : 'blue'} fontSize="lg" px={4} py={2}>
+                    {getDriverTypeLabel(driver.driverType)}
+                  </Badge>
+                </Box>
+
+                {driver.status === 'pending' && (
+                  <Alert status="info" borderRadius="md">
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Candidatura em Análise</AlertTitle>
+                      <AlertDescription>
+                        A sua candidatura está a ser analisada pela nossa equipa. 
+                        Entraremos em contacto em breve.
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+
+                {driver.status === 'active' && driver.isApproved && (
+                  <Alert status="success" borderRadius="md">
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Conta Aprovada!</AlertTitle>
+                      <AlertDescription>
+                        A sua conta foi aprovada e está ativa. 
+                        Em breve terá acesso a mais funcionalidades.
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+
+                {driver.status === 'suspended' && (
+                  <Alert status="error" borderRadius="md">
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Conta Suspensa</AlertTitle>
+                      <AlertDescription>
+                        A sua conta foi suspensa. Por favor, entre em contacto com o suporte.
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* Informações */}
+          <Card>
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                <Heading size="md">Informações da Conta</Heading>
+                
+                <Box>
+                  <Text fontWeight="bold" color="gray.600" fontSize="sm">Nome Completo</Text>
+                  <Text fontSize="lg">{driver.firstName} {driver.lastName}</Text>
+                </Box>
+
+                <Box>
+                  <Text fontWeight="bold" color="gray.600" fontSize="sm">Email</Text>
+                  <Text fontSize="lg">{driver.email}</Text>
+                </Box>
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* Próximos Passos */}
+          {driver.status === 'pending' && (
+            <Card>
+              <CardBody>
+                <VStack spacing={4} align="stretch">
+                  <Heading size="md">Próximos Passos</Heading>
+                  
+                  <Text>
+                    1. A nossa equipa está a analisar a sua candidatura
+                  </Text>
+                  <Text>
+                    2. Entraremos em contacto por email ou telefone
+                  </Text>
+                  <Text>
+                    3. Após aprovação, receberá acesso completo à plataforma
+                  </Text>
+                </VStack>
               </CardBody>
             </Card>
-
-            {/* Recent Activity */}
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-              {/* Recent Payments */}
-          <Card bg="white" borderColor="gray.200">
-            <CardHeader>
-              <Heading size="md">{tDriver('dashboard.recentPayments')}</Heading>
-            </CardHeader>
-                <CardBody>
-                  <VStack spacing={3} align="stretch">
-                    {recentPayments.length > 0 ? (
-                  recentPayments.slice(0, 5).map((payment, index) => (
-                    <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                      <HStack>
-                        <Icon as={FiDollarSign} color="green.500" />
-                          <VStack align="flex-start" spacing={0}>
-                          <Text fontSize="sm" fontWeight="medium">
-                            Pagamento #{payment.id}
-                            </Text>
-                          <Text fontSize="xs" color="gray.600">
-                            {formatPortugalTime(payment.date, 'dd/MM/yyyy')}
-                            </Text>
-                          </VStack>
-                      </HStack>
-                      <Text fontWeight="bold" color="green.500">
-                        €{payment.amount.toFixed(2)}
-                            </Text>
-                        </HStack>
-                      ))
-                    ) : (
-                      <Text color="gray.500" textAlign="center" py={4}>
-                        {tDriver('dashboard.noPayments')}
-                      </Text>
-                    )}
-                  </VStack>
-                </CardBody>
-              </Card>
-
-              {/* Recent Trips */}
-          <Card bg="white" borderColor="gray.200">
-            <CardHeader>
-              <Heading size="md">{tDriver('dashboard.recentTrips')}</Heading>
-            </CardHeader>
-                <CardBody>
-                  <VStack spacing={3} align="stretch">
-                    {recentTrips.length > 0 ? (
-                  recentTrips.slice(0, 5).map((trip, index) => (
-                    <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                      <HStack>
-                        <Icon as={FiMapPin} color="blue.500" />
-                          <VStack align="flex-start" spacing={0}>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {trip.from} → {trip.to}
-                              </Text>
-                          <Text fontSize="xs" color="gray.600">
-                            {formatPortugalTime(trip.date, 'dd/MM/yyyy')}
-                              </Text>
-                        </VStack>
-                            </HStack>
-                          <VStack align="flex-end" spacing={0}>
-                        <Text fontWeight="bold" color="blue.500">
-                              €{trip.earnings.toFixed(2)}
-                            </Text>
-                        <Text fontSize="xs" color="gray.600">
-                              ⭐ {trip.rating}
-                            </Text>
-                          </VStack>
-                        </HStack>
-                      ))
-                    ) : (
-                      <Text color="gray.500" textAlign="center" py={4}>
-                        {tDriver('dashboard.noTrips')}
-                      </Text>
-                    )}
-                  </VStack>
-                </CardBody>
-              </Card>
-            </SimpleGrid>
-
-        {/* Document Status */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">{tDriver('dashboard.documentStatus')}</Heading>
-          </CardHeader>
-                <CardBody>
-            <VStack spacing={4} align="stretch">
-              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                <HStack>
-                  <Icon as={FiCheckCircle} color="green.500" />
-                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.drivingLicense')}</Text>
-                </HStack>
-                <Badge colorScheme="green">{tDriver('dashboard.verified')}</Badge>
-              </HStack>
-              
-              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                <HStack>
-                  <Icon as={FiAlertCircle} color="yellow.500" />
-                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.vehicleInsurance')}</Text>
-                </HStack>
-                <Badge colorScheme="yellow">{tDriver('dashboard.pending')}</Badge>
-              </HStack>
-              
-              <HStack justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                <HStack>
-                  <Icon as={FiXCircle} color="red.500" />
-                  <Text fontSize="sm" fontWeight="medium">{tDriver('dashboard.tvdeCertificate')}</Text>
-                </HStack>
-                <Badge colorScheme="red">{tDriver('dashboard.rejected')}</Badge>
-              </HStack>
-                    </VStack>
-                </CardBody>
-              </Card>
-      </DriverLayout>
-    </>
+          )}
+        </VStack>
+      </Container>
+    </LoggedInLayout>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    // Extract locale from middleware header
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
-      : context.req.headers['x-locale'] || 'pt';
-    
-    // Load translations
-    const translations = await loadTranslations(locale, ['common', 'driver']);
-
-    // Get session from Iron Session
-    const { getSession } = await import('@/lib/session/ironSession');
     const session = await getSession(context.req, context.res);
-    
-    if (!session.userId) {
+
+    if (!session?.user || session.user.role !== 'driver') {
       return {
         redirect: {
           destination: '/login',
@@ -339,147 +198,47 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    // Get user data from Firestore
-    const userDoc = await adminDb.collection('users').doc(session.userId).get();
-    const userData = userDoc.exists ? userDoc.data() : null;
+    // Buscar dados do motorista
+    const driverDoc = await db.collection('drivers').doc(session.user.id).get();
     
-    if (!userData || userData.role !== 'driver') {
+    if (!driverDoc.exists) {
       return {
         redirect: {
-          destination: '/admin',
+          destination: '/login',
           permanent: false,
         },
       };
     }
 
-    // Get driver data from Firestore
-    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
-    
-    if (driverSnap.empty) {
-      throw new Error('Driver not found');
-    }
+    const driverData = driverDoc.data();
 
-    const driverDoc = driverSnap.docs[0];
-    const driver = {
-      id: driverDoc.id,
-      ...driverDoc.data(),
-    } as any;
+    const locale = Array.isArray(context.req.headers['x-locale'])
+      ? context.req.headers['x-locale'][0]
+      : context.req.headers['x-locale'] || 'pt';
 
-    // Verificar se o motorista completou o onboarding
-    const hasSelectedPlan = driver.selectedPlan && driver.selectedPlan !== null;
-    const documentsUploaded = driver.documents ? 
-      Object.values(driver.documents).filter((doc: any) => doc.uploaded).length : 0;
-    const onboardingComplete = hasSelectedPlan && documentsUploaded > 0;
-
-    // Se não completou o onboarding, redirecionar para a página de onboarding
-    if (!onboardingComplete) {
-      return {
-        redirect: {
-          destination: '/drivers/onboarding',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get real payments data
-    const paymentsSnap = await adminDb.collection('payments').where('driverId', '==', driverDoc.id).get();
-    const payments = paymentsSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
-    }));
-
-    // Get real trips data
-    const tripsSnap = await adminDb.collection('trips').where('driverId', '==', driverDoc.id).get();
-    const trips = tripsSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      date: doc.data().date?.toDate?.() || new Date(doc.data().date),
-    }));
-
-    // Get subscription data
-    const subscriptionSnap = await adminDb.collection('subscriptions').where('driverId', '==', driverDoc.id).limit(1).get();
-    const subscription = subscriptionSnap.empty ? null : {
-      ...subscriptionSnap.docs[0].data(),
-      plan: subscriptionSnap.docs[0].data().plan || { name: 'Sem plano' },
-    };
-
-    // Calculate stats from real data
-    const totalEarnings = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-    const monthlyEarnings = payments
-      .filter(p => {
-        const paymentDate = new Date(p.date);
-        const now = new Date();
-        return paymentDate.getMonth() === now.getMonth() && 
-               paymentDate.getFullYear() === now.getFullYear();
-      })
-      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-    
-    const completedTrips = trips.filter(t => t.status === 'completed');
-    const totalTrips = trips.length;
-    const averageRating = completedTrips.length > 0 
-      ? completedTrips.reduce((sum, t) => sum + (Number(t.rating) || 0), 0) / completedTrips.length 
-      : 0;
-    const completionRate = totalTrips > 0 ? Math.round((completedTrips.length / totalTrips) * 100) : 0;
-
-    const stats = {
-      totalEarnings,
-      monthlyEarnings,
-      totalTrips,
-      averageRating,
-      completionRate,
-    };
-
-    // Get recent payments (last 5)
-    const recentPayments = payments
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5);
-
-    // Get recent trips (last 5)
-    const recentTrips = trips
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5);
-
-    // Get notifications
-    const notificationsSnap = await adminDb.collection('notifications').where('driverId', '==', driverDoc.id).get();
-    const notifications = notificationsSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const translations = await loadTranslations(locale, ['common', 'driver']);
+    const { common, driver: page } = translations;
 
     return {
       props: {
-        driver,
-        stats,
-        subscription,
-        recentPayments,
-        recentTrips,
-        notifications,
-        translations,
-        userData: driver,
-        onboardingComplete,
-        hasSelectedPlan,
-        documentsUploaded,
+        translations: { common, page },
+        locale,
+        driver: {
+          firstName: driverData?.firstName || '',
+          lastName: driverData?.lastName || '',
+          email: driverData?.email || '',
+          status: driverData?.status || 'pending',
+          driverType: driverData?.driverType || 'affiliate',
+          isApproved: driverData?.isApproved || false,
+        },
       },
     };
   } catch (error) {
-    console.error('Error loading driver dashboard:', error);
+    console.error('Failed to load driver data:', error);
     return {
-      props: {
-        driver: null,
-        stats: {
-          totalEarnings: 0,
-          monthlyEarnings: 0,
-          totalTrips: 0,
-          averageRating: 0,
-          completionRate: 0,
-        },
-        subscription: null,
-        recentPayments: [],
-        recentTrips: [],
-        notifications: [],
-        translations: { common: {}, driver: {} },
-        userData: null,
+      redirect: {
+        destination: '/login',
+        permanent: false,
       },
     };
   }

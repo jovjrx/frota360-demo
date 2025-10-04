@@ -304,6 +304,22 @@ export class UberBusinessClient extends UberBaseClient {
       status: 200,
     };
   }
+
+  async testConnection(): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const response = await this.getBusinessProfile();
+      return {
+        success: response.status === 200,
+        data: response.data,
+        error: response.status !== 200 ? 'Failed to connect' : undefined,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Unknown error',
+      };
+    }
+  }
 }
 
 export function createUberBusinessClient(): UberBusinessClient {
