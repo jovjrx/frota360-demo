@@ -88,10 +88,10 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
           {/* Header */}
           <Box>
             <Heading size="xl" mb={2}>
-              {tAdmin(ADMIN.DASHBOARD.TITLE)}
+              Dashboard de Gestão TVDE
             </Heading>
             <Text color="gray.600" fontSize="lg">
-              {tAdmin(ADMIN.DASHBOARD.SUBTITLE)}
+              Visão geral do negócio - Últimos 30 dias
             </Text>
           </Box>
 
@@ -102,7 +102,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_REVENUE)}</StatLabel>
+                    <StatLabel>Receita Total</StatLabel>
                     <Icon as={FiDollarSign} color="green.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="green.600">
@@ -121,7 +121,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_EXPENSES)}</StatLabel>
+                    <StatLabel>Despesas Totais</StatLabel>
                     <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="red.600">
@@ -140,7 +140,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.NET_PROFIT)}</StatLabel>
+                    <StatLabel>Lucro Líquido</StatLabel>
                     <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="blue.600">
@@ -159,7 +159,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_TRIPS)}</StatLabel>
+                    <StatLabel>Total de Viagens</StatLabel>
                     <Icon as={FiActivity} color="purple.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="purple.600">
@@ -179,7 +179,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
             <Card>
               <CardHeader>
                 <HStack justify="space-between">
-                  <Heading size="md">{tAdmin(ADMIN.DASHBOARD.FLEET_TITLE)}</Heading>
+                  <Heading size="md">Frota Ativa</Heading>
                   <Icon as={FiTruck} color="green.500" boxSize={6} />
                 </HStack>
               </CardHeader>
@@ -196,8 +196,10 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
                   <Divider />
                   <Box>
                     <Text fontSize="sm" color="gray.600" mb={2}>Taxa de Utilização</Text>
-                    <Progress value={85} colorScheme="green" size="lg" borderRadius="md" />
-                    <Text fontSize="sm" color="gray.500" mt={1}>85% da frota em operação</Text>
+                    <Progress value={metrics?.summary?.utilizationRate || 85} colorScheme="green" size="lg" borderRadius="md" />
+                    <Text fontSize="sm" color="gray.500" mt={1}>
+                      {metrics?.summary?.utilizationRate || 85}% da frota em operação
+                    </Text>
                   </Box>
                 </VStack>
               </CardBody>
@@ -207,7 +209,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
             <Card>
               <CardHeader>
                 <HStack justify="space-between">
-                  <Heading size="md">{tAdmin(ADMIN.DASHBOARD.DRIVERS_TITLE)}</Heading>
+                  <Heading size="md">Motoristas Ativos</Heading>
                   <Icon as={FiUsers} color="blue.500" boxSize={6} />
                 </HStack>
               </CardHeader>
@@ -224,15 +226,15 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
                   <Divider />
                   <SimpleGrid columns={2} spacing={4}>
                     <Box>
-                      <Text fontSize="sm" color="gray.600">{tAdmin(ADMIN.DASHBOARD.AFFILIATES)}</Text>
+                      <Text fontSize="sm" color="gray.600">Afiliados</Text>
                       <Text fontSize="xl" fontWeight="bold">
-                        {Math.floor((metrics?.summary?.activeDrivers || 0) * 0.6)}
+                        {metrics?.summary?.activeAffiliates || Math.floor((metrics?.summary?.activeDrivers || 0) * 0.6)}
                       </Text>
                     </Box>
                     <Box>
-                      <Text fontSize="sm" color="gray.600">{tAdmin(ADMIN.DASHBOARD.RENTERS)}</Text>
+                      <Text fontSize="sm" color="gray.600">Locatários</Text>
                       <Text fontSize="xl" fontWeight="bold">
-                        {Math.floor((metrics?.summary?.activeDrivers || 0) * 0.4)}
+                        {metrics?.summary?.activeRenters || Math.floor((metrics?.summary?.activeDrivers || 0) * 0.4)}
                       </Text>
                     </Box>
                   </SimpleGrid>
@@ -244,7 +246,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
           {/* Status das Integrações */}
           <Card>
             <CardHeader>
-              <Heading size="md">{tAdmin(ADMIN.DASHBOARD.INTEGRATIONS_TITLE)}</Heading>
+              <Heading size="md">Status das Integrações</Heading>
             </CardHeader>
             <CardBody>
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
@@ -291,7 +293,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_REQUESTS)}</Text>
+                <Text>Gestão de Solicitações</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Candidaturas pendentes
                 </Text>
@@ -307,7 +309,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_DRIVERS)}</Text>
+                <Text>Controle de Motoristas</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Controle de motoristas
                 </Text>
@@ -323,7 +325,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.DETAILED_METRICS)}</Text>
+                <Text>Métricas Detalhadas</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Análise por plataforma
                 </Text>
@@ -339,7 +341,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_FLEET)}</Text>
+                <Text>Controle da Frota</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Controle da frota
                 </Text>
@@ -358,7 +360,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.INTEGRATIONS)}</Text>
+                <Text>Integrações</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Status das integrações
                 </Text>
@@ -374,7 +376,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>{tAdmin(ADMIN.DASHBOARD.CONTENT_MANAGEMENT)}</Text>
+                <Text>Gestão de Conteúdo</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Editar textos do site
                 </Text>
@@ -387,7 +389,7 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
             <Alert status="warning" borderRadius="md">
               <AlertIcon />
               <Box>
-                <Text fontWeight="bold">{tAdmin(ADMIN.DASHBOARD.INTEGRATION_PROBLEMS)}</Text>
+                <Text fontWeight="bold">Problemas nas Integrações</Text>
                 <Text fontSize="sm">
                   {metrics.errors.length} plataforma(s) com erros. Verifique as integrações.
                 </Text>

@@ -157,7 +157,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
 
       if (data.success) {
         toast({
-          title: tAdmin(ADMIN.METRICS.CONNECTION_SUCCESS),
+          title: 'Conexão estabelecida com sucesso',
           status: 'success',
           duration: 3000,
         });
@@ -167,7 +167,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
       }
     } catch (error: any) {
       toast({
-        title: tAdmin(ADMIN.METRICS.CONNECTION_ERROR),
+        title: 'Erro ao conectar',
         description: error.message,
         status: 'error',
         duration: 5000,
@@ -210,17 +210,17 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
   const getPlatformName = (platform: string) => {
     switch (platform) {
       case 'uber':
-        return tAdmin(ADMIN.METRICS.PLATFORM_UBER);
+        return 'Uber';
       case 'bolt':
-        return tAdmin(ADMIN.METRICS.PLATFORM_BOLT);
+        return 'Bolt';
       case 'cartrack':
-        return tAdmin(ADMIN.METRICS.PLATFORM_CARTRACK);
+        return 'Cartrack';
       case 'viaverde':
-        return tAdmin(ADMIN.METRICS.PLATFORM_VIAVERDE);
+        return 'ViaVerde';
       case 'fonoa':
-        return tAdmin(ADMIN.METRICS.PLATFORM_FONOA);
+        return 'FONOA';
       case 'myprio':
-        return tAdmin(ADMIN.METRICS.PLATFORM_MYPRIO);
+        return 'myPrio';
       default:
         return platform;
     }
@@ -235,10 +235,10 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
           {/* Header */}
           <Box>
             <Heading size="xl" mb={2}>
-              {tAdmin(ADMIN.METRICS.TITLE)}
+              Métricas Detalhadas
             </Heading>
             <Text color="gray.600" fontSize="lg">
-              {tAdmin(ADMIN.METRICS.SUBTITLE)}
+              Análise detalhada de performance por plataforma
             </Text>
           </Box>
 
@@ -251,12 +251,12 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                   onChange={(e) => setPeriod(e.target.value)}
                   maxW="200px"
                 >
-                  <option value="today">{tAdmin(ADMIN.METRICS.FILTER_TODAY)}</option>
-                  <option value="week">{tAdmin(ADMIN.METRICS.FILTER_WEEK)}</option>
-                  <option value="month">{tAdmin(ADMIN.METRICS.FILTER_MONTH)}</option>
-                  <option value="quarter">{tAdmin(ADMIN.METRICS.FILTER_QUARTER)}</option>
-                  <option value="year">{tAdmin(ADMIN.METRICS.FILTER_YEAR)}</option>
-                  <option value="custom">{tAdmin(ADMIN.METRICS.FILTER_CUSTOM)}</option>
+                  <option value="today">Hoje</option>
+                  <option value="week">Esta Semana</option>
+                  <option value="month">Este Mês</option>
+                  <option value="quarter">Últimos 3 Meses</option>
+                  <option value="year">Este Ano</option>
+                  <option value="custom">Período Personalizado</option>
                 </Select>
 
                 <Button
@@ -277,7 +277,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                 <CardBody>
                   <Stat>
                     <HStack justify="space-between" mb={2}>
-                      <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_REVENUE)}</StatLabel>
+                      <StatLabel>Receita Total</StatLabel>
                       <Icon as={FiDollarSign} color="green.500" boxSize={5} />
                     </HStack>
                     <StatNumber fontSize="3xl" color="green.600">
@@ -291,7 +291,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                 <CardBody>
                   <Stat>
                     <HStack justify="space-between" mb={2}>
-                      <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_EXPENSES)}</StatLabel>
+                      <StatLabel>Despesas Totais</StatLabel>
                       <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
                     </HStack>
                     <StatNumber fontSize="3xl" color="red.600">
@@ -305,7 +305,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                 <CardBody>
                   <Stat>
                     <HStack justify="space-between" mb={2}>
-                      <StatLabel>{tAdmin(ADMIN.DASHBOARD.NET_PROFIT)}</StatLabel>
+                      <StatLabel>Lucro Líquido</StatLabel>
                       <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
                     </HStack>
                     <StatNumber fontSize="3xl" color="blue.600">
@@ -323,7 +323,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                 <CardBody>
                   <Stat>
                     <HStack justify="space-between" mb={2}>
-                      <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_TRIPS)}</StatLabel>
+                      <StatLabel>Total de Viagens</StatLabel>
                       <Icon as={FiActivity} color="purple.500" boxSize={5} />
                     </HStack>
                     <StatNumber fontSize="3xl" color="purple.600">
@@ -368,7 +368,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                               {getPlatformName(platform)}
                             </Text>
                             <Text fontSize="sm" color="gray.600">
-                              {tAdmin(ADMIN.DASHBOARD.LAST_SYNC)}: {metrics?.platforms[platform]?.lastSync ? 
+                              Última Sincronização: {metrics?.platforms[platform]?.lastSync ? 
                                 new Date(metrics.platforms[platform].lastSync).toLocaleString('pt-PT') : 'N/A'}
                             </Text>
                           </VStack>
@@ -387,7 +387,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                               isLoading={testingConnection === platform}
                               leftIcon={<FiRefreshCw />}
                             >
-                              {tAdmin(ADMIN.METRICS.TEST_CONNECTION)}
+                              Testar Conexão
                             </Button>
                           </HStack>
                         </HStack>
@@ -403,7 +403,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
                         {metrics?.platforms[platform]?.data && (
                           <Box>
                             <Text fontWeight="bold" mb={4}>
-                              {tAdmin(ADMIN.METRICS.RAW_DATA)}
+                              Dados Brutos
                             </Text>
                             <Code p={4} borderRadius="md" fontSize="sm" whiteSpace="pre-wrap">
                               {JSON.stringify(metrics.platforms[platform].data, null, 2)}

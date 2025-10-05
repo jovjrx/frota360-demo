@@ -1,9 +1,11 @@
 import { UberClient } from './uber/client';
-import { BoltScraper } from './bolt/scraper';
 import { CartrackClient } from './cartrack/client';
 import { FONOAClient } from './fonoa/client';
-import { ViaVerdeScraper } from './viaverde/scraper';
-import { MyprioScraper } from './myprio/scraper';
+
+// Scrapers são importados dinamicamente para evitar problemas com puppeteer no build
+// import { BoltScraper } from './bolt/scraper';
+// import { ViaVerdeScraper } from './viaverde/scraper';
+// import { MyprioScraper } from './myprio/scraper';
 
 export interface UnifiedMetrics {
   // Receitas

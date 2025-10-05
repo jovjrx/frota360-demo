@@ -28,17 +28,30 @@ export interface SyncOptions {
 }
 
 export class SyncService {
-  private uberClient = createUberClient();
-  private boltClient = createBoltClient();
-  private cartrackClient = createCartrackClient();
-  private viaverdeClient = createViaVerdeClient();
-  private fonoaClient = createFonoaClient();
-  private myprioClient = createMyprioClient();
+  private uberClient: any = null;
+  private boltClient: any = null;
+  private cartrackClient: any = null;
+  private viaverdeClient: any = null;
+  private fonoaClient: any = null;
+  private myprioClient: any = null;
+
+  private async initClients() {
+    if (!this.uberClient) {
+      this.uberClient = await createUberClient();
+      this.boltClient = await createBoltClient();
+      this.cartrackClient = await createCartrackClient();
+      this.viaverdeClient = await createViaVerdeClient();
+      this.fonoaClient = await createFonoaClient();
+      this.myprioClient = await createMyprioClient();
+    }
+  }
 
   /**
    * Sincroniza dados de todas as plataformas
    */
   async syncAll(options: SyncOptions): Promise<SyncResult[]> {
+    await this.initClients();
+    
     const platforms = options.platforms || ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio', 'fonoa'];
     const results: SyncResult[] = [];
 
