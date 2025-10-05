@@ -58,7 +58,6 @@ export default function Header({ t }: HeaderProps) {
     () => [
       { href: getLocalizedHref("/"), label: t("navigation.home") },
       { href: getLocalizedHref("/services/drivers"), label: t("navigation.drivers") },
-      { href: getLocalizedHref("/services/companies"), label: t("navigation.companies") },
       { href: getLocalizedHref("/about"), label: t("navigation.about") },
       { href: getLocalizedHref("/contact"), label: t("navigation.contact") }
     ],

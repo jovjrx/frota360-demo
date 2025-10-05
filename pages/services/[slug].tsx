@@ -18,7 +18,6 @@ import { PageProps } from "@/interface/Global";
 import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
-import { ContentManager } from "@/components/ContentManager";
 import { useRouter } from "next/router";
 import { FaCheckCircle, FaArrowRight, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
 
@@ -36,14 +35,12 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
   const pageName = isDrivers ? 'services-drivers' : 'services-companies';
 
   return (
-    <ContentManager page={pageName} locale={locale} translations={{ page: tPage, common: tCommon }}>
-      {(content) => (
-        <>
+    <>
       <Container softBg>
         <Title
-          title={content.page("benefits.title") || tPage("benefits.title")}
-          description={content.page("benefits.subtitle") || tPage("benefits.subtitle")}
-          feature={content.page("benefits.feature") || tPage("benefits.feature")}
+          title={tPage("benefits.title") || tPage("benefits.title")}
+          description={tPage("benefits.subtitle") || tPage("benefits.subtitle")}
+          feature={tPage("benefits.feature") || tPage("benefits.feature")}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
           <Card
@@ -193,9 +190,7 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
           center
         />
       </Container>
-        </>
-      )}
-    </ContentManager>
+    </>
   );
 }
 

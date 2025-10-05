@@ -13,13 +13,15 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@chakra-ui/react';
-import { loadTranslations } from '@/lib/translations';
-import { PageProps } from '@/interface/Global';
+import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
 import { db } from '@/lib/firebaseAdmin';
+import { COMMON } from '@/translations';
 
-interface DriverDashboardProps extends PageProps {
+interface DriverDashboardProps {
+  translations: any;
+  locale: string;
   driver: {
     firstName: string;
     lastName: string;
@@ -27,10 +29,15 @@ interface DriverDashboardProps extends PageProps {
     status: string;
     driverType: string;
     isApproved: boolean;
+    adminNotes?: string;
+    rejectionReason?: string;
   };
 }
 
-export default function DriverDashboard({ tPage, tCommon, locale, driver }: DriverDashboardProps) {
+export default function DriverDashboard({ translations, locale, driver }: DriverDashboardProps) {
+  const t = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.common, key, variables);
+  };
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -49,13 +56,16 @@ export default function DriverDashboard({ tPage, tCommon, locale, driver }: Driv
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Ativo';
+      case 'approved':
+        return t(COMMON.STATUS.APPROVED);
       case 'pending':
-        return 'Pendente';
+        return t(COMMON.STATUS.PENDING);
       case 'inactive':
-        return 'Inativo';
+        return t(COMMON.STATUS.INACTIVE);
       case 'suspended':
-        return 'Suspenso';
+        return t(COMMON.STATUS.SUSPENDED);
+      case 'rejected':
+        return t(COMMON.STATUS.REJECTED);
       default:
         return status;
     }
@@ -125,6 +135,18 @@ export default function DriverDashboard({ tPage, tCommon, locale, driver }: Driv
                   </Alert>
                 )}
 
+                {driver.status === 'rejected' && (
+                  <Alert status="error" borderRadius="md">
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Candidatura Rejeitada</AlertTitle>
+                      <AlertDescription>
+                        {driver.rejectionReason || 'A sua candidatura foi rejeitada. Por favor, entre em contacto conosco para mais informações.'}
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+
                 {driver.status === 'suspended' && (
                   <Alert status="error" borderRadius="md">
                     <AlertIcon />
@@ -132,6 +154,18 @@ export default function DriverDashboard({ tPage, tCommon, locale, driver }: Driv
                       <AlertTitle>Conta Suspensa</AlertTitle>
                       <AlertDescription>
                         A sua conta foi suspensa. Por favor, entre em contacto com o suporte.
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+
+                {driver.adminNotes && (
+                  <Alert status="info" borderRadius="md">
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Nota da Administração</AlertTitle>
+                      <AlertDescription>
+                        {driver.adminNotes}
                       </AlertDescription>
                     </Box>
                   </Alert>
@@ -189,7 +223,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const session = await getSession(context.req, context.res);
 
-    if (!session?.user || session.user.role !== 'driver') {
+    // Verificar se está logado e se tem role de driver
+    if (!session?.isLoggedIn || (session.role !== 'driver' && session.user?.role !== 'driver')) {
       return {
         redirect: {
           destination: '/login',
@@ -199,7 +234,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Buscar dados do motorista
-    const driverDoc = await db.collection('drivers').doc(session.user.id).get();
+    const driverId = session.userId || session.user?.id;
+    const driverDoc = await db.collection('drivers').doc(driverId).get();
     
     if (!driverDoc.exists) {
       return {
@@ -216,12 +252,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ? context.req.headers['x-locale'][0]
       : context.req.headers['x-locale'] || 'pt';
 
-    const translations = await loadTranslations(locale, ['common', 'driver']);
-    const { common, driver: page } = translations;
+    const translations = await loadTranslations(locale, ['common']);
 
     return {
       props: {
-        translations: { common, page },
+        translations,
         locale,
         driver: {
           firstName: driverData?.firstName || '',
@@ -230,6 +265,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           status: driverData?.status || 'pending',
           driverType: driverData?.driverType || 'affiliate',
           isApproved: driverData?.isApproved || false,
+          adminNotes: driverData?.adminNotes || '',
+          rejectionReason: driverData?.rejectionReason || '',
         },
       },
     };

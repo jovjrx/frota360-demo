@@ -1,81 +1,85 @@
-// Constantes de tradução comuns
 export const COMMON = {
-  // Ações gerais
+  NAVIGATION: {
+    HOME: 'navigation.home',
+    DRIVERS: 'navigation.drivers',
+    ABOUT: 'navigation.about',
+    CONTACT: 'navigation.contact',
+  },
+  SEO: {
+    DEFAULT: {
+      TITLE: 'seo.default.title',
+      DESCRIPTION: 'seo.default.description',
+    },
+  },
+  HERO: {
+    TITLE: 'hero.title',
+    SUBTITLE: 'hero.subtitle',
+    CTA_PRIMARY: 'hero.ctaPrimary',
+    CTA_SECONDARY: 'hero.ctaSecondary',
+  },
   ACTIONS: {
-    SUBMIT: 'common.actions.submit',
-    CANCEL: 'common.actions.cancel',
-    SAVE: 'common.actions.save',
-    DELETE: 'common.actions.delete',
-    EDIT: 'common.actions.edit',
-    VIEW: 'common.actions.view',
-    BACK: 'common.actions.back',
-    NEXT: 'common.actions.next',
-    CLOSE: 'common.actions.close',
-    CONFIRM: 'common.actions.confirm',
-    LOADING: 'common.actions.loading',
+    SUBMIT: 'actions.submit',
+    CANCEL: 'actions.cancel',
+    SAVE: 'actions.save',
+    DELETE: 'actions.delete',
+    EDIT: 'actions.edit',
+    VIEW: 'actions.view',
+    BACK: 'actions.back',
+    NEXT: 'actions.next',
+    CLOSE: 'actions.close',
+    CONFIRM: 'actions.confirm',
+    LOADING: 'actions.loading',
   },
-  
-  // Status
   STATUS: {
-    ACTIVE: 'common.status.active',
-    INACTIVE: 'common.status.inactive',
-    PENDING: 'common.status.pending',
-    APPROVED: 'common.status.approved',
-    REJECTED: 'common.status.rejected',
-    SUSPENDED: 'common.status.suspended',
+    ACTIVE: 'status.active',
+    INACTIVE: 'status.inactive',
+    PENDING: 'status.pending',
+    APPROVED: 'status.approved',
+    REJECTED: 'status.rejected',
+    SUSPENDED: 'status.suspended',
   },
-  
-  // Mensagens
   MESSAGES: {
-    SUCCESS: 'common.messages.success',
-    ERROR: 'common.messages.error',
-    WARNING: 'common.messages.warning',
-    INFO: 'common.messages.info',
-    LOADING: 'common.messages.loading',
-    NO_DATA: 'common.messages.noData',
-    CONFIRM_DELETE: 'common.messages.confirmDelete',
+    SUCCESS: 'messages.success',
+    ERROR: 'messages.error',
+    WARNING: 'messages.warning',
+    INFO: 'messages.info',
+    LOADING: 'messages.loading',
+    NO_DATA: 'messages.noData',
+    CONFIRM_DELETE: 'messages.confirmDelete',
   },
-  
-  // Validações
   VALIDATION: {
-    REQUIRED: 'common.validation.required',
-    INVALID_EMAIL: 'common.validation.invalidEmail',
-    INVALID_PHONE: 'common.validation.invalidPhone',
-    MIN_LENGTH: 'common.validation.minLength',
-    MAX_LENGTH: 'common.validation.maxLength',
-    PASSWORDS_DONT_MATCH: 'common.validation.passwordsDontMatch',
+    REQUIRED: 'validation.required',
+    INVALID_EMAIL: 'validation.invalidEmail',
+    INVALID_PHONE: 'validation.invalidPhone',
+    MIN_LENGTH: 'validation.minLength',
+    MAX_LENGTH: 'validation.maxLength',
+    PASSWORDS_DONT_MATCH: 'validation.passwordsDontMatch',
   },
-  
-  // Empresa
   COMPANY: {
-    NAME: 'common.company.name',
-    DESCRIPTION: 'common.company.description',
-    EMAIL: 'common.company.email',
-    PHONE: 'common.company.phone',
-    ADDRESS: 'common.company.address',
-    WHATSAPP: 'common.company.whatsapp',
+    NAME: 'company.name',
+    DESCRIPTION: 'company.description',
+    EMAIL: 'company.email',
+    PHONE: 'company.phone',
+    ADDRESS: 'company.address',
+    WHATSAPP: 'company.whatsapp',
   },
-  
-  // Footer
   FOOTER: {
-    RIGHTS: 'common.footer.rights',
-    PRIVACY: 'common.footer.privacy',
-    TERMS: 'common.footer.terms',
-    ABOUT: 'common.footer.about',
-    CONTACT: 'common.footer.contact',
+    RIGHTS: 'footer.rights',
+    PRIVACY: 'footer.privacy',
+    TERMS: 'footer.terms',
+    ABOUT: 'footer.about',
+    CONTACT: 'footer.contact',
   },
-  
-  // FAQ
   FAQ: {
-    TITLE: 'common.faq.title',
-    SUBTITLE: 'common.faq.subtitle',
-    FEATURE: 'common.faq.feature',
+    TITLE: 'faq.title',
+    SUBTITLE: 'faq.subtitle',
+    FEATURE: 'faq.feature',
+    ITEMS: 'faq.items',
   },
-  
-  // Depoimentos
   TESTIMONIALS: {
-    TITLE: 'common.testimonials.title',
-    SUBTITLE: 'common.testimonials.subtitle',
-    FEATURE: 'common.testimonials.feature',
+    TITLE: 'testimonials.title',
+    SUBTITLE: 'testimonials.subtitle',
+    FEATURE: 'testimonials.feature',
+    ITEMS: 'testimonials.items',
   },
 } as const;

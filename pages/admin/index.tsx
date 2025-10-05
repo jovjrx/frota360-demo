@@ -36,14 +36,27 @@ import {
   FiActivity,
   FiEdit
 } from 'react-icons/fi';
-import { loadTranslations } from '@/lib/translations';
-import { PageProps } from '@/interface/Global';
+import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
+import { ADMIN } from '@/translations';
 
-export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
+interface AdminDashboardProps {
+  translations: any;
+  locale: string;
+}
+
+export default function AdminDashboard({ translations, locale }: AdminDashboardProps) {
   const [loading, setLoading] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
+
+  const t = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.common, key, variables);
+  };
+
+  const tAdmin = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.admin, key, variables);
+  };
 
   useEffect(() => {
     // Buscar métricas do último mês
@@ -78,10 +91,10 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
           {/* Header */}
           <Box>
             <Heading size="xl" mb={2}>
-              Dashboard de Gestão TVDE
+              {tAdmin(ADMIN.DASHBOARD.TITLE)}
             </Heading>
             <Text color="gray.600" fontSize="lg">
-              Visão geral do negócio - Últimos 30 dias
+              {tAdmin(ADMIN.DASHBOARD.SUBTITLE)}
             </Text>
           </Box>
 
@@ -92,7 +105,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>Receita Total</StatLabel>
+                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_REVENUE)}</StatLabel>
                     <Icon as={FiDollarSign} color="green.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="green.600">
@@ -111,7 +124,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>Despesas Totais</StatLabel>
+                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_EXPENSES)}</StatLabel>
                     <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="red.600">
@@ -130,7 +143,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>Lucro Líquido</StatLabel>
+                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.NET_PROFIT)}</StatLabel>
                     <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="blue.600">
@@ -149,7 +162,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               <CardBody>
                 <Stat>
                   <HStack justify="space-between" mb={2}>
-                    <StatLabel>Total de Viagens</StatLabel>
+                    <StatLabel>{tAdmin(ADMIN.DASHBOARD.TOTAL_TRIPS)}</StatLabel>
                     <Icon as={FiActivity} color="purple.500" boxSize={5} />
                   </HStack>
                   <StatNumber fontSize="3xl" color="purple.600">
@@ -169,7 +182,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardHeader>
                 <HStack justify="space-between">
-                  <Heading size="md">Frota Ativa</Heading>
+                  <Heading size="md">{tAdmin(ADMIN.DASHBOARD.FLEET_TITLE)}</Heading>
                   <Icon as={FiTruck} color="green.500" boxSize={6} />
                 </HStack>
               </CardHeader>
@@ -197,7 +210,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardHeader>
                 <HStack justify="space-between">
-                  <Heading size="md">Motoristas Ativos</Heading>
+                  <Heading size="md">{tAdmin(ADMIN.DASHBOARD.DRIVERS_TITLE)}</Heading>
                   <Icon as={FiUsers} color="blue.500" boxSize={6} />
                 </HStack>
               </CardHeader>
@@ -214,13 +227,13 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
                   <Divider />
                   <SimpleGrid columns={2} spacing={4}>
                     <Box>
-                      <Text fontSize="sm" color="gray.600">Afiliados</Text>
+                      <Text fontSize="sm" color="gray.600">{tAdmin(ADMIN.DASHBOARD.AFFILIATES)}</Text>
                       <Text fontSize="xl" fontWeight="bold">
                         {Math.floor((metrics?.summary?.activeDrivers || 0) * 0.6)}
                       </Text>
                     </Box>
                     <Box>
-                      <Text fontSize="sm" color="gray.600">Locatários</Text>
+                      <Text fontSize="sm" color="gray.600">{tAdmin(ADMIN.DASHBOARD.RENTERS)}</Text>
                       <Text fontSize="xl" fontWeight="bold">
                         {Math.floor((metrics?.summary?.activeDrivers || 0) * 0.4)}
                       </Text>
@@ -234,7 +247,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
           {/* Status das Integrações */}
           <Card>
             <CardHeader>
-              <Heading size="md">Status das Integrações</Heading>
+              <Heading size="md">{tAdmin(ADMIN.DASHBOARD.INTEGRATIONS_TITLE)}</Heading>
             </CardHeader>
             <CardBody>
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
@@ -281,7 +294,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>Gestão de Solicitações</Text>
+                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_REQUESTS)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Ver candidaturas pendentes
                 </Text>
@@ -297,7 +310,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>Métricas Detalhadas</Text>
+                <Text>{tAdmin(ADMIN.DASHBOARD.DETAILED_METRICS)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Análise completa por plataforma
                 </Text>
@@ -313,7 +326,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>Gestão de Conteúdo</Text>
+                <Text>{tAdmin(ADMIN.DASHBOARD.CONTENT_MANAGEMENT)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
                   Editar textos do site
                 </Text>
@@ -326,7 +339,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps) {
             <Alert status="warning" borderRadius="md">
               <AlertIcon />
               <Box>
-                <Text fontWeight="bold">Atenção: Problemas nas Integrações</Text>
+                <Text fontWeight="bold">{tAdmin(ADMIN.DASHBOARD.INTEGRATION_PROBLEMS)}</Text>
                 <Text fontSize="sm">
                   {metrics.errors.length} plataforma(s) com erros. Verifique as integrações.
                 </Text>
@@ -343,7 +356,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const session = await getSession(context.req, context.res);
 
-    if (!session?.user || session.user.role !== 'admin') {
+    // Verificar se está logado e se tem role de admin
+    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
       return {
         redirect: {
           destination: '/login',
@@ -357,11 +371,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
 
     const translations = await loadTranslations(locale, ['common', 'admin']);
-    const { common, admin: page } = translations;
 
     return {
       props: {
-        translations: { common, page },
+        translations,
         locale,
       },
     };
@@ -369,7 +382,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error('Failed to load translations:', error);
     return {
       props: {
-        translations: { common: {}, page: {} },
+        translations: { common: {}, admin: {} },
         locale: 'pt',
       },
     };

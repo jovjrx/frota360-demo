@@ -2,17 +2,14 @@
   "navigation": {
     "home": "Início",
     "drivers": "Motoristas",
-    "companies": "Empresas",
     "about": "Sobre",
     "contact": "Contacto"
   },
   "seo": {
     "default": {
-      "title": "Conduz PT - Plataforma para Motoristas TVDE"
+      "title": "Conduz PT - Plataforma para Motoristas TVDE",
+      "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais."
     }
-  },
-  "hero": {
-    "ctaPrimary": "Candidatar-me Agora"
   },
   "actions": {
     "submit": "Enviar",

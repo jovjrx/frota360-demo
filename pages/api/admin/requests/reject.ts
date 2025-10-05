@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { RejectRequestSchema } from '@/schemas/request';
+import { rejectRequestSchema } from '@/schemas/request';
 import { db } from '@/lib/firebaseAdmin';
 import { getSession } from '@/lib/session';
 import { ApiResponse } from '@/types';
@@ -34,7 +34,7 @@ export default async function handler(
     }
 
     // Validar dados
-    const validatedData = RejectRequestSchema.parse(req.body);
+    const validatedData = rejectRequestSchema.parse(req.body);
 
     // Buscar solicitação
     const requestDoc = await db.collection('requests').doc(requestId).get();
@@ -49,7 +49,6 @@ export default async function handler(
     await db.collection('requests').doc(requestId).update({
       status: 'rejected',
       rejectionReason: validatedData.rejectionReason,
-      adminNotes: validatedData.adminNotes,
       reviewedBy: session.user.id,
       reviewedAt: Date.now(),
       updatedAt: Date.now(),

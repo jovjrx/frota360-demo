@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ApproveRequestSchema } from '@/schemas/request';
+import { approveRequestSchema } from '@/schemas/request';
 import { db, auth } from '@/lib/firebaseAdmin';
 import { getSession } from '@/lib/session';
 import { ApiResponse } from '@/types';
@@ -34,7 +34,7 @@ export default async function handler(
     }
 
     // Validar dados
-    const validatedData = ApproveRequestSchema.parse(req.body);
+    const validatedData = approveRequestSchema.parse(req.body);
 
     // Buscar solicitação
     const requestDoc = await db.collection('requests').doc(requestId).get();

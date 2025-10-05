@@ -15,18 +15,15 @@ import { Container } from "@/components/Container";
 import { PageProps } from "@/interface/Global";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
-import { ContentManager } from "@/components/ContentManager";
 
 export default function About({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   return (
-    <ContentManager page="about" locale={locale} translations={{ page: tPage, common: tCommon }}>
-      {(content) => (
-        <>
+    <>
       <Container softBg>
         <Title
-          title={content.page("mission.title") || tPage("mission.title")}
-          description={content.page("mission.subtitle") || tPage("mission.subtitle")}
-          feature={content.page("mission.feature") || tPage("mission.feature")}
+          title={tPage("mission.title") || tPage("mission.title")}
+          description={tPage("mission.subtitle") || tPage("mission.subtitle")}
+          feature={tPage("mission.feature") || tPage("mission.feature")}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
           <Card
@@ -207,6 +204,126 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
         </ContainerDivisions>
       </Container>
 
+      {/* Nossa Abordagem */}
+      <Container>
+        <Title
+          title={tPage("approach.title")}
+          description={tPage("approach.subtitle")}
+          feature={tPage("approach.feature")}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
+          {(() => {
+            const methods = tPage("approach.methods");
+            if (!Array.isArray(methods)) return null;
+            return methods.map((method: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start">
+                  <HStack spacing={3}>
+                    <Text fontSize="3xl">{method.icon}</Text>
+                    <Text fontSize="xl" fontWeight="bold" color="green.600">
+                      {method.title}
+                    </Text>
+                  </HStack>
+                  <Text color="gray.600">
+                    {method.description}
+                  </Text>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Nossa Experiência */}
+      <Container softBg>
+        <Title
+          title={tPage("experience.title")}
+          description={tPage("experience.subtitle")}
+          feature={tPage("experience.feature")}
+        />
+        <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
+          <Card
+            title={tPage("experience.card.title")}
+            description={tPage("experience.card.description")}
+            animated
+            borded
+          >
+            <VStack spacing={4} align="start">
+              <Text color="gray.600">{tPage("experience.card.content")}</Text>
+              <Box w="full">
+                <Text fontWeight="bold" mb={4} color="green.600">
+                  {tPage("experience.card.stats.title")}
+                </Text>
+                <SimpleGrid columns={2} spacing={4}>
+                  {(() => {
+                    const stats = tPage("experience.card.stats.list");
+                    if (!Array.isArray(stats)) return null;
+                    return stats.map((stat: any, i: number) => (
+                      <Box key={i} textAlign="center" p={4} bg="green.50" borderRadius="md">
+                        <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                          {stat.value}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {stat.label}
+                        </Text>
+                      </Box>
+                    ));
+                  })()}
+                </SimpleGrid>
+              </Box>
+            </VStack>
+          </Card>
+
+          <Highlight
+            title={tPage("experience.highlight.title")}
+            description={tPage("experience.highlight.description")}
+            bgImage="/img/about.jpg"
+            delayImage={0.5}
+            delayBox={0.8}
+          />
+        </ContainerDivisions>
+      </Container>
+
+      {/* Nossa Equipa */}
+      <Container>
+        <Title
+          title={tPage("team.title")}
+          description={tPage("team.subtitle")}
+          feature={tPage("team.feature")}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeat(3, 1fr)" }}>
+          {(() => {
+            const members = tPage("team.members");
+            if (!Array.isArray(members)) return null;
+            return members.map((member: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start">
+                  <Avatar size="lg" name={member.name} />
+                  <Box>
+                    <Text fontSize="lg" fontWeight="bold" color="green.600">
+                      {member.name}
+                    </Text>
+                    <Text fontSize="sm" color="gray.500" mb={2}>
+                      {member.position}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600" mb={3}>
+                      {member.bio}
+                    </Text>
+                    <HStack spacing={2} flexWrap="wrap">
+                      {member.expertise.map((skill: string, j: number) => (
+                        <Badge key={j} colorScheme="green" variant="subtle">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </HStack>
+                  </Box>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
       <Container softBg>
         <Title
           title={tPage("cta.title")}
@@ -217,9 +334,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           center
         />
       </Container>
-        </>
-      )}
-    </ContentManager>
+    </>
   );
 }
 

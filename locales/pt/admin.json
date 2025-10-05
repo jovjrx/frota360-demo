@@ -1,155 +1,74 @@
 {
+  "admin": {
   "dashboard": {
-    "title": "Painel Administrativo",
-    "subtitle": "Visão geral do sistema e atividades recentes",
-    "stats": {
-      "totalDrivers": "Total Motoristas",
-      "activeDrivers": "Motoristas Ativos",
-      "pendingDrivers": "Pendentes",
+      "title": "Dashboard de Gestão TVDE",
+      "subtitle": "Visão geral do negócio - Últimos 30 dias",
+      "kpiTitle": "KPIs Financeiros",
       "totalRevenue": "Receita Total",
-      "monthlyRevenue": "Receita Mensal",
-      "totalPayouts": "Pagamentos",
-      "pendingPayouts": "Pendentes"
+      "totalExpenses": "Despesas Totais",
+      "netProfit": "Lucro Líquido",
+      "totalTrips": "Total de Viagens",
+      "activeVehicles": "Veículos Ativos",
+      "activeDrivers": "Motoristas Ativos",
+      "fleetTitle": "Frota Ativa",
+      "utilizationRate": "Taxa de Utilização",
+      "driversTitle": "Motoristas Ativos",
+      "affiliates": "Afiliados",
+      "renters": "Locatários",
+      "integrationsTitle": "Status das Integrações",
+      "lastSync": "Última Sincronização",
+      "quickActionsTitle": "Ações Rápidas",
+      "manageRequests": "Gestão de Solicitações",
+      "detailedMetrics": "Métricas Detalhadas",
+      "contentManagement": "Gestão de Conteúdo",
+      "alertsTitle": "Alertas",
+      "integrationProblems": "Problemas nas integrações"
     },
-    "recentDrivers": "Motoristas Recentes",
-    "recentPayouts": "Pagamentos Recentes",
-    "systemStatus": "Status do Sistema",
-    "systemOperational": "Sistema Operacional",
-    "databaseConnected": "Base de Dados Conectada",
-    "paymentsActive": "Pagamentos Ativos"
-  },
-  "drivers": {
-    "title": "Gestão de Motoristas",
-    "subtitle": "Gerencie motoristas, documentos e aprovações",
-    "stats": {
-      "total": "Total",
-      "approved": "Aprovados",
-      "pending": "Pendentes",
-      "rejected": "Rejeitados",
-      "suspended": "Suspensos"
-    },
-    "actions": {
+    "requests": {
+      "title": "Gestão de Solicitações",
+      "subtitle": "Analise e gerencie as candidaturas de motoristas",
+      "filterAll": "Todas",
+      "filterPending": "Pendentes",
+      "filterApproved": "Aprovadas",
+      "filterRejected": "Rejeitadas",
+      "statsTotal": "Total",
+      "statsPending": "Pendentes",
+      "statsApproved": "Aprovadas",
+      "statsRejected": "Rejeitadas",
+      "tableName": "Nome",
+      "tableEmail": "Email",
+      "tablePhone": "Telefone",
+      "tableType": "Tipo",
+      "tableStatus": "Status",
+      "tableDate": "Data",
+      "tableActions": "Ações",
       "approve": "Aprovar",
       "reject": "Rejeitar",
-      "suspend": "Suspender",
-      "reactivate": "Reativar",
-      "edit": "Editar",
-      "delete": "Excluir",
-      "view": "Ver"
+      "notes": "Notas Administrativas",
+      "rejectionReason": "Motivo da Rejeição",
+      "approveModalTitle": "Aprovar Candidatura",
+      "rejectModalTitle": "Rejeitar Candidatura",
+      "approveSuccess": "Candidatura aprovada com sucesso!",
+      "rejectSuccess": "Candidatura rejeitada com sucesso!"
     },
-    "filters": {
-      "status": "Status",
-      "search": "Buscar motoristas...",
-      "all": "Todos",
-      "active": "Ativos",
-      "pending": "Pendentes",
-      "inactive": "Inativos",
-      "suspended": "Suspensos"
-    },
-    "table": {
-      "name": "Nome",
-      "email": "Email",
-      "status": "Status",
-      "createdAt": "Data de Cadastro",
-      "actions": "Ações"
-    },
-    "modal": {
-      "editDriver": "Editar Motorista",
-      "deleteDriver": "Excluir Motorista",
-      "driverDetails": "Detalhes do Motorista",
-      "basicInfo": "Informações Básicas",
-      "adminFields": "Campos Administrativos",
-      "documents": "Documentos",
-      "history": "Histórico"
+    "metrics": {
+      "title": "Métricas Detalhadas",
+      "subtitle": "Análise detalhada de performance por plataforma",
+      "filterToday": "Hoje",
+      "filterWeek": "Esta Semana",
+      "filterMonth": "Este Mês",
+      "filterQuarter": "Este Trimestre",
+      "filterYear": "Este Ano",
+      "filterCustom": "Personalizado",
+      "platformUber": "Uber",
+      "platformBolt": "Bolt",
+      "platformCartrack": "Cartrack",
+      "platformViaverde": "ViaVerde",
+      "platformFonoa": "FONOA",
+      "platformMyprio": "myprio",
+      "testConnection": "Testar Conexão",
+      "connectionSuccess": "Conexão bem-sucedida!",
+      "connectionError": "Erro na conexão"
     }
-  },
-  "users": {
-    "title": "Gestão de Usuários",
-    "subtitle": "Gerencie usuários e permissões",
-    "actions": {
-      "create": "Criar Usuário",
-      "edit": "Editar",
-      "delete": "Excluir",
-      "changeRole": "Alterar Função"
-    }
-  },
-  "plans": {
-    "title": "Gestão de Planos",
-    "subtitle": "Configure planos e preços",
-    "actions": {
-      "create": "Criar Plano",
-      "edit": "Editar",
-      "delete": "Excluir",
-      "activate": "Ativar",
-      "deactivate": "Desativar"
-    }
-  },
-  "payouts": {
-    "title": "Gestão de Pagamentos",
-    "subtitle": "Processe e gerencie pagamentos",
-    "actions": {
-      "calculate": "Calcular",
-      "export": "Exportar",
-      "markPaid": "Marcar como Pago"
-    }
-  },
-  "content": {
-    "title": "Gestão de Conteúdo",
-    "subtitle": "Gerencie o conteúdo das páginas públicas",
-    "actions": {
-      "create": "Criar Conteúdo",
-      "edit": "Editar",
-      "delete": "Excluir",
-      "activate": "Ativar",
-      "deactivate": "Desativar"
-    },
-    "filters": {
-      "page": "Página",
-      "section": "Seção",
-      "locale": "Idioma",
-      "status": "Status"
-    },
-    "form": {
-      "page": "Página",
-      "section": "Seção",
-      "key": "Chave",
-      "content": "Conteúdo",
-      "locale": "Idioma",
-      "active": "Ativo"
-    }
-  },
-  "common": {
-    "save": "Salvar",
-    "cancel": "Cancelar",
-    "delete": "Excluir",
-    "edit": "Editar",
-    "view": "Ver",
-    "create": "Criar",
-    "update": "Atualizar",
-    "search": "Buscar",
-    "filter": "Filtrar",
-    "export": "Exportar",
-    "import": "Importar",
-    "refresh": "Atualizar",
-    "loading": "Carregando...",
-    "error": "Erro",
-    "success": "Sucesso",
-    "warning": "Aviso",
-    "info": "Informação",
-    "confirm": "Confirmar",
-    "yes": "Sim",
-    "no": "Não",
-    "close": "Fechar",
-    "open": "Abrir",
-    "back": "Voltar",
-    "next": "Próximo",
-    "previous": "Anterior",
-    "total": "Total",
-    "active": "Ativo",
-    "inactive": "Inativo",
-    "pending": "Pendente",
-    "approved": "Aprovado",
-    "rejected": "Rejeitado",
-    "suspended": "Suspenso"
   }
 }

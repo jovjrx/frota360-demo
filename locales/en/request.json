@@ -1,20 +1,23 @@
 {
   "request": {
-    "title": "Join Conduz PT",
-    "subtitle": "Fill out the form below to apply as a driver",
-    "typeLabel": "Driver Type",
-    "typeAffiliate": "Affiliate",
-    "typeRenter": "Renter",
-    "typeAffiliateDesc": "I work with my own vehicle",
-    "typeRenterDesc": "I want to rent a vehicle from Conduz PT",
-    "vehicleInfo": "As an affiliate driver, please provide information about your vehicle",
+    "title": "Driver Application",
+    "subtitle": "Fill out the form below to apply as a TVDE driver",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "city": "City",
+    "driverType": "Driver Type",
+    "driverTypeAffiliate": "Affiliate (own vehicle)",
+    "driverTypeRenter": "Renter (rents vehicle from Conduz)",
+    "vehicleInfo": "Vehicle Information",
     "vehicleMake": "Vehicle Make",
     "vehicleModel": "Vehicle Model",
     "vehicleYear": "Vehicle Year",
-    "vehiclePlate": "Vehicle Plate",
-    "additionalInfo": "Additional Information (optional)",
-    "submitButton": "Submit Application",
-    "successMessage": "Application submitted successfully! We will contact you soon.",
-    "errorMessage": "Error submitting application. Please try again."
+    "vehiclePlate": "License Plate",
+    "submit": "Submit Application",
+    "successTitle": "Application Sent!",
+    "successMessage": "Your application has been sent successfully. Our team will review and contact you soon.",
+    "backToHome": "Back to Home"
   }
 }

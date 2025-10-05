@@ -13,30 +13,39 @@ import {
   AccordionPanel,
   AccordionIcon,
 } from "@chakra-ui/react";
-import { loadTranslations } from "@/lib/translations";
+import { loadTranslations, getTranslation } from "@/lib/translations";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { PageProps } from "@/interface/Global";
 import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { ArrowRightIcon } from "@chakra-ui/icons";
-import { ContentManager } from "@/components/ContentManager";
 import { COMMON } from "@/translations";
 
-export default function Home({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+interface HomeProps {
+  translations: any;
+  locale: string;
+}
+
+export default function Home({ translations, locale }: HomeProps) {
   const getLocalizedHref = useLocalizedHref();
   
+  const t = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.common, key, variables);
+  };
+
+  const tHome = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.home, key, variables);
+  };
+  
   return (
-    <ContentManager page="home" locale={locale} translations={{ page: tPage, common: tCommon }}>
-      {(content) => (
-        <>
+    <>
           <Hero
-            title={content.page("hero.title") || tPage("hero.title")}
-            subtitle={content.page("hero.subtitle") || tPage("hero.subtitle")}
+            title={tHome("hero.title")}
+            subtitle={tHome("hero.subtitle")}
             backgroundImage="/img/bg-portugal.jpg"
-            badge={content.page("hero.badge") || tPage("hero.badge") as string}
+            badge="Motoristas TVDE"
             overlay
             actions={
               <HStack spacing={4}>
@@ -50,11 +59,11 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
                   colorScheme="green"
                   rightIcon={<ArrowRightIcon />}
                 >
-                  {content.page("hero.ctaPrimary") || tPage("hero.ctaPrimary")}
+                  {tHome("hero.ctaPrimary")}
                 </Button>
                 <Button
                   as={NextLink}
-                  href={tCommon(COMMON.COMPANY.WHATSAPP)}
+                  href={t(COMMON.COMPANY.WHATSAPP)}
                   size="lg"
                   px={8}
                   py={4}
@@ -67,14 +76,14 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
                     borderColor: "whiteAlpha.600"
                   }}
                 >
-                  {content.page("hero.ctaSecondary") || tPage("hero.ctaSecondary")}
+                  {tHome("hero.ctaSecondary")}
                 </Button>
               </HStack>
             }
           >
             <Highlight
-              title={content.page("hero.highlight.title") || tPage("hero.highlight.title")}
-              description={content.page("hero.highlight.description") || tPage("hero.highlight.description")}
+              title="Plataforma Completa"
+              description={tHome("hero.description")}
               bgImage="/img/driver-app.jpg"
               delayImage={0.5}
               delayBox={0.8}
@@ -84,13 +93,13 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
           {/* Como funciona */}
           <Container>
             <Title
-              title={tPage("howItWorks.title")}
-              description={tPage("howItWorks.subtitle")}
-              feature={tPage("howItWorks.feature")}
+              title={tHome("howItWorks.title")}
+              description={tHome("howItWorks.subtitle")}
+              feature="Como Funciona"
             />
             <ContainerDivisions template={{ base: "1fr", md: "repeat(3, 1fr)" }}>
               {(() => {
-                const steps = tPage("howItWorks.steps");
+                const steps = tHome("howItWorks.steps");
                 if (!Array.isArray(steps)) return null;
 
                 return steps.map((step: any, i: number) => (
@@ -108,7 +117,7 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
                         fontSize="2xl"
                         fontWeight="bold"
                       >
-                        {step.number}
+                        {i + 1}
                       </Box>
                       <Text fontSize="xl" fontWeight="bold" color="gray.800">
                         {step.title}
@@ -126,63 +135,91 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
           {/* Tipos de Motorista */}
           <Container softBg>
             <Title
-              title={tPage("driverTypes.title")}
-              description={tPage("driverTypes.subtitle")}
-              feature={tPage("driverTypes.feature")}
+              title={tHome("services.title")}
+              description={tHome("services.subtitle")}
+              feature="Tipos de Motorista"
             />
             <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
               <Card animated borded img="/img/service-drivers.jpg" color='green'>
                 <VStack spacing={4} align="start">
                   <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {tPage("driverTypes.affiliate.title")}
+                    {tHome("services.affiliate.title")}
                   </Text>
                   <Text color="gray.600">
-                    {tPage("driverTypes.affiliate.description")}
+                    {tHome("services.affiliate.description")}
                   </Text>
                   <Button
                     as={NextLink}
-                    href={getLocalizedHref("/services/drivers")}
+                    href={getLocalizedHref("/request")}
                     colorScheme="green"
                     size="sm"
                     rightIcon={<ArrowRightIcon />}
                   >
-                    {tPage("driverTypes.affiliate.cta")}
+                    Candidatar-me
                   </Button>
                 </VStack>
               </Card>
 
-              <Card animated borded color='blue' img="/img/service-companies.jpg">
+              <Card animated borded color='blue' img="/img/service-drivers.jpg">
                 <VStack spacing={4} align="start">
                   <Text fontSize="xl" fontWeight="bold" color="blue.600">
-                    {tPage("driverTypes.renter.title")}
+                    {tHome("services.renter.title")}
                   </Text>
                   <Text color="gray.600">
-                    {tPage("driverTypes.renter.description")}
+                    {tHome("services.renter.description")}
                   </Text>
                   <Button
                     as={NextLink}
-                    href={getLocalizedHref("/services/drivers")}
+                    href={getLocalizedHref("/request")}
                     colorScheme="blue"
                     size="sm"
                     rightIcon={<ArrowRightIcon />}
                   >
-                    {tPage("driverTypes.renter.cta")}
+                    Candidatar-me
                   </Button>
                 </VStack>
               </Card>
             </ContainerDivisions>
           </Container>
 
-          {/* Depoimentos */}
+          {/* Porquê Escolher a Conduz PT */}
           <Container>
             <Title
-              title={tCommon(COMMON.TESTIMONIALS.TITLE)}
-              description={tCommon(COMMON.TESTIMONIALS.SUBTITLE)}
-              feature={tCommon(COMMON.TESTIMONIALS.FEATURE)}
+              title={tHome("features.title")}
+              description="Descubra as vantagens de trabalhar connosco"
+              feature="Vantagens"
             />
             <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
               {(() => {
-                const testimonials = tCommon("testimonials.items");
+                const features = tHome("features.items");
+                if (!Array.isArray(features)) return null;
+
+                return features.map((feature: any, i: number) => (
+                  <Card key={i} animated borded>
+                    <VStack spacing={4} align="start">
+                      <Text fontSize="xl" fontWeight="bold" color="green.600">
+                        {feature.title}
+                      </Text>
+                      <Text color="gray.600">
+                        {feature.description}
+                      </Text>
+                    </VStack>
+                  </Card>
+                ));
+              })()}
+            </ContainerDivisions>
+          </Container>
+
+          {/* Depoimentos */}
+          <Container>
+            <Title
+              title={t(COMMON.TESTIMONIALS.TITLE)}
+              description={t(COMMON.TESTIMONIALS.SUBTITLE)}
+              feature={t(COMMON.TESTIMONIALS.FEATURE)}
+            />
+            <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
+              {(() => {
+                const testimonials = t(COMMON.TESTIMONIALS.ITEMS);
                 if (!Array.isArray(testimonials)) return null;
 
                 return testimonials.map((testimonial: any, i: number) => (
@@ -209,14 +246,14 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
           {/* FAQ */}
           <Container softBg>
             <Title
-              title={tCommon(COMMON.FAQ.TITLE)}
-              description={tCommon(COMMON.FAQ.SUBTITLE)}
-              feature={tCommon(COMMON.FAQ.FEATURE)}
+              title={t(COMMON.FAQ.TITLE)}
+              description={t(COMMON.FAQ.SUBTITLE)}
+              feature={t(COMMON.FAQ.FEATURE)}
             />
             <Box maxW="4xl" mx="auto">
               <Accordion allowToggle>
                 {(() => {
-                  const faqItems = tCommon("faq.items");
+                  const faqItems = t(COMMON.FAQ.ITEMS);
                   if (!Array.isArray(faqItems)) return null;
 
                   return faqItems.map((item: any, i: number) => (
@@ -240,17 +277,15 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
           {/* CTA Final */}
           <Container>
             <Title
-              title={tPage("cta.title")}
-              description={tPage("cta.subtitle")}
-              feature={tPage("cta.feature")}
-              ctaText={tPage("cta.button")}
+              title="Pronto para Começar?"
+              description="Junte-se à Conduz PT e comece a sua jornada como motorista TVDE"
+              feature="CTA"
+              ctaText="Candidatar-me Agora"
               cta={getLocalizedHref("/request")}
               center
             />
           </Container>
-        </>
-      )}
-    </ContentManager>
+    </>
   );
 }
 
@@ -261,11 +296,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
     
     const translations = await loadTranslations(locale, ["common", "home"]);
-    const { common, home: page } = translations;
 
     return {
       props: {
-        translations: { common, page },
+        translations,
         locale,
       },
     };
@@ -273,7 +307,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error("Failed to load translations:", error);
     return {
       props: {
-        translations: { common: {}, page: {} },
+        translations: { common: {}, home: {} },
         locale: 'pt',
       },
     };

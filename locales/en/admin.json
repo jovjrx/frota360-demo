@@ -1,155 +1,74 @@
 {
-  "dashboard": {
-    "title": "Administrative Panel",
-    "subtitle": "System overview and recent activities",
-    "stats": {
-      "totalDrivers": "Total Drivers",
-      "activeDrivers": "Active Drivers",
-      "pendingDrivers": "Pending",
+  "admin": {
+    "dashboard": {
+      "title": "TVDE Management Dashboard",
+      "subtitle": "Business overview - Last 30 days",
+      "kpiTitle": "Financial KPIs",
       "totalRevenue": "Total Revenue",
-      "monthlyRevenue": "Monthly Revenue",
-      "totalPayouts": "Payments",
-      "pendingPayouts": "Pending"
+      "totalExpenses": "Total Expenses",
+      "netProfit": "Net Profit",
+      "totalTrips": "Total Trips",
+      "activeVehicles": "Active Vehicles",
+      "activeDrivers": "Active Drivers",
+      "fleetTitle": "Active Fleet",
+      "utilizationRate": "Utilization Rate",
+      "driversTitle": "Active Drivers",
+      "affiliates": "Affiliates",
+      "renters": "Renters",
+      "integrationsTitle": "Integration Status",
+      "lastSync": "Last Sync",
+      "quickActionsTitle": "Quick Actions",
+      "manageRequests": "Manage Requests",
+      "detailedMetrics": "Detailed Metrics",
+      "contentManagement": "Content Management",
+      "alertsTitle": "Alerts",
+      "integrationProblems": "Integration problems"
     },
-    "recentDrivers": "Recent Drivers",
-    "recentPayouts": "Recent Payments",
-    "systemStatus": "System Status",
-    "systemOperational": "System Operational",
-    "databaseConnected": "Database Connected",
-    "paymentsActive": "Payments Active"
-  },
-  "drivers": {
-    "title": "Drivers Management",
-    "subtitle": "Manage drivers, documents and approvals",
-    "stats": {
-      "total": "Total",
-      "approved": "Approved",
-      "pending": "Pending",
-      "rejected": "Rejected",
-      "suspended": "Suspended"
-    },
-    "actions": {
+    "requests": {
+      "title": "Request Management",
+      "subtitle": "Review and manage driver applications",
+      "filterAll": "All",
+      "filterPending": "Pending",
+      "filterApproved": "Approved",
+      "filterRejected": "Rejected",
+      "statsTotal": "Total",
+      "statsPending": "Pending",
+      "statsApproved": "Approved",
+      "statsRejected": "Rejected",
+      "tableName": "Name",
+      "tableEmail": "Email",
+      "tablePhone": "Phone",
+      "tableType": "Type",
+      "tableStatus": "Status",
+      "tableDate": "Date",
+      "tableActions": "Actions",
       "approve": "Approve",
       "reject": "Reject",
-      "suspend": "Suspend",
-      "reactivate": "Reactivate",
-      "edit": "Edit",
-      "delete": "Delete",
-      "view": "View"
+      "notes": "Administrative Notes",
+      "rejectionReason": "Rejection Reason",
+      "approveModalTitle": "Approve Application",
+      "rejectModalTitle": "Reject Application",
+      "approveSuccess": "Application approved successfully!",
+      "rejectSuccess": "Application rejected successfully!"
     },
-    "filters": {
-      "status": "Status",
-      "search": "Search drivers...",
-      "all": "All",
-      "active": "Active",
-      "pending": "Pending",
-      "inactive": "Inactive",
-      "suspended": "Suspended"
-    },
-    "table": {
-      "name": "Name",
-      "email": "Email",
-      "status": "Status",
-      "createdAt": "Registration Date",
-      "actions": "Actions"
-    },
-    "modal": {
-      "editDriver": "Edit Driver",
-      "deleteDriver": "Delete Driver",
-      "driverDetails": "Driver Details",
-      "basicInfo": "Basic Information",
-      "adminFields": "Administrative Fields",
-      "documents": "Documents",
-      "history": "History"
+    "metrics": {
+      "title": "Detailed Metrics",
+      "subtitle": "Detailed performance analysis by platform",
+      "filterToday": "Today",
+      "filterWeek": "This Week",
+      "filterMonth": "This Month",
+      "filterQuarter": "This Quarter",
+      "filterYear": "This Year",
+      "filterCustom": "Custom",
+      "platformUber": "Uber",
+      "platformBolt": "Bolt",
+      "platformCartrack": "Cartrack",
+      "platformViaverde": "ViaVerde",
+      "platformFonoa": "FONOA",
+      "platformMyprio": "myprio",
+      "testConnection": "Test Connection",
+      "connectionSuccess": "Connection successful!",
+      "connectionError": "Connection error"
     }
-  },
-  "users": {
-    "title": "Users Management",
-    "subtitle": "Manage users and permissions",
-    "actions": {
-      "create": "Create User",
-      "edit": "Edit",
-      "delete": "Delete",
-      "changeRole": "Change Role"
-    }
-  },
-  "plans": {
-    "title": "Plans Management",
-    "subtitle": "Configure plans and pricing",
-    "actions": {
-      "create": "Create Plan",
-      "edit": "Edit",
-      "delete": "Delete",
-      "activate": "Activate",
-      "deactivate": "Deactivate"
-    }
-  },
-  "payouts": {
-    "title": "Payments Management",
-    "subtitle": "Process and manage payments",
-    "actions": {
-      "calculate": "Calculate",
-      "export": "Export",
-      "markPaid": "Mark as Paid"
-    }
-  },
-  "content": {
-    "title": "Content Management",
-    "subtitle": "Manage public pages content",
-    "actions": {
-      "create": "Create Content",
-      "edit": "Edit",
-      "delete": "Delete",
-      "activate": "Activate",
-      "deactivate": "Deactivate"
-    },
-    "filters": {
-      "page": "Page",
-      "section": "Section",
-      "locale": "Language",
-      "status": "Status"
-    },
-    "form": {
-      "page": "Page",
-      "section": "Section",
-      "key": "Key",
-      "content": "Content",
-      "locale": "Language",
-      "active": "Active"
-    }
-  },
-  "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View",
-    "create": "Create",
-    "update": "Update",
-    "search": "Search",
-    "filter": "Filter",
-    "export": "Export",
-    "import": "Import",
-    "refresh": "Refresh",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "warning": "Warning",
-    "info": "Information",
-    "confirm": "Confirm",
-    "yes": "Yes",
-    "no": "No",
-    "close": "Close",
-    "open": "Open",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "total": "Total",
-    "active": "Active",
-    "inactive": "Inactive",
-    "pending": "Pending",
-    "approved": "Approved",
-    "rejected": "Rejected",
-    "suspended": "Suspended"
   }
 }

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CreateRequestSchema } from '@/schemas/request';
+import { requestSchema } from '@/schemas/request';
 import { db } from '@/lib/firebaseAdmin';
 import { ApiResponse } from '@/types';
 
@@ -16,7 +16,7 @@ export default async function handler(
 
   try {
     // Validar dados
-    const validatedData = CreateRequestSchema.parse(req.body);
+    const validatedData = requestSchema.parse(req.body);
 
     // Criar solicitação no Firestore
     const requestData = {

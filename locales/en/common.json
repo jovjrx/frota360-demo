@@ -2,17 +2,14 @@
   "navigation": {
     "home": "Home",
     "drivers": "Drivers",
-    "companies": "Companies",
     "about": "About",
     "contact": "Contact"
   },
   "seo": {
     "default": {
-      "title": "Conduz PT - Platform for TVDE Drivers"
+      "title": "Conduz PT - Platform for TVDE Drivers",
+      "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more."
     }
-  },
-  "hero": {
-    "ctaPrimary": "Apply Now"
   },
   "actions": {
     "submit": "Submit",

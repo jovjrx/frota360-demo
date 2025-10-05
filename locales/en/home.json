@@ -1,93 +1,72 @@
 {
   "hero": {
-    "title": "More than driving, you make the road happen!",
-    "subtitle": "360° management for drivers, fleets and companies — Right platform, true support, guaranteed income.",
-    "description": "Conduz.pt is the TVDE arm of Alvorada Magistral. We offer complete solutions for drivers, companies and fleet managers with advanced technology and human support.",
-    "cta": "Get in touch",
-    "ctaSecondary": "I’m a company",
-    "badge": "TVDE PORTUGAL",
-    "highlight": {
-      "title": "Why Conduz?",
-      "description": "Onboarding in days, not weeks. Human, effective support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
-    }
-  },
-  "howItWorks": {
-    "title": "How it works",
-    "subtitle": "3 simple steps to get started",
-    "feature": "PROCESS",
-    "steps": [
-      {
-        "number": "1",
-        "title": "Registration",
-        "description": "Submit documents and choose your plan"
-      },
-      {
-        "number": "2",
-        "title": "Validation & training",
-        "description": "Compliance, insurance, welcome kit"
-      },
-      {
-        "number": "3",
-        "title": "Start earning",
-        "description": "Real‑time monitoring and clear payments"
-      }
-    ]
-  },
-  "driverTypes": {
-    "title": "Driver Types",
-    "subtitle": "Choose the option that best suits you",
-    "feature": "OPTIONS",
-    "affiliate": {
-      "title": "Affiliate Driver",
-      "description": "Work with your own vehicle and benefit from our support and partnerships with the main platforms",
-      "cta": "Learn More"
+      "title": "Conduz PT",
+      "subtitle": "The complete platform for TVDE drivers in Portugal",
+      "description": "Join hundreds of drivers who already trust Conduz PT to manage their transport business. We offer complete support for affiliates and renters.",
+      "ctaPrimary": "Apply Now",
+      "ctaSecondary": "Talk on WhatsApp"
     },
-    "renter": {
-      "title": "Renter Driver",
-      "description": "Don't have a vehicle? Rent one of our well-maintained vehicles and start working immediately",
-      "cta": "Learn More"
-    }
-  },
-  "metrics": {
-    "title": "Our Numbers",
-    "subtitle": "Indicators that prove our efficiency",
-    "feature": "RESULTS",
-    "stats": [
-      {
-        "value": "95",
-        "total": "100",
-        "unit": "%",
-        "label": "Document approval rate",
-        "description": "Over 95% document approval rate"
+    "services": {
+      "title": "Driver Types",
+      "subtitle": "Choose the model that best fits your situation",
+      "affiliate": {
+        "title": "Affiliate Driver",
+        "description": "Work with your own vehicle and have total control over your business.",
+        "benefits": [
+          "Total schedule flexibility",
+          "100% your revenue",
+          "Total vehicle control",
+          "Complete technical support"
+        ]
       },
-      {
-        "value": "24",
-        "total": "48",
-        "unit": "h",
-        "label": "Average review time",
-        "description": "Under 24h average review time whenever possible"
-      },
-      {
-        "value": "4.8",
-        "total": "5.0",
-        "unit": "/5",
-        "label": "Support satisfaction",
-        "description": "4.8/5 support satisfaction"
-      },
-      {
-        "value": "7",
-        "total": "7",
-        "unit": "days",
-        "label": "Support availability",
-        "description": "Support 7 days a week"
+      "renter": {
+        "title": "Renter Driver",
+        "description": "Rent a vehicle from Conduz PT and start working immediately.",
+        "benefits": [
+          "No initial investment",
+          "Always updated vehicles",
+          "Maintenance included",
+          "Complete insurance"
+        ]
       }
-    ]
-  },
-  "cta": {
-    "title": "Ready to start earning?",
-    "subtitle": "Join the drivers who already chose Conduz",
-    "button": "Start now",
-    "feature": "NEXT STEP"
-  }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "The process is simple and fast",
+      "steps": [
+        {
+          "title": "Application",
+          "description": "Fill out the online application form"
+        },
+        {
+          "title": "Analysis",
+          "description": "Our team analyzes your application"
+        },
+        {
+          "title": "Approval",
+          "description": "Receive confirmation and start working"
+        }
+      ]
+    },
+    "features": {
+      "title": "Why Choose Conduz PT?",
+      "items": [
+        {
+          "title": "Complete Integration",
+          "description": "We connect with all major transport platforms"
+        },
+        {
+          "title": "24/7 Support",
+          "description": "We are always available to help you"
+        },
+        {
+          "title": "Total Transparency",
+          "description": "Detailed and transparent reports"
+        },
+        {
+          "title": "Guaranteed Growth",
+          "description": "We help maximize your earnings"
+        }
+      ]
+    }
 }
-

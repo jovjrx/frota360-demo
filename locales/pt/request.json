@@ -1,20 +1,23 @@
 {
   "request": {
-    "title": "Junte-se à Conduz PT",
-    "subtitle": "Preencha o formulário abaixo para se candidatar como motorista",
-    "typeLabel": "Tipo de Motorista",
-    "typeAffiliate": "Afiliado",
-    "typeRenter": "Locatário",
-    "typeAffiliateDesc": "Trabalho com o meu próprio veículo",
-    "typeRenterDesc": "Pretendo alugar um veículo da Conduz PT",
-    "vehicleInfo": "Como motorista afiliado, por favor forneça informações sobre o seu veículo",
+    "title": "Candidatura de Motorista",
+    "subtitle": "Preencha o formulário abaixo para se candidatar como motorista TVDE",
+    "firstName": "Nome",
+    "lastName": "Apelido",
+    "email": "Email",
+    "phone": "Telefone",
+    "city": "Cidade",
+    "driverType": "Tipo de Motorista",
+    "driverTypeAffiliate": "Afiliado (veículo próprio)",
+    "driverTypeRenter": "Locatário (aluga veículo da Conduz)",
+    "vehicleInfo": "Informações do Veículo",
     "vehicleMake": "Marca do Veículo",
     "vehicleModel": "Modelo do Veículo",
     "vehicleYear": "Ano do Veículo",
-    "vehiclePlate": "Matrícula do Veículo",
-    "additionalInfo": "Informações Adicionais (opcional)",
-    "submitButton": "Enviar Candidatura",
-    "successMessage": "Candidatura enviada com sucesso! Entraremos em contacto em breve.",
-    "errorMessage": "Erro ao enviar candidatura. Por favor, tente novamente."
+    "vehiclePlate": "Matrícula",
+    "submit": "Enviar Candidatura",
+    "successTitle": "Candidatura Enviada!",
+    "successMessage": "A sua candidatura foi enviada com sucesso. A nossa equipa irá analisar e entrar em contacto consigo em breve.",
+    "backToHome": "Voltar ao Início"
   }
 }

@@ -1,90 +1,207 @@
-import { BaseIntegrationClient, IntegrationResponse } from '../base-client';
+import { 
+  BaseIntegrationClient, 
+  IntegrationCredentials, 
+  ConnectionTestResult, 
+  Invoice 
+} from '../base-client';
 
-export interface FonoaInvoice {
+interface FONOACredentials extends IntegrationCredentials {
+  email: string;
+  password: string;
+}
+
+interface FONOAAuthResponse {
+  token: string;
+  expires_in: number;
+  user_id: string;
+}
+
+interface FONOAInvoice {
   id: string;
   number: string;
   date: string;
-  dueDate: string;
   amount: number;
-  tax: number;
-  total: number;
+  tax_amount: number;
   status: string;
-  customer: {
-    name: string;
-    taxId: string;
-  };
+  customer_name: string;
 }
 
-export interface FonoaTaxReport {
-  period: {
-    start: string;
-    end: string;
-  };
-  totalRevenue: number;
-  totalTax: number;
-  taxRate: number;
-  invoices: number;
-}
+export class FONOAClient extends BaseIntegrationClient {
+  private authToken?: string;
+  private tokenExpiry?: Date;
 
-export class FonoaClient extends BaseIntegrationClient {
-  constructor(email: string, password: string) {
-    super({
-      baseURL: 'https://api.fonoa.com',
-      username: email,
-      password: password,
-    });
+  constructor(credentials: FONOACredentials) {
+    super(credentials, 'https://api.fonoa.com/v1');
   }
 
-  getName(): string {
+  getPlatformName(): string {
     return 'FONOA';
   }
 
-  async testConnection(): Promise<IntegrationResponse> {
+  async authenticate(): Promise<void> {
     try {
-      const response = await this.request('GET', '/v1/account');
+      const response = await fetch('https://api.fonoa.com/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: this.credentials.email as string,
+          password: this.credentials.password as string,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`FONOA authentication failed: ${response.statusText}`);
+      }
+
+      const data: FONOAAuthResponse = await response.json();
+      this.authToken = data.token;
+      this.tokenExpiry = new Date(Date.now() + (data.expires_in * 1000));
+      this.isAuthenticated = true;
+    } catch (error) {
+      console.error('FONOA authentication error:', error);
+      throw new Error('Failed to authenticate with FONOA');
+    }
+  }
+
+  async testConnection(): Promise<ConnectionTestResult> {
+    try {
+      await this.authenticate();
+      
+      // Test with a simple API call
+      const response = await this.makeRequest('GET', '/invoices?limit=1');
+      
       return {
-        success: response.success,
-        data: response.data,
-        error: response.error,
+        success: true,
+        lastSync: new Date().toISOString(),
+        data: response,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
 
-  async getInvoices(startDate: string, endDate: string): Promise<IntegrationResponse<FonoaInvoice[]>> {
-    return this.request<FonoaInvoice[]>('GET', '/v1/invoices', undefined, {
-      params: {
-        start_date: startDate,
-        end_date: endDate,
+  async getInvoices(startDate: string, endDate: string): Promise<Invoice[]> {
+    try {
+      const response = await this.makeRequest(
+        'GET',
+        `/invoices?start_date=${startDate}&end_date=${endDate}`
+      );
+
+      const invoices: FONOAInvoice[] = response.invoices || [];
+      
+      return invoices.map(invoice => ({
+        id: invoice.id,
+        number: invoice.number,
+        date: invoice.date,
+        amount: invoice.amount,
+        tax: invoice.tax_amount,
+        status: this.mapInvoiceStatus(invoice.status),
+        customer: invoice.customer_name,
+      }));
+    } catch (error) {
+      console.error('Error fetching FONOA invoices:', error);
+      return [];
+    }
+  }
+
+  async getInvoiceSummary(startDate: string, endDate: string): Promise<{
+    totalInvoiced: number;
+    totalTax: number;
+    totalPaid: number;
+    totalPending: number;
+    invoiceCount: number;
+  }> {
+    try {
+      const invoices = await this.getInvoices(startDate, endDate);
+      
+      const summary = {
+        totalInvoiced: 0,
+        totalTax: 0,
+        totalPaid: 0,
+        totalPending: 0,
+        invoiceCount: invoices.length,
+      };
+
+      invoices.forEach(invoice => {
+        summary.totalInvoiced += invoice.amount;
+        summary.totalTax += invoice.tax;
+        
+        if (invoice.status === 'paid') {
+          summary.totalPaid += invoice.amount;
+        } else {
+          summary.totalPending += invoice.amount;
+        }
+      });
+
+      return summary;
+    } catch (error) {
+      console.error('Error calculating FONOA invoice summary:', error);
+      return {
+        totalInvoiced: 0,
+        totalTax: 0,
+        totalPaid: 0,
+        totalPending: 0,
+        invoiceCount: 0,
+      };
+    }
+  }
+
+  async getTrips(startDate: string, endDate: string): Promise<any[]> {
+    // FONOA doesn't provide trip data
+    return [];
+  }
+
+  async getEarnings(startDate: string, endDate: string): Promise<any> {
+    // FONOA doesn't provide earnings data
+    return {
+      total: 0,
+      trips: 0,
+      averagePerTrip: 0,
+      period: {
+        start: startDate,
+        end: endDate,
       },
-    });
+    };
   }
 
-  async getInvoice(invoiceId: string): Promise<IntegrationResponse<FonoaInvoice>> {
-    return this.request<FonoaInvoice>('GET', `/v1/invoices/${invoiceId}`);
+  async getDrivers(): Promise<any[]> {
+    // FONOA doesn't provide driver data
+    return [];
   }
 
-  async getTaxReport(startDate: string, endDate: string): Promise<IntegrationResponse<FonoaTaxReport>> {
-    return this.request<FonoaTaxReport>('GET', '/v1/tax-reports', undefined, {
-      params: {
-        start_date: startDate,
-        end_date: endDate,
-      },
-    });
+  private mapInvoiceStatus(fonoaStatus: string): 'paid' | 'pending' | 'overdue' {
+    switch (fonoaStatus.toLowerCase()) {
+      case 'paid':
+      case 'pago':
+        return 'paid';
+      case 'overdue':
+      case 'vencido':
+        return 'overdue';
+      default:
+        return 'pending';
+    }
   }
 
-  async createInvoice(invoiceData: any): Promise<IntegrationResponse> {
-    return this.request('POST', '/v1/invoices', invoiceData);
-  }
-}
+  protected async makeRequest<T = any>(
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    endpoint: string,
+    data?: any,
+    headers?: Record<string, string>
+  ): Promise<T> {
+    if (!this.authToken || (this.tokenExpiry && new Date() >= this.tokenExpiry)) {
+      await this.authenticate();
+    }
 
-export function createFonoaClient(): FonoaClient {
-  const email = process.env.FONOA_EMAIL || 'info@alvoradamagistral.eu';
-  const password = process.env.FONOA_PASSWORD || 'Muffin@2017';
-  
-  return new FonoaClient(email, password);
+    const authHeaders = {
+      'Authorization': `Bearer ${this.authToken}`,
+      ...headers,
+    };
+
+    return super.makeRequest(method, endpoint, data, authHeaders);
+  }
 }

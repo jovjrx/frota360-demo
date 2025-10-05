@@ -34,10 +34,10 @@ import {
   StatLabel,
   StatNumber,
 } from '@chakra-ui/react';
-import { loadTranslations } from '@/lib/translations';
-import { PageProps } from '@/interface/Global';
+import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
+import { ADMIN } from '@/translations';
 
 interface Request {
   id: string;
@@ -59,7 +59,12 @@ interface Request {
   adminNotes?: string;
 }
 
-export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
+interface RequestsPageProps {
+  translations: any;
+  locale: string;
+}
+
+export default function RequestsPage({ translations, locale }: RequestsPageProps) {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
@@ -69,6 +74,14 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
   const [notes, setNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const t = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.common, key, variables);
+  };
+
+  const tAdmin = (key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.admin, key, variables);
+  };
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -202,10 +215,10 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
           {/* Header */}
           <Box>
             <Heading size="lg" mb={2}>
-              Gestão de Solicitações
+              {tAdmin(ADMIN.REQUESTS.TITLE)}
             </Heading>
             <Text color="gray.600">
-              Analise e gerencie as solicitações de novos motoristas
+              {tAdmin(ADMIN.REQUESTS.SUBTITLE)}
             </Text>
           </Box>
 
@@ -214,7 +227,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardBody>
                 <Stat>
-                  <StatLabel>Total</StatLabel>
+                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_TOTAL)}</StatLabel>
                   <StatNumber>{stats.total}</StatNumber>
                 </Stat>
               </CardBody>
@@ -222,7 +235,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardBody>
                 <Stat>
-                  <StatLabel>Pendentes</StatLabel>
+                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_PENDING)}</StatLabel>
                   <StatNumber color="yellow.500">{stats.pending}</StatNumber>
                 </Stat>
               </CardBody>
@@ -230,7 +243,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardBody>
                 <Stat>
-                  <StatLabel>Aprovados</StatLabel>
+                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_APPROVED)}</StatLabel>
                   <StatNumber color="green.500">{stats.approved}</StatNumber>
                 </Stat>
               </CardBody>
@@ -238,7 +251,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
             <Card>
               <CardBody>
                 <Stat>
-                  <StatLabel>Rejeitados</StatLabel>
+                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_REJECTED)}</StatLabel>
                   <StatNumber color="red.500">{stats.rejected}</StatNumber>
                 </Stat>
               </CardBody>
@@ -252,11 +265,10 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
               onChange={(e) => setStatusFilter(e.target.value)}
               maxW="200px"
             >
-              <option value="all">Todos</option>
-              <option value="pending">Pendentes</option>
-              <option value="approved">Aprovados</option>
-              <option value="rejected">Rejeitados</option>
-              <option value="contacted">Contactados</option>
+              <option value="all">{tAdmin(ADMIN.REQUESTS.FILTER_ALL)}</option>
+              <option value="pending">{tAdmin(ADMIN.REQUESTS.FILTER_PENDING)}</option>
+              <option value="approved">{tAdmin(ADMIN.REQUESTS.FILTER_APPROVED)}</option>
+              <option value="rejected">{tAdmin(ADMIN.REQUESTS.FILTER_REJECTED)}</option>
             </Select>
             <Button onClick={fetchRequests} isLoading={loading}>
               Atualizar
@@ -283,14 +295,14 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
                   <Table variant="simple">
                     <Thead>
                       <Tr>
-                        <Th>Nome</Th>
-                        <Th>Email</Th>
-                        <Th>Telefone</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_NAME)}</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_EMAIL)}</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_PHONE)}</Th>
                         <Th>Cidade</Th>
-                        <Th>Tipo</Th>
-                        <Th>Status</Th>
-                        <Th>Data</Th>
-                        <Th>Ações</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_TYPE)}</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_STATUS)}</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_DATE)}</Th>
+                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_ACTIONS)}</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -320,14 +332,14 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
                                     colorScheme="green"
                                     onClick={() => handleAction(request, 'approve')}
                                   >
-                                    Aprovar
+                                    {tAdmin(ADMIN.REQUESTS.APPROVE)}
                                   </Button>
                                   <Button
                                     size="sm"
                                     colorScheme="red"
                                     onClick={() => handleAction(request, 'reject')}
                                   >
-                                    Rejeitar
+                                    {tAdmin(ADMIN.REQUESTS.REJECT)}
                                   </Button>
                                 </>
                               )}
@@ -349,7 +361,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            {actionType === 'approve' ? 'Aprovar Solicitação' : 'Rejeitar Solicitação'}
+            {actionType === 'approve' ? tAdmin(ADMIN.REQUESTS.APPROVE_MODAL_TITLE) : tAdmin(ADMIN.REQUESTS.REJECT_MODAL_TITLE)}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -371,7 +383,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
               {actionType === 'reject' && (
                 <Box>
                   <Text fontWeight="bold" mb={2}>
-                    Motivo da Rejeição *
+                    {tAdmin(ADMIN.REQUESTS.REJECTION_REASON)} *
                   </Text>
                   <Textarea
                     value={rejectionReason}
@@ -384,7 +396,7 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps) {
 
               <Box>
                 <Text fontWeight="bold" mb={2}>
-                  Notas Administrativas (opcional)
+                  {tAdmin(ADMIN.REQUESTS.NOTES)} (opcional)
                 </Text>
                 <Textarea
                   value={notes}
@@ -419,7 +431,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const session = await getSession(context.req, context.res);
 
-    if (!session?.user || session.user.role !== 'admin') {
+    // Verificar se está logado e se tem role de admin
+    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
       return {
         redirect: {
           destination: '/login',
@@ -433,11 +446,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
 
     const translations = await loadTranslations(locale, ['common', 'admin']);
-    const { common, admin: page } = translations;
 
     return {
       props: {
-        translations: { common, page },
+        translations,
         locale,
       },
     };
@@ -445,7 +457,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     console.error('Failed to load translations:', error);
     return {
       props: {
-        translations: { common: {}, page: {} },
+        translations: { common: {}, admin: {} },
         locale: 'pt',
       },
     };

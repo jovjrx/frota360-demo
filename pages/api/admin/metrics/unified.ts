@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/lib/session';
 import { ApiResponse } from '@/types';
-import {
-  createBoltClient,
-  createCartrackClient,
-  createFonoaClient,
-  createViaVerdeClient,
-  createMyprioClient,
-} from '@/lib/integrations';
+// import {
+//   BoltClient,
+//   CartrackClient,
+//   FONOAClient,
+//   ViaVerdeClient,
+//   MyprioClient,
+// } from '@/lib/integrations';
 
 export interface UnifiedMetrics {
   period: {
@@ -80,83 +80,63 @@ export default async function handler(
       errors: [],
     };
 
-    // Buscar dados do Bolt
-    try {
-      const boltClient = createBoltClient();
-      const boltStats = await boltClient.getStats(startDate as string, endDate as string);
-      
-      if (boltStats.success && boltStats.data) {
-        metrics.platforms.bolt = boltStats.data;
-        metrics.summary.totalTrips += boltStats.data.totalTrips || 0;
-        metrics.summary.totalEarnings += boltStats.data.totalEarnings || 0;
-        metrics.summary.activeDrivers += boltStats.data.activeDrivers || 0;
-      } else {
-        metrics.errors.push(`Bolt: ${boltStats.error}`);
-      }
-    } catch (error: any) {
-      metrics.errors.push(`Bolt: ${error.message}`);
-    }
+    // Mock data for now - will be replaced with real integrations
+    metrics.platforms.bolt = {
+      totalTrips: 1250,
+      totalEarnings: 15680.50,
+      activeDrivers: 45,
+      success: true,
+      lastUpdate: new Date().toISOString(),
+    };
+    
+    metrics.summary.totalTrips += 1250;
+    metrics.summary.totalEarnings += 15680.50;
+    metrics.summary.activeDrivers += 45;
 
-    // Buscar dados do Cartrack
-    try {
-      const cartrackClient = createCartrackClient();
-      const cartrackStats = await cartrackClient.getStats(startDate as string, endDate as string);
-      
-      if (cartrackStats.success && cartrackStats.data) {
-        metrics.platforms.cartrack = cartrackStats.data;
-        metrics.summary.totalTrips += cartrackStats.data.totalTrips || 0;
-        metrics.summary.activeVehicles += cartrackStats.data.activeVehicles || 0;
-      } else {
-        metrics.errors.push(`Cartrack: ${cartrackStats.error}`);
-      }
-    } catch (error: any) {
-      metrics.errors.push(`Cartrack: ${error.message}`);
-    }
+    // Mock Cartrack data
+    metrics.platforms.cartrack = {
+      activeVehicles: 38,
+      totalMileage: 45670,
+      averageUtilization: 78.5,
+      success: true,
+      lastUpdate: new Date().toISOString(),
+    };
+    
+    metrics.summary.activeVehicles += 38;
 
-    // Buscar dados do FONOA
-    try {
-      const fonoaClient = createFonoaClient();
-      const fonoaReport = await fonoaClient.getTaxReport(startDate as string, endDate as string);
-      
-      if (fonoaReport.success && fonoaReport.data) {
-        metrics.platforms.fonoa = fonoaReport.data;
-        // FONOA fornece dados fiscais, não afeta earnings diretamente
-      } else {
-        metrics.errors.push(`FONOA: ${fonoaReport.error}`);
-      }
-    } catch (error: any) {
-      metrics.errors.push(`FONOA: ${error.message}`);
-    }
+    // Mock FONOA data
+    metrics.platforms.fonoa = {
+      totalBilled: 12500.00,
+      taxesPaid: 2875.00,
+      invoicesGenerated: 45,
+      success: true,
+      lastUpdate: new Date().toISOString(),
+    };
 
-    // Buscar dados do ViaVerde
-    try {
-      const viaverdeClient = createViaVerdeClient();
-      const viaverdeStats = await viaverdeClient.getStats(startDate as string, endDate as string);
-      
-      if (viaverdeStats.success && viaverdeStats.data) {
-        metrics.platforms.viaverde = viaverdeStats.data;
-        metrics.summary.totalExpenses += viaverdeStats.data.totalAmount || 0;
-      } else {
-        metrics.errors.push(`ViaVerde: ${viaverdeStats.error}`);
-      }
-    } catch (error: any) {
-      metrics.errors.push(`ViaVerde: ${error.message}`);
-    }
+    // Mock ViaVerde data
+    metrics.platforms.viaverde = {
+      totalSpent: 1250.75,
+      transactionsCount: 156,
+      averageTransaction: 8.02,
+      success: true,
+      lastUpdate: new Date().toISOString(),
+    };
+    
+    metrics.summary.totalExpenses += 1250.75;
 
-    // Buscar dados do myprio
-    try {
-      const myprioClient = createMyprioClient();
-      const myprioStats = await myprioClient.getStats(startDate as string, endDate as string);
-      
-      if (myprioStats.success && myprioStats.data) {
-        metrics.platforms.myprio = myprioStats.data;
-        metrics.summary.totalExpenses += myprioStats.data.totalExpenses || 0;
-      } else {
-        metrics.errors.push(`myprio: ${myprioStats.error}`);
-      }
-    } catch (error: any) {
-      metrics.errors.push(`myprio: ${error.message}`);
-    }
+    // Mock myprio data
+    metrics.platforms.myprio = {
+      totalExpenses: 3450.25,
+      categories: {
+        fuel: 2100.00,
+        maintenance: 850.25,
+        insurance: 500.00,
+      },
+      success: true,
+      lastUpdate: new Date().toISOString(),
+    };
+    
+    metrics.summary.totalExpenses += 3450.25;
 
     // Calcular lucro líquido
     metrics.summary.netProfit = metrics.summary.totalEarnings - metrics.summary.totalExpenses;
