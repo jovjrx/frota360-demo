@@ -44,27 +44,27 @@ export default async function handler(
         break;
 
       case 'bolt':
-        const boltClient = createBoltClient();
+        const boltClient = await createBoltClient();
         result = await boltClient.testConnection();
         break;
 
       case 'cartrack':
-        const cartrackClient = createCartrackClient();
+        const cartrackClient = await createCartrackClient();
         result = await cartrackClient.testConnection();
         break;
 
       case 'fonoa':
-        const fonoaClient = createFonoaClient();
+        const fonoaClient = await createFonoaClient();
         result = await fonoaClient.testConnection();
         break;
 
       case 'viaverde':
-        const viaverdeClient = createViaVerdeClient();
+        const viaverdeClient = await createViaVerdeClient();
         result = await viaverdeClient.testConnection();
         break;
 
       case 'myprio':
-        const myprioClient = createMyprioClient();
+        const myprioClient = await createMyprioClient();
         result = await myprioClient.testConnection();
         break;
 

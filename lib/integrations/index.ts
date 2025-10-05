@@ -26,47 +26,85 @@ import { CartrackClient as CartrackClientClass } from './cartrack/client';
 import { ViaVerdeClient as ViaVerdeClientClass } from './viaverde/client';
 import { FONOAClient as FONOAClientClass } from './fonoa/client';
 import { MyprioClient as MyprioClientClass } from './myprio/client';
+import integrationService from './integration-service';
 
-export function createUberClient() {
+// Factory functions - BUSCA CREDENCIAIS DO FIRESTORE
+
+export async function createUberClient() {
+  const integration = await integrationService.getIntegration('uber');
+  
+  if (!integration) {
+    throw new Error('Uber integration not configured');
+  }
+
   return new UberClientClass({
-    clientId: process.env.UBER_CLIENT_ID || '',
-    clientSecret: process.env.UBER_CLIENT_SECRET || '',
-    orgUuid: process.env.UBER_ORG_UUID || '',
+    clientId: integration.credentials.clientId || '',
+    clientSecret: integration.credentials.clientSecret || '',
+    orgUuid: integration.credentials.orgUuid || '',
   });
 }
 
-export function createBoltClient() {
+export async function createBoltClient() {
+  const integration = await integrationService.getIntegration('bolt');
+  
+  if (!integration) {
+    throw new Error('Bolt integration not configured');
+  }
+
   return new BoltClientClass({
-    email: process.env.BOLT_EMAIL || '',
-    password: process.env.BOLT_PASSWORD || '',
+    clientId: integration.credentials.clientId || '',
+    clientSecret: integration.credentials.clientSecret || '',
   });
 }
 
-export function createCartrackClient() {
+export async function createCartrackClient() {
+  const integration = await integrationService.getIntegration('cartrack');
+  
+  if (!integration) {
+    throw new Error('Cartrack integration not configured');
+  }
+
   return new CartrackClientClass({
-    baseUrl: process.env.CARTRACK_BASE_URL || 'https://fleetapi-pt.cartrack.com/rest',
-    username: process.env.CARTRACK_USERNAME || '',
-    password: process.env.CARTRACK_PASSWORD || '',
+    username: integration.credentials.username || '',
+    apiKey: integration.credentials.apiKey || '',
   });
 }
 
-export function createViaVerdeClient() {
+export async function createViaVerdeClient() {
+  const integration = await integrationService.getIntegration('viaverde');
+  
+  if (!integration) {
+    throw new Error('ViaVerde integration not configured');
+  }
+
   return new ViaVerdeClientClass({
-    email: process.env.VIAVERDE_EMAIL || '',
-    password: process.env.VIAVERDE_PASSWORD || '',
+    email: integration.credentials.email || '',
+    password: integration.credentials.password || '',
   });
 }
 
-export function createFonoaClient() {
+export async function createFonoaClient() {
+  const integration = await integrationService.getIntegration('fonoa');
+  
+  if (!integration) {
+    throw new Error('FONOA integration not configured');
+  }
+
   return new FONOAClientClass({
-    email: process.env.FONOA_EMAIL || '',
-    password: process.env.FONOA_PASSWORD || '',
+    email: integration.credentials.email || '',
+    password: integration.credentials.password || '',
   });
 }
 
-export function createMyprioClient() {
+export async function createMyprioClient() {
+  const integration = await integrationService.getIntegration('myprio');
+  
+  if (!integration) {
+    throw new Error('myPrio integration not configured');
+  }
+
   return new MyprioClientClass({
-    accountId: process.env.MYPRIO_ACCOUNT_ID || '',
-    password: process.env.MYPRIO_PASSWORD || '',
+    accountId: integration.credentials.accountId || '',
+    password: integration.credentials.password || '',
   });
 }
