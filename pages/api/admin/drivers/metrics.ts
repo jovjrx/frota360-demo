@@ -1,0 +1,92 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getSession } from '@/lib/session';
+import { db } from '@/lib/firebaseAdmin';
+import { ApiResponse } from '@/types';
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiResponse>
+) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({
+      success: false,
+      error: 'Method not allowed',
+    });
+  }
+
+  try {
+    const session = await getSession(req, res);
+
+    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
+      return res.status(401).json({
+        success: false,
+        error: 'Não autorizado',
+      });
+    }
+
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate e endDate são obrigatórios',
+      });
+    }
+
+    // Buscar todos os motoristas aprovados
+    const driversSnapshot = await db
+      .collection('drivers')
+      .where('status', '==', 'approved')
+      .get();
+
+    const driversMetrics = [];
+
+    for (const driverDoc of driversSnapshot.docs) {
+      const driverData = driverDoc.data();
+
+      // Mock data - Em produção, buscar das integrações reais
+      const metrics = {
+        id: driverDoc.id,
+        name: `${driverData.firstName} ${driverData.lastName}`,
+        email: driverData.email,
+        type: driverData.driverType || 'affiliate',
+        status: driverData.isActive ? 'active' : 'inactive',
+        vehicle: driverData.vehicle?.plate || null,
+        metrics: {
+          totalTrips: Math.floor(Math.random() * 200) + 50,
+          totalEarnings: Math.floor(Math.random() * 5000) + 1000,
+          totalExpenses: Math.floor(Math.random() * 2000) + 500,
+          netProfit: 0, // Calculado abaixo
+          avgFare: 0, // Calculado abaixo
+          totalDistance: Math.floor(Math.random() * 3000) + 500,
+          hoursWorked: Math.floor(Math.random() * 200) + 50,
+          rating: 4.0 + Math.random() * 1.0, // 4.0 a 5.0
+        },
+      };
+
+      // Calcular valores derivados
+      metrics.metrics.netProfit = metrics.metrics.totalEarnings - metrics.metrics.totalExpenses;
+      metrics.metrics.avgFare = metrics.metrics.totalTrips > 0 
+        ? metrics.metrics.totalEarnings / metrics.metrics.totalTrips 
+        : 0;
+
+      driversMetrics.push(metrics);
+    }
+
+    // Ordenar por lucro (maior para menor)
+    driversMetrics.sort((a, b) => b.metrics.netProfit - a.metrics.netProfit);
+
+    return res.status(200).json({
+      success: true,
+      data: driversMetrics,
+      message: `${driversMetrics.length} motoristas encontrados`,
+    });
+  } catch (error: any) {
+    console.error('Error fetching driver metrics:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao buscar métricas',
+      message: error.message,
+    });
+  }
+}

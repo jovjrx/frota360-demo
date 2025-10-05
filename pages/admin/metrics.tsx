@@ -44,11 +44,7 @@ import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
 import { ADMIN, COMMON } from '@/translations';
-
-interface MetricsPageProps {
-  translations: any;
-  locale: string;
-}
+import { PageProps } from '@/interface/Global';
 
 interface PlatformMetrics {
   platform: string;
@@ -73,7 +69,7 @@ interface UnifiedMetrics {
   errors: string[];
 }
 
-export default function MetricsPage({ translations, locale }: MetricsPageProps) {
+export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
@@ -82,12 +78,12 @@ export default function MetricsPage({ translations, locale }: MetricsPageProps) 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const t = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.common, key, variables);
+  const t = (key: string) => {
+    return tCommon(key);
   };
 
-  const tAdmin = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.admin, key, variables);
+  const tAdmin = (key: string) => {
+    return tPage(key);
   };
 
   useEffect(() => {
@@ -462,10 +458,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
 
     const translations = await loadTranslations(locale, ['common', 'admin']);
+    const { common, admin: page } = translations;
 
     return {
       props: {
-        translations,
+        translations: { common, page },
         locale,
       },
     };

@@ -40,22 +40,18 @@ import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
 import { ADMIN } from '@/translations';
+import { PageProps } from '@/interface/Global';
 
-interface AdminDashboardProps {
-  translations: any;
-  locale: string;
-}
-
-export default function AdminDashboard({ translations, locale }: AdminDashboardProps) {
+export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   const [loading, setLoading] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
 
-  const t = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.common, key, variables);
+  const t = (key: string) => {
+    return tCommon(key);
   };
 
-  const tAdmin = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.admin, key, variables);
+  const tAdmin = (key: string) => {
+    return tPage(key);
   };
 
   useEffect(() => {
@@ -284,7 +280,7 @@ export default function AdminDashboard({ translations, locale }: AdminDashboardP
           </Card>
 
           {/* Ações Rápidas */}
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
             <Button
               as={NextLink}
               href="/admin/requests"
@@ -296,7 +292,23 @@ export default function AdminDashboard({ translations, locale }: AdminDashboardP
               <VStack spacing={0}>
                 <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_REQUESTS)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
-                  Ver candidaturas pendentes
+                  Candidaturas pendentes
+                </Text>
+              </VStack>
+            </Button>
+
+            <Button
+              as={NextLink}
+              href="/admin/drivers-metrics"
+              size="lg"
+              colorScheme="orange"
+              leftIcon={<Icon as={FiUsers} />}
+              height="80px"
+            >
+              <VStack spacing={0}>
+                <Text>Métricas por Motorista</Text>
+                <Text fontSize="sm" fontWeight="normal">
+                  Performance individual
                 </Text>
               </VStack>
             </Button>
@@ -312,7 +324,7 @@ export default function AdminDashboard({ translations, locale }: AdminDashboardP
               <VStack spacing={0}>
                 <Text>{tAdmin(ADMIN.DASHBOARD.DETAILED_METRICS)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
-                  Análise completa por plataforma
+                  Análise por plataforma
                 </Text>
               </VStack>
             </Button>
@@ -371,10 +383,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
 
     const translations = await loadTranslations(locale, ['common', 'admin']);
+    const { common, admin } = translations;
 
     return {
       props: {
-        translations,
+        translations: { common, admin },
         locale,
       },
     };

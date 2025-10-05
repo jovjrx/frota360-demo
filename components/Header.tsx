@@ -216,6 +216,20 @@ export default function Header({ t }: HeaderProps) {
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
+                                leftIcon={<FiUserCheck />}
+                                onClick={() => router.push('/admin/requests')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Solicitações</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
                                 leftIcon={<FiUsers />}
                                 onClick={() => router.push('/admin/drivers')}
                                 borderRadius="lg"
@@ -230,7 +244,35 @@ export default function Header({ t }: HeaderProps) {
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiUserCheck />}
+                                leftIcon={<FiTrendingUp />}
+                                onClick={() => router.push('/admin/drivers-metrics')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Métricas por Motorista</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiTrendingUp />}
+                                onClick={() => router.push('/admin/metrics')}
+                                borderRadius="lg"
+                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                                transition="all 0.2s"
+                                h="48px"
+                                px={4}
+                              >
+                                <Text fontWeight="medium">Métricas Detalhadas</Text>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="md"
+                                justifyContent="flex-start"
+                                leftIcon={<FiUsers />}
                                 onClick={() => router.push('/admin/users')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}

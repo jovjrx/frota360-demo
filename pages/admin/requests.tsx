@@ -38,6 +38,7 @@ import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
 import { ADMIN } from '@/translations';
+import { PageProps } from '@/interface/Global';
 
 interface Request {
   id: string;
@@ -59,12 +60,7 @@ interface Request {
   adminNotes?: string;
 }
 
-interface RequestsPageProps {
-  translations: any;
-  locale: string;
-}
-
-export default function RequestsPage({ translations, locale }: RequestsPageProps) {
+export default function RequestsPage({ tPage, tCommon, locale }: PageProps & { locale: string }) {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
@@ -75,12 +71,12 @@ export default function RequestsPage({ translations, locale }: RequestsPageProps
   const [rejectionReason, setRejectionReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const t = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.common, key, variables);
+  const t = (key: string) => {
+    return tCommon(key);
   };
 
-  const tAdmin = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.admin, key, variables);
+  const tAdmin = (key: string) => {
+    return tPage(key);
   };
 
   const fetchRequests = async () => {
@@ -446,10 +442,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       : context.req.headers['x-locale'] || 'pt';
 
     const translations = await loadTranslations(locale, ['common', 'admin']);
+    const { common, admin: page } = translations;
 
     return {
       props: {
-        translations,
+        translations: { common, page },
         locale,
       },
     };
