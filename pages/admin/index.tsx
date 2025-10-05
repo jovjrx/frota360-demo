@@ -34,7 +34,8 @@ import {
   FiAlertCircle,
   FiCheckCircle,
   FiActivity,
-  FiEdit
+  FiEdit,
+  FiSettings
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
@@ -280,7 +281,7 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & {
           </Card>
 
           {/* Ações Rápidas */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
             <Button
               as={NextLink}
               href="/admin/requests"
@@ -299,16 +300,16 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & {
 
             <Button
               as={NextLink}
-              href="/admin/drivers-metrics"
+              href="/admin/drivers"
               size="lg"
               colorScheme="orange"
               leftIcon={<Icon as={FiUsers} />}
               height="80px"
             >
               <VStack spacing={0}>
-                <Text>Métricas por Motorista</Text>
+                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_DRIVERS)}</Text>
                 <Text fontSize="sm" fontWeight="normal">
-                  Performance individual
+                  Controle de motoristas
                 </Text>
               </VStack>
             </Button>
@@ -331,9 +332,44 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & {
 
             <Button
               as={NextLink}
-              href="/admin/content"
+              href="/admin/fleet"
+              size="lg"
+              colorScheme="teal"
+              leftIcon={<Icon as={FiTruck} />}
+              height="80px"
+            >
+              <VStack spacing={0}>
+                <Text>{tAdmin(ADMIN.DASHBOARD.MANAGE_FLEET)}</Text>
+                <Text fontSize="sm" fontWeight="normal">
+                  Controle da frota
+                </Text>
+              </VStack>
+            </Button>
+          </SimpleGrid>
+
+          {/* Segunda linha de ações */}
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+            <Button
+              as={NextLink}
+              href="/admin/integrations"
               size="lg"
               colorScheme="purple"
+              leftIcon={<Icon as={FiSettings} />}
+              height="80px"
+            >
+              <VStack spacing={0}>
+                <Text>{tAdmin(ADMIN.DASHBOARD.INTEGRATIONS)}</Text>
+                <Text fontSize="sm" fontWeight="normal">
+                  Status das integrações
+                </Text>
+              </VStack>
+            </Button>
+
+            <Button
+              as={NextLink}
+              href="/admin/content"
+              size="lg"
+              colorScheme="gray"
               leftIcon={<Icon as={FiEdit} />}
               height="80px"
             >
@@ -365,39 +401,6 @@ export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const session = await getSession(context.req, context.res);
-
-    // Verificar se está logado e se tem role de admin
-    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    const locale = Array.isArray(context.req.headers['x-locale'])
-      ? context.req.headers['x-locale'][0]
-      : context.req.headers['x-locale'] || 'pt';
-
-    const translations = await loadTranslations(locale, ['common', 'admin']);
-    const { common, admin } = translations;
-
-    return {
-      props: {
-        translations: { common, admin },
-        locale,
-      },
-    };
-  } catch (error) {
-    console.error('Failed to load translations:', error);
-    return {
-      props: {
-        translations: { common: {}, admin: {} },
-        locale: 'pt',
-      },
-    };
-  }
+  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
+  return checkAdminAuth(context);
 };

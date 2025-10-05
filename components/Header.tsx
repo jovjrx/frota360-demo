@@ -30,7 +30,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit } from "react-icons/fi";
+import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit, FiTruck, FiActivity, FiWifi } from "react-icons/fi";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -238,27 +238,27 @@ export default function Header({ t }: HeaderProps) {
                                 h="48px"
                                 px={4}
                               >
-                                <Text fontWeight="medium">Motoristas</Text>
+                                <Text fontWeight="medium">Controle de Motoristas</Text>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiTrendingUp />}
-                                onClick={() => router.push('/admin/drivers-metrics')}
+                                leftIcon={<FiTruck />}
+                                onClick={() => router.push('/admin/fleet')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
                                 transition="all 0.2s"
                                 h="48px"
                                 px={4}
                               >
-                                <Text fontWeight="medium">Métricas por Motorista</Text>
+                                <Text fontWeight="medium">Controle da Frota</Text>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiTrendingUp />}
+                                leftIcon={<FiActivity />}
                                 onClick={() => router.push('/admin/metrics')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
@@ -266,35 +266,21 @@ export default function Header({ t }: HeaderProps) {
                                 h="48px"
                                 px={4}
                               >
-                                <Text fontWeight="medium">Métricas Detalhadas</Text>
+                                <Text fontWeight="medium">Métricas</Text>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="md"
                                 justifyContent="flex-start"
-                                leftIcon={<FiUsers />}
-                                onClick={() => router.push('/admin/users')}
+                                leftIcon={<FiWifi />}
+                                onClick={() => router.push('/admin/integrations')}
                                 borderRadius="lg"
                                 _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
                                 transition="all 0.2s"
                                 h="48px"
                                 px={4}
                               >
-                                <Text fontWeight="medium">Usuários</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiSettings />}
-                                onClick={() => router.push('/admin/config')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Configurações</Text>
+                                <Text fontWeight="medium">Integrações</Text>
                               </Button>
                               <Button
                                 variant="ghost"

@@ -421,39 +421,6 @@ export default function DriverMetrics({ translations, locale }: DriverMetricsPro
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const session = await getSession(context.req, context.res);
-
-    // Verificar se está logado e se tem role de admin
-    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    const locale = Array.isArray(context.req.headers['x-locale'])
-      ? context.req.headers['x-locale'][0]
-      : context.req.headers['x-locale'] || 'pt';
-
-    const translations = await loadTranslations(locale, ['common', 'admin']);
-    const { common, admin } = translations;
-
-    return {
-      props: {
-        translations: { common, admin },
-        locale,
-      },
-    };
-  } catch (error) {
-    console.error('Failed to load translations:', error);
-    return {
-      props: {
-        translations: { common: {}, admin: {} },
-        locale: 'pt',
-      },
-    };
-  }
+  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
+  return checkAdminAuth(context);
 };
