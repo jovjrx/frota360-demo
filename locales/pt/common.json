@@ -3,7 +3,16 @@
     "home": "Início",
     "drivers": "Motoristas",
     "about": "Sobre",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "login": "Entrar",
+    "logout": "Sair",
+    "signup": "Criar Conta"
+  },
+  "user": {
+    "email": "Email",
+    "password": "Senha",
+    "name": "Nome",
+    "phone": "Telefone"
   },
   "seo": {
     "default": {

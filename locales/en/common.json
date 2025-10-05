@@ -3,7 +3,16 @@
     "home": "Home",
     "drivers": "Drivers",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up"
+  },
+  "user": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "phone": "Phone"
   },
   "seo": {
     "default": {
