@@ -9,8 +9,13 @@
     "build": "next build",
     "start": "next start",
     "postbuild": "next-sitemap",
-    "setup": "node scripts/setup-firebase.js",
-    "add-data": "node scripts/add-data.js"
+    "setup": "bash scripts/setup.sh",
+    "setup:firebase": "node scripts/setup-firebase.js",
+    "add-data": "node scripts/add-data.js",
+    "test:apis": "ts-node scripts/test-apis.ts",
+    "test:apis:uber": "ts-node scripts/test-apis.ts uber",
+    "test:apis:bolt": "ts-node scripts/test-apis.ts bolt",
+    "test:apis:cartrack": "ts-node scripts/test-apis.ts cartrack"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
