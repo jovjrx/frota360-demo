@@ -174,6 +174,43 @@ export class CartrackClient extends BaseIntegrationClient {
     }
   }
 
+  async getMonthlyData(year: number, month: number): Promise<any> {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+    try {
+      const [vehicles, utilization] = await Promise.all([
+        this.getVehicles(),
+        this.getVehicleUtilization(startDate, endDate)
+      ]);
+
+      return {
+        success: true,
+        data: {
+          vehicles: {
+            total: utilization.totalVehicles,
+            active: utilization.activeVehicles,
+            list: vehicles
+          },
+          trips: {
+            total: 0,
+            totalDistance: utilization.totalKilometers
+          },
+          fuel: {
+            totalCost: 0,
+            transactions: 0
+          }
+        }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   protected async makeRequest<T = any>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
