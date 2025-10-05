@@ -89,6 +89,9 @@ interface UsersManagementProps {
   };
   translations: Record<string, any>;
   userData: any;
+  tCommon?: (key: string) => string;
+  tPage?: (key: string) => string;
+  locale?: string;
 }
 
 export default function UsersManagement({ 
@@ -96,9 +99,11 @@ export default function UsersManagement({
   stats,
   translations,
   userData,
-  tCommon
-}: UsersManagementProps & { tCommon: (key: string) => string }) {
-  const tAdmin = (key: string) => translations.admin?.[key] || key;
+  tCommon,
+  tPage,
+}: UsersManagementProps) {
+  const t = tCommon || ((key: string) => translations.common?.[key] || key);
+  const tAdmin = tPage || ((key: string) => translations.admin?.[key] || key);
   
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();

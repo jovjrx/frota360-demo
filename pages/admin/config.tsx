@@ -71,15 +71,20 @@ interface AdminConfigProps {
   config: any;
   translations: Record<string, any>;
   userData: any;
+  tCommon?: (key: string) => string;
+  tPage?: (key: string) => string;
+  locale?: string;
 }
 
 export default function AdminConfig({ 
   config, 
   translations,
   userData,
-  tCommon
-}: AdminConfigProps & { tCommon: (key: string) => string }) {
-  const tAdmin = (key: string) => translations.admin?.[key] || key;
+  tCommon,
+  tPage,
+}: AdminConfigProps) {
+  const t = tCommon || ((key: string) => translations.common?.[key] || key);
+  const tAdmin = tPage || ((key: string) => translations.admin?.[key] || key);
   
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();

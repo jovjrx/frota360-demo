@@ -42,11 +42,7 @@ import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
 import { getSession } from '@/lib/session';
 import { ADMIN, COMMON } from '@/translations';
-
-interface DriverMetricsProps {
-  translations: any;
-  locale: string;
-}
+import { PageProps } from '@/interface/Global';
 
 interface DriverMetric {
   id: string;
@@ -67,47 +63,28 @@ interface DriverMetric {
   };
 }
 
-export default function DriverMetrics({ translations, locale }: DriverMetricsProps) {
-  const [drivers, setDrivers] = useState<DriverMetric[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('30'); // dias
+interface DriverMetricsProps extends PageProps {
+  translations: {
+    common: any;
+    admin: any;
+  };
+  locale: string;
+  drivers: DriverMetric[];
+  defaultPeriod: string;
+}
+
+export default function DriverMetrics({ translations, locale, tCommon, tPage, drivers: initialDrivers, defaultPeriod }: DriverMetricsProps) {
+  const [drivers] = useState<DriverMetric[]>(initialDrivers);
   const [filterType, setFilterType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const t = (key: string, variables?: Record<string, any>) => {
+  const t = tCommon || ((key: string, variables?: Record<string, any>) => {
     return getTranslation(translations.common, key, variables);
-  };
+  });
 
-  const tAdmin = (key: string, variables?: Record<string, any>) => {
+  const tAdmin = tPage || ((key: string, variables?: Record<string, any>) => {
     return getTranslation(translations.admin, key, variables);
-  };
-
-  useEffect(() => {
-    fetchDriverMetrics();
-  }, [period]);
-
-  const fetchDriverMetrics = async () => {
-    setLoading(true);
-    try {
-      const endDate = new Date().toISOString().split('T')[0];
-      const startDate = new Date(Date.now() - parseInt(period) * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-
-      const response = await fetch(
-        `/api/admin/drivers/metrics?startDate=${startDate}&endDate=${endDate}`
-      );
-      const data = await response.json();
-
-      if (data.success) {
-        setDrivers(data.data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching driver metrics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-PT', {
@@ -155,16 +132,6 @@ export default function DriverMetrics({ translations, locale }: DriverMetricsPro
             <CardBody>
               <HStack spacing={4} flexWrap="wrap">
                 <Box>
-                  <Text fontSize="sm" mb={2} fontWeight="medium">Período:</Text>
-                  <Select value={period} onChange={(e) => setPeriod(e.target.value)} w="200px">
-                    <option value="7">Últimos 7 dias</option>
-                    <option value="30">Últimos 30 dias</option>
-                    <option value="90">Últimos 90 dias</option>
-                    <option value="365">Último ano</option>
-                  </Select>
-                </Box>
-
-                <Box>
                   <Text fontSize="sm" mb={2} fontWeight="medium">Tipo:</Text>
                   <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} w="200px">
                     <option value="all">Todos</option>
@@ -180,13 +147,6 @@ export default function DriverMetrics({ translations, locale }: DriverMetricsPro
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                </Box>
-
-                <Box>
-                  <Text fontSize="sm" mb={2} opacity={0}>.</Text>
-                  <Button colorScheme="green" onClick={fetchDriverMetrics}>
-                    Atualizar
-                  </Button>
                 </Box>
               </HStack>
             </CardBody>
@@ -259,13 +219,7 @@ export default function DriverMetrics({ translations, locale }: DriverMetricsPro
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {loading ? (
-                      <Tr>
-                        <Td colSpan={9} textAlign="center" py={8}>
-                          <Text color="gray.500">Carregando...</Text>
-                        </Td>
-                      </Tr>
-                    ) : filteredDrivers.length === 0 ? (
+                    {filteredDrivers.length === 0 ? (
                       <Tr>
                         <Td colSpan={9} textAlign="center" py={8}>
                           <Text color="gray.500">Nenhum motorista encontrado</Text>
@@ -422,5 +376,84 @@ export default function DriverMetrics({ translations, locale }: DriverMetricsPro
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  return checkAdminAuth(context);
+  const authResult = await checkAdminAuth(context);
+  
+  if ('redirect' in authResult) {
+    return authResult;
+  }
+
+  try {
+    const { fetchDriverMetricsData } = await import('@/lib/admin/unified-data');
+    
+    // Período padrão: últimos 30 dias
+    const period = (context.query.period as string) || '30';
+    const days = parseInt(period);
+    
+    // Buscar dados unificados incluindo weekly records
+    const unifiedData = await fetchDriverMetricsData(days);
+
+    // Converter para formato esperado pelo componente
+    const drivers = unifiedData.drivers.map(driver => {
+      // Buscar métricas semanais deste motorista
+      const driverWeeklyRecords = unifiedData.weeklyRecords.filter(
+        record => record.driverId === driver.id
+      );
+
+      // Agregar métricas de todos os weekly records
+      const metrics = driverWeeklyRecords.reduce(
+        (acc, record) => ({
+          totalTrips: acc.totalTrips + record.metrics.totalTrips,
+          totalEarnings: acc.totalEarnings + record.metrics.totalEarnings,
+          totalExpenses: acc.totalExpenses + record.metrics.totalExpenses,
+          netProfit: acc.netProfit + record.metrics.netProfit,
+          avgFare: acc.avgFare + record.metrics.avgFare,
+          totalDistance: acc.totalDistance + record.metrics.totalDistance,
+          hoursWorked: acc.hoursWorked + record.metrics.hoursWorked,
+          rating: Math.max(acc.rating, record.metrics.rating),
+        }),
+        {
+          totalTrips: 0,
+          totalEarnings: 0,
+          totalExpenses: 0,
+          netProfit: 0,
+          avgFare: 0,
+          totalDistance: 0,
+          hoursWorked: 0,
+          rating: 0,
+        }
+      );
+
+      // Calcular média de tarifa
+      if (metrics.totalTrips > 0) {
+        metrics.avgFare = metrics.totalEarnings / metrics.totalTrips;
+      }
+
+      return {
+        id: driver.id,
+        name: driver.name,
+        email: driver.email,
+        type: driver.type,
+        status: driver.status,
+        vehicle: driver.vehicle,
+        metrics,
+      };
+    });
+
+    return {
+      props: {
+        ...authResult.props,
+        drivers,
+        defaultPeriod: period,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching driver metrics:', error);
+    return {
+      props: {
+        ...authResult.props,
+        drivers: [],
+        defaultPeriod: '30',
+      },
+    };
+  }
 };

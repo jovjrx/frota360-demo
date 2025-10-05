@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   IconButton,
@@ -30,20 +30,16 @@ interface Notification {
 
 export default function NotificationBadge() {
   // const { user } = useAuth();
-  const user = { id: 'mock-user', email: 'test@example.com' }; // Mock user for now
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   
   const bg = 'white';
   const borderColor = 'gray.200';
 
-  useEffect(() => {
-    if (user) {
-      loadNotifications();
-    }
-  }, [user]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
+    if (hasLoaded) return;
+    
     setLoading(true);
     try {
       // Mock data - implementar com API real
@@ -75,12 +71,17 @@ export default function NotificationBadge() {
       ];
       
       setNotifications(mockNotifications);
+      setHasLoaded(true);
     } catch (error) {
       console.error('Error loading notifications:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [hasLoaded]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const markAsRead = async (notificationId: string) => {
     setNotifications(prev =>

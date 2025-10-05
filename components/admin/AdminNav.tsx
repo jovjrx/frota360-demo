@@ -23,6 +23,7 @@ import {
   FiFileText,
   FiActivity,
   FiLogOut,
+  FiWifi,
 } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -45,25 +46,31 @@ const navItems: NavItem[] = [
     label: 'Solicitações',
     href: '/admin/requests',
     icon: FiFileText,
-    description: 'Gerenciar solicitações de motoristas',
+    description: 'Solicitações do site',
   },
   {
-    label: 'Controle de Motoristas',
+    label: 'Controle Semanal',
     href: '/admin/drivers-weekly',
-    icon: FiUsers,
-    description: 'Controle semanal de motoristas',
+    icon: FiCalendar,
+    description: 'Controle semanal dos motoristas',
   },
   {
-    label: 'Controle de Frota',
+    label: 'Controle da Frota',
     href: '/admin/fleet',
     icon: FiTruck,
-    description: 'Gestão completa da frota',
+    description: 'Gestão da frota de veículos',
+  },
+  {
+    label: 'Métricas',
+    href: '/admin/metrics',
+    icon: FiBarChart2,
+    description: 'Métricas gerais do sistema',
   },
   {
     label: 'Integrações',
     href: '/admin/integrations',
-    icon: FiActivity,
-    description: 'Status das integrações',
+    icon: FiWifi,
+    description: 'Integrações externas',
   },
 ];
 

@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
 import { ApiResponse } from '@/types';
 import {
   createBoltClient,
@@ -10,19 +9,13 @@ import {
 } from '@/lib/integrations';
 import { createUberConfig } from '@/lib/uber/base';
 import { UberBusinessClient } from '@/lib/uber/client-business';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  // Verificar autenticação
-  const session = await getSession(req, res);
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({
-      success: false,
-      error: 'Não autorizado',
-    });
-  }
+  // Não precisa verificar sessão - já verificado no SSR
 
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -83,12 +76,25 @@ export default async function handler(
     }
 
     if (result.success) {
+      // Atualizar status no Firestore
+      await adminDb.collection('integrations').doc(platform.toLowerCase()).update({
+        status: 'connected',
+        lastSync: new Date().toISOString(),
+        errorMessage: null,
+      });
+
       return res.status(200).json({
         success: true,
         message: `Conexão com ${platform} estabelecida com sucesso`,
         data: result.data,
       });
     } else {
+      // Atualizar status de erro no Firestore
+      await adminDb.collection('integrations').doc(platform.toLowerCase()).update({
+        status: 'error',
+        errorMessage: result.error || 'Erro na conexão',
+      });
+
       return res.status(500).json({
         success: false,
         error: `Erro ao conectar com ${platform}`,

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import NextLink from 'next/link';
 import {
@@ -39,44 +38,37 @@ import {
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
 import LoggedInLayout from '@/components/LoggedInLayout';
-import { getSession } from '@/lib/session';
 import { ADMIN } from '@/translations';
 import { PageProps } from '@/interface/Global';
 
-interface AdminDashboardProps {
+interface DashboardMetrics {
+  summary: {
+    totalEarnings: number;
+    totalExpenses: number;
+    netProfit: number;
+    totalTrips: number;
+    activeVehicles: number;
+    activeDrivers: number;
+    activeAffiliates: number;
+    activeRenters: number;
+    utilizationRate: number;
+  };
+  errors: string[];
+}
+
+interface AdminDashboardProps extends PageProps {
   translations: {
     common: any;
     page: any;
   };
   locale: string;
+  metrics: DashboardMetrics;
 }
 
-export default function AdminDashboard({ translations, locale }: AdminDashboardProps) {
-  const [loading, setLoading] = useState(false);
-  const [metrics, setMetrics] = useState<any>(null);
+export default function AdminDashboard({ translations, locale, tCommon, tPage, metrics }: AdminDashboardProps) {
 
-  const t = (key: string) => {
-    return getTranslation(translations.common, key);
-  };
-
-  const tAdmin = (key: string) => {
-    return getTranslation(translations.page, key);
-  };
-
-  useEffect(() => {
-    // Buscar métricas do último mês
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
-    fetch(`/api/admin/metrics/unified?startDate=${startDate}&endDate=${endDate}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setMetrics(data.data);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const t = tCommon || ((key: string) => getTranslation(translations.common, key));
+  const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-PT', {
@@ -410,5 +402,61 @@ export default function AdminDashboard({ translations, locale }: AdminDashboardP
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  return checkAdminAuth(context);
+  const authResult = await checkAdminAuth(context);
+  
+  if ('redirect' in authResult || 'notFound' in authResult) {
+    return authResult;
+  }
+
+  try {
+    const { fetchDashboardData } = await import('@/lib/admin/unified-data');
+    
+    // Buscar dados unificados dos últimos 30 dias
+    const unifiedData = await fetchDashboardData(30);
+
+    // Converter para formato esperado pelo componente
+    const metrics: DashboardMetrics = {
+      summary: {
+        totalEarnings: unifiedData.summary.financial.totalEarnings,
+        totalExpenses: unifiedData.summary.financial.totalExpenses,
+        netProfit: unifiedData.summary.financial.netProfit,
+        totalTrips: unifiedData.summary.operations.totalTrips,
+        activeVehicles: unifiedData.summary.fleet.activeVehicles,
+        activeDrivers: unifiedData.summary.drivers.activeDrivers,
+        activeAffiliates: unifiedData.summary.drivers.affiliates,
+        activeRenters: unifiedData.summary.drivers.renters,
+        utilizationRate: unifiedData.summary.fleet.utilizationRate,
+      },
+      errors: unifiedData.errors,
+    };
+
+    return {
+      props: {
+        ...authResult.props,
+        metrics,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    return {
+      props: {
+        ...authResult.props,
+        metrics: {
+          summary: {
+            totalEarnings: 0,
+            totalExpenses: 0,
+            netProfit: 0,
+            totalTrips: 0,
+            activeVehicles: 0,
+            activeDrivers: 0,
+            activeAffiliates: 0,
+            activeRenters: 0,
+            utilizationRate: 0,
+          },
+          errors: [],
+        },
+      },
+    };
+  }
 };
+

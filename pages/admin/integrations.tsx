@@ -46,76 +46,24 @@ interface Integration {
   errorMessage?: string;
 }
 
-interface AdminIntegrationsProps {
+interface AdminIntegrationsProps extends PageProps {
   translations: {
     common: any;
     page: any;
   };
   locale: string;
+  integrations: Integration[];
 }
 
-export default function AdminIntegrations({ translations, locale }: AdminIntegrationsProps) {
-  const tCommon = (key: string) => getTranslation(translations.common, key);
-  const tPage = (key: string) => getTranslation(translations.page, key);
-  const tAdmin = tPage;
-  const t = tCommon;
+export default function AdminIntegrations({ translations, locale, tCommon, tPage, integrations: initialIntegrations }: AdminIntegrationsProps) {
+  const t = tCommon || ((key: string) => getTranslation(translations.common, key));
+  const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
   
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations);
   const [testingAll, setTestingAll] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
   
   const toast = useToast();
-
-  // Mock data - substituir por chamadas à API
-  useEffect(() => {
-    const mockIntegrations: Integration[] = [
-      {
-        id: 'uber',
-        name: 'Uber',
-        description: 'Integração com Uber para viagens e ganhos',
-        status: 'connected',
-        lastSync: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: 'bolt',
-        name: 'Bolt',
-        description: 'Integração com Bolt para viagens e ganhos',
-        status: 'connected',
-        lastSync: '2024-01-15T10:25:00Z'
-      },
-      {
-        id: 'cartrack',
-        name: 'Cartrack',
-        description: 'Integração com Cartrack para dados de veículos',
-        status: 'error',
-        lastSync: '2024-01-14T15:20:00Z',
-        errorMessage: 'Erro de autenticação - Token expirado'
-      },
-      {
-        id: 'viaverde',
-        name: 'ViaVerde',
-        description: 'Integração com ViaVerde para dados de portagens',
-        status: 'disconnected',
-        lastSync: '2024-01-10T09:15:00Z'
-      },
-      {
-        id: 'fonoa',
-        name: 'FONOA',
-        description: 'Integração com FONOA para faturação',
-        status: 'connected',
-        lastSync: '2024-01-15T11:00:00Z'
-      },
-      {
-        id: 'myprio',
-        name: 'myprio',
-        description: 'Integração com myprio para despesas de combustível',
-        status: 'syncing',
-        lastSync: '2024-01-15T11:05:00Z'
-      }
-    ];
-    
-    setIntegrations(mockIntegrations);
-  }, []);
 
   const handleTestConnection = async (integration: Integration) => {
     try {
@@ -125,37 +73,68 @@ export default function AdminIntegrations({ translations, locale }: AdminIntegra
           : int
       ));
 
-      // Simular teste de conexão
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const success = Math.random() > 0.3; // 70% de chance de sucesso para demo
-      
-      setIntegrations(prev => prev.map(int => 
-        int.id === integration.id 
-          ? { 
-              ...int, 
-              status: success ? 'connected' : 'error',
-              errorMessage: success ? undefined : 'Erro na conexão - Verifique as credenciais',
-              lastSync: success ? new Date().toISOString() : int.lastSync
-            }
-          : int
-      ));
-
-      toast({
-        title: success ? 'Conexão bem-sucedida!' : 'Erro na conexão',
-        description: success 
-          ? `Conexão com ${integration.name} estabelecida com sucesso`
-          : `Falha ao conectar com ${integration.name}`,
-        status: success ? 'success' : 'error',
-        duration: 3000,
-        isClosable: true,
+      const response = await fetch('/api/admin/integrations/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ platform: integration.id }),
       });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setIntegrations(prev => prev.map(int => 
+          int.id === integration.id 
+            ? { 
+                ...int, 
+                status: 'connected',
+                errorMessage: undefined,
+                lastSync: new Date().toISOString()
+              }
+            : int
+        ));
+
+        toast({
+          title: 'Conexão bem-sucedida!',
+          description: `Conexão com ${integration.name} estabelecida com sucesso`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        setIntegrations(prev => prev.map(int => 
+          int.id === integration.id 
+            ? { 
+                ...int, 
+                status: 'error',
+                errorMessage: data.error || 'Erro na conexão'
+              }
+            : int
+        ));
+
+        toast({
+          title: 'Erro na conexão',
+          description: `Falha ao conectar com ${integration.name}: ${data.error}`,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       setIntegrations(prev => prev.map(int => 
         int.id === integration.id 
           ? { ...int, status: 'error', errorMessage: 'Erro interno' }
           : int
       ));
+
+      toast({
+        title: 'Erro',
+        description: 'Erro ao testar conexão',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -183,22 +162,38 @@ export default function AdminIntegrations({ translations, locale }: AdminIntegra
   const handleSyncAllData = async () => {
     setSyncingAll(true);
     try {
-      // Simular sincronização de todos os dados
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      setIntegrations(prev => prev.map(int => 
-        int.status === 'connected' 
-          ? { ...int, lastSync: new Date().toISOString() }
-          : int
-      ));
-
-      toast({
-        title: 'Sincronização concluída',
-        description: 'Todos os dados foram sincronizados com sucesso',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
+      const response = await fetch('/api/admin/integrations/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setIntegrations(prev => prev.map(int => 
+          int.status === 'connected' 
+            ? { ...int, lastSync: new Date().toISOString() }
+            : int
+        ));
+
+        toast({
+          title: 'Sincronização concluída',
+          description: `${data.synced} integração(ões) sincronizada(s) com sucesso`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Erro na sincronização',
+          description: data.error || 'Falha ao sincronizar dados',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Erro na sincronização',
@@ -487,5 +482,104 @@ export default function AdminIntegrations({ translations, locale }: AdminIntegra
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  return checkAdminAuth(context);
+  const authResult = await checkAdminAuth(context);
+  
+  // Se não está autenticado, retorna o redirect
+  if ('redirect' in authResult) {
+    return authResult;
+  }
+
+  try {
+    const { fetchUnifiedAdminData } = await import('@/lib/admin/unified-data');
+    
+    // Buscar dados unificados incluindo apenas integrations
+    const unifiedData = await fetchUnifiedAdminData({
+      includeDrivers: false,
+      includeVehicles: false,
+      includeFleetRecords: false,
+      includeIntegrations: true,
+      includeRequests: false,
+      includeWeeklyRecords: false,
+    });
+
+    // Converter para formato esperado pelo componente
+    const integrations = unifiedData.integrations.map(integration => ({
+      id: integration.id,
+      name: integration.name,
+      description: `Integração com ${integration.name}`,
+      status: integration.status,
+      lastSync: integration.lastSync || null,
+      errorMessage: integration.lastError || null,
+    }));
+
+    // Se não houver integrações, criar as padrão
+    if (integrations.length === 0) {
+      const { adminDb } = await import('@/lib/firebaseAdmin');
+      const defaultIntegrations = [
+        {
+          id: 'uber',
+          name: 'Uber',
+          description: 'Integração com Uber para viagens e ganhos',
+          status: 'disconnected',
+        },
+        {
+          id: 'bolt',
+          name: 'Bolt',
+          description: 'Integração com Bolt para viagens e ganhos',
+          status: 'disconnected',
+        },
+        {
+          id: 'cartrack',
+          name: 'Cartrack',
+          description: 'Integração com Cartrack para dados de veículos',
+          status: 'disconnected',
+        },
+        {
+          id: 'viaverde',
+          name: 'ViaVerde',
+          description: 'Integração com ViaVerde para dados de portagens',
+          status: 'disconnected',
+        },
+        {
+          id: 'fonoa',
+          name: 'FONOA',
+          description: 'Integração com FONOA para faturação',
+          status: 'disconnected',
+        },
+        {
+          id: 'myprio',
+          name: 'myprio',
+          description: 'Integração com myprio para despesas de combustível',
+          status: 'disconnected',
+        },
+      ];
+
+      // Criar integrações padrão no Firestore
+      for (const integration of defaultIntegrations) {
+        await adminDb.collection('integrations').doc(integration.id).set(integration);
+      }
+
+      return {
+        props: {
+          ...authResult.props,
+          integrations: defaultIntegrations,
+        },
+      };
+    }
+
+    return {
+      props: {
+        ...authResult.props,
+        integrations,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching integrations:', error);
+    return {
+      props: {
+        ...authResult.props,
+        integrations: [],
+      },
+    };
+  }
 };

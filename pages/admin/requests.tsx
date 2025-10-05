@@ -60,54 +60,40 @@ interface Request {
   adminNotes?: string;
 }
 
-interface RequestsPageProps {
+interface RequestsPageProps extends PageProps {
   translations: {
     common: any;
     page: any;
   };
   locale: string;
+  requests: Request[];
+  stats: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    contacted: number;
+  };
 }
 
-export default function RequestsPage({ translations, locale }: RequestsPageProps) {
-  const t = (key: string) => getTranslation(translations.common, key);
-  const tAdmin = (key: string) => getTranslation(translations.page, key);
+export default function RequestsPage({ translations, locale, tCommon, tPage, requests: initialRequests, stats }: RequestsPageProps) {
+  const t = tCommon || ((key: string) => getTranslation(translations.common, key));
+  const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
   
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<Request[]>(initialRequests);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
   const [notes, setNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const fetchRequests = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/requests/index?status=${statusFilter}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setRequests(data.data);
-      } else {
-        throw new Error(data.error || data.message);
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Erro ao carregar solicitações',
-        description: error.message,
-        status: 'error',
-        duration: 5000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRequests();
-  }, [statusFilter]);
+  // Filtrar localmente quando mudar o filtro
+  const filteredRequests = statusFilter === 'all' 
+    ? requests 
+    : requests.filter(req => req.status === statusFilter);
 
   const handleAction = (request: Request, action: 'approve' | 'reject') => {
     setSelectedRequest(request);
@@ -150,7 +136,8 @@ export default function RequestsPage({ translations, locale }: RequestsPageProps
           duration: 3000,
         });
         onClose();
-        fetchRequests();
+        // Recarregar a página para atualizar os dados via SSR
+        window.location.reload();
       } else {
         throw new Error(data.error || data.message);
       }
@@ -198,13 +185,6 @@ export default function RequestsPage({ translations, locale }: RequestsPageProps
 
   const getDriverTypeLabel = (type: string) => {
     return type === 'affiliate' ? 'Afiliado' : 'Locatário';
-  };
-
-  const stats = {
-    total: requests.length,
-    pending: requests.filter((r) => r.status === 'pending').length,
-    approved: requests.filter((r) => r.status === 'approved').length,
-    rejected: requests.filter((r) => r.status === 'rejected').length,
   };
 
   return (
@@ -269,43 +249,34 @@ export default function RequestsPage({ translations, locale }: RequestsPageProps
               <option value="approved">{tAdmin(ADMIN.REQUESTS.FILTER_APPROVED)}</option>
               <option value="rejected">{tAdmin(ADMIN.REQUESTS.FILTER_REJECTED)}</option>
             </Select>
-            <Button onClick={fetchRequests} isLoading={loading}>
-              Atualizar
-            </Button>
           </HStack>
 
           {/* Tabela */}
           <Card>
             <CardBody>
-              {loading && (
-                <Box textAlign="center" py={10}>
-                  <Spinner size="xl" color="green.500" />
-                </Box>
-              )}
-
-              {!loading && requests.length === 0 && (
+              {filteredRequests.length === 0 && (
                 <Text textAlign="center" py={10} color="gray.500">
                   Nenhuma solicitação encontrada
                 </Text>
               )}
 
-              {!loading && requests.length > 0 && (
+              {filteredRequests.length > 0 && (
                 <Box overflowX="auto">
                   <Table variant="simple">
                     <Thead>
                       <Tr>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_NAME)}</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_EMAIL)}</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_PHONE)}</Th>
+                        <Th>Nome</Th>
+                        <Th>Email</Th>
+                        <Th>Telefone</Th>
                         <Th>Cidade</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_TYPE)}</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_STATUS)}</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_DATE)}</Th>
-                        <Th>{tAdmin(ADMIN.REQUESTS.TABLE_ACTIONS)}</Th>
+                        <Th>Tipo</Th>
+                        <Th>Status</Th>
+                        <Th>Data</Th>
+                        <Th>Ações</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {requests.map((request) => (
+                      {filteredRequests.map((request) => (
                         <Tr key={request.id}>
                           <Td>{`${request.firstName} ${request.lastName}`}</Td>
                           <Td>{request.email}</Td>
@@ -428,5 +399,71 @@ export default function RequestsPage({ translations, locale }: RequestsPageProps
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  return checkAdminAuth(context);
+  const authResult = await checkAdminAuth(context);
+  
+  if ('redirect' in authResult) {
+    return authResult;
+  }
+
+  try {
+    const { fetchUnifiedAdminData } = await import('@/lib/admin/unified-data');
+    
+    // Buscar dados unificados incluindo requests
+    const unifiedData = await fetchUnifiedAdminData({
+      includeDrivers: false,
+      includeVehicles: false,
+      includeFleetRecords: false,
+      includeIntegrations: false,
+      includeRequests: true,
+      includeWeeklyRecords: false,
+    });
+
+    // Converter para formato esperado pelo componente
+    const requests = unifiedData.requests.map(request => ({
+      id: request.id,
+      firstName: request.name.split(' ')[0] || '',
+      lastName: request.name.split(' ').slice(1).join(' ') || '',
+      email: request.email,
+      phone: request.phone,
+      city: '',
+      driverType: 'affiliate',
+      status: request.status,
+      createdAt: new Date(request.createdAt).getTime(),
+      vehicle: null,
+      rejectionReason: null,
+      adminNotes: null,
+    }));
+
+    // Usar estatísticas do summary
+    const stats = {
+      total: unifiedData.summary.requests.total,
+      pending: unifiedData.summary.requests.pending,
+      approved: unifiedData.summary.requests.approved,
+      rejected: unifiedData.summary.requests.rejected,
+      contacted: 0, // Não está no summary padrão
+    };
+
+    return {
+      props: {
+        ...authResult.props,
+        requests,
+        stats,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching requests:', error);
+    return {
+      props: {
+        ...authResult.props,
+        requests: [],
+        stats: {
+          total: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          contacted: 0,
+        },
+      },
+    };
+  }
 };
