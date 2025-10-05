@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { withAdmin } from '@/lib/auth/withAdmin';
@@ -63,7 +64,6 @@ import {
   FiAlertCircle,
   FiInfo
 } from 'react-icons/fi';
-import { useState, useEffect } from 'react';
 import { loadTranslations } from '@/lib/translations';
 import AdminLayout from '@/components/layouts/AdminLayout';
 
