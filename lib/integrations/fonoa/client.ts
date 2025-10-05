@@ -187,6 +187,33 @@ export class FONOAClient extends BaseIntegrationClient {
     }
   }
 
+   async getMonthlyData(year: number, month: number): Promise<any> {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+    try {
+      const invoices = await this.getInvoices(startDate, endDate);
+      const totalTaxes = invoices.reduce((sum, inv) => sum + (inv.amount * 0.23), 0); // Assumindo 23% de IVA
+      const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+
+      return {
+        success: true,
+        data: {
+          totalTaxes: Math.round(totalTaxes * 100) / 100,
+          totalAmount: Math.round(totalAmount * 100) / 100,
+          invoices: invoices.length,
+          list: invoices
+        }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   protected async makeRequest<T = any>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
@@ -196,12 +223,10 @@ export class FONOAClient extends BaseIntegrationClient {
     if (!this.authToken || (this.tokenExpiry && new Date() >= this.tokenExpiry)) {
       await this.authenticate();
     }
-
     const authHeaders = {
       'Authorization': `Bearer ${this.authToken}`,
       ...headers,
     };
-
     return super.makeRequest(method, endpoint, data, authHeaders);
   }
 }

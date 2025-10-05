@@ -15,7 +15,8 @@
     "test:apis": "ts-node scripts/test-apis.ts",
     "test:apis:uber": "ts-node scripts/test-apis.ts uber",
     "test:apis:bolt": "ts-node scripts/test-apis.ts bolt",
-    "test:apis:cartrack": "ts-node scripts/test-apis.ts cartrack"
+    "test:apis:cartrack": "ts-node scripts/test-apis.ts cartrack",
+    "test:integrations": "ts-node scripts/test-integrations.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
@@ -48,6 +49,9 @@
     "next-sitemap": "^4.2.3",
     "nextjs-google-analytics": "^2.3.7",
     "nodemailer": "^7.0.6",
+    "puppeteer": "^24.23.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.64.0",
