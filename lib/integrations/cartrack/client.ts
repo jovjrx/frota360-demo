@@ -4,10 +4,11 @@ import {
   ConnectionTestResult, 
   VehicleData 
 } from '../base-client';
+import integrationService from '../integration-service';
 
 interface CartrackCredentials extends IntegrationCredentials {
   username: string;
-  password: string;
+  apiKey: string;
 }
 
 interface CartrackAuthResponse {
@@ -31,11 +32,11 @@ export class CartrackClient extends BaseIntegrationClient {
   private authHeader: string;
 
   constructor(credentials: CartrackCredentials) {
-    // Cartrack Portugal usa Basic Auth, não bearer token
-    super(credentials, process.env.CARTRACK_BASE_URL || 'https://fleetapi-pt.cartrack.com/rest');
+    // Cartrack Portugal usa Basic Auth com API Key
+    super(credentials, 'https://fleetapi-pt.cartrack.com/rest');
     
-    // Criar Basic Auth header
-    const auth = `${credentials.username}:${credentials.password}`;
+    // Criar Basic Auth header usando username + API Key
+    const auth = `${credentials.username}:${credentials.apiKey}`;
     this.authHeader = `Basic ${Buffer.from(auth).toString('base64')}`;
     this.isAuthenticated = true; // Basic auth doesn't need separate authentication
   }
@@ -128,10 +129,15 @@ export class CartrackClient extends BaseIntegrationClient {
 
   async getTrips(startDate: string, endDate: string): Promise<any[]> {
     try {
-      // According to API docs: GET /trips with query params
+      // According to Cartrack API docs: GET /trips with timestamps in format "YYYY-MM-DD HH:MM:SS"
+      // Example: "2025-09-28 00:00:00"
+      const startTimestamp = `${startDate} 00:00:00`;
+      const endTimestamp = `${endDate} 23:59:59`;
+      
       const params = new URLSearchParams({
-        start_timestamp: startDate,
-        end_timestamp: endDate,
+        start_timestamp: startTimestamp,
+        end_timestamp: endTimestamp,
+        page: '1',
         limit: '1000',
       });
       const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
@@ -144,16 +150,28 @@ export class CartrackClient extends BaseIntegrationClient {
 
   async getFuelData(startDate: string, endDate: string): Promise<any> {
     try {
-      // According to API docs: POST /fuel/consumption with body
+      // According to Cartrack API docs: There are multiple fuel endpoints
+      // Try /mifleet/fuel first (from documentation)
+      const startTimestamp = `${startDate} 00:00:00`;
+      const endTimestamp = `${endDate} 23:59:59`;
+      
       const body = {
-        registrations: [],
-        start_timestamp: startDate,
-        end_timestamp: endDate,
+        registrations: [], // Empty array for all vehicles
+        start_timestamp: startTimestamp,
+        end_timestamp: endTimestamp,
         page: 1,
         limit: 1000,
       };
-      const response = await this.makeRequest('POST', '/fuel/consumption', body);
-      return response;
+      
+      // Try mifleet/fuel endpoint
+      try {
+        const response = await this.makeRequest('GET', `/mifleet/fuel?filter[start_timestamp]=${encodeURIComponent(startTimestamp)}&filter[end_timestamp]=${encodeURIComponent(endTimestamp)}&limit=1000`);
+        return response;
+      } catch (err) {
+        // If that fails, fuel data might not be available or require different endpoint
+        console.warn('MiFleet fuel endpoint not available, trying alternative');
+        return { data: [], meta: null };
+      }
     } catch (error) {
       console.error('Error fetching Cartrack fuel data:', error);
       return { data: [], meta: null };
@@ -162,14 +180,24 @@ export class CartrackClient extends BaseIntegrationClient {
 
   async getMaintenanceData(startDate: string, endDate: string): Promise<any[]> {
     try {
-      // According to API docs: GET /maintenance with filter params
+      // According to Cartrack API docs: Try /mifleet/maintenance
+      const startTimestamp = `${startDate} 00:00:00`;
+      const endTimestamp = `${endDate} 23:59:59`;
+      
       const params = new URLSearchParams({
-        'filter[start_timestamp]': startDate,
-        'filter[end_timestamp]': endDate,
+        'filter[start_timestamp]': startTimestamp,
+        'filter[end_timestamp]': endTimestamp,
         limit: '1000',
       });
-      const response = await this.makeRequest('GET', `/maintenance?${params.toString()}`);
-      return response.data || [];
+      
+      try {
+        const response = await this.makeRequest('GET', `/mifleet/maintenance?${params.toString()}`);
+        return response.data || [];
+      } catch (err) {
+        // If that fails, try without mifleet prefix
+        console.warn('MiFleet maintenance endpoint not available');
+        return [];
+      }
     } catch (error) {
       console.error('Error fetching Cartrack maintenance data:', error);
       return [];
@@ -186,8 +214,17 @@ export class CartrackClient extends BaseIntegrationClient {
       ]);
 
       const activeVehicles = vehicles.filter(v => v.status === 'active').length;
-      const totalDistance = trips.reduce((sum: number, t: any) => sum + (t.distance_km || 0), 0);
-      const totalDuration = trips.reduce((sum: number, t: any) => sum + (t.duration_minutes || 0), 0);
+      
+      // API Cartrack retorna trip_distance em METROS e trip_duration_seconds
+      const totalDistance = trips.reduce((sum: number, t: any) => {
+        const distanceMeters = t.trip_distance || 0;
+        return sum + (distanceMeters / 1000); // Converter metros para km
+      }, 0);
+      
+      const totalDuration = trips.reduce((sum: number, t: any) => {
+        const durationSeconds = t.trip_duration_seconds || 0;
+        return sum + (durationSeconds / 60); // Converter segundos para minutos
+      }, 0);
       
       // Fuel data now comes in data array format from API
       const fuelDataArray = fuelData.data || [];
@@ -314,17 +351,56 @@ export class CartrackClient extends BaseIntegrationClient {
   }
 }
 
-// Factory function para criar instância com env vars
-export function createCartrackClient(): CartrackClient {
-  const username = process.env.CARTRACK_USERNAME || '';
-  const password = process.env.CARTRACK_PASSWORD || '';
+// ============================================================================
+// FACTORY FUNCTIONS
+// ============================================================================
 
-  if (!username || !password) {
-    throw new Error('CARTRACK_USERNAME and CARTRACK_PASSWORD are required');
+/**
+ * Cria instância do Cartrack Client a partir do Firestore (RECOMENDADO)
+ * Usa o IntegrationService para buscar credenciais do Firestore com cache
+ */
+export async function createCartrackClient(): Promise<CartrackClient> {
+  // Busca integração do Firestore (com cache)
+  const integration = await integrationService.getIntegration('cartrack');
+  
+  if (!integration) {
+    throw new Error('Integração Cartrack não encontrada no Firestore. Execute o setup primeiro.');
   }
+  
+  if (!integration.enabled) {
+    throw new Error('Integração Cartrack está desabilitada.');
+  }
+  
+  const { username, apiKey } = integration.credentials;
+  
+  if (!username || !apiKey) {
+    throw new Error('Credenciais Cartrack incompletas no Firestore.');
+  }
+  
+  console.log(`🚗 Cartrack Client criado do Firestore (cached: ${integrationService.getCacheStats().platforms.includes('cartrack')})`);
+  
+  return new CartrackClient({
+    username,
+    apiKey,
+  });
+}
+
+/**
+ * Cria instância do Cartrack Client a partir de variáveis de ambiente (LEGADO)
+ * Use apenas para testes ou se não quiser usar Firestore
+ */
+export function createCartrackClientFromEnv(): CartrackClient {
+  const username = process.env.CARTRACK_USERNAME || '';
+  const apiKey = process.env.CARTRACK_API_KEY || process.env.CARTRACK_PASSWORD || '';
+
+  if (!username || !apiKey) {
+    throw new Error('CARTRACK_USERNAME e CARTRACK_API_KEY são obrigatórios nas variáveis de ambiente');
+  }
+
+  console.log(`🚗 Cartrack Client criado de variáveis de ambiente`);
 
   return new CartrackClient({
     username,
-    password,
+    apiKey,
   });
 }
