@@ -28,11 +28,16 @@ interface CartrackVehicle {
 }
 
 export class CartrackClient extends BaseIntegrationClient {
-  private authToken?: string;
-  private tokenExpiry?: Date;
+  private authHeader: string;
 
   constructor(credentials: CartrackCredentials) {
-    super(credentials, 'https://api.cartrack.com/v1');
+    // Cartrack Portugal usa Basic Auth, não bearer token
+    super(credentials, process.env.CARTRACK_BASE_URL || 'https://fleetapi-pt.cartrack.com/rest');
+    
+    // Criar Basic Auth header
+    const auth = `${credentials.username}:${credentials.password}`;
+    this.authHeader = `Basic ${Buffer.from(auth).toString('base64')}`;
+    this.isAuthenticated = true; // Basic auth doesn't need separate authentication
   }
 
   getPlatformName(): string {
@@ -40,25 +45,10 @@ export class CartrackClient extends BaseIntegrationClient {
   }
 
   async authenticate(): Promise<void> {
+    // Cartrack usa Basic Auth, então não precisa de autenticação separada
+    // Apenas testa a conexão
     try {
-      const response = await fetch('https://api.cartrack.com/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: this.credentials.username as string,
-          password: this.credentials.password as string,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Cartrack authentication failed: ${response.statusText}`);
-      }
-
-      const data: CartrackAuthResponse = await response.json();
-      this.authToken = data.token;
-      this.tokenExpiry = new Date(Date.now() + (data.expires_in * 1000));
+      await this.makeRequest('GET', '/vehicles/status');
       this.isAuthenticated = true;
     } catch (error) {
       console.error('Cartrack authentication error:', error);
@@ -68,10 +58,8 @@ export class CartrackClient extends BaseIntegrationClient {
 
   async testConnection(): Promise<ConnectionTestResult> {
     try {
-      await this.authenticate();
-      
       // Test with a simple API call
-      const response = await this.makeRequest('GET', '/vehicles');
+      const response = await this.makeRequest('GET', '/vehicles/status');
       
       return {
         success: true,
@@ -117,13 +105,14 @@ export class CartrackClient extends BaseIntegrationClient {
       const vehicles = await this.getVehicles();
       const activeVehicles = vehicles.filter(v => v.status === 'active').length;
       
-      // This would require additional API calls to get actual usage data
-      const mockTotalKm = vehicles.reduce((sum, v) => sum + v.kilometers, 0);
+      // Buscar dados de viagens para calcular kilometragem real
+      const trips = await this.getTrips(startDate, endDate);
+      const totalKilometers = trips.reduce((sum: number, trip: any) => sum + (trip.distance_km || 0), 0);
       
       return {
         totalVehicles: vehicles.length,
         activeVehicles,
-        totalKilometers: mockTotalKm,
+        totalKilometers,
         averageUtilization: vehicles.length > 0 ? (activeVehicles / vehicles.length) * 100 : 0,
       };
     } catch (error) {
@@ -138,9 +127,107 @@ export class CartrackClient extends BaseIntegrationClient {
   }
 
   async getTrips(startDate: string, endDate: string): Promise<any[]> {
-    // Cartrack doesn't provide trip data in the same way as Uber/Bolt
-    // This would be implemented based on actual Cartrack API documentation
-    return [];
+    try {
+      // According to API docs: GET /trips with query params
+      const params = new URLSearchParams({
+        start_timestamp: startDate,
+        end_timestamp: endDate,
+        limit: '1000',
+      });
+      const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching Cartrack trips:', error);
+      return [];
+    }
+  }
+
+  async getFuelData(startDate: string, endDate: string): Promise<any> {
+    try {
+      // According to API docs: POST /fuel/consumption with body
+      const body = {
+        registrations: [],
+        start_timestamp: startDate,
+        end_timestamp: endDate,
+        page: 1,
+        limit: 1000,
+      };
+      const response = await this.makeRequest('POST', '/fuel/consumption', body);
+      return response;
+    } catch (error) {
+      console.error('Error fetching Cartrack fuel data:', error);
+      return { data: [], meta: null };
+    }
+  }
+
+  async getMaintenanceData(startDate: string, endDate: string): Promise<any[]> {
+    try {
+      // According to API docs: GET /maintenance with filter params
+      const params = new URLSearchParams({
+        'filter[start_timestamp]': startDate,
+        'filter[end_timestamp]': endDate,
+        limit: '1000',
+      });
+      const response = await this.makeRequest('GET', `/maintenance?${params.toString()}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching Cartrack maintenance data:', error);
+      return [];
+    }
+  }
+
+  async getMetrics(startDate: string, endDate: string): Promise<any> {
+    try {
+      const [vehicles, trips, fuelData, maintenanceData] = await Promise.all([
+        this.getVehicles(),
+        this.getTrips(startDate, endDate),
+        this.getFuelData(startDate, endDate),
+        this.getMaintenanceData(startDate, endDate),
+      ]);
+
+      const activeVehicles = vehicles.filter(v => v.status === 'active').length;
+      const totalDistance = trips.reduce((sum: number, t: any) => sum + (t.distance_km || 0), 0);
+      const totalDuration = trips.reduce((sum: number, t: any) => sum + (t.duration_minutes || 0), 0);
+      
+      // Fuel data now comes in data array format from API
+      const fuelDataArray = fuelData.data || [];
+      const fuelConsumed = fuelDataArray.reduce((sum: number, f: any) => sum + (f.fuel_consumed_liters || 0), 0);
+      const fuelCost = fuelDataArray.reduce((sum: number, f: any) => sum + (f.cost || 0), 0);
+      const avgConsumption = fuelDataArray.length > 0 
+        ? fuelDataArray.reduce((sum: number, f: any) => sum + (f.consumption_per_100km || 0), 0) / fuelDataArray.length
+        : 0;
+      
+      const maintenanceCost = maintenanceData.reduce((sum: number, m: any) => sum + (m.cost || 0), 0);
+
+      return {
+        vehicles: {
+          total: vehicles.length,
+          active: activeVehicles,
+          inactive: vehicles.length - activeVehicles,
+        },
+        trips: {
+          total: trips.length,
+          totalDistanceKm: totalDistance,
+          totalDurationHours: totalDuration / 60,
+        },
+        fuel: {
+          totalLiters: fuelConsumed,
+          totalCost: fuelCost,
+          avgConsumption: avgConsumption,
+        },
+        maintenance: {
+          totalCost: maintenanceCost,
+          eventsCount: maintenanceData.length,
+        },
+        summary: {
+          totalExpenses: fuelCost + maintenanceCost,
+          activeVehicles,
+        },
+      };
+    } catch (error) {
+      console.error('Error fetching Cartrack metrics:', error);
+      throw error;
+    }
   }
 
   async getEarnings(startDate: string, endDate: string): Promise<any> {
@@ -180,15 +267,27 @@ export class CartrackClient extends BaseIntegrationClient {
     data?: any,
     headers?: Record<string, string>
   ): Promise<T> {
-    if (!this.authToken || (this.tokenExpiry && new Date() >= this.tokenExpiry)) {
-      await this.authenticate();
-    }
-
+    // Cartrack usa Basic Auth, não Bearer token
     const authHeaders = {
-      'Authorization': `Bearer ${this.authToken}`,
+      'Authorization': this.authHeader,
       ...headers,
     };
 
     return super.makeRequest(method, endpoint, data, authHeaders);
   }
+}
+
+// Factory function para criar instância com env vars
+export function createCartrackClient(): CartrackClient {
+  const username = process.env.CARTRACK_USERNAME || '';
+  const password = process.env.CARTRACK_PASSWORD || '';
+
+  if (!username || !password) {
+    throw new Error('CARTRACK_USERNAME and CARTRACK_PASSWORD are required');
+  }
+
+  return new CartrackClient({
+    username,
+    password,
+  });
 }

@@ -8,14 +8,14 @@ import {
 } from '../base-client';
 
 interface BoltCredentials extends IntegrationCredentials {
-  email: string;
-  password: string;
+  clientId: string;
+  clientSecret: string;
 }
 
 interface BoltAuthResponse {
-  token: string;
-  expires_at: string;
-  user_id: string;
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 interface BoltTrip {
@@ -40,12 +40,12 @@ interface BoltDriver {
 }
 
 export class BoltClient extends BaseIntegrationClient {
-  private authToken?: string;
+  private accessToken?: string;
   private tokenExpiry?: Date;
-  private userId?: string;
 
   constructor(credentials: BoltCredentials) {
-    super(credentials, 'https://api.bolt.eu/v1');
+    // Base URL oficial da API Bolt Fleet Integration Gateway
+    super(credentials, 'https://node.bolt.eu/fleet-integration-gateway');
   }
 
   getPlatformName(): string {
@@ -54,29 +54,31 @@ export class BoltClient extends BaseIntegrationClient {
 
   async authenticate(): Promise<void> {
     try {
-      const response = await fetch('https://api.bolt.eu/v1/auth/login', {
+      const response = await fetch('https://oidc.bolt.eu/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          email: this.credentials.email as string,
-          password: this.credentials.password as string,
+        body: new URLSearchParams({
+          client_id: this.credentials.clientId as string,
+          client_secret: this.credentials.clientSecret as string,
+          grant_type: 'client_credentials',
+          scope: 'fleet-integration:api',
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Bolt authentication failed: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Bolt authentication failed: ${response.statusText} - ${errorText}`);
       }
 
       const data: BoltAuthResponse = await response.json();
-      this.authToken = data.token;
-      this.tokenExpiry = new Date(data.expires_at);
-      this.userId = data.user_id;
+      this.accessToken = data.access_token;
+      this.tokenExpiry = new Date(Date.now() + (data.expires_in * 1000));
       this.isAuthenticated = true;
     } catch (error) {
       console.error('Bolt authentication error:', error);
-      throw new Error('Failed to authenticate with Bolt');
+      throw error;
     }
   }
 
@@ -84,8 +86,8 @@ export class BoltClient extends BaseIntegrationClient {
     try {
       await this.authenticate();
       
-      // Test with a simple API call
-      const response = await this.makeRequest('GET', '/user/profile');
+      // Test endpoint da documentação oficial
+      const response = await this.makeRequest('POST', '/fleetIntegration/v1/test');
       
       return {
         success: true,
@@ -102,21 +104,23 @@ export class BoltClient extends BaseIntegrationClient {
 
   async getTrips(startDate: string, endDate: string): Promise<Trip[]> {
     try {
-      const response = await this.makeRequest(
-        'GET',
-        `/trips?start_date=${startDate}&end_date=${endDate}`
-      );
+      // Bolt usa POST para getFleetOrders (viagens)
+      const response = await this.makeRequest('POST', '/fleetIntegration/v1/getFleetOrders', {
+        from: new Date(startDate).getTime(),
+        to: new Date(endDate).getTime(),
+      });
 
-      const trips: BoltTrip[] = response.trips || [];
+      const trips: BoltTrip[] = response.orders || [];
       
       return trips.map(trip => ({
         id: trip.id,
-        date: new Date(trip.start_time).toISOString().split('T')[0],
-        startTime: trip.start_time,
-        endTime: trip.end_time || '',
-        distance: trip.distance_km || 0,
-        duration: trip.end_time ? 
-          (new Date(trip.end_time).getTime() - new Date(trip.start_time).getTime()) / 60000 : 0, // minutes
+        date: new Date(parseInt(trip.start_time) || 0).toISOString().split('T')[0],
+        startTime: new Date(parseInt(trip.start_time) || 0).toISOString(),
+        endTime: trip.end_time ? new Date(parseInt(trip.end_time) || 0).toISOString() : '',
+        distance: (trip.distance_km || 0) / 1000, // Bolt pode retornar em metros
+        duration: trip.end_time && trip.start_time 
+          ? (parseInt(trip.end_time) - parseInt(trip.start_time)) / 60000 // ms para minutos
+          : 0,
         earnings: trip.price?.amount || 0,
         driverId: trip.driver_id,
         status: this.mapTripStatus(trip.status),
@@ -157,7 +161,8 @@ export class BoltClient extends BaseIntegrationClient {
 
   async getDrivers(): Promise<Driver[]> {
     try {
-      const response = await this.makeRequest('GET', '/drivers');
+      // Bolt usa POST para getDrivers
+      const response = await this.makeRequest('POST', '/fleetIntegration/v1/getDrivers', {});
       const drivers: BoltDriver[] = response.drivers || [];
       
       return drivers.map(driver => ({
@@ -210,16 +215,30 @@ export class BoltClient extends BaseIntegrationClient {
     data?: any,
     headers?: Record<string, string>
   ): Promise<T> {
-    if (!this.authToken || (this.tokenExpiry && new Date() >= this.tokenExpiry)) {
+    if (!this.accessToken || (this.tokenExpiry && new Date() >= this.tokenExpiry)) {
       await this.authenticate();
     }
 
     const authHeaders = {
-      'Authorization': `Bearer ${this.authToken}`,
-      'X-User-ID': this.userId || '',
+      'Authorization': `Bearer ${this.accessToken}`,
       ...headers,
     };
 
     return super.makeRequest(method, endpoint, data, authHeaders);
   }
+}
+
+// Factory function para criar instância com env vars
+export function createBoltClient(): BoltClient {
+  const clientId = process.env.BOLT_CLIENT_ID || '';
+  const clientSecret = process.env.BOLT_SECRET || '';
+
+  if (!clientId || !clientSecret) {
+    throw new Error('BOLT_CLIENT_ID and BOLT_SECRET are required');
+  }
+
+  return new BoltClient({
+    clientId,
+    clientSecret,
+  });
 }

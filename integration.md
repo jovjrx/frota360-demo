@@ -10,15 +10,17 @@ Integrar 6 plataformas (Uber, Bolt, Cartrack, FONOA, ViaVerde, myprio) no painel
 
 ```env
 # Uber
-UBER_CLIENT_ID=
-UBER_CLIENT_SECRET=
-UBER_ORG_UUID=
+UBER_CLIENT_ID=0W89Kw8QMgGdesno5dBdvNdabnMw8KkL
+UBER_CLIENT_SECRET=mQdZgiooj9SId57DuR5w9t6TSq10HHfG7acVTq1A
+UBER_ORG_UUID=0W89Kw8QMgGdesno5dBdvNdabnMw8KkL
 UBER_EMAIL=info@alvoradamagistral.eu
 UBER_PASSWORD=Alvorada@25
 
 # Bolt
 BOLT_EMAIL=caroline@alvoradamagistral.eu
 BOLT_PASSWORD=Muffin@2017
+BOLT_CLIENT_ID=G__hozQ4Baf39Xk9PjVH7
+BOLT_SECRET=SL5zIEeoQCAdz_wPOqEl1F4wL24xaYMoVws5jtemEZE_WZzBPIfSawHE-oaZ14UquJG6iejy84zs_njFjJ4wsA
 
 # Cartrack
 CARTRACK_BASE_URL=https://fleetapi-pt.cartrack.com/rest

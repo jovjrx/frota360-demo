@@ -64,12 +64,13 @@ export class UberClient extends BaseIntegrationClient {
           client_id: this.credentials.clientId as string,
           client_secret: this.credentials.clientSecret as string,
           grant_type: 'client_credentials',
-          scope: 'partner.accounts partner.trips.read partner.drivers.read',
+          scope: 'business.trips business.earnings',
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Uber authentication failed: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Uber authentication failed: ${response.statusText} - ${errorText}`);
       }
 
       const data: UberAuthResponse = await response.json();
@@ -78,7 +79,7 @@ export class UberClient extends BaseIntegrationClient {
       this.isAuthenticated = true;
     } catch (error) {
       console.error('Uber authentication error:', error);
-      throw new Error('Failed to authenticate with Uber');
+      throw error;
     }
   }
 
@@ -224,4 +225,21 @@ export class UberClient extends BaseIntegrationClient {
 
     return super.makeRequest(method, endpoint, data, authHeaders);
   }
+}
+
+// Factory function para criar instância com env vars
+export function createUberClient(): UberClient {
+  const clientId = process.env.UBER_CLIENT_ID || '';
+  const clientSecret = process.env.UBER_CLIENT_SECRET || '';
+  const orgUuid = process.env.UBER_ORG_UUID || '';
+
+  if (!clientId || !clientSecret || !orgUuid) {
+    throw new Error('UBER_CLIENT_ID, UBER_CLIENT_SECRET and UBER_ORG_UUID are required');
+  }
+
+  return new UberClient({
+    clientId,
+    clientSecret,
+    orgUuid,
+  });
 }
