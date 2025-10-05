@@ -1,4 +1,19 @@
 {
+  "navigation": {
+    "home": "Home",
+    "drivers": "Drivers",
+    "companies": "Companies",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "seo": {
+    "default": {
+      "title": "Conduz PT - Platform for TVDE Drivers"
+    }
+  },
+  "hero": {
+    "ctaPrimary": "Apply Now"
+  },
   "actions": {
     "submit": "Submit",
     "cancel": "Cancel",

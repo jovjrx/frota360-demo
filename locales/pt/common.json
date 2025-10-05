@@ -1,4 +1,19 @@
 {
+  "navigation": {
+    "home": "Início",
+    "drivers": "Motoristas",
+    "companies": "Empresas",
+    "about": "Sobre",
+    "contact": "Contacto"
+  },
+  "seo": {
+    "default": {
+      "title": "Conduz PT - Plataforma para Motoristas TVDE"
+    }
+  },
+  "hero": {
+    "ctaPrimary": "Candidatar-me Agora"
+  },
   "actions": {
     "submit": "Enviar",
     "cancel": "Cancelar",
