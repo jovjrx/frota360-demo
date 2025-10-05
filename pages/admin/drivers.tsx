@@ -81,7 +81,17 @@ interface DriverFilters {
   search: string;
 }
 
-export default function AdminDrivers({ tCommon, tPage, locale }: PageProps) {
+interface AdminDriversProps {
+  translations: {
+    common: any;
+    page: any;
+  };
+  locale: string;
+}
+
+export default function AdminDrivers({ translations, locale }: AdminDriversProps) {
+  const tCommon = (key: string) => getTranslation(translations.common, key);
+  const tPage = (key: string) => getTranslation(translations.page, key);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [filteredDrivers, setFilteredDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -507,32 +517,6 @@ export default function AdminDrivers({ tCommon, tPage, locale }: PageProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-    const result = await checkAdminAuth(context);
-    
-    if ('redirect' in result) {
-      return result;
-    }
-
-    // Criar funções de tradução
-    const { createTranslationFunction } = await import('@/lib/translations');
-    const tCommon = createTranslationFunction(result.props.translations.common);
-    const tPage = createTranslationFunction(result.props.translations.page);
-
-    return {
-      props: {
-        ...result.props,
-        tCommon,
-        tPage,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
+  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
+  return checkAdminAuth(context);
 };

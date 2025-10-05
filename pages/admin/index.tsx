@@ -43,16 +43,24 @@ import { getSession } from '@/lib/session';
 import { ADMIN } from '@/translations';
 import { PageProps } from '@/interface/Global';
 
-export default function AdminDashboard({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+interface AdminDashboardProps {
+  translations: {
+    common: any;
+    page: any;
+  };
+  locale: string;
+}
+
+export default function AdminDashboard({ translations, locale }: AdminDashboardProps) {
   const [loading, setLoading] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
 
   const t = (key: string) => {
-    return tCommon(key);
+    return getTranslation(translations.common, key);
   };
 
   const tAdmin = (key: string) => {
-    return tPage(key);
+    return getTranslation(translations.page, key);
   };
 
   useEffect(() => {

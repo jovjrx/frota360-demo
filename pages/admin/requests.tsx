@@ -60,7 +60,18 @@ interface Request {
   adminNotes?: string;
 }
 
-export default function RequestsPage({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+interface RequestsPageProps {
+  translations: {
+    common: any;
+    page: any;
+  };
+  locale: string;
+}
+
+export default function RequestsPage({ translations, locale }: RequestsPageProps) {
+  const t = (key: string) => getTranslation(translations.common, key);
+  const tAdmin = (key: string) => getTranslation(translations.page, key);
+  
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
@@ -70,14 +81,6 @@ export default function RequestsPage({ tPage, tCommon, locale }: PageProps & { l
   const [notes, setNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  const t = (key: string) => {
-    return tCommon(key);
-  };
-
-  const tAdmin = (key: string) => {
-    return tPage(key);
-  };
 
   const fetchRequests = async () => {
     setLoading(true);

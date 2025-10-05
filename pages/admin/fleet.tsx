@@ -77,7 +77,17 @@ interface FleetKPIs {
   pendingPayments: number;
 }
 
-export default function AdminFleet({ tCommon, tPage, locale }: PageProps) {
+interface AdminFleetProps {
+  translations: {
+    common: any;
+    page: any;
+  };
+  locale: string;
+}
+
+export default function AdminFleet({ translations, locale }: AdminFleetProps) {
+  const tCommon = (key: string) => getTranslation(translations.common, key);
+  const tPage = (key: string) => getTranslation(translations.page, key);
   const [records, setRecords] = useState<FleetRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<FleetRecord[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -721,32 +731,6 @@ export default function AdminFleet({ tCommon, tPage, locale }: PageProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-    const result = await checkAdminAuth(context);
-    
-    if ('redirect' in result) {
-      return result;
-    }
-
-    // Criar funções de tradução
-    const { createTranslationFunction } = await import('@/lib/translations');
-    const tCommon = createTranslationFunction(result.props.translations.common);
-    const tPage = createTranslationFunction(result.props.translations.page);
-
-    return {
-      props: {
-        ...result.props,
-        tCommon,
-        tPage,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
+  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
+  return checkAdminAuth(context);
 };
