@@ -48,15 +48,9 @@ const navItems: NavItem[] = [
     description: 'Gerenciar solicitações de motoristas',
   },
   {
-    label: 'Motoristas',
-    href: '/admin/drivers',
+    label: 'Controle de Motoristas',
+    href: '/admin/drivers-weekly',
     icon: FiUsers,
-    description: 'Gestão de motoristas',
-  },
-  {
-    label: 'Controle Semanal',
-    href: '/admin/drivers-metrics',
-    icon: FiCalendar,
     description: 'Controle semanal de motoristas',
   },
   {
@@ -66,22 +60,10 @@ const navItems: NavItem[] = [
     description: 'Gestão completa da frota',
   },
   {
-    label: 'Métricas',
-    href: '/admin/metrics',
-    icon: FiBarChart2,
-    description: 'Métricas e análises',
-  },
-  {
     label: 'Integrações',
     href: '/admin/integrations',
     icon: FiActivity,
     description: 'Status das integrações',
-  },
-  {
-    label: 'Configurações',
-    href: '/admin/config',
-    icon: FiSettings,
-    description: 'Configurações do sistema',
   },
 ];
 
