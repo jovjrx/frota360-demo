@@ -7,7 +7,7 @@
   },
   "seo": {
     "default": {
-      "title": "Conduz PT - Plataforma para Motoristas TVDE",
+      "title": "TVDE Portugal | Conduz - Você conduz, nós cuidamos do resto!",
       "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais."
     }
   },
@@ -50,19 +50,47 @@
     "passwordsDontMatch": "As senhas não coincidem"
   },
   "company": {
-    "name": "Conduz PT",
-    "description": "Plataforma de gestão para motoristas profissionais em Portugal",
-    "email": "info@alvoradamagistral.eu",
-    "phone": "+351 XXX XXX XXX",
-    "address": "Portugal",
-    "whatsapp": "https://wa.me/351XXXXXXXXX"
+    "name": "Alvorada Magistral",
+    "description": "Você conduz, nós cuidamos do resto!",
+    "email": "conduz@alvoradamagistral.eu",
+    "emailDescription": "Suporte e informações",
+    "phone": "+351 913 415 670",
+    "phoneDescription": "Suporte 7 dias/semana",
+    "address": "Rua Engenheiro Arantes de Oliveira 143",
+    "postalCode": "3720-253",
+    "city": "Oliveira de Azeméis",
+    "state": "Aveiro",
+    "country": "Portugal",
+    "nipc": "517524945",
+    "whatsapp": "http://wa.me/+351913415670",
+    "whats": "http://wa.me/+351913415670",
+    "whatsDescription": "Suporte rápido e eficiente",
+    "website": "conduz.pt"
   },
   "footer": {
+    "tagline": "Você conduz, nós cuidamos do resto!",
+    "description": "A plataforma que transforma motoristas em empresários de sucesso",
+    "contactInfo": "Informações de Contacto",
+    "quickLinks": "Links Rápidos",
     "rights": "© {{year}} Conduz PT. Todos os direitos reservados.",
+    "copyright": "Todos os direitos reservados",
+    "madeWith": "Feito com",
+    "by": "por",
+    "company": "Alvorada Magistral",
+    "developerBy": "Desenvolvido por",
+    "developer": "Jose Junior",
     "privacy": "Política de Privacidade",
     "terms": "Termos e Condições",
     "about": "Sobre Nós",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "services": "Serviços",
+    "drivers": "Para Motoristas",
+    "support": "Suporte",
+    "faq": "Perguntas Frequentes",
+    "help": "Central de Ajuda",
+    "legal": "Legal",
+    "followUs": "Siga-nos",
+    "home": "Início"
   },
   "faq": {
     "title": "Perguntas Frequentes",

@@ -180,13 +180,13 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
         </ContainerDivisions>
       </Container>
 
-      <Container>
+      <Container softBg>
         <Title
-          title={tPage("cta.title")}
-          description={tPage("cta.subtitle")}
-          feature={tPage("cta.feature")}
-          ctaText={tPage("cta.button")}
-          cta="/contact"
+          title={isDrivers ? "Pronto para Fazer Parte?" : tPage("cta.title")}
+          description={isDrivers ? "Você conduz, nós cuidamos do resto! Candidate-se agora e comece sua jornada como motorista TVDE." : tPage("cta.subtitle")}
+          feature="PRÓXIMO PASSO"
+          ctaText={isDrivers ? "Candidatar-me Agora" : tPage("cta.button")}
+          cta={isDrivers ? "/request" : "/contact"}
           center
         />
       </Container>

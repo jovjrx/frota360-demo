@@ -1,10 +1,15 @@
 {
   "hero": {
-      "title": "Conduz PT",
-      "subtitle": "A plataforma completa para motoristas TVDE em Portugal",
-      "description": "Junte-se a centenas de motoristas que já confiam na Conduz PT para gerir o seu negócio de transporte. Oferecemos suporte completo para afiliados e locatários.",
-      "ctaPrimary": "Candidatar-me Agora",
-      "ctaSecondary": "Falar no WhatsApp"
+      "title": "Você conduz, nós cuidamos do resto!",
+      "subtitle": "Gestão 360º para motoristas TVDE — Plataforma certa, apoio real, ganhos garantidos.",
+      "description": "A Conduz.pt é o braço TVDE da Alvorada Magistral. Oferecemos soluções completas para motoristas com tecnologia avançada e suporte humano.",
+      "ctaPrimary": "Candidatar-me como Motorista",
+      "ctaSecondary": "Falar no WhatsApp",
+      "badge": "TVDE PORTUGAL",
+      "highlight": {
+        "title": "Você conduz, nós cuidamos do resto!",
+        "description": "Onboarding em dias, não semanas. Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
+      }
     },
     "services": {
       "title": "Tipos de Motorista",
@@ -31,20 +36,24 @@
       }
     },
     "howItWorks": {
-      "title": "Como Funciona",
-      "subtitle": "O processo é simples e rápido",
+      "title": "Como funciona",
+      "subtitle": "3 passos simples para começar",
+      "feature": "PROCESSO",
       "steps": [
         {
-          "title": "Candidatura",
+          "number": "1",
+          "title": "Solicitação",
           "description": "Preencha o formulário de candidatura online"
         },
         {
-          "title": "Análise",
-          "description": "A nossa equipa analisa a sua candidatura"
+          "number": "2",
+          "title": "Validação & formação",
+          "description": "Compliance, seguro, kit de boas-vindas"
         },
         {
-          "title": "Aprovação",
-          "description": "Recebe a confirmação e pode começar a trabalhar"
+          "number": "3",
+          "title": "Comece a faturar",
+          "description": "Monitorização em tempo real e pagamentos claros"
         }
       ]
     },
@@ -68,5 +77,46 @@
           "description": "Ajudamos a maximizar os seus ganhos"
         }
       ]
+    },
+    "metrics": {
+      "title": "Os Nossos Números",
+      "subtitle": "Indicadores que comprovam a nossa eficiência",
+      "feature": "RESULTADOS",
+      "stats": [
+        {
+          "value": "95",
+          "total": "100",
+          "unit": "%",
+          "label": "Taxa de aprovação de documentos",
+          "description": "Mais de 95% de taxa de aprovação de documentos"
+        },
+        {
+          "value": "24",
+          "total": "48",
+          "unit": "h",
+          "label": "Tempo médio para análise",
+          "description": "Menos de 24h tempo médio para análise quando possível"
+        },
+        {
+          "value": "4.8",
+          "total": "5.0",
+          "unit": "/5",
+          "label": "Satisfação do suporte",
+          "description": "4.8/5 satisfação do suporte"
+        },
+        {
+          "value": "7",
+          "total": "7",
+          "unit": "dias",
+          "label": "Suporte disponível",
+          "description": "Suporte 7 dias por semana"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Pronto para Começar a Faturar?",
+      "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz",
+      "feature": "PRÓXIMO PASSO",
+      "button": "Começar agora"
     }
 }

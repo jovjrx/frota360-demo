@@ -391,9 +391,6 @@ export default function Header({ t }: HeaderProps) {
                   <Button as={NextLink} href="/login" variant="ghost" size="sm">
                     Entrar
                   </Button>
-                  <Button as={NextLink} href="/signup" colorScheme="red" size="sm">
-                    Cadastrar
-                  </Button>
                 </>
               )}
             </HStack>
@@ -456,9 +453,6 @@ export default function Header({ t }: HeaderProps) {
                   <VStack spacing={2}>
                     <Button as={NextLink} href="/login" variant="ghost" size="sm" w="full">
                       Entrar
-                    </Button>
-                    <Button as={NextLink} href="/signup" colorScheme="green" size="sm" w="full">
-                      Cadastrar
                     </Button>
                   </VStack>
                 )}

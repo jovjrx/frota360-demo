@@ -7,7 +7,7 @@
   },
   "seo": {
     "default": {
-      "title": "Conduz PT - Platform for TVDE Drivers",
+      "title": "TVDE Portugal | Conduz - You drive, we take care of the rest!",
       "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more."
     }
   },
@@ -50,19 +50,47 @@
     "passwordsDontMatch": "Passwords don't match"
   },
   "company": {
-    "name": "Conduz PT",
-    "description": "Management platform for professional drivers in Portugal",
-    "email": "info@alvoradamagistral.eu",
-    "phone": "+351 XXX XXX XXX",
-    "address": "Portugal",
-    "whatsapp": "https://wa.me/351XXXXXXXXX"
+    "name": "Alvorada Magistral",
+    "description": "You drive, we take care of the rest!",
+    "email": "conduz@alvoradamagistral.eu",
+    "emailDescription": "Support and information",
+    "phone": "+351 913 415 670",
+    "phoneDescription": "Support 7 days/week",
+    "address": "Rua Engenheiro Arantes de Oliveira 143",
+    "postalCode": "3720-253",
+    "city": "Oliveira de Azeméis",
+    "state": "Aveiro",
+    "country": "Portugal",
+    "nipc": "517524945",
+    "whatsapp": "http://wa.me/+351913415670",
+    "whats": "http://wa.me/+351913415670",
+    "whatsDescription": "Fast and efficient support",
+    "website": "conduz.pt"
   },
   "footer": {
+    "tagline": "You drive, we take care of the rest!",
+    "description": "The platform that transforms drivers into successful entrepreneurs",
+    "contactInfo": "Contact Information",
+    "quickLinks": "Quick Links",
     "rights": "© {{year}} Conduz PT. All rights reserved.",
+    "copyright": "All rights reserved",
+    "madeWith": "Made with",
+    "by": "by",
+    "company": "Alvorada Magistral",
+    "developerBy": "Developed by",
+    "developer": "Jose Junior",
     "privacy": "Privacy Policy",
     "terms": "Terms and Conditions",
     "about": "About Us",
-    "contact": "Contact"
+    "contact": "Contact",
+    "services": "Services",
+    "drivers": "For Drivers",
+    "support": "Support",
+    "faq": "FAQ",
+    "help": "Help Center",
+    "legal": "Legal",
+    "followUs": "Follow us",
+    "home": "Home"
   },
   "faq": {
     "title": "Frequently Asked Questions",

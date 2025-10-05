@@ -97,10 +97,6 @@ export default function Footer({ t }: FooterProps) {
             <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/services/drivers")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.drivers")}
             </Link>
-            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/services/companies")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
-              {t("navigation.companies")}
-            </Link>
-
             <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/contact")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
               {t("navigation.contact")}
             </Link>
