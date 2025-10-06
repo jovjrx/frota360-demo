@@ -162,8 +162,10 @@ export default function WeeklyPayoutPage({
     grossTotal: acc.grossTotal + record.grossTotal,
     commissionAmount: acc.commissionAmount + record.commissionAmount,
     fuel: acc.fuel + record.fuel,
+    viaverde: acc.viaverde + (record.viaverde || 0),
+    totalExpenses: acc.totalExpenses + (record.totalExpenses || 0),
     netPayout: acc.netPayout + record.netPayout,
-  }), { grossTotal: 0, commissionAmount: 0, fuel: 0, netPayout: 0 });
+  }), { grossTotal: 0, commissionAmount: 0, fuel: 0, viaverde: 0, totalExpenses: 0, netPayout: 0 });
 
   // Obter lista única de motoristas
   const drivers = Array.from(new Set(records.map(r => ({ id: r.driverId, name: r.driverName }))
@@ -259,13 +261,13 @@ export default function WeeklyPayoutPage({
       </Card>
 
       {/* Resumo */}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 6 }} spacing={4}>
         <Card>
           <CardBody>
             <Stat>
-              <StatLabel>Total Bruto</StatLabel>
-              <StatNumber color="green.600">{formatCurrency(totals.grossTotal)}</StatNumber>
-              <StatHelpText>{filteredRecords.length} registros</StatHelpText>
+              <StatLabel fontSize="xs">Total Bruto</StatLabel>
+              <StatNumber fontSize="lg" color="green.600">{formatCurrency(totals.grossTotal)}</StatNumber>
+              <StatHelpText fontSize="xs">{filteredRecords.length} registros</StatHelpText>
             </Stat>
           </CardBody>
         </Card>
@@ -273,9 +275,9 @@ export default function WeeklyPayoutPage({
         <Card>
           <CardBody>
             <Stat>
-              <StatLabel>Comissões (7%)</StatLabel>
-              <StatNumber color="purple.600">{formatCurrency(totals.commissionAmount)}</StatNumber>
-              <StatHelpText>
+              <StatLabel fontSize="xs">Comissões (7%)</StatLabel>
+              <StatNumber fontSize="lg" color="purple.600">{formatCurrency(totals.commissionAmount)}</StatNumber>
+              <StatHelpText fontSize="xs">
                 {totals.grossTotal ? ((totals.commissionAmount / totals.grossTotal) * 100).toFixed(1) : 0}% do bruto
               </StatHelpText>
             </Stat>
@@ -285,9 +287,9 @@ export default function WeeklyPayoutPage({
         <Card>
           <CardBody>
             <Stat>
-              <StatLabel>Combustível</StatLabel>
-              <StatNumber color="orange.600">{formatCurrency(totals.fuel)}</StatNumber>
-              <StatHelpText>
+              <StatLabel fontSize="xs">Combustível</StatLabel>
+              <StatNumber fontSize="lg" color="orange.600">{formatCurrency(totals.fuel)}</StatNumber>
+              <StatHelpText fontSize="xs">
                 {totals.grossTotal ? ((totals.fuel / totals.grossTotal) * 100).toFixed(1) : 0}% do bruto
               </StatHelpText>
             </Stat>
@@ -297,9 +299,33 @@ export default function WeeklyPayoutPage({
         <Card>
           <CardBody>
             <Stat>
-              <StatLabel>Valor Líquido</StatLabel>
-              <StatNumber color="blue.600">{formatCurrency(totals.netPayout)}</StatNumber>
-              <StatHelpText>A transferir</StatHelpText>
+              <StatLabel fontSize="xs">ViaVerde</StatLabel>
+              <StatNumber fontSize="lg" color="red.600">{formatCurrency(totals.viaverde)}</StatNumber>
+              <StatHelpText fontSize="xs">
+                {totals.grossTotal ? ((totals.viaverde / totals.grossTotal) * 100).toFixed(1) : 0}% do bruto
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel fontSize="xs">Total Despesas</StatLabel>
+              <StatNumber fontSize="lg" color="red.700">{formatCurrency(totals.totalExpenses)}</StatNumber>
+              <StatHelpText fontSize="xs">
+                {totals.grossTotal ? ((totals.totalExpenses / totals.grossTotal) * 100).toFixed(1) : 0}% do bruto
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel fontSize="xs">Valor Líquido</StatLabel>
+              <StatNumber fontSize="lg" color="blue.600">{formatCurrency(totals.netPayout)}</StatNumber>
+              <StatHelpText fontSize="xs">A transferir</StatHelpText>
             </Stat>
           </CardBody>
         </Card>
@@ -322,8 +348,11 @@ export default function WeeklyPayoutPage({
                   <Th isNumeric>Uber Portagens</Th>
                   <Th isNumeric>Bolt Viagens</Th>
                   <Th isNumeric>Bolt Gorjetas</Th>
+                  <Th isNumeric>Bolt Portagens</Th>
                   <Th isNumeric>Total Bruto</Th>
                   <Th isNumeric>Combustível</Th>
+                  <Th isNumeric>ViaVerde</Th>
+                  <Th isNumeric>Total Despesas</Th>
                   <Th isNumeric>Comissão 7%</Th>
                   <Th isNumeric>Valor Líquido</Th>
                   <Th>Status</Th>
@@ -333,7 +362,7 @@ export default function WeeklyPayoutPage({
               <Tbody>
                 {filteredRecords.length === 0 ? (
                   <Tr>
-                    <Td colSpan={13} textAlign="center" py={8}>
+                    <Td colSpan={16} textAlign="center" py={8}>
                       <Text color="gray.500">Nenhum registro encontrado</Text>
                     </Td>
                   </Tr>
@@ -369,6 +398,9 @@ export default function WeeklyPayoutPage({
                         <Text fontSize="sm">{formatCurrency(record.boltTips)}</Text>
                       </Td>
                       <Td isNumeric>
+                        <Text fontSize="sm">{formatCurrency(record.boltTolls || 0)}</Text>
+                      </Td>
+                      <Td isNumeric>
                         <Text fontSize="sm" fontWeight="bold" color="green.600">
                           {formatCurrency(record.grossTotal)}
                         </Text>
@@ -376,6 +408,16 @@ export default function WeeklyPayoutPage({
                       <Td isNumeric>
                         <Text fontSize="sm" color="orange.600">
                           {formatCurrency(record.fuel)}
+                        </Text>
+                      </Td>
+                      <Td isNumeric>
+                        <Text fontSize="sm" color="red.600">
+                          {formatCurrency(record.viaverde || 0)}
+                        </Text>
+                      </Td>
+                      <Td isNumeric>
+                        <Text fontSize="sm" fontWeight="medium" color="red.700">
+                          {formatCurrency(record.totalExpenses || 0)}
                         </Text>
                       </Td>
                       <Td isNumeric>

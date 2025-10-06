@@ -177,7 +177,7 @@ export function calculateWeeklyTotals(record: ProcessedWeeklyRecord): ProcessedW
   const commissionRate = 0.07;
   const commissionAmount = commissionBase * commissionRate;
   
-  const netPayout = grossTotal - commissionAmount - fuelTotal;
+  const netPayout = grossTotal - commissionAmount - fuelTotal - viaverdeTotal;
   
   record.calculations = {
     grossTotal,
