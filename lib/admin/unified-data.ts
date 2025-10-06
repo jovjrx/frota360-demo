@@ -13,12 +13,12 @@ export interface UnifiedDriver {
   id: string;
   name: string;
   email: string;
-  phone?: string;
+  phone?: string | null;
   type: 'affiliate' | 'renter';
   status: 'active' | 'inactive' | 'suspended';
-  vehicle?: string;
-  vehicleName?: string;
-  joinDate?: string;
+  vehicle?: string | null;
+  vehicleName?: string | null;
+  joinDate?: string | null;
   metrics?: DriverMetrics;
 }
 
@@ -40,9 +40,9 @@ export interface UnifiedVehicle {
   model: string;
   year: number;
   status: 'active' | 'inactive' | 'maintenance';
-  type?: string;
-  currentDriver?: string;
-  currentDriverName?: string;
+  type?: string | null;
+  currentDriver?: string | null;
+  currentDriverName?: string | null;
 }
 
 export interface UnifiedFleetRecord {
@@ -56,8 +56,8 @@ export interface UnifiedFleetRecord {
   totalEarnings: number;
   totalExpenses: number;
   netProfit: number;
-  totalDistance?: number;
-  hoursWorked?: number;
+  totalDistance?: number | null;
+  hoursWorked?: number | null;
 }
 
 export interface UnifiedIntegration {
@@ -65,8 +65,8 @@ export interface UnifiedIntegration {
   name: string;
   platform: string;
   status: 'connected' | 'disconnected' | 'error';
-  lastSync?: string;
-  lastError?: string;
+  lastSync?: string | null;
+  lastError?: string | null;
   config?: Record<string, any>;
 }
 
@@ -76,10 +76,10 @@ export interface UnifiedRequest {
   email: string;
   phone: string;
   service: string;
-  message?: string;
+  message?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
-  updatedAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface UnifiedWeeklyRecord {
@@ -218,12 +218,12 @@ export async function fetchUnifiedAdminData(
             id: doc.id,
             name: driverData.name || '',
             email: driverData.email || '',
-            phone: driverData.phone,
+            phone: driverData.phone || null,
             type: driverData.type || 'renter',
             status: driverData.status || 'active',
-            vehicle: driverData.vehicle,
-            vehicleName: driverData.vehicleName,
-            joinDate: driverData.joinDate || driverData.createdAt,
+            vehicle: driverData.vehicle || null,
+            vehicleName: driverData.vehicleName || null,
+            joinDate: driverData.joinDate || driverData.createdAt || null,
           };
         });
       } catch (error: any) {
@@ -251,9 +251,9 @@ export async function fetchUnifiedAdminData(
             model: vehicleData.model || '',
             year: vehicleData.year || 0,
             status: vehicleData.status || 'active',
-            type: vehicleData.type,
-            currentDriver: vehicleData.currentDriver,
-            currentDriverName: vehicleData.currentDriverName,
+            type: vehicleData.type || null,
+            currentDriver: vehicleData.currentDriver || null,
+            currentDriverName: vehicleData.currentDriverName || null,
           };
         });
       } catch (error: any) {
@@ -283,8 +283,8 @@ export async function fetchUnifiedAdminData(
             totalEarnings: record.totalEarnings || 0,
             totalExpenses: record.totalExpenses || 0,
             netProfit: record.netProfit || 0,
-            totalDistance: record.totalDistance,
-            hoursWorked: record.hoursWorked,
+            totalDistance: record.totalDistance || null,
+            hoursWorked: record.hoursWorked || null,
           };
         });
       } catch (error: any) {
@@ -304,9 +304,9 @@ export async function fetchUnifiedAdminData(
             name: integration.name || '',
             platform: integration.platform || doc.id,
             status: integration.status || 'disconnected',
-            lastSync: integration.lastSync,
-            lastError: integration.lastError,
-            config: integration.config,
+            lastSync: integration.lastSync || null,
+            lastError: integration.lastError || null,
+            config: integration.config || {},
           };
         });
       } catch (error: any) {
@@ -330,10 +330,10 @@ export async function fetchUnifiedAdminData(
             email: request.email || '',
             phone: request.phone || '',
             service: request.service || '',
-            message: request.message,
+            message: request.message || null,
             status: request.status || 'pending',
             createdAt: request.createdAt || '',
-            updatedAt: request.updatedAt,
+            updatedAt: request.updatedAt || null,
           };
         });
       } catch (error: any) {

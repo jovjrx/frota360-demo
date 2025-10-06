@@ -29,11 +29,11 @@ import {
   StatNumber,
   StatHelpText,
 } from '@chakra-ui/react';
-import { 
-  FiCheckCircle, 
-  FiXCircle, 
-  FiRefreshCw, 
-  FiTrendingUp, 
+import {
+  FiCheckCircle,
+  FiXCircle,
+  FiRefreshCw,
+  FiTrendingUp,
   FiTrendingDown,
   FiActivity,
   FiDollarSign,
@@ -41,8 +41,7 @@ import {
   FiTruck,
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
-import LoggedInLayout from '@/components/LoggedInLayout';
-import { getSession } from '@/lib/session';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import { ADMIN, COMMON } from '@/translations';
 import { PageProps } from '@/interface/Global';
 
@@ -225,213 +224,204 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
   const platforms = ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
 
   return (
-    <LoggedInLayout>
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          {/* Header */}
-          <Box>
-            <Heading size="xl" mb={2}>
-              Métricas Detalhadas
-            </Heading>
-            <Text color="gray.600" fontSize="lg">
-              Análise detalhada de performance por plataforma
-            </Text>
-          </Box>
+    <AdminLayout
+      title="Métricas Detalhadas"
+      subtitle="Análise detalhada de performance por plataforma"
+      breadcrumbs={[{ label: 'Métricas' }]}
+    >
 
-          {/* Filtros */}
+      <Card>
+        <CardBody>
+          <HStack spacing={4} wrap="wrap">
+            <Select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              maxW="200px"
+            >
+              <option value="today">Hoje</option>
+              <option value="week">Esta Semana</option>
+              <option value="month">Este Mês</option>
+              <option value="quarter">Últimos 3 Meses</option>
+              <option value="year">Este Ano</option>
+              <option value="custom">Período Personalizado</option>
+            </Select>
+
+            <Button
+              onClick={fetchMetrics}
+              isLoading={loading}
+              leftIcon={<FiRefreshCw />}
+            >
+              Atualizar
+            </Button>
+          </HStack>
+        </CardBody>
+      </Card>
+
+      {/* Resumo Geral */}
+      {metrics && (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
           <Card>
             <CardBody>
-              <HStack spacing={4} wrap="wrap">
-                <Select
-                  value={period}
-                  onChange={(e) => setPeriod(e.target.value)}
-                  maxW="200px"
-                >
-                  <option value="today">Hoje</option>
-                  <option value="week">Esta Semana</option>
-                  <option value="month">Este Mês</option>
-                  <option value="quarter">Últimos 3 Meses</option>
-                  <option value="year">Este Ano</option>
-                  <option value="custom">Período Personalizado</option>
-                </Select>
-
-                <Button
-                  onClick={fetchMetrics}
-                  isLoading={loading}
-                  leftIcon={<FiRefreshCw />}
-                >
-                  Atualizar
-                </Button>
-              </HStack>
+              <Stat>
+                <HStack justify="space-between" mb={2}>
+                  <StatLabel>Receita Total</StatLabel>
+                  <Icon as={FiDollarSign} color="green.500" boxSize={5} />
+                </HStack>
+                <StatNumber fontSize="3xl" color="green.600">
+                  {formatCurrency(metrics.summary.totalEarnings)}
+                </StatNumber>
+              </Stat>
             </CardBody>
           </Card>
 
-          {/* Resumo Geral */}
-          {metrics && (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-              <Card>
-                <CardBody>
-                  <Stat>
-                    <HStack justify="space-between" mb={2}>
-                      <StatLabel>Receita Total</StatLabel>
-                      <Icon as={FiDollarSign} color="green.500" boxSize={5} />
-                    </HStack>
-                    <StatNumber fontSize="3xl" color="green.600">
-                      {formatCurrency(metrics.summary.totalEarnings)}
-                    </StatNumber>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardBody>
-                  <Stat>
-                    <HStack justify="space-between" mb={2}>
-                      <StatLabel>Despesas Totais</StatLabel>
-                      <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
-                    </HStack>
-                    <StatNumber fontSize="3xl" color="red.600">
-                      {formatCurrency(metrics.summary.totalExpenses)}
-                    </StatNumber>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardBody>
-                  <Stat>
-                    <HStack justify="space-between" mb={2}>
-                      <StatLabel>Lucro Líquido</StatLabel>
-                      <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
-                    </HStack>
-                    <StatNumber fontSize="3xl" color="blue.600">
-                      {formatCurrency(metrics.summary.netProfit)}
-                    </StatNumber>
-                    <StatHelpText>
-                      Margem: {metrics.summary.totalEarnings ? 
-                        ((metrics.summary.netProfit / metrics.summary.totalEarnings) * 100).toFixed(1) : 0}%
-                    </StatHelpText>
-                  </Stat>
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardBody>
-                  <Stat>
-                    <HStack justify="space-between" mb={2}>
-                      <StatLabel>Total de Viagens</StatLabel>
-                      <Icon as={FiActivity} color="purple.500" boxSize={5} />
-                    </HStack>
-                    <StatNumber fontSize="3xl" color="purple.600">
-                      {formatNumber(metrics.summary.totalTrips)}
-                    </StatNumber>
-                  </Stat>
-                </CardBody>
-              </Card>
-            </SimpleGrid>
-          )}
-
-          {/* Tabs por Plataforma */}
           <Card>
             <CardBody>
-              <Tabs>
-                <TabList>
-                  {platforms.map((platform) => (
-                    <Tab key={platform}>
-                      <HStack spacing={2}>
-                        <Icon as={getPlatformIcon(platform)} />
-                        <Text>{getPlatformName(platform)}</Text>
-                        {metrics?.platforms[platform] && (
-                          <Icon
-                            as={metrics.platforms[platform].online ? FiCheckCircle : FiXCircle}
-                            color={metrics.platforms[platform].online ? 'green.500' : 'red.500'}
-                            boxSize={4}
-                          />
-                        )}
-                      </HStack>
-                    </Tab>
-                  ))}
-                </TabList>
+              <Stat>
+                <HStack justify="space-between" mb={2}>
+                  <StatLabel>Despesas Totais</StatLabel>
+                  <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
+                </HStack>
+                <StatNumber fontSize="3xl" color="red.600">
+                  {formatCurrency(metrics.summary.totalExpenses)}
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
 
-                <TabPanels>
-                  {platforms.map((platform) => (
-                    <TabPanel key={platform}>
-                      <VStack spacing={6} align="stretch">
-                        {/* Status da Plataforma */}
-                        <HStack justify="space-between">
-                          <VStack align="start" spacing={1}>
-                            <Text fontWeight="bold" fontSize="lg">
-                              {getPlatformName(platform)}
-                            </Text>
-                            <Text fontSize="sm" color="gray.600">
-                              Última Sincronização: {metrics?.platforms[platform]?.lastSync ? 
-                                new Date(metrics.platforms[platform].lastSync).toLocaleString('pt-PT') : 'N/A'}
-                            </Text>
-                          </VStack>
-                          <HStack spacing={2}>
-                            <Badge
-                              colorScheme={metrics?.platforms[platform]?.online ? 'green' : 'red'}
-                              fontSize="md"
-                              px={3}
-                              py={1}
-                            >
-                              {metrics?.platforms[platform]?.online ? 'Online' : 'Offline'}
-                            </Badge>
-                            <Button
-                              size="sm"
-                              onClick={() => testConnection(platform)}
-                              isLoading={testingConnection === platform}
-                              leftIcon={<FiRefreshCw />}
-                            >
-                              Testar Conexão
-                            </Button>
-                          </HStack>
-                        </HStack>
+          <Card>
+            <CardBody>
+              <Stat>
+                <HStack justify="space-between" mb={2}>
+                  <StatLabel>Lucro Líquido</StatLabel>
+                  <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
+                </HStack>
+                <StatNumber fontSize="3xl" color="blue.600">
+                  {formatCurrency(metrics.summary.netProfit)}
+                </StatNumber>
+                <StatHelpText>
+                  Margem: {metrics.summary.totalEarnings ?
+                    ((metrics.summary.netProfit / metrics.summary.totalEarnings) * 100).toFixed(1) : 0}%
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-                        {/* Dados da Plataforma */}
-                        {metrics?.platforms[platform]?.error && (
-                          <Alert status="error" borderRadius="md">
-                            <AlertIcon />
-                            <Text>{metrics.platforms[platform].error}</Text>
-                          </Alert>
-                        )}
+          <Card>
+            <CardBody>
+              <Stat>
+                <HStack justify="space-between" mb={2}>
+                  <StatLabel>Total de Viagens</StatLabel>
+                  <Icon as={FiActivity} color="purple.500" boxSize={5} />
+                </HStack>
+                <StatNumber fontSize="3xl" color="purple.600">
+                  {formatNumber(metrics.summary.totalTrips)}
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      )}
 
-                        {metrics?.platforms[platform]?.data && (
-                          <Box>
-                            <Text fontWeight="bold" mb={4}>
-                              Dados Brutos
-                            </Text>
-                            <Code p={4} borderRadius="md" fontSize="sm" whiteSpace="pre-wrap">
-                              {JSON.stringify(metrics.platforms[platform].data, null, 2)}
-                            </Code>
-                          </Box>
-                        )}
+      {/* Tabs por Plataforma */}
+      <Card>
+        <CardBody>
+          <Tabs>
+            <TabList>
+              {platforms.map((platform) => (
+                <Tab key={platform}>
+                  <HStack spacing={2}>
+                    <Icon as={getPlatformIcon(platform)} />
+                    <Text>{getPlatformName(platform)}</Text>
+                    {metrics?.platforms[platform] && (
+                      <Icon
+                        as={metrics.platforms[platform].online ? FiCheckCircle : FiXCircle}
+                        color={metrics.platforms[platform].online ? 'green.500' : 'red.500'}
+                        boxSize={4}
+                      />
+                    )}
+                  </HStack>
+                </Tab>
+              ))}
+            </TabList>
 
-                        {!metrics?.platforms[platform]?.data && !metrics?.platforms[platform]?.error && (
-                          <Text color="gray.500" textAlign="center" py={8}>
-                            Nenhum dado disponível para esta plataforma
-                          </Text>
-                        )}
+            <TabPanels>
+              {platforms.map((platform) => (
+                <TabPanel key={platform}>
+                  <VStack spacing={6} align="stretch">
+                    {/* Status da Plataforma */}
+                    <HStack justify="space-between">
+                      <VStack align="start" spacing={1}>
+                        <Text fontWeight="bold" fontSize="lg">
+                          {getPlatformName(platform)}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Última Sincronização: {metrics?.platforms[platform]?.lastSync ?
+                            new Date(metrics.platforms[platform].lastSync).toLocaleString('pt-PT') : 'N/A'}
+                        </Text>
                       </VStack>
-                    </TabPanel>
-                  ))}
-                </TabPanels>
-              </Tabs>
-            </CardBody>
-          </Card>
+                      <HStack spacing={2}>
+                        <Badge
+                          colorScheme={metrics?.platforms[platform]?.online ? 'green' : 'red'}
+                          fontSize="md"
+                          px={3}
+                          py={1}
+                        >
+                          {metrics?.platforms[platform]?.online ? 'Online' : 'Offline'}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          onClick={() => testConnection(platform)}
+                          isLoading={testingConnection === platform}
+                          leftIcon={<FiRefreshCw />}
+                        >
+                          Testar Conexão
+                        </Button>
+                      </HStack>
+                    </HStack>
 
-          {/* Loading State */}
-          {loading && (
-            <Box textAlign="center" py={10}>
-              <Spinner size="xl" color="blue.500" />
-              <Text mt={4} color="gray.600">
-                Carregando métricas...
-              </Text>
-            </Box>
-          )}
-        </VStack>
-      </Container>
-    </LoggedInLayout>
+                    {/* Dados da Plataforma */}
+                    {metrics?.platforms[platform]?.error && (
+                      <Alert status="error" borderRadius="md">
+                        <AlertIcon />
+                        <Text>{metrics.platforms[platform].error}</Text>
+                      </Alert>
+                    )}
+
+                    {metrics?.platforms[platform]?.data && (
+                      <Box>
+                        <Text fontWeight="bold" mb={4}>
+                          Dados Brutos
+                        </Text>
+                        <Code p={4} borderRadius="md" fontSize="sm" whiteSpace="pre-wrap">
+                          {JSON.stringify(metrics.platforms[platform].data, null, 2)}
+                        </Code>
+                      </Box>
+                    )}
+
+                    {!metrics?.platforms[platform]?.data && !metrics?.platforms[platform]?.error && (
+                      <Text color="gray.500" textAlign="center" py={8}>
+                        Nenhum dado disponível para esta plataforma
+                      </Text>
+                    )}
+                  </VStack>
+                </TabPanel>
+              ))}
+            </TabPanels>
+          </Tabs>
+        </CardBody>
+      </Card>
+
+      {/* Loading State */}
+      {loading && (
+        <Box textAlign="center" py={10}>
+          <Spinner size="xl" color="blue.500" />
+          <Text mt={4} color="gray.600">
+            Carregando métricas...
+          </Text>
+        </Box>
+      )}
+
+    </AdminLayout>
   );
 }
 

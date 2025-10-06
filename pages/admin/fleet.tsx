@@ -25,13 +25,13 @@ import {
   Center,
   Spinner,
 } from '@chakra-ui/react';
-import { 
+import {
   FiRefreshCw,
   FiDownload,
   FiPlus,
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
-import LoggedInLayout from '@/components/LoggedInLayout';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
 import { FleetRecord } from '@/schemas/fleet-record';
 
@@ -61,15 +61,15 @@ interface AdminFleetProps extends PageProps {
   kpis: FleetKPIs;
 }
 
-export default function AdminFleet({ 
-  translations, 
-  locale, 
-  tCommon, 
-  tPage, 
-  records: initialRecords, 
-  drivers, 
-  vehicles, 
-  kpis 
+export default function AdminFleet({
+  translations,
+  locale,
+  tCommon,
+  tPage,
+  records: initialRecords,
+  drivers,
+  vehicles,
+  kpis
 }: AdminFleetProps) {
   const [records, setRecords] = useState<FleetRecord[]>(initialRecords);
   const [filteredRecords, setFilteredRecords] = useState<FleetRecord[]>(initialRecords);
@@ -79,7 +79,7 @@ export default function AdminFleet({
     vehicleId: '',
     status: ''
   });
-  
+
   const toast = useToast();
   const t = tCommon || ((key: string) => getTranslation(translations.common, key));
   const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
@@ -116,7 +116,7 @@ export default function AdminFleet({
       const response = await fetch('/api/admin/fleet/sync', {
         method: 'POST',
       });
-      
+
       if (response.ok) {
         toast({
           title: 'Sincronização concluída',
@@ -181,220 +181,217 @@ export default function AdminFleet({
   };
 
   return (
-    <LoggedInLayout>
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={6} align="stretch">
-          {/* Header */}
-          <HStack justify="space-between">
-            <Box>
-              <Heading size="lg">Controle da Frota</Heading>
-              <Text color="gray.600">Gestão de veículos e motoristas</Text>
-            </Box>
-            <HStack>
+    <AdminLayout
+      title="Controle da Frota"
+      subtitle="Gestão de veículos e motoristas"
+      breadcrumbs={[{ label: 'Frota' }]}
+    >
+
+      <HStack justify="flex-end">
+        <HStack>
+          <Button
+            leftIcon={<Icon as={FiRefreshCw} />}
+            onClick={handleSyncData}
+            isLoading={syncing}
+            loadingText="Sincronizando..."
+          >
+            Sincronizar
+          </Button>
+          <Button
+            leftIcon={<Icon as={FiDownload} />}
+            onClick={handleExportExcel}
+          >
+            Exportar Excel
+          </Button>
+        </HStack>
+      </HStack>
+
+      {/* KPIs */}
+      <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4}>
+        <Card>
+          <CardBody>
+            <VStack align="start">
+              <Text fontSize="sm" color="gray.600">Receitas Totais</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                {formatCurrency(currentKpis.totalEarnings)}
+              </Text>
+            </VStack>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <VStack align="start">
+              <Text fontSize="sm" color="gray.600">Despesas Totais</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="red.500">
+                {formatCurrency(currentKpis.totalExpenses)}
+              </Text>
+            </VStack>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <VStack align="start">
+              <Text fontSize="sm" color="gray.600">Comissões</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+                {formatCurrency(currentKpis.totalCommissions)}
+              </Text>
+            </VStack>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <VStack align="start">
+              <Text fontSize="sm" color="gray.600">Pagamentos</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+                {formatCurrency(currentKpis.totalPayouts)}
+              </Text>
+            </VStack>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <VStack align="start">
+              <Text fontSize="sm" color="gray.600">Pendentes</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="orange.500">
+                {formatCurrency(currentKpis.pendingPayments)}
+              </Text>
+              <Badge colorScheme="yellow">Pendente</Badge>
+            </VStack>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+
+      {/* Filtros */}
+      <Card>
+        <CardBody>
+          <HStack spacing={4} flexWrap="wrap">
+            <Select
+              placeholder="Todos os motoristas"
+              value={filters.driverId}
+              onChange={(e) => setFilters({ ...filters, driverId: e.target.value })}
+              maxW="200px"
+            >
+              {drivers.map(driver => (
+                <option key={driver.id} value={driver.id}>{driver.name}</option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Todos os veículos"
+              value={filters.vehicleId}
+              onChange={(e) => setFilters({ ...filters, vehicleId: e.target.value })}
+              maxW="200px"
+            >
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.plate} - {vehicle.make} {vehicle.model}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Todos os status"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              maxW="150px"
+            >
+              <option value="paid">Pago</option>
+              <option value="pending">Pendente</option>
+              <option value="cancelled">Cancelado</option>
+            </Select>
+
+            {(filters.driverId || filters.vehicleId || filters.status) && (
               <Button
-                leftIcon={<Icon as={FiRefreshCw} />}
-                onClick={handleSyncData}
-                isLoading={syncing}
-                loadingText="Sincronizando..."
+                size="sm"
+                variant="ghost"
+                onClick={() => setFilters({ driverId: '', vehicleId: '', status: '' })}
               >
-                Sincronizar
+                Limpar Filtros
               </Button>
-              <Button
-                leftIcon={<Icon as={FiDownload} />}
-                onClick={handleExportExcel}
-              >
-                Exportar Excel
-              </Button>
-            </HStack>
+            )}
           </HStack>
+        </CardBody>
+      </Card>
 
-          {/* KPIs */}
-          <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4}>
-            <Card>
-              <CardBody>
-                <VStack align="start">
-                  <Text fontSize="sm" color="gray.600">Receitas Totais</Text>
-                  <Text fontSize="2xl" fontWeight="bold" color="green.500">
-                    {formatCurrency(currentKpis.totalEarnings)}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <VStack align="start">
-                  <Text fontSize="sm" color="gray.600">Despesas Totais</Text>
-                  <Text fontSize="2xl" fontWeight="bold" color="red.500">
-                    {formatCurrency(currentKpis.totalExpenses)}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <VStack align="start">
-                  <Text fontSize="sm" color="gray.600">Comissões</Text>
-                  <Text fontSize="2xl" fontWeight="bold" color="blue.500">
-                    {formatCurrency(currentKpis.totalCommissions)}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <VStack align="start">
-                  <Text fontSize="sm" color="gray.600">Pagamentos</Text>
-                  <Text fontSize="2xl" fontWeight="bold" color="purple.500">
-                    {formatCurrency(currentKpis.totalPayouts)}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <VStack align="start">
-                  <Text fontSize="sm" color="gray.600">Pendentes</Text>
-                  <Text fontSize="2xl" fontWeight="bold" color="orange.500">
-                    {formatCurrency(currentKpis.pendingPayments)}
-                  </Text>
-                  <Badge colorScheme="yellow">Pendente</Badge>
-                </VStack>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-
-          {/* Filtros */}
-          <Card>
-            <CardBody>
-              <HStack spacing={4} flexWrap="wrap">
-                <Select
-                  placeholder="Todos os motoristas"
-                  value={filters.driverId}
-                  onChange={(e) => setFilters({ ...filters, driverId: e.target.value })}
-                  maxW="200px"
-                >
-                  {drivers.map(driver => (
-                    <option key={driver.id} value={driver.id}>{driver.name}</option>
+      {/* Tabela de Registros */}
+      <Card>
+        <CardBody>
+          {filteredRecords.length === 0 ? (
+            <Center py={10}>
+              <VStack>
+                <Text color="gray.500">Nenhum registro encontrado</Text>
+                <Text fontSize="sm" color="gray.400">
+                  Ajuste os filtros ou sincronize novos dados
+                </Text>
+              </VStack>
+            </Center>
+          ) : (
+            <Box overflowX="auto">
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Motorista</Th>
+                    <Th>Veículo</Th>
+                    <Th>Período</Th>
+                    <Th isNumeric>Receitas</Th>
+                    <Th isNumeric>Despesas</Th>
+                    <Th isNumeric>Comissão</Th>
+                    <Th isNumeric>Pagamento</Th>
+                    <Th>Status</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {filteredRecords.map((record) => (
+                    <Tr key={record.id}>
+                      <Td>{record.driverName || 'N/A'}</Td>
+                      <Td>{record.vehiclePlate || 'N/A'}</Td>
+                      <Td>{formatPeriod(record.periodStart, record.periodEnd)}</Td>
+                      <Td isNumeric color="green.600">
+                        {formatCurrency(record.earningsTotal || 0)}
+                      </Td>
+                      <Td isNumeric color="red.600">
+                        {formatCurrency((record.fuel || 0) + (record.rental || 0) + (record.otherExpenses || 0))}
+                      </Td>
+                      <Td isNumeric>
+                        {formatCurrency(record.commissionAmount || 0)}
+                      </Td>
+                      <Td isNumeric fontWeight="bold">
+                        {formatCurrency(record.netPayout || 0)}
+                      </Td>
+                      <Td>
+                        <Badge colorScheme={getStatusColor(record.paymentStatus || 'pending')}>
+                          {getStatusText(record.paymentStatus || 'pending')}
+                        </Badge>
+                      </Td>
+                    </Tr>
                   ))}
-                </Select>
-                
-                <Select
-                  placeholder="Todos os veículos"
-                  value={filters.vehicleId}
-                  onChange={(e) => setFilters({ ...filters, vehicleId: e.target.value })}
-                  maxW="200px"
-                >
-                  {vehicles.map(vehicle => (
-                    <option key={vehicle.id} value={vehicle.id}>
-                      {vehicle.plate} - {vehicle.make} {vehicle.model}
-                    </option>
-                  ))}
-                </Select>
+                </Tbody>
+              </Table>
+            </Box>
+          )}
+        </CardBody>
+      </Card>
 
-                <Select
-                  placeholder="Todos os status"
-                  value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  maxW="150px"
-                >
-                  <option value="paid">Pago</option>
-                  <option value="pending">Pendente</option>
-                  <option value="cancelled">Cancelado</option>
-                </Select>
-
-                {(filters.driverId || filters.vehicleId || filters.status) && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setFilters({ driverId: '', vehicleId: '', status: '' })}
-                  >
-                    Limpar Filtros
-                  </Button>
-                )}
-              </HStack>
-            </CardBody>
-          </Card>
-
-          {/* Tabela de Registros */}
-          <Card>
-            <CardBody>
-              {filteredRecords.length === 0 ? (
-                <Center py={10}>
-                  <VStack>
-                    <Text color="gray.500">Nenhum registro encontrado</Text>
-                    <Text fontSize="sm" color="gray.400">
-                      Ajuste os filtros ou sincronize novos dados
-                    </Text>
-                  </VStack>
-                </Center>
-              ) : (
-                <Box overflowX="auto">
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Motorista</Th>
-                        <Th>Veículo</Th>
-                        <Th>Período</Th>
-                        <Th isNumeric>Receitas</Th>
-                        <Th isNumeric>Despesas</Th>
-                        <Th isNumeric>Comissão</Th>
-                        <Th isNumeric>Pagamento</Th>
-                        <Th>Status</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {filteredRecords.map((record) => (
-                        <Tr key={record.id}>
-                          <Td>{record.driverName || 'N/A'}</Td>
-                          <Td>{record.vehiclePlate || 'N/A'}</Td>
-                          <Td>{formatPeriod(record.periodStart, record.periodEnd)}</Td>
-                          <Td isNumeric color="green.600">
-                            {formatCurrency(record.earningsTotal || 0)}
-                          </Td>
-                          <Td isNumeric color="red.600">
-                            {formatCurrency((record.fuel || 0) + (record.rental || 0) + (record.otherExpenses || 0))}
-                          </Td>
-                          <Td isNumeric>
-                            {formatCurrency(record.commissionAmount || 0)}
-                          </Td>
-                          <Td isNumeric fontWeight="bold">
-                            {formatCurrency(record.netPayout || 0)}
-                          </Td>
-                          <Td>
-                            <Badge colorScheme={getStatusColor(record.paymentStatus || 'pending')}>
-                              {getStatusText(record.paymentStatus || 'pending')}
-                            </Badge>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
-              )}
-            </CardBody>
-          </Card>
-        </VStack>
-      </Container>
-    </LoggedInLayout>
+    </AdminLayout>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
   const authResult = await checkAdminAuth(context);
-  
+
   if ('redirect' in authResult) {
     return authResult;
   }
 
   try {
     const { fetchUnifiedAdminData } = await import('@/lib/admin/unified-data');
-    
+
     // Calcular período dos últimos 30 dias
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
-    
+
     // Buscar dados unificados dos últimos 30 dias
     const unifiedData = await fetchUnifiedAdminData({
       startDate,

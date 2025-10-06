@@ -1,463 +1,392 @@
+/**
+ * Exemplo de Página Admin usando Unified Data Service
+ * 
+ * Este arquivo demonstra as melhores práticas de uso do serviço unificado
+ */
+
 import { GetServerSideProps } from 'next';
-import NextLink from 'next/link';
 import {
   Box,
   Container,
   Heading,
   SimpleGrid,
+  Card,
+  CardBody,
   Stat,
   StatLabel,
   StatNumber,
   StatHelpText,
-  StatArrow,
-  Card,
-  CardHeader,
-  CardBody,
+  Button,
   VStack,
   HStack,
-  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
   Badge,
-  Button,
-  Icon,
-  Divider,
-  Alert,
-  AlertIcon,
-  Progress,
+  Text,
+  useToast,
 } from '@chakra-ui/react';
-import { 
-  FiDollarSign, 
-  FiTrendingUp, 
-  FiTrendingDown,
-  FiTruck,
-  FiUsers,
-  FiAlertCircle,
-  FiCheckCircle,
-  FiActivity,
-  FiEdit,
-  FiSettings
-} from 'react-icons/fi';
-import { loadTranslations, getTranslation } from '@/lib/translations';
-import LoggedInLayout from '@/components/LoggedInLayout';
-import { ADMIN } from '@/translations';
+import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers } from 'react-icons/fi';
+import { UnifiedAdminData } from '@/lib/admin/unified-data';
+import { useDashboardData } from '@/lib/hooks/useUnifiedData';
 import { PageProps } from '@/interface/Global';
-
-interface DashboardMetrics {
-  summary: {
-    totalEarnings: number;
-    totalExpenses: number;
-    netProfit: number;
-    totalTrips: number;
-    activeVehicles: number;
-    activeDrivers: number;
-    activeAffiliates: number;
-    activeRenters: number;
-    utilizationRate: number;
-  };
-  errors: string[];
-}
+import AdminLayout from '@/components/layouts/AdminLayout';
 
 interface AdminDashboardProps extends PageProps {
-  translations: {
-    common: any;
-    page: any;
-  };
-  locale: string;
-  metrics: DashboardMetrics;
+  initialData: UnifiedAdminData;
 }
 
-export default function AdminDashboard({ translations, locale, tCommon, tPage, metrics }: AdminDashboardProps) {
+export default function AdminDashboard({ initialData, tCommon, tPage }: AdminDashboardProps) {
+  const toast = useToast();
 
-  const t = tCommon || ((key: string) => getTranslation(translations.common, key));
-  const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
+  // Hook para atualização manual (opcional)
+  const { data: updatedData, loading, refetch } = useDashboardData(30);
+
+  // Usar dados atualizados se disponíveis, senão usar dados iniciais do SSR
+  const data = updatedData || initialData;
+
+  const handleRefresh = async () => {
+    await refetch();
+    toast({
+      title: 'Dados atualizados',
+      status: 'success',
+      duration: 2000,
+    });
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-PT', {
       style: 'currency',
       currency: 'EUR',
-    }).format(value || 0);
-  };
-
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('pt-PT').format(value || 0);
+    }).format(value);
   };
 
   return (
-    <LoggedInLayout>
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          {/* Header */}
-          <Box>
-            <Heading size="xl" mb={2}>
-              Dashboard de Gestão TVDE
+    <AdminLayout
+      title='Gestão TVDE'
+      subtitle={`Período: ${data.period.startDate} até ${data.period.endDate} (${data.period.days} dias)`}
+      side={<Button
+        leftIcon={<FiRefreshCw />}
+        onClick={handleRefresh}
+        isLoading={loading}
+        colorScheme="blue"
+      >
+        Atualizar
+      </Button>}>
+
+      {/* Alertas de erro */}
+      {data.errors.length > 0 && (
+        <Card bg="red.50" borderColor="red.200" borderWidth={1}>
+          <CardBody>
+            <Heading size="sm" color="red.700" mb={2}>
+              Avisos ({data.errors.length})
             </Heading>
-            <Text color="gray.600" fontSize="lg">
-              Visão geral do negócio - Últimos 30 dias
-            </Text>
-          </Box>
+            {data.errors.map((error, idx) => (
+              <Text key={idx} fontSize="sm" color="red.600">
+                • {error}
+              </Text>
+            ))}
+          </CardBody>
+        </Card>
+      )}
 
-          {/* KPIs Principais */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-            {/* Receita Total */}
-            <Card>
-              <CardBody>
-                <Stat>
-                  <HStack justify="space-between" mb={2}>
-                    <StatLabel>Receita Total</StatLabel>
-                    <Icon as={FiDollarSign} color="green.500" boxSize={5} />
-                  </HStack>
-                  <StatNumber fontSize="3xl" color="green.600">
-                    {formatCurrency(metrics?.summary?.totalEarnings || 0)}
-                  </StatNumber>
-                  <StatHelpText>
-                    <StatArrow type="increase" />
-                    12.5% vs mês anterior
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-
-            {/* Despesas Totais */}
-            <Card>
-              <CardBody>
-                <Stat>
-                  <HStack justify="space-between" mb={2}>
-                    <StatLabel>Despesas Totais</StatLabel>
-                    <Icon as={FiTrendingDown} color="red.500" boxSize={5} />
-                  </HStack>
-                  <StatNumber fontSize="3xl" color="red.600">
-                    {formatCurrency(metrics?.summary?.totalExpenses || 0)}
-                  </StatNumber>
-                  <StatHelpText>
-                    <StatArrow type="decrease" />
-                    3.2% vs mês anterior
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-
-            {/* Lucro Líquido */}
-            <Card>
-              <CardBody>
-                <Stat>
-                  <HStack justify="space-between" mb={2}>
-                    <StatLabel>Lucro Líquido</StatLabel>
-                    <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
-                  </HStack>
-                  <StatNumber fontSize="3xl" color="blue.600">
-                    {formatCurrency(metrics?.summary?.netProfit || 0)}
-                  </StatNumber>
-                  <StatHelpText>
-                    Margem: {metrics?.summary?.totalEarnings ? 
-                      ((metrics.summary.netProfit / metrics.summary.totalEarnings) * 100).toFixed(1) : 0}%
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-
-            {/* Total de Viagens */}
-            <Card>
-              <CardBody>
-                <Stat>
-                  <HStack justify="space-between" mb={2}>
-                    <StatLabel>Total de Viagens</StatLabel>
-                    <Icon as={FiActivity} color="purple.500" boxSize={5} />
-                  </HStack>
-                  <StatNumber fontSize="3xl" color="purple.600">
-                    {formatNumber(metrics?.summary?.totalTrips || 0)}
-                  </StatNumber>
-                  <StatHelpText>
-                    Média: {formatCurrency((metrics?.summary?.totalEarnings || 0) / (metrics?.summary?.totalTrips || 1))} /viagem
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-
-          {/* Frota e Motoristas */}
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-            {/* Frota Ativa */}
-            <Card>
-              <CardHeader>
-                <HStack justify="space-between">
-                  <Heading size="md">Frota Ativa</Heading>
-                  <Icon as={FiTruck} color="green.500" boxSize={6} />
-                </HStack>
-              </CardHeader>
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  <HStack justify="space-between">
-                    <Text fontSize="4xl" fontWeight="bold" color="green.600">
-                      {formatNumber(metrics?.summary?.activeVehicles || 0)}
-                    </Text>
-                    <Badge colorScheme="green" fontSize="md" px={3} py={1}>
-                      Veículos
-                    </Badge>
-                  </HStack>
-                  <Divider />
-                  <Box>
-                    <Text fontSize="sm" color="gray.600" mb={2}>Taxa de Utilização</Text>
-                    <Progress value={metrics?.summary?.utilizationRate || 85} colorScheme="green" size="lg" borderRadius="md" />
-                    <Text fontSize="sm" color="gray.500" mt={1}>
-                      {metrics?.summary?.utilizationRate || 85}% da frota em operação
-                    </Text>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            {/* Motoristas Ativos */}
-            <Card>
-              <CardHeader>
-                <HStack justify="space-between">
-                  <Heading size="md">Motoristas Ativos</Heading>
-                  <Icon as={FiUsers} color="blue.500" boxSize={6} />
-                </HStack>
-              </CardHeader>
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  <HStack justify="space-between">
-                    <Text fontSize="4xl" fontWeight="bold" color="blue.600">
-                      {formatNumber(metrics?.summary?.activeDrivers || 0)}
-                    </Text>
-                    <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
-                      Motoristas
-                    </Badge>
-                  </HStack>
-                  <Divider />
-                  <SimpleGrid columns={2} spacing={4}>
-                    <Box>
-                      <Text fontSize="sm" color="gray.600">Afiliados</Text>
-                      <Text fontSize="xl" fontWeight="bold">
-                        {metrics?.summary?.activeAffiliates || Math.floor((metrics?.summary?.activeDrivers || 0) * 0.6)}
-                      </Text>
-                    </Box>
-                    <Box>
-                      <Text fontSize="sm" color="gray.600">Locatários</Text>
-                      <Text fontSize="xl" fontWeight="bold">
-                        {metrics?.summary?.activeRenters || Math.floor((metrics?.summary?.activeDrivers || 0) * 0.4)}
-                      </Text>
-                    </Box>
-                  </SimpleGrid>
-                </VStack>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-
-          {/* Status das Integrações */}
+      {/* KPIs Financeiros */}
+      <Box>
+        <Heading size="md" mb={4}>Financeiro</Heading>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
           <Card>
-            <CardHeader>
-              <Heading size="md">Status das Integrações</Heading>
-            </CardHeader>
             <CardBody>
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-                {[
-                  { name: 'Uber', status: 'online', lastSync: '2 min atrás' },
-                  { name: 'Bolt', status: 'online', lastSync: '5 min atrás' },
-                  { name: 'Cartrack', status: 'online', lastSync: '1 min atrás' },
-                  { name: 'ViaVerde', status: 'online', lastSync: '3 min atrás' },
-                  { name: 'myprio', status: 'online', lastSync: '10 min atrás' },
-                ].map((integration) => (
-                  <HStack
-                    key={integration.name}
-                    p={4}
-                    bg="gray.50"
-                    borderRadius="md"
-                    justify="space-between"
-                  >
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="bold">{integration.name}</Text>
-                      <Text fontSize="xs" color="gray.600">
-                        {integration.lastSync}
-                      </Text>
-                    </VStack>
-                    <Icon
-                      as={integration.status === 'online' ? FiCheckCircle : FiAlertCircle}
-                      color={integration.status === 'online' ? 'green.500' : 'orange.500'}
-                      boxSize={5}
-                    />
-                  </HStack>
-                ))}
-              </SimpleGrid>
+              <Stat>
+                <StatLabel>Receita Total</StatLabel>
+                <StatNumber color="green.600">
+                  {formatCurrency(data.summary.financial.totalEarnings)}
+                </StatNumber>
+                <StatHelpText>
+                  Média por viagem: {formatCurrency(data.summary.financial.avgTripValue)}
+                </StatHelpText>
+              </Stat>
             </CardBody>
           </Card>
 
-          {/* Ações Rápidas */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            <Button
-              as={NextLink}
-              href="/admin/requests"
-              size="lg"
-              colorScheme="green"
-              leftIcon={<Icon as={FiUsers} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Gestão de Solicitações</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Candidaturas pendentes
-                </Text>
-              </VStack>
-            </Button>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Despesas</StatLabel>
+                <StatNumber color="red.600">
+                  {formatCurrency(data.summary.financial.totalExpenses)}
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Button
-              as={NextLink}
-              href="/admin/drivers"
-              size="lg"
-              colorScheme="orange"
-              leftIcon={<Icon as={FiUsers} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Controle de Motoristas</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Controle de motoristas
-                </Text>
-              </VStack>
-            </Button>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Lucro Líquido</StatLabel>
+                <StatNumber color="blue.600">
+                  {formatCurrency(data.summary.financial.netProfit)}
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Button
-              as={NextLink}
-              href="/admin/metrics"
-              size="lg"
-              colorScheme="blue"
-              leftIcon={<Icon as={FiActivity} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Métricas Detalhadas</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Análise por plataforma
-                </Text>
-              </VStack>
-            </Button>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Margem</StatLabel>
+                <StatNumber color="purple.600">
+                  {data.summary.financial.profitMargin.toFixed(1)}%
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      </Box>
 
-            <Button
-              as={NextLink}
-              href="/admin/fleet"
-              size="lg"
-              colorScheme="teal"
-              leftIcon={<Icon as={FiTruck} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Controle da Frota</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Controle da frota
-                </Text>
-              </VStack>
-            </Button>
-          </SimpleGrid>
+      {/* KPIs Operacionais */}
+      <Box>
+        <Heading size="md" mb={4}>Operações</Heading>
+        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Viagens</StatLabel>
+                <StatNumber>{data.summary.operations.totalTrips}</StatNumber>
+                <StatHelpText>
+                  {data.summary.operations.avgTripsPerDay.toFixed(1)}/dia
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-          {/* Segunda linha de ações */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            <Button
-              as={NextLink}
-              href="/admin/integrations"
-              size="lg"
-              colorScheme="purple"
-              leftIcon={<Icon as={FiSettings} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Integrações</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Status das integrações
-                </Text>
-              </VStack>
-            </Button>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Distância</StatLabel>
+                <StatNumber>
+                  {(data.summary.operations.totalDistance / 1000).toFixed(0)} km
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Button
-              as={NextLink}
-              href="/admin/content"
-              size="lg"
-              colorScheme="gray"
-              leftIcon={<Icon as={FiEdit} />}
-              height="80px"
-            >
-              <VStack spacing={0}>
-                <Text>Gestão de Conteúdo</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  Editar textos do site
-                </Text>
-              </VStack>
-            </Button>
-          </SimpleGrid>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Horas</StatLabel>
+                <StatNumber>
+                  {data.summary.operations.totalHours.toFixed(0)}h
+                </StatNumber>
+              </Stat>
+            </CardBody>
+          </Card>
 
-          {/* Alertas */}
-          {metrics?.errors && metrics.errors.length > 0 && (
-            <Alert status="warning" borderRadius="md">
-              <AlertIcon />
-              <Box>
-                <Text fontWeight="bold">Problemas nas Integrações</Text>
-                <Text fontSize="sm">
-                  {metrics.errors.length} plataforma(s) com erros. Verifique as integrações.
-                </Text>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>Taxa de Utilização</StatLabel>
+                <StatNumber>
+                  {data.summary.fleet.utilizationRate.toFixed(0)}%
+                </StatNumber>
+                <StatHelpText>
+                  {data.summary.fleet.activeVehicles} veículos
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      </Box>
+
+      {/* Resumo Frota e Motoristas */}
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+        {/* Frota */}
+        <Card>
+          <CardBody>
+            <HStack justify="space-between" mb={4}>
+              <Heading size="md">Frota</Heading>
+              <FiTruck size={24} />
+            </HStack>
+            <VStack align="stretch" spacing={3}>
+              <HStack justify="space-between">
+                <Text>Total de Veículos</Text>
+                <Badge colorScheme="blue" fontSize="md">
+                  {data.summary.fleet.totalVehicles}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Ativos</Text>
+                <Badge colorScheme="green" fontSize="md">
+                  {data.summary.fleet.activeVehicles}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Manutenção</Text>
+                <Badge colorScheme="yellow" fontSize="md">
+                  {data.summary.fleet.maintenanceVehicles}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Inativos</Text>
+                <Badge colorScheme="gray" fontSize="md">
+                  {data.summary.fleet.inactiveVehicles}
+                </Badge>
+              </HStack>
+            </VStack>
+          </CardBody>
+        </Card>
+
+        {/* Motoristas */}
+        <Card>
+          <CardBody>
+            <HStack justify="space-between" mb={4}>
+              <Heading size="md">Motoristas</Heading>
+              <FiUsers size={24} />
+            </HStack>
+            <VStack align="stretch" spacing={3}>
+              <HStack justify="space-between">
+                <Text>Total de Motoristas</Text>
+                <Badge colorScheme="blue" fontSize="md">
+                  {data.summary.drivers.totalDrivers}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Ativos</Text>
+                <Badge colorScheme="green" fontSize="md">
+                  {data.summary.drivers.activeDrivers}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Afiliados</Text>
+                <Badge colorScheme="purple" fontSize="md">
+                  {data.summary.drivers.affiliates}
+                </Badge>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Locatários</Text>
+                <Badge colorScheme="orange" fontSize="md">
+                  {data.summary.drivers.renters}
+                </Badge>
+              </HStack>
+            </VStack>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+
+      {/* Top 5 Motoristas por Receita */}
+      <Card>
+        <CardBody>
+          <Heading size="md" mb={4}>Top 5 Motoristas por Receita</Heading>
+          <Table size="sm">
+            <Thead>
+              <Tr>
+                <Th>Motorista</Th>
+                <Th>Tipo</Th>
+                <Th isNumeric>Receita</Th>
+                <Th isNumeric>Lucro</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {data.fleetRecords
+                .reduce((acc, record) => {
+                  const existing = acc.find(r => r.driverId === record.driverId);
+                  if (existing) {
+                    existing.totalEarnings += record.totalEarnings;
+                    existing.netProfit += record.netProfit;
+                  } else {
+                    acc.push({
+                      driverId: record.driverId,
+                      driverName: record.driverName,
+                      totalEarnings: record.totalEarnings,
+                      netProfit: record.netProfit,
+                    });
+                  }
+                  return acc;
+                }, [] as any[])
+                .sort((a, b) => b.totalEarnings - a.totalEarnings)
+                .slice(0, 5)
+                .map((driver, idx) => {
+                  const driverData = data.drivers.find(d => d.id === driver.driverId);
+                  return (
+                    <Tr key={driver.driverId}>
+                      <Td fontWeight="medium">{driver.driverName}</Td>
+                      <Td>
+                        {driverData && (
+                          <Badge colorScheme={driverData.type === 'affiliate' ? 'green' : 'blue'}>
+                            {driverData.type}
+                          </Badge>
+                        )}
+                      </Td>
+                      <Td isNumeric color="green.600" fontWeight="medium">
+                        {formatCurrency(driver.totalEarnings)}
+                      </Td>
+                      <Td isNumeric color="blue.600" fontWeight="medium">
+                        {formatCurrency(driver.netProfit)}
+                      </Td>
+                    </Tr>
+                  );
+                })}
+            </Tbody>
+          </Table>
+        </CardBody>
+      </Card>
+
+      {/* Status das Integrações */}
+      <Card>
+        <CardBody>
+          <Heading size="md" mb={4}>
+            Integrações ({data.summary.integrations.connected}/{data.summary.integrations.total})
+          </Heading>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+            {data.integrations.map(integration => (
+              <Box key={integration.id} textAlign="center">
+                <Text fontWeight="medium" mb={2}>{integration.name}</Text>
+                <Badge
+                  colorScheme={
+                    integration.status === 'connected' ? 'green' :
+                      integration.status === 'error' ? 'red' : 'gray'
+                  }
+                  fontSize="sm"
+                  px={3}
+                  py={1}
+                >
+                  {integration.status}
+                </Badge>
               </Box>
-            </Alert>
-          )}
-        </VStack>
-      </Container>
-    </LoggedInLayout>
+            ))}
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+    </AdminLayout>
   );
 }
 
+// ========== SSR ==========
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
   const authResult = await checkAdminAuth(context);
-  
+
   if ('redirect' in authResult || 'notFound' in authResult) {
     return authResult;
   }
 
   try {
     const { fetchDashboardData } = await import('@/lib/admin/unified-data');
-    
-    // Buscar dados unificados dos últimos 30 dias
-    const unifiedData = await fetchDashboardData(30);
 
-    // Converter para formato esperado pelo componente
-    const metrics: DashboardMetrics = {
-      summary: {
-        totalEarnings: unifiedData.summary.financial.totalEarnings,
-        totalExpenses: unifiedData.summary.financial.totalExpenses,
-        netProfit: unifiedData.summary.financial.netProfit,
-        totalTrips: unifiedData.summary.operations.totalTrips,
-        activeVehicles: unifiedData.summary.fleet.activeVehicles,
-        activeDrivers: unifiedData.summary.drivers.activeDrivers,
-        activeAffiliates: unifiedData.summary.drivers.affiliates,
-        activeRenters: unifiedData.summary.drivers.renters,
-        utilizationRate: unifiedData.summary.fleet.utilizationRate,
-      },
-      errors: unifiedData.errors,
-    };
+    // Buscar dados unificados dos últimos 30 dias
+    const initialData = await fetchDashboardData(30);
 
     return {
       props: {
         ...authResult.props,
-        metrics,
+        initialData,
       },
     };
   } catch (error) {
-    console.error('Error fetching dashboard metrics:', error);
-    return {
-      props: {
-        ...authResult.props,
-        metrics: {
-          summary: {
-            totalEarnings: 0,
-            totalExpenses: 0,
-            netProfit: 0,
-            totalTrips: 0,
-            activeVehicles: 0,
-            activeDrivers: 0,
-            activeAffiliates: 0,
-            activeRenters: 0,
-            utilizationRate: 0,
-          },
-          errors: [],
-        },
-      },
-    };
+    console.error('Error fetching unified data:', error);
+    throw error;
   }
 };
-

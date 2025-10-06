@@ -31,6 +31,7 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit, FiTruck, FiActivity, FiWifi, FiBarChart2 } from "react-icons/fi";
+import { getAllMenuItems } from "@/config/adminMenu";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -80,47 +81,8 @@ export default function Header({ t }: HeaderProps) {
     </Button>
   );
 
-  const ToolsMenu = () => (
-    <Box position="relative">
-      <Popover
-        placement="bottom-start"
-        closeOnBlur={true}
-        closeOnEsc={true}
-      >
-        <PopoverTrigger>
-          <Button
-            variant="ghost"
-            fontSize="sm"
-            fontWeight="medium"
-            rightIcon={<ChevronDownIcon />}
-            _hover={{ bg: "gray.100" }}
-          >
-            {t("navigation.tools")}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent p={2} shadow="lg" border="none" borderRadius="lg">
-          <PopoverBody>
-            <VStack align="start" spacing={1}>
-              <Button
-                as={NextLink}
-                href="/tools"
-                variant="ghost"
-                size="sm"
-                w="full"
-                justifyContent="start"
-                _hover={{ bg: "gray.100" }}
-                onClick={() => {
-                  setOpen(false); // Fechar menu mobile também
-                }}
-              >
-                {t("tools.management")}
-              </Button>
-            </VStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    </Box>
-  );
+
+  const allMenuItems = getAllMenuItems();
 
   return (
     <Box as="header" borderBottomWidth="0" shadow="sm" position="sticky" top={0} zIndex={900} bg="white" >
@@ -158,7 +120,7 @@ export default function Header({ t }: HeaderProps) {
                       _hover={{ bg: "gray.100" }}
                     >
                       <Text display={{ base: "none", lg: "block" }}>
-                        Menu
+                        {userData?.name || user.displayName || user.email}
                       </Text>
                     </Button>
                   </PopoverTrigger>
@@ -193,97 +155,23 @@ export default function Header({ t }: HeaderProps) {
 
                         {/* Menu Items */}
                         <VStack spacing={1} align="stretch" p={2}>
-                          <Button
-                            variant="ghost"
-                            size="md"
-                            justifyContent="flex-start"
-                            leftIcon={<FiUser />}
-                            onClick={() => {
-                              router.push(isAdmin ? '/admin' : '/drivers');
-                            }}
-                            borderRadius="lg"
-                            _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                            transition="all 0.2s"
-                            h="48px"
-                            px={4}
-                          >
-                            <Text fontWeight="medium">Painel</Text>
-                          </Button>
-
-                          {isAdmin && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiUserCheck />}
-                                onClick={() => router.push('/admin/requests')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Solicitações</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiUsers />}
-                                onClick={() => router.push('/admin/drivers-weekly')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Controle Semanal</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiTruck />}
-                                onClick={() => router.push('/admin/fleet')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Controle da Frota</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiBarChart2 />}
-                                onClick={() => router.push('/admin/metrics')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Métricas</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiWifi />}
-                                onClick={() => router.push('/admin/integrations')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Integrações</Text>
-                              </Button>
-                            </>
-                          )}
+                          {isAdmin && allMenuItems?.map((item) => (
+                            <Button
+                              key={item.id}
+                              variant="ghost"
+                              size="md"
+                              justifyContent="flex-start"
+                              leftIcon={<Icon as={item.icon} />}
+                              onClick={() => router.push(item.href)}
+                              borderRadius="lg"
+                              _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                              transition="all 0.2s"
+                              h="48px"
+                              px={4}
+                            >
+                              <Text fontWeight="medium">{item.label}</Text>
+                            </Button>
+                          ))}
 
                           {!isAdmin && (
                             <>

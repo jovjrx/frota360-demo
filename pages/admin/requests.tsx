@@ -35,8 +35,7 @@ import {
   StatNumber,
 } from '@chakra-ui/react';
 import { loadTranslations, getTranslation } from '@/lib/translations';
-import LoggedInLayout from '@/components/LoggedInLayout';
-import { getSession } from '@/lib/session';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import { ADMIN } from '@/translations';
 import { PageProps } from '@/interface/Global';
 
@@ -79,7 +78,7 @@ interface RequestsPageProps extends PageProps {
 export default function RequestsPage({ translations, locale, tCommon, tPage, requests: initialRequests, stats }: RequestsPageProps) {
   const t = tCommon || ((key: string) => getTranslation(translations.common, key));
   const tAdmin = tPage || ((key: string) => getTranslation(translations.page, key));
-  
+
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
@@ -91,8 +90,8 @@ export default function RequestsPage({ translations, locale, tCommon, tPage, req
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Filtrar localmente quando mudar o filtro
-  const filteredRequests = statusFilter === 'all' 
-    ? requests 
+  const filteredRequests = statusFilter === 'all'
+    ? requests
     : requests.filter(req => req.status === statusFilter);
 
   const handleAction = (request: Request, action: 'approve' | 'reject') => {
@@ -188,143 +187,134 @@ export default function RequestsPage({ translations, locale, tCommon, tPage, req
   };
 
   return (
-    <LoggedInLayout>
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          {/* Header */}
-          <Box>
-            <Heading size="lg" mb={2}>
-              {tAdmin(ADMIN.REQUESTS.TITLE)}
-            </Heading>
-            <Text color="gray.600">
-              {tAdmin(ADMIN.REQUESTS.SUBTITLE)}
+    <AdminLayout
+      title={tAdmin(ADMIN.REQUESTS.TITLE)}
+      subtitle={tAdmin(ADMIN.REQUESTS.SUBTITLE)}
+      breadcrumbs={[{ label: 'Solicitações' }]}
+    >
+
+      <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_TOTAL)}</StatLabel>
+              <StatNumber>{stats.total}</StatNumber>
+            </Stat>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_PENDING)}</StatLabel>
+              <StatNumber color="yellow.500">{stats.pending}</StatNumber>
+            </Stat>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_APPROVED)}</StatLabel>
+              <StatNumber color="green.500">{stats.approved}</StatNumber>
+            </Stat>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_REJECTED)}</StatLabel>
+              <StatNumber color="red.500">{stats.rejected}</StatNumber>
+            </Stat>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+
+      {/* Filtros */}
+      <HStack>
+        <Select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          maxW="200px"
+        >
+          <option value="all">{tAdmin(ADMIN.REQUESTS.FILTER_ALL)}</option>
+          <option value="pending">{tAdmin(ADMIN.REQUESTS.FILTER_PENDING)}</option>
+          <option value="approved">{tAdmin(ADMIN.REQUESTS.FILTER_APPROVED)}</option>
+          <option value="rejected">{tAdmin(ADMIN.REQUESTS.FILTER_REJECTED)}</option>
+        </Select>
+      </HStack>
+
+      {/* Tabela */}
+      <Card>
+        <CardBody>
+          {filteredRequests.length === 0 && (
+            <Text textAlign="center" py={10} color="gray.500">
+              Nenhuma solicitação encontrada
             </Text>
-          </Box>
+          )}
 
-          {/* Stats */}
-          <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_TOTAL)}</StatLabel>
-                  <StatNumber>{stats.total}</StatNumber>
-                </Stat>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_PENDING)}</StatLabel>
-                  <StatNumber color="yellow.500">{stats.pending}</StatNumber>
-                </Stat>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_APPROVED)}</StatLabel>
-                  <StatNumber color="green.500">{stats.approved}</StatNumber>
-                </Stat>
-              </CardBody>
-            </Card>
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>{tAdmin(ADMIN.REQUESTS.STATS_REJECTED)}</StatLabel>
-                  <StatNumber color="red.500">{stats.rejected}</StatNumber>
-                </Stat>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
+          {filteredRequests.length > 0 && (
+            <Box overflowX="auto">
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Nome</Th>
+                    <Th>Email</Th>
+                    <Th>Telefone</Th>
+                    <Th>Cidade</Th>
+                    <Th>Tipo</Th>
+                    <Th>Status</Th>
+                    <Th>Data</Th>
+                    <Th>Ações</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {filteredRequests.map((request) => (
+                    <Tr key={request.id}>
+                      <Td>{`${request.firstName} ${request.lastName}`}</Td>
+                      <Td>{request.email}</Td>
+                      <Td>{request.phone}</Td>
+                      <Td>{request.city}</Td>
+                      <Td>
+                        <Badge colorScheme={request.driverType === 'affiliate' ? 'green' : 'blue'}>
+                          {getDriverTypeLabel(request.driverType)}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Badge colorScheme={getStatusColor(request.status)}>
+                          {getStatusLabel(request.status)}
+                        </Badge>
+                      </Td>
+                      <Td>{new Date(request.createdAt).toLocaleDateString('pt-PT')}</Td>
+                      <Td>
+                        <HStack spacing={2}>
+                          {request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                colorScheme="green"
+                                onClick={() => handleAction(request, 'approve')}
+                              >
+                                {tAdmin(ADMIN.REQUESTS.APPROVE)}
+                              </Button>
+                              <Button
+                                size="sm"
+                                colorScheme="red"
+                                onClick={() => handleAction(request, 'reject')}
+                              >
+                                {tAdmin(ADMIN.REQUESTS.REJECT)}
+                              </Button>
+                            </>
+                          )}
+                        </HStack>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
+          )}
+        </CardBody>
+      </Card>
 
-          {/* Filtros */}
-          <HStack>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              maxW="200px"
-            >
-              <option value="all">{tAdmin(ADMIN.REQUESTS.FILTER_ALL)}</option>
-              <option value="pending">{tAdmin(ADMIN.REQUESTS.FILTER_PENDING)}</option>
-              <option value="approved">{tAdmin(ADMIN.REQUESTS.FILTER_APPROVED)}</option>
-              <option value="rejected">{tAdmin(ADMIN.REQUESTS.FILTER_REJECTED)}</option>
-            </Select>
-          </HStack>
-
-          {/* Tabela */}
-          <Card>
-            <CardBody>
-              {filteredRequests.length === 0 && (
-                <Text textAlign="center" py={10} color="gray.500">
-                  Nenhuma solicitação encontrada
-                </Text>
-              )}
-
-              {filteredRequests.length > 0 && (
-                <Box overflowX="auto">
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Nome</Th>
-                        <Th>Email</Th>
-                        <Th>Telefone</Th>
-                        <Th>Cidade</Th>
-                        <Th>Tipo</Th>
-                        <Th>Status</Th>
-                        <Th>Data</Th>
-                        <Th>Ações</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {filteredRequests.map((request) => (
-                        <Tr key={request.id}>
-                          <Td>{`${request.firstName} ${request.lastName}`}</Td>
-                          <Td>{request.email}</Td>
-                          <Td>{request.phone}</Td>
-                          <Td>{request.city}</Td>
-                          <Td>
-                            <Badge colorScheme={request.driverType === 'affiliate' ? 'green' : 'blue'}>
-                              {getDriverTypeLabel(request.driverType)}
-                            </Badge>
-                          </Td>
-                          <Td>
-                            <Badge colorScheme={getStatusColor(request.status)}>
-                              {getStatusLabel(request.status)}
-                            </Badge>
-                          </Td>
-                          <Td>{new Date(request.createdAt).toLocaleDateString('pt-PT')}</Td>
-                          <Td>
-                            <HStack spacing={2}>
-                              {request.status === 'pending' && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    colorScheme="green"
-                                    onClick={() => handleAction(request, 'approve')}
-                                  >
-                                    {tAdmin(ADMIN.REQUESTS.APPROVE)}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    colorScheme="red"
-                                    onClick={() => handleAction(request, 'reject')}
-                                  >
-                                    {tAdmin(ADMIN.REQUESTS.REJECT)}
-                                  </Button>
-                                </>
-                              )}
-                            </HStack>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
-              )}
-            </CardBody>
-          </Card>
-        </VStack>
-      </Container>
 
       {/* Modal de Ação */}
       <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -393,21 +383,21 @@ export default function RequestsPage({ translations, locale, tCommon, tPage, req
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </LoggedInLayout>
+    </AdminLayout>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
   const authResult = await checkAdminAuth(context);
-  
+
   if ('redirect' in authResult) {
     return authResult;
   }
 
   try {
     const { fetchUnifiedAdminData } = await import('@/lib/admin/unified-data');
-    
+
     // Buscar dados unificados incluindo requests
     const unifiedData = await fetchUnifiedAdminData({
       includeDrivers: false,

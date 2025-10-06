@@ -52,7 +52,7 @@ import {
   FormLabel,
   Textarea,
 } from '@chakra-ui/react';
-import { 
+import {
   FiSearch,
   FiFilter,
   FiDownload,
@@ -94,8 +94,8 @@ interface UsersManagementProps {
   locale?: string;
 }
 
-export default function UsersManagement({ 
-  users, 
+export default function UsersManagement({
+  users,
   stats,
   translations,
   userData,
@@ -104,10 +104,10 @@ export default function UsersManagement({
 }: UsersManagementProps) {
   const t = tCommon || ((key: string) => translations.common?.[key] || key);
   const tAdmin = tPage || ((key: string) => translations.admin?.[key] || key);
-  
+
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -117,12 +117,12 @@ export default function UsersManagement({
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      const matchesSearch = 
+      const matchesSearch =
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-      
+
       return matchesSearch && matchesRole;
     });
   }, [users, searchTerm, roleFilter]);
@@ -160,14 +160,14 @@ export default function UsersManagement({
 
   const handleUserAction = async (action: string, userData?: any) => {
     if (!selectedUser) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch('/api/admin/user-management', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: selectedUser.id, 
+        body: JSON.stringify({
+          userId: selectedUser.id,
           action,
           userData
         }),
@@ -187,7 +187,7 @@ export default function UsersManagement({
           duration: 3000,
           isClosable: true,
         });
-        
+
         // Reload page to show updated data
         window.location.reload();
       } else {
@@ -232,39 +232,12 @@ export default function UsersManagement({
       <Head>
         <title>Gerenciar Usuários - Conduz.pt</title>
       </Head>
-      
+
       <AdminLayout
         title="Gerenciar Usuários"
         subtitle="Gerencie todos os usuários do sistema (admins e motoristas)"
-        user={{
-          name: userData?.name || 'Administrador',
-          avatar: userData?.avatar,
-          role: 'admin',
-          status: 'active'
-        }}
-        notifications={0}
         breadcrumbs={[
           { label: 'Usuários' }
-        ]}
-        stats={[
-          {
-            label: 'Total',
-            value: stats.total,
-            helpText: 'Usuários',
-            color: 'gray.500'
-          },
-          {
-            label: 'Administradores',
-            value: stats.admins,
-            helpText: 'Admins',
-            color: 'blue.500'
-          },
-          {
-            label: 'Motoristas',
-            value: stats.drivers,
-            helpText: 'Drivers',
-            color: 'green.500'
-          }
         ]}
       >
         {/* Filters and Actions */}
@@ -398,7 +371,7 @@ export default function UsersManagement({
                         </Badge>
                       </VStack>
                     </HStack>
-                    
+
                     <SimpleGrid columns={2} spacing={4}>
                       <Box>
                         <Text fontSize="sm" color="gray.500">Data de Criação</Text>
@@ -431,7 +404,7 @@ export default function UsersManagement({
             const nameInput = document.getElementById('edit-name') as HTMLInputElement;
             const emailInput = document.getElementById('edit-email') as HTMLInputElement;
             const roleSelect = document.getElementById('edit-role') as HTMLSelectElement;
-            
+
             if (!nameInput.value || !emailInput.value || !roleSelect.value) {
               toast({
                 title: 'Campos obrigatórios',
@@ -448,7 +421,7 @@ export default function UsersManagement({
               email: emailInput.value,
               role: roleSelect.value
             });
-            
+
             setIsEditModalOpen(false);
           }}
           saveText="Salvar Alterações"
@@ -490,7 +463,7 @@ export default function UsersManagement({
           <Alert status="warning">
             <AlertIcon />
             <AlertDescription>
-              Tem certeza que deseja excluir o usuário <strong>{selectedUser?.name}</strong>? 
+              Tem certeza que deseja excluir o usuário <strong>{selectedUser?.name}</strong>?
               Esta ação não pode ser desfeita.
             </AlertDescription>
           </Alert>
@@ -505,7 +478,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Get session from Iron Session
     const { getSession } = await import('@/lib/session/ironSession');
     const session = await getSession(context.req, context.res);
-    
+
     if (!session.userId) {
       return {
         redirect: {
@@ -518,7 +491,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Get user data from Firestore
     const userDoc = await adminDb.collection('users').doc(session.userId).get();
     const userData = userDoc.exists ? userDoc.data() : null;
-    
+
     if (!userData || userData.role !== 'admin') {
       return {
         redirect: {
@@ -529,10 +502,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Extract locale from middleware header
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
+    const locale = Array.isArray(context.req.headers['x-locale'])
+      ? context.req.headers['x-locale'][0]
       : context.req.headers['x-locale'] || 'pt';
-    
+
     const translations = await loadTranslations(locale, ['common', 'admin']);
 
     // Get all users (admins)
