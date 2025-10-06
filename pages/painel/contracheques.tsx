@@ -109,6 +109,41 @@ export default function PainelContracheques() {
     onOpen();
   }
 
+  async function baixarPDF(contracheque: Contracheque) {
+    try {
+      const response = await fetch(`/api/painel/contracheques/${contracheque.id}/pdf`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao gerar PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `Contracheque_${formatarDataCurta(contracheque.weekStart)}_a_${formatarDataCurta(contracheque.weekEnd)}.pdf`;
+      a.download = fileName.replace(/\//g, '-');
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'PDF gerado com sucesso!',
+        status: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+      toast({
+        title: 'Erro ao gerar PDF',
+        description: 'Tente novamente mais tarde',
+        status: 'error',
+        duration: 5000,
+      });
+    }
+  }
+
   function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -249,16 +284,15 @@ export default function PainelContracheques() {
                     >
                       Ver Detalhes
                     </Button>
-                    {isPago && (
-                      <Button
-                        size="sm"
-                        colorScheme={statusColor}
-                        leftIcon={<Icon as={FiDownload} />}
-                        flex={1}
-                      >
-                        Baixar PDF
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      colorScheme={statusColor}
+                      leftIcon={<Icon as={FiDownload} />}
+                      onClick={() => baixarPDF(contracheque)}
+                      flex={1}
+                    >
+                      Baixar PDF
+                    </Button>
                   </HStack>
                 </VStack>
               </Box>

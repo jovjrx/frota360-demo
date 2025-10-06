@@ -215,11 +215,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdBy: 'system',
       });
 
-    // 4. TODO: Enviar email com credenciais
-    console.log(`📧 Email a ser enviado para ${email}:`);
-    console.log(`   Login: ${email}`);
-    console.log(`   Senha temporária: ${temporaryPassword}`);
-    console.log(`   Acesso: https://conduz.pt/painel`);
+    // 4. Enviar email com credenciais
+    try {
+      const { emailService } = await import('@/lib/email/mailer');
+      await emailService.sendDriverCredentialsEmail(
+        email,
+        `${firstName} ${lastName}`,
+        temporaryPassword
+      );
+      console.log(`✅ Email com credenciais enviado para ${email}`);
+    } catch (emailError) {
+      console.error('❌ Erro ao enviar email:', emailError);
+      // Não falhar a operação se o email falhar
+    }
 
     return res.status(201).json({ 
       success: true,

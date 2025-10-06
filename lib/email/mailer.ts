@@ -115,6 +115,26 @@ class EmailService {
     });
   }
 
+  async sendDriverCredentialsEmail(driverEmail: string, driverName: string, temporaryPassword: string): Promise<void> {
+    const template = this.getDriverCredentialsTemplate(driverName, driverEmail, temporaryPassword);
+    await this.sendEmail({
+      to: driverEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  }
+
+  async sendPasswordResetEmail(driverEmail: string, driverName: string, resetToken: string): Promise<void> {
+    const template = this.getPasswordResetTemplate(driverName, resetToken);
+    await this.sendEmail({
+      to: driverEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  }
+
   private getDriverWelcomeTemplate(driverName: string): EmailTemplate {
     return {
       subject: 'Bem-vindo à Conduz.pt!',
@@ -238,6 +258,134 @@ class EmailService {
         </div>
       `,
       text: `Renovação em breve\n\nOlá ${driverName},\n\nSua assinatura do plano ${planName} será renovada automaticamente em ${renewalDateStr}.\n\nCertifique-se de que seu método de pagamento está atualizado.\n\nGerenciar: ${process.env.NEXT_PUBLIC_APP_URL}/painel/subscription\n\nSe você não deseja renovar, pode cancelar a qualquer momento.\n\nEquipe Conduz.pt`,
+    };
+  }
+
+  private getDriverCredentialsTemplate(driverName: string, email: string, temporaryPassword: string): EmailTemplate {
+    return {
+      subject: 'Bem-vindo à Conduz - Suas Credenciais de Acesso',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
+          <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #48BB78; margin: 0;">🚗 Conduz</h1>
+              <p style="color: #718096; margin: 5px 0;">Alvorada Magistral</p>
+            </div>
+            
+            <h2 style="color: #2D3748; margin-bottom: 20px;">Olá ${driverName}!</h2>
+            
+            <p style="color: #4A5568; line-height: 1.6;">
+              Sua conta foi criada com sucesso na plataforma Conduz! 🎉
+            </p>
+            
+            <div style="background-color: #F7FAFC; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #48BB78;">
+              <h3 style="color: #2D3748; margin-top: 0;">Dados de Acesso:</h3>
+              <p style="margin: 10px 0;">
+                <strong style="color: #2D3748;">Email:</strong><br/>
+                <code style="background-color: #EDF2F7; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 5px; font-size: 14px;">${email}</code>
+              </p>
+              <p style="margin: 10px 0;">
+                <strong style="color: #2D3748;">Senha Temporária:</strong><br/>
+                <code style="background-color: #FED7D7; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 5px; font-size: 14px; color: #C53030;">${temporaryPassword}</code>
+              </p>
+            </div>
+            
+            <div style="background-color: #FFF5F5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #F56565;">
+              <p style="margin: 0; color: #742A2A; font-size: 14px;">
+                <strong>⚠️ Importante:</strong> Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/painel" 
+                 style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+                Acessar Painel do Motorista
+              </a>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
+              <p style="color: #718096; font-size: 14px; margin: 5px 0;">
+                <strong>Em caso de dúvidas:</strong>
+              </p>
+              <p style="color: #718096; font-size: 14px; margin: 5px 0;">
+                📧 Email: suporte@conduz.pt<br/>
+                📱 WhatsApp: +351 912 345 678
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
+              <p style="color: #A0AEC0; font-size: 12px; margin: 0;">
+                Bem-vindo à equipe Conduz!<br/>
+                Alvorada Magistral - Gestão de Motoristas TVDE
+              </p>
+            </div>
+          </div>
+        </div>
+      `,
+      text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nAlvorada Magistral - Gestão de Motoristas TVDE`,
+    };
+  }
+
+  private getPasswordResetTemplate(driverName: string, resetToken: string): EmailTemplate {
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/reset-password?token=${resetToken}`;
+    
+    return {
+      subject: 'Recuperação de Senha - Conduz',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
+          <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #48BB78; margin: 0;">🔐 Recuperação de Senha</h1>
+            </div>
+            
+            <h2 style="color: #2D3748; margin-bottom: 20px;">Olá ${driverName}!</h2>
+            
+            <p style="color: #4A5568; line-height: 1.6;">
+              Recebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.
+            </p>
+            
+            <p style="color: #4A5568; line-height: 1.6;">
+              Se você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" 
+                 style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+                Redefinir Senha
+              </a>
+            </div>
+            
+            <div style="background-color: #FFF5F5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #F56565;">
+              <p style="margin: 0; color: #742A2A; font-size: 14px;">
+                <strong>⚠️ Atenção:</strong> Este link expira em 1 hora por questões de segurança.
+              </p>
+            </div>
+            
+            <p style="color: #718096; font-size: 14px; margin-top: 20px;">
+              Se o botão não funcionar, copie e cole este link no seu navegador:<br/>
+              <code style="background-color: #EDF2F7; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 5px; font-size: 12px; word-break: break-all;">${resetUrl}</code>
+            </p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
+              <p style="color: #718096; font-size: 14px; margin: 5px 0;">
+                <strong>Precisa de ajuda?</strong>
+              </p>
+              <p style="color: #718096; font-size: 14px; margin: 5px 0;">
+                📧 Email: suporte@conduz.pt<br/>
+                📱 WhatsApp: +351 912 345 678
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
+              <p style="color: #A0AEC0; font-size: 12px; margin: 0;">
+                Conduz - Alvorada Magistral<br/>
+                Gestão de Motoristas TVDE
+              </p>
+            </div>
+          </div>
+        </div>
+      `,
+      text: `Recuperação de Senha - Conduz\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nConduz - Alvorada Magistral\nGestão de Motoristas TVDE`,
     };
   }
 }

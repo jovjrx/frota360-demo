@@ -150,12 +150,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           createdBy: 'system',
         });
 
-      // 5. TODO: Enviar email com credenciais
-      // Aqui você pode integrar com serviço de email (SendGrid, AWS SES, etc.)
-      console.log(`📧 Email a ser enviado para ${driverData?.email}:`);
-      console.log(`   Login: ${driverData?.email}`);
+      // 5. Enviar email com credenciais
       if (temporaryPassword) {
-        console.log(`   Senha temporária: ${temporaryPassword}`);
+        try {
+          const { emailService } = await import('@/lib/email/mailer');
+          await emailService.sendDriverCredentialsEmail(
+            driverData?.email,
+            driverData?.fullName || `${driverData?.firstName} ${driverData?.lastName}`,
+            temporaryPassword
+          );
+          console.log(`✅ Email com credenciais enviado para ${driverData?.email}`);
+        } catch (emailError) {
+          console.error('❌ Erro ao enviar email:', emailError);
+          // Não falhar a operação se o email falhar
+        }
       }
 
       return res.status(200).json({ 
