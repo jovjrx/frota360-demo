@@ -52,7 +52,10 @@ export function calculateDriverWeeklyRecord(data: Partial<DriverWeeklyRecord>): 
     (data.boltTrips || 0) + 
     (data.boltTips || 0);
   
-  const commissionBase = (data.uberTrips || 0) + (data.boltTrips || 0);
+  // Base de comissão: ganhos de viagens EXCLUINDO portagens (que são reembolsadas)
+  const commissionBase = 
+    ((data.uberTrips || 0) + (data.boltTrips || 0)) - 
+    (data.uberTolls || 0);
   const commissionAmount = commissionBase * (data.commissionRate || 0.07);
   
   const netPayout = 
