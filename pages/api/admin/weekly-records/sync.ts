@@ -97,8 +97,15 @@ function getWeekStart(date: Date): string {
 
 function getWeekEnd(date: Date): string {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? 0 : 7); // Domingo
+  const day = d.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+  // Para uma semana que começa na segunda-feira (dia 1), o domingo é o dia 7.
+  // A lógica para encontrar o domingo da mesma semana que começa na segunda-feira é:
+  // Se o dia atual for domingo (0), a diferença para o domingo da semana atual é 0.
+  // Se o dia atual for segunda (1), a diferença para o domingo da semana atual é 6.
+  // Se o dia atual for terça (2), a diferença para o domingo da semana atual é 5.
+  // ...
+  // Se o dia atual for sábado (6), a diferença para o domingo da semana atual é 1.
+  const diff = d.getDate() - day + (day === 0 ? 0 : 7); // Calcula o domingo da semana atual
   d.setDate(diff);
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split("T")[0];
 }
