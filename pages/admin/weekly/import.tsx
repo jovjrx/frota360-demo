@@ -29,8 +29,14 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
+import { getTranslation } from '@/lib/translations';
 
 interface ImportPageProps extends PageProps {
+  translations: {
+    common: any;
+    page: any;
+  };
+  locale: string;
 }
 
 interface UploadedFile {
@@ -49,15 +55,24 @@ interface ProcessResult {
 
 const getWeekDates = (): { start: string; end: string } => {
   const today = new Date();
-  const dayOfWeek = today.getDay();
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Segunda-feira
+  const dayOfWeek = today.getDay(); // 0 = domingo, 1 = segunda, etc.
+  
+  // Calcular quantos dias voltar para chegar à segunda-feira
+  let daysToMonday;
+  if (dayOfWeek === 0) { // Domingo
+    daysToMonday = 6; // Voltar 6 dias
+  } else if (dayOfWeek === 1) { // Segunda-feira
+    daysToMonday = 0; // Já é segunda, não voltar
+  } else { // Terça a sábado (2-6)
+    daysToMonday = dayOfWeek - 1; // Voltar para segunda
+  }
   
   const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() + diff);
+  weekStart.setDate(today.getDate() - daysToMonday);
   weekStart.setHours(0, 0, 0, 0);
   
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6); // Domingo
+  weekEnd.setDate(weekStart.getDate() + 6); // Domingo (6 dias depois)
   weekEnd.setHours(23, 59, 59, 999);
   
   return {
@@ -66,7 +81,7 @@ const getWeekDates = (): { start: string; end: string } => {
   };
 };
 
-export default function ImportPage(_props: ImportPageProps) {
+export default function ImportPage({ translations, locale, tCommon, tPage }: ImportPageProps) {
   const { start, end } = getWeekDates();
   
   const [weekStart, setWeekStart] = useState(start);
@@ -83,6 +98,15 @@ export default function ImportPage(_props: ImportPageProps) {
   ]);
 
   const toast = useToast();
+
+  // Funções de tradução
+  const t = tCommon || ((key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.common, key, variables);
+  });
+
+  const tAdmin = tPage || ((key: string, variables?: Record<string, any>) => {
+    return getTranslation(translations.page, key, variables);
+  });
 
   const handleFileChange = (platform: string, file: File | null) => {
     setFiles(prev =>
@@ -212,10 +236,10 @@ export default function ImportPage(_props: ImportPageProps) {
         duration: 5000,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      const errorMessage = error instanceof Error ? error.message : tAdmin('errors.unknown') || 'Erro desconhecido';
       
       toast({
-        title: 'Erro no processamento',
+        title: tAdmin('errors.processing') || 'Erro no processamento',
         description: errorMessage,
         status: 'error',
         duration: 5000,
@@ -240,10 +264,10 @@ export default function ImportPage(_props: ImportPageProps) {
 
   const getPlatformLabel = (platform: string): string => {
     switch (platform) {
-      case 'uber': return 'Uber';
-      case 'bolt': return 'Bolt';
-      case 'myprio': return 'myprio (Combustível)';
-      case 'viaverde': return 'ViaVerde (Portagens)';
+      case 'uber': return tAdmin('platforms.uber') || 'Uber';
+      case 'bolt': return tAdmin('platforms.bolt') || 'Bolt';
+      case 'myprio': return tAdmin('platforms.myprio') || 'myprio (Combustível)';
+      case 'viaverde': return tAdmin('platforms.viaverde') || 'ViaVerde (Portagens)';
       default: return platform;
     }
   };
@@ -260,28 +284,20 @@ export default function ImportPage(_props: ImportPageProps) {
 
   return (
     <AdminLayout
-      title="Importação de Dados Semanais"
-      subtitle="Faça upload dos arquivos CSV/Excel de cada plataforma para processar os pagamentos da semana"
-      breadcrumbs={[{ label: 'Controle Semanal', href: '/admin/weekly' }, { label: 'Importação' }]}
+      title={tAdmin('weekly.import.title') || 'Importação de Dados Semanais'}
+      subtitle={tAdmin('weekly.import.subtitle') || 'Faça upload dos arquivos CSV/Excel de cada plataforma para processar os pagamentos da semana'}
+      breadcrumbs={[{ label: tAdmin('weekly.title') || 'Controle Semanal', href: '/admin/weekly' }, { label: tAdmin('weekly.import.title') || 'Importação' }]}
     >
       <VStack spacing={6} align="stretch">
-        {/* Header */}
-        <Box>
-          <Heading size="lg" mb={2}>Importação de Dados Semanais</Heading>
-          <Text color="gray.600">
-            Faça upload dos arquivos CSV/Excel de cada plataforma para processar os pagamentos da semana
-          </Text>
-        </Box>
-
         {/* Week Selection */}
         <Card>
           <CardHeader>
-            <Heading size="md">Período da Semana</Heading>
+            <Heading size="md">{tAdmin('weekly.import.period') || 'Período da Semana'}</Heading>
           </CardHeader>
           <CardBody>
             <HStack spacing={4}>
               <FormControl>
-                <FormLabel>Início da Semana</FormLabel>
+                <FormLabel>{tAdmin('weekly.import.startDate') || 'Início da Semana'}</FormLabel>
                 <Input
                   type="date"
                   value={weekStart}
@@ -289,7 +305,7 @@ export default function ImportPage(_props: ImportPageProps) {
                 />
               </FormControl>
               <FormControl>
-                <FormLabel>Fim da Semana</FormLabel>
+                <FormLabel>{tAdmin('weekly.import.endDate') || 'Fim da Semana'}</FormLabel>
                 <Input
                   type="date"
                   value={weekEnd}
@@ -303,7 +319,7 @@ export default function ImportPage(_props: ImportPageProps) {
         {/* File Upload */}
         <Card>
           <CardHeader>
-            <Heading size="md">Arquivos para Importação</Heading>
+            <Heading size="md">{tAdmin('weekly.import.files') || 'Arquivos para Importação'}</Heading>
           </CardHeader>
           <CardBody>
             <VStack spacing={4} align="stretch">
@@ -354,10 +370,10 @@ export default function ImportPage(_props: ImportPageProps) {
                 onClick={handleUploadAll}
                 isDisabled={files.every(f => f.file === null) || allUploaded}
               >
-                Enviar Arquivos ({uploadedCount}/{files.filter(f => f.file !== null).length})
+                {tAdmin('weekly.import.uploadFiles') || 'Enviar Arquivos'} ({uploadedCount}/{files.filter(f => f.file !== null).length})
               </Button>
               <Button onClick={handleReset} variant="ghost">
-                Resetar
+                {t('common.reset') || 'Resetar'}
               </Button>
             </HStack>
           </CardBody>

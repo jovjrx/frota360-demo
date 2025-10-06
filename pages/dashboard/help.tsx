@@ -20,7 +20,7 @@ import {
   FiMessageCircle,
   FiExternalLink,
 } from 'react-icons/fi';
-import PainelLayout from '@/components/layouts/PainelLayout';
+import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
 
 export default function PainelAjuda() {

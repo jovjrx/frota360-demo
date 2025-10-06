@@ -32,7 +32,7 @@ import {
   FiClock,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
-import PainelLayout from '@/components/layouts/PainelLayout';
+import PainelLayout from '@/components/layouts/DashboardLayout';
 
 interface Contracheque {
   id: string;
