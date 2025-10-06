@@ -18,10 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { week } = req.query;
 
     const db = getFirestore();
-    let query = db.collection('weeklyRecords').orderBy('weekStart', 'desc');
+    let query = db.collection('driverWeeklyRecords').orderBy('weekStart', 'desc');
 
     if (week && week !== 'all' && typeof week === 'string') {
-      query = query.where('weekStart', '==', week) as any;
+      query = query.where('weekId', '==', week) as any;
     }
 
     const snapshot = await query.get();
@@ -37,16 +37,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Semana Fim',
       'Motorista',
       'IBAN',
-      'Uber Viagens (€)',
-      'Uber Gorjetas (€)',
-      'Uber Portagens (€)',
-      'Bolt Viagens (€)',
-      'Bolt Gorjetas (€)',
-      'Total Bruto (€)',
+      'Uber Total (€)',
+      'Bolt Total (€)',
+      'Ganhos Total (€)',
+      'IVA 6% (€)',
+      'Ganhos - IVA (€)',
+      'Despesas Adm 7% (€)',
       'Combustível (€)',
-      'Base Comissão (€)',
-      'Comissão 7% (€)',
-      'Valor Líquido (€)',
+      'ViaVerde (€)',
+      'Aluguel (€)',
+      'Total Despesas (€)',
+      'Repasse Líquido (€)',
       'Status',
       'Data Pagamento',
     ];
@@ -56,16 +57,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       record.weekEnd,
       record.driverName,
       record.iban || '',
-      record.uberTrips.toFixed(2),
-      record.uberTips.toFixed(2),
-      record.uberTolls.toFixed(2),
-      record.boltTrips.toFixed(2),
-      record.boltTips.toFixed(2),
-      record.grossTotal.toFixed(2),
-      record.fuel.toFixed(2),
-      record.commissionBase.toFixed(2),
-      record.commissionAmount.toFixed(2),
-      record.netPayout.toFixed(2),
+      record.uberTotal.toFixed(2),
+      record.boltTotal.toFixed(2),
+      record.ganhosTotal.toFixed(2),
+      record.ivaValor.toFixed(2),
+      record.ganhosMenosIVA.toFixed(2),
+      record.despesasAdm.toFixed(2),
+      record.combustivel.toFixed(2),
+      record.viaverde.toFixed(2),
+      record.aluguel.toFixed(2),
+      record.totalDespesas.toFixed(2),
+      record.repasse.toFixed(2),
       record.paymentStatus === 'paid' ? 'PAGO' : record.paymentStatus === 'cancelled' ? 'CANCELADO' : 'PENDENTE',
       record.paymentDate || '',
     ]);

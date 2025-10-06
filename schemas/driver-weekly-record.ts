@@ -4,40 +4,34 @@ export const DriverWeeklyRecordSchema = z.object({
   id: z.string(),
   driverId: z.string(),
   driverName: z.string(),
+  weekId: z.string(), // 2024-W40
   weekStart: z.string(), // YYYY-MM-DD
   weekEnd: z.string(),   // YYYY-MM-DD
   
-  // Uber
-  uberTrips: z.number().default(0),
-  uberTips: z.number().default(0),
-  uberTolls: z.number().default(0),
-  
-  // Bolt
-  boltTrips: z.number().default(0),
-  boltTips: z.number().default(0),
-  boltTolls: z.number().default(0),
-  
-  // Totais
-  grossTotal: z.number().default(0),
+  // Valores totais repassados pelas plataformas
+  uberTotal: z.number().default(0),  // "Pago a si" do Uber
+  boltTotal: z.number().default(0),  // "Ganhos brutos (total)" do Bolt
   
   // Despesas
-  fuel: z.number().default(0),
-  viaverde: z.number().default(0),
-  otherCosts: z.number().default(0),
-  totalExpenses: z.number().default(0),
+  combustivel: z.number().default(0),  // myprio
+  viaverde: z.number().default(0),     // ViaVerde (portagens)
+  aluguel: z.number().default(0),      // Aluguel semanal (se locatário)
   
-  // Comissão
-  commissionBase: z.number().default(0),
-  commissionRate: z.number().default(0.07),
-  commissionAmount: z.number().default(0),
-  
-  // Líquido
-  netPayout: z.number().default(0),
+  // Cálculos automáticos
+  ganhosTotal: z.number().default(0),        // uberTotal + boltTotal
+  ivaValor: z.number().default(0),           // ganhosTotal × 0.06
+  ganhosMenosIVA: z.number().default(0),     // ganhosTotal × 0.94
+  despesasAdm: z.number().default(0),        // ganhosMenosIVA × 0.07
+  totalDespesas: z.number().default(0),      // combustivel + viaverde + aluguel
+  repasse: z.number().default(0),            // ganhosMenosIVA - despesasAdm - totalDespesas
   
   // Pagamento
   iban: z.string().optional(),
   paymentStatus: z.enum(['pending', 'paid', 'cancelled']).default('pending'),
   paymentDate: z.string().optional(),
+  
+  // Origem dos dados
+  dataSource: z.enum(['manual', 'auto']).default('manual'),
   
   // Metadados
   createdAt: z.string(),
@@ -47,86 +41,121 @@ export const DriverWeeklyRecordSchema = z.object({
 
 export type DriverWeeklyRecord = z.infer<typeof DriverWeeklyRecordSchema>;
 
-export function calculateDriverWeeklyRecord(data: Partial<DriverWeeklyRecord>): DriverWeeklyRecord {
-  // Total Bruto = Uber + Bolt (viagens + gorjetas + portagens)
-  const grossTotal = 
-    (data.uberTrips || 0) + 
-    (data.uberTips || 0) + 
-    (data.uberTolls || 0) + 
-    (data.boltTrips || 0) + 
-    (data.boltTips || 0) +
-    (data.boltTolls || 0);
+/**
+ * Calcula todos os valores derivados de um registro semanal
+ * Aplica as fórmulas corretas:
+ * - IVA 6% sobre ganhos totais
+ * - Despesas administrativas 7% sobre (ganhos - IVA)
+ * - Portagens só descontadas de locatários
+ */
+export function calculateDriverWeeklyRecord(
+  data: Partial<DriverWeeklyRecord>,
+  driver?: { type: 'affiliate' | 'renter'; rentalFee?: number }
+): DriverWeeklyRecord {
+  // 1. Ganhos Total
+  const ganhosTotal = (data.uberTotal || 0) + (data.boltTotal || 0);
   
-  // Base de comissão: ganhos de viagens EXCLUINDO portagens (que são reembolsadas)
-  const commissionBase = 
-    ((data.uberTrips || 0) + (data.boltTrips || 0)) - 
-    ((data.uberTolls || 0) + (data.boltTolls || 0));
+  // 2. IVA 6%
+  const ivaValor = ganhosTotal * 0.06;
+  const ganhosMenosIVA = ganhosTotal * 0.94;
   
-  const commissionAmount = commissionBase * (data.commissionRate || 0.07);
+  // 3. Despesas Administrativas 7%
+  const despesasAdm = ganhosMenosIVA * 0.07;
   
-  // Total de Despesas
-  const totalExpenses = 
-    (data.fuel || 0) + 
-    (data.viaverde || 0) + 
-    (data.otherCosts || 0);
+  // 4. Aluguel (só para locatários)
+  let aluguel = data.aluguel || 0;
+  if (driver?.type === 'renter' && driver.rentalFee) {
+    aluguel = driver.rentalFee;
+  }
   
-  // Valor Líquido = Total Bruto - Comissão - Despesas
-  const netPayout = 
-    grossTotal - 
-    commissionAmount - 
-    totalExpenses;
+  // 5. ViaVerde (só desconta de locatários)
+  let viaverdeDesconto = 0;
+  if (driver?.type === 'renter') {
+    viaverdeDesconto = data.viaverde || 0;
+  }
+  
+  // 6. Total Despesas
+  const totalDespesas = (data.combustivel || 0) + viaverdeDesconto + aluguel;
+  
+  // 7. Repasse
+  const repasse = ganhosMenosIVA - despesasAdm - totalDespesas;
+  
+  const now = new Date().toISOString();
   
   return {
-    ...data,
-    grossTotal,
-    commissionBase,
-    commissionAmount,
-    totalExpenses,
-    netPayout,
-    boltTolls: data.boltTolls || 0,
+    id: data.id || '',
+    driverId: data.driverId || '',
+    driverName: data.driverName || '',
+    weekId: data.weekId || '',
+    weekStart: data.weekStart || '',
+    weekEnd: data.weekEnd || '',
+    
+    uberTotal: data.uberTotal || 0,
+    boltTotal: data.boltTotal || 0,
+    
+    combustivel: data.combustivel || 0,
     viaverde: data.viaverde || 0,
-  } as DriverWeeklyRecord;
+    aluguel,
+    
+    ganhosTotal,
+    ivaValor,
+    ganhosMenosIVA,
+    despesasAdm,
+    totalDespesas,
+    repasse,
+    
+    iban: data.iban,
+    paymentStatus: data.paymentStatus || 'pending',
+    paymentDate: data.paymentDate,
+    
+    dataSource: data.dataSource || 'manual',
+    
+    createdAt: data.createdAt || now,
+    updatedAt: now,
+    notes: data.notes,
+  };
 }
 
 /**
- * Converte ProcessedWeeklyRecord para DriverWeeklyRecord
- * Para compatibilidade entre schemas
+ * Gera ID único para registro semanal
  */
-export function convertToDriverWeeklyRecord(processed: any): DriverWeeklyRecord {
+export function generateWeeklyRecordId(driverId: string, weekId: string): string {
+  return `${driverId}_${weekId}`;
+}
+
+/**
+ * Gera weekId a partir de uma data
+ */
+export function getWeekId(date: Date): string {
+  const year = date.getFullYear();
+  const onejan = new Date(year, 0, 1);
+  const week = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+  return `${year}-W${week.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Obtém datas de início e fim de uma semana
+ */
+export function getWeekDates(weekId: string): { start: string; end: string } {
+  const [year, week] = weekId.split('-W').map(Number);
+  
+  // Primeiro dia do ano
+  const jan1 = new Date(year, 0, 1);
+  
+  // Primeiro dia da semana (segunda-feira)
+  const daysToMonday = (jan1.getDay() === 0 ? 6 : jan1.getDay() - 1);
+  const firstMonday = new Date(year, 0, 1 + (7 - daysToMonday) % 7);
+  
+  // Calcular início da semana desejada
+  const weekStart = new Date(firstMonday);
+  weekStart.setDate(firstMonday.getDate() + (week - 1) * 7);
+  
+  // Fim da semana (domingo)
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  
   return {
-    id: processed.id,
-    driverId: processed.driverId,
-    driverName: processed.driverName,
-    weekStart: processed.weekStart,
-    weekEnd: processed.weekEnd,
-    
-    uberTrips: processed.uber?.earnings || 0,
-    uberTips: processed.uber?.tips || 0,
-    uberTolls: processed.uber?.tolls || 0,
-    
-    boltTrips: processed.bolt?.earnings || 0,
-    boltTips: processed.bolt?.tips || 0,
-    boltTolls: processed.bolt?.tolls || 0,
-    
-    grossTotal: processed.calculations?.grossTotal || 0,
-    
-    fuel: processed.fuel?.amount || 0,
-    viaverde: processed.viaverde?.amount || 0,
-    otherCosts: 0,
-    totalExpenses: (processed.fuel?.amount || 0) + (processed.viaverde?.amount || 0),
-    
-    commissionBase: processed.calculations?.commissionBase || 0,
-    commissionRate: processed.calculations?.commissionRate || 0.07,
-    commissionAmount: processed.calculations?.commissionAmount || 0,
-    
-    netPayout: processed.calculations?.netPayout || 0,
-    
-    iban: processed.payment?.iban || '',
-    paymentStatus: processed.payment?.status || 'pending',
-    paymentDate: processed.payment?.paidAt,
-    
-    createdAt: processed.createdAt,
-    updatedAt: processed.updatedAt,
-    notes: processed.notes,
+    start: weekStart.toISOString().split('T')[0],
+    end: weekEnd.toISOString().split('T')[0],
   };
 }

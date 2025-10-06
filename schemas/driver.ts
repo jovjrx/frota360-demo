@@ -32,6 +32,9 @@ export const DriverAdminFieldsSchema = z.object({
   // Tipo de motorista (afiliado ou locatário)
   type: z.enum(['affiliate', 'renter']).default('affiliate'),
   
+  // Aluguel semanal (para locatários)
+  rentalFee: z.number().default(0),
+  
   // IDs das Plataformas (adicionado conforme estratégia)
   integrations: z.object({
     uber: z.object({

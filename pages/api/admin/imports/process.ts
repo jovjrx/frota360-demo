@@ -2,11 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/lib/session';
 import { getFirestore } from 'firebase-admin/firestore';
 import { 
-  WeeklyDataImport, 
-  ProcessedWeeklyRecord, 
-  createEmptyWeeklyRecord, 
-  calculateWeeklyTotals 
-} from '@/schemas/weekly-data-import';
+  calculateDriverWeeklyRecord, 
+  generateWeeklyRecordId,
+  getWeekId,
+  DriverWeeklyRecord 
+} from '@/schemas/driver-weekly-record';
+import { updateDataSource } from '@/schemas/weekly-data-sources';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -44,425 +45,389 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       warnings: [] as string[],
     };
 
+    // Obter semana da primeira importação
+    const firstImport = importsSnapshot.docs[0].data();
+    const weekStart = firstImport.weekStart;
+    const weekEnd = firstImport.weekEnd;
+    const weekId = getWeekId(new Date(weekStart));
+
+    // Buscar todos os motoristas ativos
+    const driversSnapshot = await db.collection('drivers')
+      .where('status', '==', 'active')
+      .get();
+
+    const driversMap = new Map();
+    driversSnapshot.forEach(doc => {
+      driversMap.set(doc.id, { id: doc.id, ...doc.data() });
+    });
+
+    // Mapas para acumular dados de cada plataforma
+    const dataByDriver = new Map<string, {
+      driverId: string;
+      driverName: string;
+      uberTotal: number;
+      boltTotal: number;
+      combustivel: number;
+      viaverde: number;
+      aluguel: number;
+      iban?: string;
+      type: 'affiliate' | 'renter';
+      rentalFee: number;
+    }>();
+
     // Processar cada importação
     for (const doc of importsSnapshot.docs) {
-      const importData = doc.data() as WeeklyDataImport;
+      const importData = doc.data();
+      const platform = importData.platform;
 
       try {
-        const processResult = await processImport(importData, session.userId || 'unknown');
-        
-        if (processResult.success) {
-          results.success.push(`${importData.platform}: ${processResult.recordsProcessed} motoristas`);
-          
-          // Marcar como processado
-          await doc.ref.update({
-            processed: true,
-            processedAt: new Date().toISOString(),
-          });
-        } else {
-          results.errors.push({
-            platform: importData.platform,
-            error: processResult.error || 'Erro desconhecido',
-          });
+        if (platform === 'uber') {
+          await processUberData(importData, driversMap, dataByDriver, results.warnings);
+          results.success.push(`Uber: processado com sucesso`);
+        } else if (platform === 'bolt') {
+          await processBoltData(importData, driversMap, dataByDriver, results.warnings);
+          results.success.push(`Bolt: processado com sucesso`);
+        } else if (platform === 'myprio') {
+          await processMyprioData(importData, driversMap, dataByDriver, results.warnings);
+          results.success.push(`myprio: processado com sucesso`);
+        } else if (platform === 'viaverde') {
+          await processViaverdeData(importData, driversMap, dataByDriver, results.warnings);
+          results.success.push(`ViaVerde: processado com sucesso`);
         }
 
-        if (processResult.warnings && processResult.warnings.length > 0) {
-          results.warnings.push(...processResult.warnings);
-        }
+        // Marcar como processado
+        await doc.ref.update({
+          processed: true,
+          processedAt: new Date().toISOString(),
+        });
       } catch (error) {
-        console.error(`Error processing ${importData.platform}:`, error);
+        console.error(`Error processing ${platform}:`, error);
         results.errors.push({
-          platform: importData.platform,
+          platform,
           error: error instanceof Error ? error.message : 'Erro no processamento',
         });
       }
     }
 
+    // Criar/atualizar registros semanais para cada motorista
+    let recordsCreated = 0;
+    for (const [driverId, data] of dataByDriver.entries()) {
+      const recordId = generateWeeklyRecordId(driverId, weekId);
+
+      const record = calculateDriverWeeklyRecord(
+        {
+          id: recordId,
+          driverId: data.driverId,
+          driverName: data.driverName,
+          weekId,
+          weekStart,
+          weekEnd,
+          uberTotal: data.uberTotal,
+          boltTotal: data.boltTotal,
+          combustivel: data.combustivel,
+          viaverde: data.viaverde,
+          aluguel: data.aluguel,
+          iban: data.iban,
+          dataSource: 'manual',
+        },
+        {
+          type: data.type,
+          rentalFee: data.rentalFee,
+        }
+      );
+
+      await db.collection('driverWeeklyRecords').doc(recordId).set(record);
+      recordsCreated++;
+    }
+
+    results.success.push(`Registros criados/atualizados: ${recordsCreated} motoristas`);
+
+    // Atualizar weeklyDataSources
+    const weekDoc = await db.collection('weeklyDataSources').doc(weekId).get();
+    let weekData = weekDoc.exists ? weekDoc.data() : null;
+
+    if (!weekData) {
+      const { createWeeklyDataSources } = await import('@/schemas/weekly-data-sources');
+      weekData = createWeeklyDataSources(weekId, weekStart, weekEnd);
+    }
+
+    // Atualizar status de cada fonte processada
+    for (const doc of importsSnapshot.docs) {
+      const importData = doc.data();
+      const platform = importData.platform as 'uber' | 'bolt' | 'myprio' | 'viaverde';
+      
+      const driversCount = Array.from(dataByDriver.values()).filter(d => {
+        if (platform === 'uber') return d.uberTotal > 0;
+        if (platform === 'bolt') return d.boltTotal > 0;
+        if (platform === 'myprio') return d.combustivel > 0;
+        if (platform === 'viaverde') return d.viaverde > 0;
+        return false;
+      }).length;
+
+      weekData = updateDataSource(weekData as any, platform, {
+        status: 'complete',
+        origin: 'manual',
+        driversCount,
+        recordsCount: importData.rawData?.rows?.length || 0,
+      });
+    }
+
+    await db.collection('weeklyDataSources').doc(weekId).set(weekData);
+
     return res.status(200).json({
       success: true,
       results,
+      recordsCreated,
+      weekId,
     });
   } catch (error) {
     console.error('Error processing imports:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Internal server error' 
+    });
   }
 }
 
 /**
- * Processa uma importação de dados
+ * Processa dados do Uber
  */
-async function processImport(importData: WeeklyDataImport, adminId: string): Promise<{
-  success: boolean;
-  recordsProcessed: number;
-  error?: string;
-  warnings?: string[];
-}> {
-  const db = getFirestore();
-  const warnings: string[] = [];
-  let recordsProcessed = 0;
-
-  // Processar conforme a plataforma
-  switch (importData.platform) {
-    case 'uber':
-      const uberResult = await processUberImport(importData, db, warnings);
-      recordsProcessed = uberResult;
-      break;
-
-    case 'bolt':
-      const boltResult = await processBoltImport(importData, db, warnings);
-      recordsProcessed = boltResult;
-      break;
-
-    case 'myprio':
-      const myprioResult = await processMyprioImport(importData, db, warnings);
-      recordsProcessed = myprioResult;
-      break;
-
-    case 'viaverde':
-      const viaverdeResult = await processViaverdeImport(importData, db, warnings);
-      recordsProcessed = viaverdeResult;
-      break;
-
-    default:
-      return {
-        success: false,
-        recordsProcessed: 0,
-        error: `Plataforma ${importData.platform} não suportada`,
-      };
-  }
-
-  return {
-    success: true,
-    recordsProcessed,
-    warnings: warnings.length > 0 ? warnings : undefined,
-  };
-}
-
-/**
- * Processa importação do Uber
- */
-async function processUberImport(
-  importData: WeeklyDataImport,
-  db: FirebaseFirestore.Firestore,
+async function processUberData(
+  importData: any,
+  driversMap: Map<string, any>,
+  dataByDriver: Map<string, any>,
   warnings: string[]
-): Promise<number> {
-  const rows = importData.rawData.rows || [];
-  let processed = 0;
-
-  for (const row of rows) {
-    try {
-      const uberUuid = row['UUID do motorista'];
-      
-      if (!uberUuid) {
-        warnings.push('Uber: Linha sem UUID do motorista (ignorada)');
-        continue;
-      }
-
-      // Buscar motorista pelo UUID do Uber
-      const driversSnapshot = await db.collection('drivers')
-        .where('integrations.uber.uuid', '==', uberUuid)
-        .limit(1)
-        .get();
-
-      if (driversSnapshot.empty) {
-        warnings.push(`Uber: Motorista com UUID ${uberUuid} não encontrado`);
-        continue;
-      }
-
-      const driverDoc = driversSnapshot.docs[0];
-      const driver = driverDoc.data();
-
-      // Extrair valores do Uber
-      const earnings = parseFloat(row['Pago a si:Os seus rendimentos:Tarifa:Tarifa'] || '0');
-      const tips = parseFloat(row['Pago a si:Os seus rendimentos:Tarifa:Gorjetas'] || '0');
-      const tolls = parseFloat(row['Pago a si:Os seus rendimentos:Tarifa:Portagens'] || '0');
-
-      // Buscar ou criar registro semanal
-      await upsertWeeklyRecord(
-        db,
-        driverDoc.id,
-        driver.name || driver.fullName || 'Unknown',
-        importData.weekStart,
-        importData.weekEnd,
-        {
-          uber: {
-            earnings,
-            tips,
-            tolls,
-            importId: importData.id,
-          },
-        },
-        driver.banking?.iban || ''
-      );
-
-      processed++;
-    } catch (error) {
-      console.error('Error processing Uber row:', error);
-      warnings.push(`Uber: Erro ao processar linha (${error})`);
-    }
-  }
-
-  return processed;
-}
-
-/**
- * Processa importação do Bolt
- */
-async function processBoltImport(
-  importData: WeeklyDataImport,
-  db: FirebaseFirestore.Firestore,
-  warnings: string[]
-): Promise<number> {
-  const rows = importData.rawData.rows || [];
-  let processed = 0;
-
-  for (const row of rows) {
-    try {
-      const boltId = row['Driver ID'] || row['driver_id'];
-      
-      if (!boltId) {
-        warnings.push('Bolt: Linha sem Driver ID (ignorada)');
-        continue;
-      }
-
-      // Buscar motorista pelo ID do Bolt
-      const driversSnapshot = await db.collection('drivers')
-        .where('integrations.bolt.id', '==', boltId)
-        .limit(1)
-        .get();
-
-      if (driversSnapshot.empty) {
-        warnings.push(`Bolt: Motorista com ID ${boltId} não encontrado`);
-        continue;
-      }
-
-      const driverDoc = driversSnapshot.docs[0];
-      const driver = driverDoc.data();
-
-      // Extrair valores do Bolt
-      const earnings = parseFloat(row['Earnings'] || row['Total'] || '0');
-      const tips = parseFloat(row['Tips'] || '0');
-      const tolls = 0; // Bolt geralmente não tem portagens separadas
-
-      // Buscar ou criar registro semanal
-      await upsertWeeklyRecord(
-        db,
-        driverDoc.id,
-        driver.name || driver.fullName || 'Unknown',
-        importData.weekStart,
-        importData.weekEnd,
-        {
-          bolt: {
-            earnings,
-            tips,
-            tolls,
-            importId: importData.id,
-          },
-        },
-        driver.banking?.iban || ''
-      );
-
-      processed++;
-    } catch (error) {
-      console.error('Error processing Bolt row:', error);
-      warnings.push(`Bolt: Erro ao processar linha (${error})`);
-    }
-  }
-
-  return processed;
-}
-
-/**
- * Processa importação do myprio
- */
-async function processMyprioImport(
-  importData: WeeklyDataImport,
-  db: FirebaseFirestore.Firestore,
-  warnings: string[]
-): Promise<number> {
-  const rows = importData.rawData.rows || [];
-  let processed = 0;
-
-  for (const row of rows) {
-    try {
-      const cardNumber = row['Cartão'] || row['Card'];
-      const amount = parseFloat(row['Valor'] || row['Amount'] || '0');
-      
-      if (!cardNumber) {
-        warnings.push('myprio: Transação sem número de cartão (ignorada)');
-        continue;
-      }
-
-      // Buscar motorista pelo cartão myprio
-      const driversSnapshot = await db.collection('drivers')
-        .where('cards.myprio', '==', cardNumber)
-        .limit(1)
-        .get();
-
-      if (driversSnapshot.empty) {
-        warnings.push(`myprio: Motorista com cartão ${cardNumber} não encontrado`);
-        continue;
-      }
-
-      const driverDoc = driversSnapshot.docs[0];
-      const driver = driverDoc.data();
-
-      // Buscar registro existente para agregar transações
-      const recordId = `${driverDoc.id}_${importData.weekStart}`;
-      const existingRecordDoc = await db.collection('driverWeeklyRecords').doc(recordId).get();
-      const existingRecord = existingRecordDoc.data() as ProcessedWeeklyRecord | undefined;
-
-      const currentFuelAmount = existingRecord?.fuel?.amount || 0;
-      const currentFuelTransactions = existingRecord?.fuel?.transactions || 0;
-
-      // Buscar ou criar registro semanal
-      await upsertWeeklyRecord(
-        db,
-        driverDoc.id,
-        driver.name || driver.fullName || 'Unknown',
-        importData.weekStart,
-        importData.weekEnd,
-        {
-          fuel: {
-            amount: currentFuelAmount + amount,
-            transactions: currentFuelTransactions + 1,
-            importId: importData.id,
-          },
-        },
-        driver.banking?.iban || ''
-      );
-
-      processed++;
-    } catch (error) {
-      console.error('Error processing myprio row:', error);
-      warnings.push(`myprio: Erro ao processar linha (${error})`);
-    }
-  }
-
-  return processed;
-}
-
-/**
- * Processa importação do ViaVerde
- */
-async function processViaverdeImport(
-  importData: WeeklyDataImport,
-  db: FirebaseFirestore.Firestore,
-  warnings: string[]
-): Promise<number> {
-  const rows = importData.rawData.rows || [];
-  let processed = 0;
-
-  for (const row of rows) {
-    try {
-      const plate = row['Matrícula'] || row['Plate'];
-      const amount = parseFloat(row['Valor'] || row['Amount'] || '0');
-      
-      if (!plate) {
-        warnings.push('ViaVerde: Transação sem matrícula (ignorada)');
-        continue;
-      }
-
-      // Buscar motorista pela matrícula do veículo
-      const driversSnapshot = await db.collection('drivers')
-        .where('vehicle.plate', '==', plate)
-        .limit(1)
-        .get();
-
-      if (driversSnapshot.empty) {
-        warnings.push(`ViaVerde: Motorista com matrícula ${plate} não encontrado`);
-        continue;
-      }
-
-      const driverDoc = driversSnapshot.docs[0];
-      const driver = driverDoc.data();
-
-      // Buscar registro existente para agregar transações
-      const recordId = `${driverDoc.id}_${importData.weekStart}`;
-      const existingRecordDoc = await db.collection('driverWeeklyRecords').doc(recordId).get();
-      const existingRecord = existingRecordDoc.data() as ProcessedWeeklyRecord | undefined;
-
-      const currentViaverdeAmount = existingRecord?.viaverde?.amount || 0;
-      const currentViaverdeTransactions = existingRecord?.viaverde?.transactions || 0;
-
-      // Buscar ou criar registro semanal
-      await upsertWeeklyRecord(
-        db,
-        driverDoc.id,
-        driver.name || driver.fullName || 'Unknown',
-        importData.weekStart,
-        importData.weekEnd,
-        {
-          viaverde: {
-            amount: currentViaverdeAmount + amount,
-            transactions: currentViaverdeTransactions + 1,
-            importId: importData.id,
-          },
-        },
-        driver.banking?.iban || ''
-      );
-
-      processed++;
-    } catch (error) {
-      console.error('Error processing ViaVerde row:', error);
-      warnings.push(`ViaVerde: Erro ao processar linha (${error})`);
-    }
-  }
-
-  return processed;
-}
-
-/**
- * Busca ou cria um registro semanal e atualiza com novos dados
- */
-async function upsertWeeklyRecord(
-  db: FirebaseFirestore.Firestore,
-  driverId: string,
-  driverName: string,
-  weekStart: string,
-  weekEnd: string,
-  updates: Partial<ProcessedWeeklyRecord>,
-  iban: string
 ): Promise<void> {
-  const recordId = `${driverId}_${weekStart}`;
-  const recordRef = db.collection('driverWeeklyRecords').doc(recordId);
+  const rows = importData.rawData?.rows || [];
 
-  const doc = await recordRef.get();
+  for (const row of rows) {
+    const uuid = row['UUID do motorista'] || row['Driver UUID'];
+    
+    if (!uuid) {
+      warnings.push('Uber: Linha sem UUID do motorista (ignorada)');
+      continue;
+    }
 
-  if (doc.exists) {
-    // Atualizar registro existente
-    const existingRecord = doc.data() as ProcessedWeeklyRecord;
+    // Buscar motorista pelo UUID
+    let driver = null;
+    for (const [id, d] of driversMap.entries()) {
+      if (d.integrations?.uber?.uuid === uuid) {
+        driver = d;
+        break;
+      }
+    }
 
-    // Merge dos dados
-    const updatedRecord: ProcessedWeeklyRecord = {
-      ...existingRecord,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
+    if (!driver) {
+      warnings.push(`Uber: Motorista com UUID ${uuid} não encontrado`);
+      continue;
+    }
 
-    // Recalcular totais
-    const recalculated = calculateWeeklyTotals(updatedRecord);
+    // Extrair valor "Pago a si"
+    const pagoASi = parseFloat(row['Pago a si'] || row['Paid to you'] || '0');
 
-    await recordRef.update(recalculated);
-  } else {
-    // Criar novo registro
-    const newRecord = createEmptyWeeklyRecord(
-      driverId,
-      driverName,
-      weekStart,
-      weekEnd,
-      iban
-    );
+    if (pagoASi <= 0) {
+      continue;
+    }
 
-    // Aplicar updates
-    const updatedRecord: ProcessedWeeklyRecord = {
-      ...newRecord,
-      ...updates,
-    };
+    // Obter ou criar entrada do motorista
+    let driverData = dataByDriver.get(driver.id);
+    if (!driverData) {
+      driverData = {
+        driverId: driver.id,
+        driverName: driver.name || driver.fullName || 'Unknown',
+        uberTotal: 0,
+        boltTotal: 0,
+        combustivel: 0,
+        viaverde: 0,
+        aluguel: driver.rentalFee || 0,
+        iban: driver.banking?.iban,
+        type: driver.type || 'affiliate',
+        rentalFee: driver.rentalFee || 0,
+      };
+      dataByDriver.set(driver.id, driverData);
+    }
 
-    // Recalcular totais
-    const recalculated = calculateWeeklyTotals(updatedRecord);
+    driverData.uberTotal += pagoASi;
+  }
+}
 
-    await recordRef.set(recalculated);
+/**
+ * Processa dados do Bolt
+ */
+async function processBoltData(
+  importData: any,
+  driversMap: Map<string, any>,
+  dataByDriver: Map<string, any>,
+  warnings: string[]
+): Promise<void> {
+  const rows = importData.rawData?.rows || [];
+
+  for (const row of rows) {
+    const driverId = row['ID do motorista'] || row['Driver ID'];
+    
+    if (!driverId) {
+      warnings.push('Bolt: Linha sem ID do motorista (ignorada)');
+      continue;
+    }
+
+    // Buscar motorista pelo ID do Bolt
+    let driver = null;
+    for (const [id, d] of driversMap.entries()) {
+      if (d.integrations?.bolt?.id === driverId) {
+        driver = d;
+        break;
+      }
+    }
+
+    if (!driver) {
+      warnings.push(`Bolt: Motorista com ID ${driverId} não encontrado`);
+      continue;
+    }
+
+    // Extrair "Ganhos brutos (total)"
+    const ganhosBrutos = parseFloat(row['Ganhos brutos (total)'] || row['Gross earnings (total)'] || '0');
+
+    if (ganhosBrutos <= 0) {
+      continue;
+    }
+
+    // Obter ou criar entrada do motorista
+    let driverData = dataByDriver.get(driver.id);
+    if (!driverData) {
+      driverData = {
+        driverId: driver.id,
+        driverName: driver.name || driver.fullName || 'Unknown',
+        uberTotal: 0,
+        boltTotal: 0,
+        combustivel: 0,
+        viaverde: 0,
+        aluguel: driver.rentalFee || 0,
+        iban: driver.banking?.iban,
+        type: driver.type || 'affiliate',
+        rentalFee: driver.rentalFee || 0,
+      };
+      dataByDriver.set(driver.id, driverData);
+    }
+
+    driverData.boltTotal += ganhosBrutos;
+  }
+}
+
+/**
+ * Processa dados do myprio
+ */
+async function processMyprioData(
+  importData: any,
+  driversMap: Map<string, any>,
+  dataByDriver: Map<string, any>,
+  warnings: string[]
+): Promise<void> {
+  const rows = importData.rawData?.rows || [];
+
+  for (const row of rows) {
+    const cardNumber = row['Número do cartão'] || row['Card number'] || row['Cartão'];
+    const valor = parseFloat(row['Valor'] || row['Amount'] || '0');
+    
+    if (!cardNumber) {
+      warnings.push('myprio: Transação sem número de cartão (ignorada)');
+      continue;
+    }
+
+    if (valor <= 0) {
+      continue;
+    }
+
+    // Buscar motorista pelo cartão
+    let driver = null;
+    for (const [id, d] of driversMap.entries()) {
+      if (d.cards?.myprio === cardNumber) {
+        driver = d;
+        break;
+      }
+    }
+
+    if (!driver) {
+      warnings.push(`myprio: Motorista com cartão ${cardNumber} não encontrado`);
+      continue;
+    }
+
+    // Obter ou criar entrada do motorista
+    let driverData = dataByDriver.get(driver.id);
+    if (!driverData) {
+      driverData = {
+        driverId: driver.id,
+        driverName: driver.name || driver.fullName || 'Unknown',
+        uberTotal: 0,
+        boltTotal: 0,
+        combustivel: 0,
+        viaverde: 0,
+        aluguel: driver.rentalFee || 0,
+        iban: driver.banking?.iban,
+        type: driver.type || 'affiliate',
+        rentalFee: driver.rentalFee || 0,
+      };
+      dataByDriver.set(driver.id, driverData);
+    }
+
+    driverData.combustivel += valor;
+  }
+}
+
+/**
+ * Processa dados do ViaVerde
+ */
+async function processViaverdeData(
+  importData: any,
+  driversMap: Map<string, any>,
+  dataByDriver: Map<string, any>,
+  warnings: string[]
+): Promise<void> {
+  const rows = importData.rawData?.rows || [];
+
+  for (const row of rows) {
+    const plate = row['Matrícula'] || row['License Plate'] || row['Placa'];
+    const valor = parseFloat(row['Valor'] || row['Amount'] || '0');
+    
+    if (!plate) {
+      warnings.push('ViaVerde: Transação sem matrícula (ignorada)');
+      continue;
+    }
+
+    if (valor <= 0) {
+      continue;
+    }
+
+    // Buscar motorista pela matrícula
+    let driver = null;
+    for (const [id, d] of driversMap.entries()) {
+      if (d.vehicle?.plate === plate) {
+        driver = d;
+        break;
+      }
+    }
+
+    if (!driver) {
+      warnings.push(`ViaVerde: Motorista com matrícula ${plate} não encontrado`);
+      continue;
+    }
+
+    // Obter ou criar entrada do motorista
+    let driverData = dataByDriver.get(driver.id);
+    if (!driverData) {
+      driverData = {
+        driverId: driver.id,
+        driverName: driver.name || driver.fullName || 'Unknown',
+        uberTotal: 0,
+        boltTotal: 0,
+        combustivel: 0,
+        viaverde: 0,
+        aluguel: driver.rentalFee || 0,
+        iban: driver.banking?.iban,
+        type: driver.type || 'affiliate',
+        rentalFee: driver.rentalFee || 0,
+      };
+      dataByDriver.set(driver.id, driverData);
+    }
+
+    driverData.viaverde += valor;
   }
 }

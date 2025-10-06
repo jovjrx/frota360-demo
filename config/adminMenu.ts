@@ -75,11 +75,11 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
     },
     {
-        id: 'metrics',
-        label: 'Métricas',
-        href: '/admin/metrics',
+        id: 'dados',
+        label: 'Dados',
+        href: '/admin/dados',
         icon: FiBarChart2,
-        description: 'Análise de performance',
+        description: 'Gerenciamento de dados semanais',
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
     {

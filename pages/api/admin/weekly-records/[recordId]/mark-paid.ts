@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const db = getFirestore();
-    const recordRef = db.collection('weeklyRecords').doc(recordId);
+    const recordRef = db.collection('driverWeeklyRecords').doc(recordId);
     
     await recordRef.update({
       paymentStatus: 'paid',
