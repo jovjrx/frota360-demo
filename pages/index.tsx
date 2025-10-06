@@ -52,37 +52,46 @@ export default function Home({ tPage, tCommon, locale }: PageProps & { locale: s
         badge={tHome(HOME.HERO.BADGE)}
         overlay
         actions={
-          <HStack spacing={4}>
-            <Button
-              as={NextLink}
-              href={getLocalizedHref("/request")}
-              size="lg"
-              px={8}
-              py={4}
-              shadow="lg"
-              colorScheme="green"
-              rightIcon={<ArrowRightIcon />}
+          <VStack spacing={{ base: 3, md: 0 }} w="full">
+            <HStack 
+              spacing={{ base: 2, md: 4 }} 
+              flexDirection={{ base: "column", md: "row" }}
+              w="full"
+              align="center"
             >
-              {tHome(HOME.HERO.CTA_PRIMARY)}
-            </Button>
-            <Button
-              as={NextLink}
-              href={t(COMMON.COMPANY.WHATSAPP)}
-              size="lg"
-              px={8}
-              py={4}
-              variant="outline"
-              colorScheme="whiteAlpha"
-              borderColor="whiteAlpha.400"
-              color="white"
-              _hover={{
-                bg: "whiteAlpha.100",
-                borderColor: "whiteAlpha.600"
-              }}
-            >
-              {tHome(HOME.HERO.CTA_SECONDARY)}
-            </Button>
-          </HStack>
+              <Button
+                as={NextLink}
+                href={getLocalizedHref("/request")}
+                size={{ base: "md", md: "lg" }}
+                px={{ base: 6, md: 8 }}
+                py={{ base: 3, md: 4 }}
+                w={{ base: "full", md: "auto" }}
+                shadow="lg"
+                colorScheme="green"
+                rightIcon={<ArrowRightIcon />}
+              >
+                {tHome(HOME.HERO.CTA_PRIMARY)}
+              </Button>
+              <Button
+                as={NextLink}
+                href={t(COMMON.COMPANY.WHATSAPP)}
+                size={{ base: "md", md: "lg" }}
+                px={{ base: 6, md: 8 }}
+                py={{ base: 3, md: 4 }}
+                w={{ base: "full", md: "auto" }}
+                variant="outline"
+                colorScheme="whiteAlpha"
+                borderColor="whiteAlpha.400"
+                color="white"
+                _hover={{
+                  bg: "whiteAlpha.100",
+                  borderColor: "whiteAlpha.600"
+                }}
+              >
+                {tHome(HOME.HERO.CTA_SECONDARY)}
+              </Button>
+            </HStack>
+          </VStack>
         }
       >
         <Highlight

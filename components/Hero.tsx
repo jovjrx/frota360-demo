@@ -82,7 +82,7 @@ export default function Hero({
               </Text>
             </VStack>
             {actions && (
-              <Box mt={4} w={isCenter ? "auto" : "unset"}>
+              <Box mt={4} w="full">
                 {actions}
               </Box>
             )}

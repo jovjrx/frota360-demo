@@ -189,12 +189,6 @@ export default function LoginPage({ translations }: LoginPageProps) {
                 Esqueci a senha
               </ChakraLink>
             </Text>
-            <Text color="gray.600" fontSize="sm">
-              Não tem uma conta?{' '}
-              <ChakraLink as={Link} href="/signup" color="green.500" fontWeight="medium">
-                  Criar conta
-              </ChakraLink>
-            </Text>
           </VStack>
         </VStack>
       </Container>
