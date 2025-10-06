@@ -153,18 +153,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       integrations: {
         uber: {
           uuid: uberUuid || null,
+          name: null,
           enabled: !!uberUuid,
         },
         bolt: {
-          driverId: boltDriverId || null,
+          id: boltDriverId || null,
+          email: null,
           enabled: !!boltDriverId,
         },
-        myprio: {
-          enabled: myprioEnabled || false,
-        },
-        viaverde: {
-          enabled: viaverdeEnabled || false,
-        },
+      },
+      
+      // Cartões de combustível/portagens
+      cards: {
+        myprio: myprioEnabled ? 'enabled' : null,
+        viaverde: viaverdeEnabled ? 'enabled' : null,
       },
       
       // Dados do Firebase Auth
