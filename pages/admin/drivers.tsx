@@ -46,7 +46,9 @@ import {
   FiCreditCard,
   FiTruck,
   FiDollarSign,
+  FiPlus,
 } from 'react-icons/fi';
+import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
 
@@ -89,6 +91,7 @@ interface DriversPageProps extends PageProps {
 }
 
 export default function DriversPage({ initialDrivers }: DriversPageProps) {
+  const router = useRouter();
   const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
@@ -223,6 +226,15 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
       title="Gestão de Motoristas"
       subtitle="Configure integrações, cartões e dados bancários dos motoristas"
       breadcrumbs={[{ label: 'Motoristas' }]}
+      side={
+        <Button
+          leftIcon={<Icon as={FiPlus} />}
+          colorScheme="red"
+          onClick={() => router.push('/admin/drivers/add')}
+        >
+          Adicionar Motorista
+        </Button>
+      }
     >
       <VStack spacing={6} align="stretch">
         {/* Filtros */}

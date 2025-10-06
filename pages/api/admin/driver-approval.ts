@@ -1,6 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/lib/session/ironSession';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
+
+/**
+ * Gera uma senha temporária aleatória
+ */
+function generateTemporaryPassword(): string {
+  const length = 12;
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -30,12 +43,67 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const driverData = driverDoc.data();
 
     if (action === 'approve') {
-      // Approve driver and create subscription
+      // 1. Criar conta no Firebase Auth (se não existir)
+      let firebaseUid = driverData?.firebaseUid;
+      let temporaryPassword = '';
+
+      if (!firebaseUid) {
+        try {
+          // Gerar senha temporária
+          temporaryPassword = generateTemporaryPassword();
+
+          // Criar usuário no Firebase Auth
+          const userRecord = await adminAuth.createUser({
+            email: driverData?.email,
+            password: temporaryPassword,
+            emailVerified: false,
+            displayName: driverData?.fullName || `${driverData?.firstName} ${driverData?.lastName}`,
+          });
+
+          firebaseUid = userRecord.uid;
+
+          // Definir custom claim para role de motorista
+          await adminAuth.setCustomUserClaims(userRecord.uid, {
+            role: 'driver',
+            driverId: driverId,
+          });
+
+          console.log(`✅ Conta Firebase Auth criada para ${driverData?.email} (UID: ${firebaseUid})`);
+
+        } catch (authError: any) {
+          // Se o email já existe, tentar buscar o usuário
+          if (authError.code === 'auth/email-already-exists') {
+            try {
+              const existingUser = await adminAuth.getUserByEmail(driverData?.email);
+              firebaseUid = existingUser.uid;
+
+              // Atualizar custom claims
+              await adminAuth.setCustomUserClaims(existingUser.uid, {
+                role: 'driver',
+                driverId: driverId,
+              });
+
+              console.log(`⚠️ Email já existe, usando conta existente (UID: ${firebaseUid})`);
+            } catch (error) {
+              console.error('Erro ao buscar usuário existente:', error);
+              throw new Error('Email já existe mas não foi possível vincular a conta');
+            }
+          } else {
+            console.error('Erro ao criar conta Firebase Auth:', authError);
+            throw authError;
+          }
+        }
+      }
+
+      // 2. Atualizar dados do motorista no Firestore
       const updateData: any = {
         status: 'active',
-        approvedAt: new Date(),
+        approvedAt: new Date().toISOString(),
         approvedBy: session.userId,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
+        firebaseUid: firebaseUid,
+        activatedAt: new Date().toISOString(),
+        activatedBy: session.userId,
       };
 
       // If planId is provided, update the selected plan
@@ -51,24 +119,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       await driverRef.update(updateData);
 
-      // Create subscription if driver has a selected plan
+      // 3. Create subscription if driver has a selected plan
       if (driverData?.selectedPlan || planId) {
         const subscriptionData = {
           driverId,
           planId: planId || driverData.selectedPlan,
           status: 'active',
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          trialStart: new Date(),
-          trialEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days trial
-          createdAt: new Date(),
+          currentPeriodStart: new Date().toISOString(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+          trialStart: new Date().toISOString(),
+          trialEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days trial
+          createdAt: new Date().toISOString(),
           createdBy: session.userId,
         };
 
         await adminDb.collection('subscriptions').add(subscriptionData);
       }
 
-      // Create notification for driver
+      // 4. Create notification for driver
       await adminDb
         .collection('drivers')
         .doc(driverId)
@@ -78,23 +146,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title: 'Conta Aprovada!',
           message: 'Sua conta foi aprovada e você já pode começar a trabalhar.',
           read: false,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
           createdBy: 'system',
         });
 
+      // 5. TODO: Enviar email com credenciais
+      // Aqui você pode integrar com serviço de email (SendGrid, AWS SES, etc.)
+      console.log(`📧 Email a ser enviado para ${driverData?.email}:`);
+      console.log(`   Login: ${driverData?.email}`);
+      if (temporaryPassword) {
+        console.log(`   Senha temporária: ${temporaryPassword}`);
+      }
+
       return res.status(200).json({ 
         success: true, 
-        message: 'Driver approved successfully' 
+        message: 'Driver approved successfully',
+        firebaseUid,
+        email: driverData?.email,
+        temporaryPassword: temporaryPassword || null, // Retornar apenas para o admin ver
       });
 
     } else if (action === 'reject') {
       // Reject driver
       await driverRef.update({
         status: 'rejected',
-        rejectedAt: new Date(),
+        rejectedAt: new Date().toISOString(),
         rejectedBy: session.userId,
         rejectionReason: rejectionReason || 'Documentos não atendem aos requisitos',
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       });
 
       // Create notification for driver
@@ -107,7 +186,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title: 'Conta Rejeitada',
           message: rejectionReason || 'Sua conta foi rejeitada. Entre em contato com o suporte para mais informações.',
           read: false,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
           createdBy: 'system',
         });
 
@@ -133,7 +212,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         selectedPlan: planId,
         planName: planData?.name,
         planPrice: planData?.priceCents,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
         updatedBy: session.userId,
       });
 
@@ -150,9 +229,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           driverId,
           planId,
           status: 'active',
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          createdAt: new Date(),
+          currentPeriodStart: new Date().toISOString(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date().toISOString(),
           createdBy: session.userId,
         });
       } else {
@@ -160,7 +239,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const subscriptionDoc = subscriptionSnap.docs[0];
         await subscriptionDoc.ref.update({
           planId,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
           updatedBy: session.userId,
         });
       }
@@ -175,7 +254,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title: 'Plano Alterado',
           message: `Seu plano foi alterado para ${planData?.name}.`,
           read: false,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
           createdBy: 'system',
         });
 
@@ -188,8 +267,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Invalid action' });
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in driver approval:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
 }
