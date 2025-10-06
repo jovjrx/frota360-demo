@@ -11,29 +11,35 @@ import {
   Heading,
   Text,
   HStack,
-  IconButton,
   VStack,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   Button,
+  IconButton,
+  Avatar,
+  MenuDivider,
+  useBreakpointValue,
+  Badge,
+  Icon,
 } from '@chakra-ui/react';
-import { 
-  FiBell, 
-  FiHome, 
-  FiChevronRight, 
-  FiSettings,
-  FiUsers,
-  FiTruck,
-  FiActivity,
-  FiFileText,
+import {
+  FiHome,
+  FiChevronRight,
   FiGrid,
   FiChevronDown,
+  FiLogOut,
+  FiUser,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import NotificationBadge from './notifications/NotificationBadge';
+import {
+  getMainMenuItems,
+  getMoreMenuItems,
+  getAllMenuItems,
+  isMenuItemActive,
+} from '@/config/adminMenu';
 
 interface LoggedInLayoutProps {
   children: React.ReactNode;
@@ -45,23 +51,36 @@ interface LoggedInLayoutProps {
   }>;
 }
 
-export default function LoggedInLayout({ 
-  children, 
-  title, 
-  subtitle, 
-  breadcrumbs = [] 
+export default function LoggedInLayout({
+  children,
+  title,
+  subtitle,
+  breadcrumbs = []
 }: LoggedInLayoutProps) {
   const router = useRouter();
   const isAdminRoute = useMemo(() => router.pathname.startsWith('/admin'), [router.pathname]);
+  
+  // Mobile: esconde o menu horizontal, mostra apenas dropdown do usuário
+  const isMobile = useBreakpointValue({ base: true, lg: false });
+  const showHorizontalMenu = !isMobile && isAdminRoute;
+
+  const mainMenuItems = getMainMenuItems();
+  const moreMenuItems = getMoreMenuItems();
+  const allMenuItems = getAllMenuItems();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
 
   return (
     <Box minH="100vh" bg="gray.50">
       {/* Header */}
       <Box bg="white" borderBottom="1px" borderColor="gray.200" shadow="sm">
         <Container maxW="7xl">
-          <HStack justify="space-between" py={4}>
-            {/* Logo e Nome */}
-            <HStack spacing={4}>
+          <HStack justify="space-between" py={4} spacing={4}>
+            {/* Logo */}
+            <HStack spacing={3}>
               <Box
                 w="40px"
                 h="40px"
@@ -76,7 +95,7 @@ export default function LoggedInLayout({
               >
                 C
               </Box>
-              <VStack align="start" spacing={0}>
+              <VStack align="start" spacing={0} display={{ base: 'none', md: 'flex' }}>
                 <Text fontWeight="bold" fontSize="lg" color="gray.900">
                   Conduz.pt
                 </Text>
@@ -86,91 +105,111 @@ export default function LoggedInLayout({
               </VStack>
             </HStack>
 
-            {/* Menu de Navegação Admin */}
-            {isAdminRoute && (
-              <HStack spacing={1}>
-                <Button
-                  as={Link}
-                  href="/admin"
-                  variant={router.pathname === '/admin' ? 'solid' : 'ghost'}
-                  colorScheme={router.pathname === '/admin' ? 'green' : 'gray'}
-                  size="sm"
-                  leftIcon={<FiHome />}
-                >
-                  Dashboard
-                </Button>
-
-                <Button
-                  as={Link}
-                  href="/admin/requests"
-                  variant={router.pathname.startsWith('/admin/requests') ? 'solid' : 'ghost'}
-                  colorScheme={router.pathname.startsWith('/admin/requests') ? 'green' : 'gray'}
-                  size="sm"
-                  leftIcon={<FiFileText />}
-                >
-                  Solicitações
-                </Button>
-
-                <Button
-                  as={Link}
-                  href="/admin/drivers"
-                  variant={router.pathname.startsWith('/admin/drivers') ? 'solid' : 'ghost'}
-                  colorScheme={router.pathname.startsWith('/admin/drivers') ? 'green' : 'gray'}
-                  size="sm"
-                  leftIcon={<FiUsers />}
-                >
-                  Motoristas
-                </Button>
-
-                <Button
-                  as={Link}
-                  href="/admin/fleet"
-                  variant={router.pathname.startsWith('/admin/fleet') ? 'solid' : 'ghost'}
-                  colorScheme={router.pathname.startsWith('/admin/fleet') ? 'green' : 'gray'}
-                  size="sm"
-                  leftIcon={<FiTruck />}
-                >
-                  Frota
-                </Button>
-
-                <Menu>
-                  <MenuButton
-                    as={Button}
+            {/* Menu Horizontal (Desktop apenas) */}
+            {showHorizontalMenu && (
+              <HStack spacing={1} flex={1} justify="center">
+                {mainMenuItems.map((item) => (
+                  <Button
+                    key={item.id}
+                    as={Link}
+                    href={item.href}
+                    variant={isMenuItemActive(item.href, router.pathname) ? 'solid' : 'ghost'}
+                    colorScheme={isMenuItemActive(item.href, router.pathname) ? 'green' : 'gray'}
                     size="sm"
-                    variant="ghost"
-                    rightIcon={<FiChevronDown />}
-                    leftIcon={<FiGrid />}
+                    leftIcon={<Icon as={item.icon} />}
                   >
-                    Mais
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<FiActivity />} as={Link} href="/admin/metrics">
-                      Métricas
-                    </MenuItem>
-                    <MenuItem icon={<FiSettings />} as={Link} href="/admin/integrations">
-                      Integrações
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                    {item.label}
+                  </Button>
+                ))}
+
+                {/* Dropdown "Mais" */}
+                {moreMenuItems.length > 0 && (
+                  <Menu>
+                    <MenuButton
+                      as={Button}
+                      size="sm"
+                      variant="ghost"
+                      rightIcon={<FiChevronDown />}
+                      leftIcon={<FiGrid />}
+                    >
+                      Mais
+                    </MenuButton>
+                    <MenuList>
+                      {moreMenuItems.map((item) => (
+                        <MenuItem
+                          key={item.id}
+                          icon={<Icon as={item.icon} />}
+                          as={Link}
+                          href={item.href}
+                        >
+                          {item.label}
+                        </MenuItem>
+                      ))}
+                    </MenuList>
+                  </Menu>
+                )}
               </HStack>
             )}
 
-            {/* Spacer */}
-            <Box flex={1} />
+            {/* Spacer no mobile */}
+            {isMobile && <Box flex={1} />}
 
-            {/* Ações do Header */}
-            <HStack spacing={2}>
-              {/* Notificações */}
-              <NotificationBadge />
-
-              {/* Configurações */}
-              <IconButton
-                icon={<FiSettings />}
+            {/* Menu do Usuário */}
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<Avatar size="sm" name="Admin" />}
                 variant="ghost"
-                size="sm"
-                aria-label="Configurações"
+                aria-label="Menu do usuário"
               />
-            </HStack>
+              <MenuList>
+                {/* Cabeçalho */}
+                <Box px={3} py={2}>
+                  <Text fontWeight="bold" fontSize="sm">
+                    Administrador
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">
+                    admin@conduz.pt
+                  </Text>
+                </Box>
+                
+                <MenuDivider />
+
+                {/* Mobile: Mostrar todos os itens do menu */}
+                {isMobile && isAdminRoute && (
+                  <>
+                    {allMenuItems.map((item) => (
+                      <MenuItem
+                        key={item.id}
+                        icon={<Icon as={item.icon} />}
+                        as={Link}
+                        href={item.href}
+                        bg={isMenuItemActive(item.href, router.pathname) ? 'green.50' : undefined}
+                        color={isMenuItemActive(item.href, router.pathname) ? 'green.600' : undefined}
+                      >
+                        <HStack justify="space-between" w="full">
+                          <Text>{item.label}</Text>
+                          {isMenuItemActive(item.href, router.pathname) && (
+                            <Badge colorScheme="green" size="sm">
+                              Ativo
+                            </Badge>
+                          )}
+                        </HStack>
+                      </MenuItem>
+                    ))}
+                    <MenuDivider />
+                  </>
+                )}
+
+                {/* Opções gerais */}
+                <MenuItem icon={<FiUser />} as={Link} href="/admin/profile">
+                  Meu Perfil
+                </MenuItem>
+                <MenuItem icon={<FiLogOut />} onClick={handleLogout} color="red.500">
+                  Sair
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </HStack>
         </Container>
       </Box>

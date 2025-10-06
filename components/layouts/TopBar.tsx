@@ -56,12 +56,6 @@ export default function TopBar({
     }
   };
 
-  // Limitar caracteres do nome para não quebrar o layout
-  const truncateName = (name: string, maxLength: number = 20) => {
-    if (name.length <= maxLength) return name;
-    return name.substring(0, maxLength) + '...';
-  };
-
   return (
     <Box bg="white" borderBottom="1px" borderColor="gray.200" py={3} shadow="sm">
       <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }}>

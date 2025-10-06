@@ -75,63 +75,79 @@ export default async function handler(
       errors: [],
     };
 
-    // Mock data for now - will be replaced with real integrations
-    metrics.platforms.bolt = {
-      totalTrips: 1250,
-      totalEarnings: 15680.50,
-      activeDrivers: 45,
-      success: true,
-      lastUpdate: new Date().toISOString(),
-    };
-    
-    metrics.summary.totalTrips += 1250;
-    metrics.summary.totalEarnings += 15680.50;
-    metrics.summary.activeDrivers += 45;
+    const platforms = ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
 
-    // Mock Cartrack data
-    metrics.platforms.cartrack = {
-      activeVehicles: 38,
-      totalMileage: 45670,
-      averageUtilization: 78.5,
-      success: true,
-      lastUpdate: new Date().toISOString(),
-    };
-    
-    metrics.summary.activeVehicles += 38;
+    // Buscar dados reais de cada plataforma
+    for (const platform of platforms) {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/integrations/${platform}/data`,
+          {
+            headers: {
+              cookie: req.headers.cookie || '',
+            },
+          }
+        );
 
-    // Mock FONOA data
-    metrics.platforms.fonoa = {
-      totalBilled: 12500.00,
-      taxesPaid: 2875.00,
-      invoicesGenerated: 45,
-      success: true,
-      lastUpdate: new Date().toISOString(),
-    };
+        if (response.ok) {
+          const result = await response.json();
+          
+          if (result.success && result.data) {
+            metrics.platforms[platform] = {
+              online: true,
+              lastSync: result.data.lastUpdate || new Date().toISOString(),
+              data: result.data,
+            };
 
-    // Mock ViaVerde data
-    metrics.platforms.viaverde = {
-      totalSpent: 1250.75,
-      transactionsCount: 156,
-      averageTransaction: 8.02,
-      success: true,
-      lastUpdate: new Date().toISOString(),
-    };
-    
-    metrics.summary.totalExpenses += 1250.75;
+            // Processar dados por plataforma
+            switch (platform) {
+              case 'uber':
+              case 'bolt':
+                if (result.data.summary) {
+                  metrics.summary.totalTrips += result.data.summary.totalTrips || 0;
+                  metrics.summary.totalEarnings += result.data.summary.totalEarnings || 0;
+                }
+                break;
 
-    // Mock myprio data
-    metrics.platforms.myprio = {
-      totalExpenses: 3450.25,
-      categories: {
-        fuel: 2100.00,
-        maintenance: 850.25,
-        insurance: 500.00,
-      },
-      success: true,
-      lastUpdate: new Date().toISOString(),
-    };
-    
-    metrics.summary.totalExpenses += 3450.25;
+              case 'cartrack':
+                if (result.data.summary) {
+                  metrics.summary.totalTrips += result.data.summary.totalTrips || 0;
+                  metrics.summary.activeVehicles += result.data.summary.totalVehicles || 0;
+                }
+                break;
+
+              case 'viaverde':
+              case 'myprio':
+                if (result.data.summary) {
+                  metrics.summary.totalExpenses += result.data.summary.totalExpenses || 0;
+                }
+                break;
+            }
+          } else {
+            metrics.platforms[platform] = {
+              online: false,
+              lastSync: new Date().toISOString(),
+              error: result.error || 'Erro ao buscar dados',
+            };
+            metrics.errors.push(`${platform}: ${result.error || 'Erro desconhecido'}`);
+          }
+        } else {
+          metrics.platforms[platform] = {
+            online: false,
+            lastSync: new Date().toISOString(),
+            error: 'Plataforma não responde',
+          };
+          metrics.errors.push(`${platform}: Plataforma não responde`);
+        }
+      } catch (error: any) {
+        metrics.platforms[platform] = {
+          online: false,
+          lastSync: new Date().toISOString(),
+          error: error.message || 'Erro de conexão',
+        };
+        metrics.errors.push(`${platform}: ${error.message || 'Erro de conexão'}`);
+      }
+    }
 
     // Calcular lucro líquido
     metrics.summary.netProfit = metrics.summary.totalEarnings - metrics.summary.totalExpenses;
