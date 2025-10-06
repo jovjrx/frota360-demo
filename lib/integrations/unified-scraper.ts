@@ -1,5 +1,3 @@
-import { FONOAClient } from './fonoa/client';
-
 // Scrapers são importados dinamicamente para evitar problemas com puppeteer no build
 // import { ViaVerdeScraper } from './viaverde/scraper';
 // import { MyprioScraper } from './myprio/scraper';
@@ -55,15 +53,10 @@ export interface UnifiedMetrics {
 }
 
 export class UnifiedScraper {
-  private fonoa: FONOAClient;
   private viaverde: any; // ViaVerdeScraper - lazy loaded
   private myprio: any; // MyprioScraper - lazy loaded
 
   constructor() {
-    this.fonoa = new FONOAClient({
-      email: process.env.FONOA_EMAIL || 'info@alvoradamagistral.eu',
-      password: process.env.FONOA_PASSWORD || 'Muffin@2017'
-    });
     // ViaVerde e Myprio scrapers são carregados sob demanda
   }
 
@@ -74,21 +67,19 @@ export class UnifiedScraper {
     const lastDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
 
-    // Executar apenas integrações de scraper (Uber, Bolt, Cartrack agora usam factory functions)
+    // Executar apenas scrapers restantes (ViaVerde, Myprio)
     const results = await Promise.allSettled([
-      this.syncFonoa(year, month),
       this.syncViaVerde(year, month),
       this.syncMyprio(year, month)
     ]);
 
     // Extrair dados ou erros
-    const fonoa = results[0].status === 'fulfilled' ? results[0].value : null;
-    const viaverde = results[1].status === 'fulfilled' ? results[1].value : null;
-    const myprio = results[2].status === 'fulfilled' ? results[2].value : null;
+    const viaverde = results[0].status === 'fulfilled' ? results[0].value : null;
+    const myprio = results[1].status === 'fulfilled' ? results[1].value : null;
 
     // Coletar erros
     const errors: Array<{ platform: string; error: string }> = [];
-    const platforms = ['fonoa', 'viaverde', 'myprio'];
+    const platforms = ['viaverde', 'myprio'];
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
         errors.push({
@@ -102,8 +93,7 @@ export class UnifiedScraper {
     const totalFuelCost = myprio?.totalFuel || 0;
     const totalTollsCost = viaverde?.totalTolls || 0;
     const totalMaintenanceCost = myprio?.totalMaintenance || 0;
-    const totalTaxes = fonoa?.totalTaxes || 0;
-    const totalExpenses = totalFuelCost + totalTollsCost + totalMaintenanceCost + totalTaxes;
+    const totalExpenses = totalFuelCost + totalTollsCost + totalMaintenanceCost;
 
     console.log('\n=== Resumo das Métricas (Scrapers) ===');
     console.log(`Despesas: €${totalExpenses.toFixed(2)}`);
@@ -116,14 +106,13 @@ export class UnifiedScraper {
       totalFuelCost: Math.round(totalFuelCost * 100) / 100,
       totalTollsCost: Math.round(totalTollsCost * 100) / 100,
       totalMaintenanceCost: Math.round(totalMaintenanceCost * 100) / 100,
-      totalTaxes: Math.round(totalTaxes * 100) / 100,
+      totalTaxes: 0, // FONOA removido
       totalExpenses: Math.round(totalExpenses * 100) / 100,
       activeVehicles: 0, // Calculado via factory functions
       totalVehicles: 0, // Calculado via factory functions
       totalDistance: 0, // Calculado via factory functions
       netProfit: 0, // Calculado via factory functions
       platforms: {
-        fonoa,
         viaverde,
         myprio
       },
@@ -136,24 +125,6 @@ export class UnifiedScraper {
       errors,
       timestamp: new Date().toISOString()
     };
-  }
-
-  private async syncFonoa(year: number, month: number): Promise<any> {
-    console.log('[FONOA] Iniciando sincronização...');
-    try {
-      const result = await this.fonoa.getMonthlyData(year, month);
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Unknown error');
-      }
-
-      console.log(`[FONOA] ✓ €${result.data?.totalTaxes.toFixed(2)} em impostos`);
-      
-      return result.data;
-    } catch (error: any) {
-      console.error(`[FONOA] ✗ Erro: ${error.message}`);
-      throw error;
-    }
   }
 
   private async syncViaVerde(year: number, month: number): Promise<any> {

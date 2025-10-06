@@ -255,7 +255,6 @@ export default function AdminDashboard({ translations, locale, tCommon, tPage, m
                   { name: 'Bolt', status: 'online', lastSync: '5 min atrás' },
                   { name: 'Cartrack', status: 'online', lastSync: '1 min atrás' },
                   { name: 'ViaVerde', status: 'online', lastSync: '3 min atrás' },
-                  { name: 'FONOA', status: 'warning', lastSync: '2 horas atrás' },
                   { name: 'myprio', status: 'online', lastSync: '10 min atrás' },
                 ].map((integration) => (
                   <HStack

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
+import { requireAdmin } from '@/lib/auth/helpers';
 import { ApiResponse } from '@/types';
 // import {
 //   BoltClient,
@@ -37,14 +37,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse<UnifiedMetrics>>
 ) {
-  // Verificar autenticação
-  const session = await getSession(req, res);
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({
-      success: false,
-      error: 'Não autorizado',
-    });
-  }
+  // Verificar autenticação admin
+  const session = await requireAdmin(req, res);
+  if (!session) return; // requireAdmin já enviou a resposta 401
 
   if (req.method !== 'GET') {
     return res.status(405).json({

@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types';
 import {
   createBoltClient,
   createCartrackClient,
-  createFonoaClient,
   createViaVerdeClient,
   createMyprioClient,
 } from '@/lib/integrations';
@@ -51,11 +50,6 @@ export default async function handler(
       case 'cartrack':
         const cartrackClient = await createCartrackClient();
         result = await cartrackClient.testConnection();
-        break;
-
-      case 'fonoa':
-        const fonoaClient = await createFonoaClient();
-        result = await fonoaClient.testConnection();
         break;
 
       case 'viaverde':

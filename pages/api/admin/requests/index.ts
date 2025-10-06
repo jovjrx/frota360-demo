@@ -1,20 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '@/lib/firebaseAdmin';
-import { getSession } from '@/lib/session';
+import { requireAdmin } from '@/lib/auth/helpers';
 import { ApiResponse, PaginatedResponse } from '@/types';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PaginatedResponse | ApiResponse>
 ) {
-  // Verificar autenticação
-  const session = await getSession(req, res);
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({
-      success: false,
-      error: 'Não autorizado',
-    });
-  }
+  // Verificar autenticação admin
+  const session = await requireAdmin(req, res);
+  if (!session) return;
 
   if (req.method === 'GET') {
     try {

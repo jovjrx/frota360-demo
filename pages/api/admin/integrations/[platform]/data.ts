@@ -22,7 +22,7 @@ export default async function handler(
   }
 
   // Validar se é uma plataforma válida
-  const validPlatforms: IntegrationPlatform[] = ['uber', 'bolt', 'cartrack', 'viaverde', 'fonoa', 'myprio'];
+  const validPlatforms: IntegrationPlatform[] = ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
   if (!validPlatforms.includes(platform as IntegrationPlatform)) {
     return res.status(400).json({
       success: false,
@@ -119,7 +119,6 @@ export default async function handler(
         break;
 
       case 'viaverde':
-      case 'fonoa':
       case 'myprio':
         data = {
           platform: platform,

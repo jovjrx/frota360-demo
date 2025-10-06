@@ -219,7 +219,6 @@ export default function AdminIntegrations({ translations, locale, tCommon, tPage
           orgUuid: formData.orgUuid || '',
         };
       case 'viaverde':
-      case 'fonoa':
         return {
           email: formData.email || '',
           password: formData.password || '',
@@ -323,7 +322,6 @@ export default function AdminIntegrations({ translations, locale, tCommon, tPage
         );
       
       case 'viaverde':
-      case 'fonoa':
         return (
           <>
             <FormControl>
@@ -1351,12 +1349,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           id: 'viaverde',
           name: 'ViaVerde',
           description: 'Integração com ViaVerde para dados de portagens',
-          status: 'disconnected',
-        },
-        {
-          id: 'fonoa',
-          name: 'FONOA',
-          description: 'Integração com FONOA para faturação',
           status: 'disconnected',
         },
         {

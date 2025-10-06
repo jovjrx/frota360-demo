@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
+import { requireAdmin } from '@/lib/auth/helpers';
 import { db } from '@/lib/firebaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -7,11 +7,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const session = await getSession(req, res);
-  
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = await requireAdmin(req, res);
+  if (!session) return;
 
   try {
     const { id, paymentDate } = req.body;

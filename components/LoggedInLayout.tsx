@@ -13,8 +13,24 @@ import {
   HStack,
   IconButton,
   VStack,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Button,
 } from '@chakra-ui/react';
-import { FiBell, FiHome, FiChevronRight, FiSettings } from 'react-icons/fi';
+import { 
+  FiBell, 
+  FiHome, 
+  FiChevronRight, 
+  FiSettings,
+  FiUsers,
+  FiTruck,
+  FiActivity,
+  FiFileText,
+  FiGrid,
+  FiChevronDown,
+} from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import NotificationBadge from './notifications/NotificationBadge';
@@ -44,31 +60,98 @@ export default function LoggedInLayout({
       <Box bg="white" borderBottom="1px" borderColor="gray.200" shadow="sm">
         <Container maxW="7xl">
           <HStack justify="space-between" py={4}>
-            {/* Logo e Nome para rotas não-admin */}
-            {!isAdminRoute && (
-              <HStack spacing={4}>
-                <Box
-                  w="40px"
-                  h="40px"
-                  bg="green.500"
-                  borderRadius="lg"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  color="white"
-                  fontWeight="bold"
-                  fontSize="lg"
+            {/* Logo e Nome */}
+            <HStack spacing={4}>
+              <Box
+                w="40px"
+                h="40px"
+                bg="green.500"
+                borderRadius="lg"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="white"
+                fontWeight="bold"
+                fontSize="lg"
+              >
+                C
+              </Box>
+              <VStack align="start" spacing={0}>
+                <Text fontWeight="bold" fontSize="lg" color="gray.900">
+                  Conduz.pt
+                </Text>
+                <Text fontSize="sm" color="gray.500">
+                  {isAdminRoute ? 'Painel Admin' : 'Painel'}
+                </Text>
+              </VStack>
+            </HStack>
+
+            {/* Menu de Navegação Admin */}
+            {isAdminRoute && (
+              <HStack spacing={1}>
+                <Button
+                  as={Link}
+                  href="/admin"
+                  variant={router.pathname === '/admin' ? 'solid' : 'ghost'}
+                  colorScheme={router.pathname === '/admin' ? 'green' : 'gray'}
+                  size="sm"
+                  leftIcon={<FiHome />}
                 >
-                  C
-                </Box>
-                <VStack align="start" spacing={0}>
-                  <Text fontWeight="bold" fontSize="lg" color="gray.900">
-                    Conduz.pt
-                  </Text>
-                  <Text fontSize="sm" color="gray.500">
-                    Painel
-                  </Text>
-                </VStack>
+                  Dashboard
+                </Button>
+
+                <Button
+                  as={Link}
+                  href="/admin/requests"
+                  variant={router.pathname.startsWith('/admin/requests') ? 'solid' : 'ghost'}
+                  colorScheme={router.pathname.startsWith('/admin/requests') ? 'green' : 'gray'}
+                  size="sm"
+                  leftIcon={<FiFileText />}
+                >
+                  Solicitações
+                </Button>
+
+                <Button
+                  as={Link}
+                  href="/admin/drivers"
+                  variant={router.pathname.startsWith('/admin/drivers') ? 'solid' : 'ghost'}
+                  colorScheme={router.pathname.startsWith('/admin/drivers') ? 'green' : 'gray'}
+                  size="sm"
+                  leftIcon={<FiUsers />}
+                >
+                  Motoristas
+                </Button>
+
+                <Button
+                  as={Link}
+                  href="/admin/fleet"
+                  variant={router.pathname.startsWith('/admin/fleet') ? 'solid' : 'ghost'}
+                  colorScheme={router.pathname.startsWith('/admin/fleet') ? 'green' : 'gray'}
+                  size="sm"
+                  leftIcon={<FiTruck />}
+                >
+                  Frota
+                </Button>
+
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    size="sm"
+                    variant="ghost"
+                    rightIcon={<FiChevronDown />}
+                    leftIcon={<FiGrid />}
+                  >
+                    Mais
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem icon={<FiActivity />} as={Link} href="/admin/metrics">
+                      Métricas
+                    </MenuItem>
+                    <MenuItem icon={<FiSettings />} as={Link} href="/admin/integrations">
+                      Integrações
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
               </HStack>
             )}
 

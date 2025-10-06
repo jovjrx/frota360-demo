@@ -131,36 +131,9 @@ async function main() {
     console.log('✅ ViaVerde configurado (desabilitado)\n');
 
     // ========================================================================
-    // 5. FONOA
+    // 5. MYPRIO
     // ========================================================================
-    console.log('📝 5. Atualizando FONOA...');
-    
-    await integrationService.updateIntegration('fonoa', {
-      enabled: false, // Não implementado
-      status: 'inactive',
-      credentials: {
-        email: 'info@alvoradamagistral.eu',
-        password: 'Muffin@2017',
-      },
-      config: {
-        baseUrl: 'https://app.fonoa.com',
-        endpoints: {
-          login: 'https://app.fonoa.com/login',
-        },
-      },
-    });
-    
-    await integrationLogService.logInfo(
-      'fonoa',
-      'Credenciais configuradas (não implementado)'
-    );
-    
-    console.log('✅ FONOA configurado (não implementado)\n');
-
-    // ========================================================================
-    // 6. MYPRIO
-    // ========================================================================
-    console.log('📝 6. Atualizando myPrio...');
+    console.log('📝 5. Atualizando myPrio...');
     
     await integrationService.updateIntegration('myprio', {
       enabled: false, // Desabilitado até testar scraper

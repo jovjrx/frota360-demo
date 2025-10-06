@@ -9,7 +9,7 @@ async function showFirestoreData() {
   console.log('🔍 Analisando dados no Firestore...\n');
   console.log('=' .repeat(80));
 
-  const platforms: IntegrationPlatform[] = ['uber', 'bolt', 'cartrack', 'viaverde', 'fonoa', 'myprio'];
+  const platforms: IntegrationPlatform[] = ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
 
   for (const platform of platforms) {
     const integration = await integrationService.getIntegration(platform);

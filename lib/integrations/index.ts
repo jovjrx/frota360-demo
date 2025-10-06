@@ -3,7 +3,6 @@ export { UberClient } from './uber/client';
 export { BoltClient } from './bolt/client';
 export { CartrackClient } from './cartrack/client';
 export { ViaVerdeClient } from './viaverde/client';
-export { FONOAClient } from './fonoa/client';
 export { MyprioClient } from './myprio/client';
 
 export type {
@@ -24,7 +23,6 @@ import { UberClient as UberClientClass } from './uber/client';
 import { BoltClient as BoltClientClass } from './bolt/client';
 import { CartrackClient as CartrackClientClass } from './cartrack/client';
 import { ViaVerdeClient as ViaVerdeClientClass } from './viaverde/client';
-import { FONOAClient as FONOAClientClass } from './fonoa/client';
 import { MyprioClient as MyprioClientClass } from './myprio/client';
 import integrationService from './integration-service';
 
@@ -78,19 +76,6 @@ export async function createViaVerdeClient() {
   }
 
   return new ViaVerdeClientClass({
-    email: integration.credentials.email || '',
-    password: integration.credentials.password || '',
-  });
-}
-
-export async function createFonoaClient() {
-  const integration = await integrationService.getIntegration('fonoa');
-  
-  if (!integration) {
-    throw new Error('FONOA integration not configured');
-  }
-
-  return new FONOAClientClass({
     email: integration.credentials.email || '',
     password: integration.credentials.password || '',
   });

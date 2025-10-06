@@ -7,7 +7,6 @@ import {
   createBoltClient,
   createUberClient,
   createViaVerdeClient,
-  createFonoaClient,
   createMyprioClient
 } from '../lib/integrations';
 
@@ -58,20 +57,9 @@ async function testFactoryFunctions() {
     console.log();
   }
 
-  // Teste 5: FONOA
+  // Teste 5: myPrio
   try {
-    console.log('5️⃣ Testando FONOA...');
-    const fonoaClient = await createFonoaClient();
-    console.log('✅ FONOA client criado com sucesso');
-    console.log('   Credenciais carregadas do Firestore\n');
-  } catch (error) {
-    console.error('❌ Erro ao criar FONOA client:', error instanceof Error ? error.message : error);
-    console.log();
-  }
-
-  // Teste 6: myPrio
-  try {
-    console.log('6️⃣ Testando myPrio...');
+    console.log('5️⃣ Testando myPrio...');
     const myprioClient = await createMyprioClient();
     console.log('✅ myPrio client criado com sucesso');
     console.log('   Credenciais carregadas do Firestore\n');

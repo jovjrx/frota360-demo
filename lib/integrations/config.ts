@@ -43,7 +43,6 @@ export type IntegrationPlatform =
   | 'bolt' 
   | 'cartrack' 
   | 'viaverde' 
-  | 'fonoa' 
   | 'myprio';
 
 // ============================================================================
@@ -159,29 +158,6 @@ const VIAVERDE_CONFIG: IntegrationConfig = {
 };
 
 /**
- * 🧾 FONOA (IVA/Tax Management)
- * Tipo: Web Scraping (Puppeteer) ou API se disponível
- * URL: https://app.fonoa.com/
- */
-const FONOA_CONFIG: IntegrationConfig = {
-  enabled: false, // ⚠️ Ainda não implementado
-  name: 'FONOA',
-  type: 'scraper',
-  credentials: {
-    email: process.env.FONOA_EMAIL || 'info@alvoradamagistral.eu',
-    password: process.env.FONOA_PASSWORD || 'Muffin@2017',
-  },
-  endpoints: {
-    base: process.env.FONOA_BASE_URL || 'https://app.fonoa.com',
-    login: 'https://app.fonoa.com/login',
-  },
-  options: {
-    headless: process.env.NODE_ENV === 'production',
-    timeout: 30000,
-  },
-};
-
-/**
  * 💳 MYPRIO (Expense Management)
  * Tipo: Web Scraping (Puppeteer)
  * URL: https://www.myprio.pt/
@@ -213,7 +189,6 @@ const INTEGRATION_CONFIGS: Record<IntegrationPlatform, IntegrationConfig> = {
   bolt: BOLT_CONFIG,
   cartrack: CARTRACK_CONFIG,
   viaverde: VIAVERDE_CONFIG,
-  fonoa: FONOA_CONFIG,
   myprio: MYPRIO_CONFIG,
 };
 
@@ -328,6 +303,5 @@ export {
   BOLT_CONFIG,
   CARTRACK_CONFIG,
   VIAVERDE_CONFIG,
-  FONOA_CONFIG,
   MYPRIO_CONFIG,
 };

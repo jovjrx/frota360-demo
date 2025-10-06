@@ -198,8 +198,6 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
         return FiTruck;
       case 'viaverde':
         return FiDollarSign;
-      case 'fonoa':
-        return FiUsers;
       case 'myprio':
         return FiActivity;
       default:
@@ -217,8 +215,6 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
         return 'Cartrack';
       case 'viaverde':
         return 'ViaVerde';
-      case 'fonoa':
-        return 'FONOA';
       case 'myprio':
         return 'myPrio';
       default:
@@ -226,7 +222,7 @@ export default function MetricsPage({ tPage, tCommon, locale }: PageProps & { lo
     }
   };
 
-  const platforms = ['uber', 'bolt', 'cartrack', 'viaverde', 'fonoa', 'myprio'];
+  const platforms = ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
 
   return (
     <LoggedInLayout>

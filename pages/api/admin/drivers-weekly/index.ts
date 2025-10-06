@@ -1,14 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
+import { requireAdmin } from '@/lib/auth/helpers';
 import { db } from '@/lib/firebaseAdmin';
 import { DriverWeeklyRecord, calculateDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession(req, res);
-  
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = await requireAdmin(req, res);
+  if (!session) return;
 
   if (req.method === 'GET') {
     return handleGet(req, res);

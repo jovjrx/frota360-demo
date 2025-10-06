@@ -45,7 +45,6 @@ export type IntegrationPlatform =
   | 'bolt' 
   | 'cartrack' 
   | 'viaverde' 
-  | 'fonoa' 
   | 'myprio';
 
 /**
@@ -202,18 +201,6 @@ export const DEFAULT_INTEGRATION_CONFIGS: Record<IntegrationPlatform, Partial<In
     },
   },
   
-  fonoa: {
-    platform: 'fonoa',
-    name: 'FONOA',
-    type: 'scraper',
-    config: {
-      baseUrl: 'https://app.fonoa.com',
-      endpoints: {
-        login: 'https://app.fonoa.com/login',
-      },
-    },
-  },
-  
   myprio: {
     platform: 'myprio',
     name: 'myPrio',
@@ -235,6 +222,5 @@ export const REQUIRED_CREDENTIALS: Record<IntegrationPlatform, string[]> = {
   bolt: ['clientId', 'clientSecret'],
   cartrack: ['username', 'apiKey'],
   viaverde: ['email', 'password'],
-  fonoa: ['email', 'password'],
   myprio: ['accountId', 'password'],
 };

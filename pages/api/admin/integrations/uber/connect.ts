@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
+import { requireAdmin } from '@/lib/auth/helpers';
 
 /**
  * Inicia o fluxo OAuth 2.0 com Uber
@@ -10,10 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const session = await getSession(req, res);
-  if (!session?.user || session.user.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = await requireAdmin(req, res);
+  if (!session) return;
 
   const clientId = process.env.UBER_CLIENT_ID;
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/integrations/uber/callback`;

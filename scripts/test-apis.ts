@@ -15,7 +15,6 @@ import {
   createBoltClient,
   createCartrackClient,
   createViaVerdeClient,
-  createFonoaClient,
   createMyprioClient,
 } from '../lib/integrations';
 
@@ -94,22 +93,6 @@ async function testViaVerde() {
   }
 }
 
-async function testFonoa() {
-  console.log('\n📄 Testando FONOA...');
-  try {
-    const client = await createFonoaClient();
-    const result = await client.testConnection();
-    
-    if (result.success) {
-      console.log('✅ FONOA: Conectado com sucesso');
-    } else {
-      console.log(`❌ FONOA: ${result.error}`);
-    }
-  } catch (error: any) {
-    console.log(`❌ FONOA: ${error.message}`);
-  }
-}
-
 async function testMyprio() {
   console.log('\n💰 Testando myprio...');
   try {
@@ -134,7 +117,6 @@ async function testAll() {
   await testBolt();
   await testCartrack();
   await testViaVerde();
-  await testFonoa();
   await testMyprio();
   
   console.log('\n================================');
@@ -156,9 +138,6 @@ async function main() {
       break;
     case 'viaverde':
       await testViaVerde();
-      break;
-    case 'fonoa':
-      await testFonoa();
       break;
     case 'myprio':
       await testMyprio();

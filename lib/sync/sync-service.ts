@@ -3,7 +3,6 @@ import {
   createBoltClient,
   createCartrackClient,
   createViaVerdeClient,
-  createFonoaClient,
   createMyprioClient,
 } from '@/lib/integrations';
 import { db } from '@/lib/firebaseAdmin';
@@ -32,7 +31,6 @@ export class SyncService {
   private boltClient: any = null;
   private cartrackClient: any = null;
   private viaverdeClient: any = null;
-  private fonoaClient: any = null;
   private myprioClient: any = null;
 
   private async initClients() {
@@ -41,7 +39,6 @@ export class SyncService {
       this.boltClient = await createBoltClient();
       this.cartrackClient = await createCartrackClient();
       this.viaverdeClient = await createViaVerdeClient();
-      this.fonoaClient = await createFonoaClient();
       this.myprioClient = await createMyprioClient();
     }
   }
@@ -52,7 +49,7 @@ export class SyncService {
   async syncAll(options: SyncOptions): Promise<SyncResult[]> {
     await this.initClients();
     
-    const platforms = options.platforms || ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio', 'fonoa'];
+    const platforms = options.platforms || ['uber', 'bolt', 'cartrack', 'viaverde', 'myprio'];
     const results: SyncResult[] = [];
 
     for (const platform of platforms) {
@@ -74,9 +71,6 @@ export class SyncService {
             break;
           case 'myprio':
             result = await this.syncMyprio(options);
-            break;
-          case 'fonoa':
-            result = await this.syncFonoa(options);
             break;
           default:
             continue;
@@ -391,59 +385,6 @@ export class SyncService {
       return {
         success: false,
         platform: 'myprio',
-        recordsCreated: 0,
-        recordsUpdated: updated,
-        errors: [error.message, ...errors],
-        duration: Date.now() - startTime,
-      };
-    }
-  }
-
-  /**
-   * Sincroniza dados do FONOA (impostos e faturas)
-   */
-  private async syncFonoa(options: SyncOptions): Promise<SyncResult> {
-    const startTime = Date.now();
-    const errors: string[] = [];
-    let updated = 0;
-
-    try {
-      const connectionTest = await this.fonoaClient.testConnection();
-      if (!connectionTest.success) {
-        throw new Error('Falha ao conectar com FONOA');
-      }
-
-      const invoicesResponse = await this.fonoaClient.getInvoices(
-        options.startDate,
-        options.endDate
-      );
-      
-      if (!invoicesResponse || !Array.isArray(invoicesResponse)) {
-        throw new Error('Falha ao buscar faturas do FONOA');
-      }
-
-      // Processar faturas (informativo apenas)
-      for (const invoice of invoicesResponse) {
-        try {
-          await this.logInvoice(invoice);
-          updated++;
-        } catch (error: any) {
-          errors.push(`Erro ao processar fatura ${invoice.id}: ${error.message}`);
-        }
-      }
-
-      return {
-        success: true,
-        platform: 'fonoa',
-        recordsCreated: 0,
-        recordsUpdated: updated,
-        errors,
-        duration: Date.now() - startTime,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        platform: 'fonoa',
         recordsCreated: 0,
         recordsUpdated: updated,
         errors: [error.message, ...errors],
