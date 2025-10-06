@@ -19,12 +19,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Buscar todos os motoristas
     const driversSnapshot = await db.collection('drivers').get();
-    const drivers = driversSnapshot.docs.map(doc => ({ 
-      id: doc.id, 
-      name: doc.data().name || 'Unknown',
-      iban: doc.data().iban || '',
-      ...doc.data() 
-    }));
+    const drivers = driversSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        id: doc.id, 
+        name: data.name || data.fullName || 'Unknown',
+        iban: data.banking?.iban || '',
+        type: data.type || 'affiliate',
+        weeklyRent: data.vehicle?.weeklyRent || 0,
+        ...data 
+      };
+    });
 
     // Para cada motorista, buscar dados das APIs e criar registros semanais
     const weeklyRecords = [];
@@ -55,16 +60,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         driverName: driver.name || 'Unknown',
         weekStart,
         weekEnd,
-        uberTrips: 0,
-        uberTips: 0,
-        uberTolls: 0,
-        boltTrips: 0,
-        boltTips: 0,
-        fuel: 0,
-        otherCosts: 0,
-        commissionRate: 0.07,
-        iban: driver.iban || '',
+        uberTotal: 0,
+        boltTotal: 0,
+        combustivel: 0,
+        viaverde: 0,
+        aluguel: driver.type === 'renter' ? (driver.weeklyRent || 0) : 0,
+        iban: driver.iban,
         paymentStatus: 'pending',
+        dataSource: 'auto',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from 'next-auth/react';
+import { getSession } from '@/lib/session/ironSession';
 
 /**
  * GET /api/painel/contracheques
@@ -17,26 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Verificar autenticação
-    const session = await getSession({ req });
-    if (!session || !session.user) {
+    const session = await getSession(req, res);
+    if (!session.userId) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
-    const userEmail = session.user.email;
-
-    // Buscar motorista pelo email
-    const driversSnapshot = await adminDb
-      .collection('drivers')
-      .where('email', '==', userEmail)
-      .limit(1)
-      .get();
-
-    if (driversSnapshot.empty) {
-      return res.status(404).json({ error: 'Motorista não encontrado' });
-    }
-
-    const driverDoc = driversSnapshot.docs[0];
-    const driverId = driverDoc.id;
+    const driverId = session.userId;
 
     // Parâmetros da query
     const { status, limit = '12' } = req.query;

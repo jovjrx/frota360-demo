@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from 'next-auth/react';
+import { getSession } from '@/lib/session/ironSession';
 
 /**
  * GET /api/painel/me
@@ -13,12 +13,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Verificar autenticação
-    const session = await getSession({ req });
+    const session = await getSession(req, res);
     if (!session || !session.user) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
-    const userEmail = session.user.email;
+    const userEmail = session.userId;
 
     // Buscar motorista pelo email
     const driversSnapshot = await adminDb

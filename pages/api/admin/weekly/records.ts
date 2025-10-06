@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/firebase-admin';
+import { adminDb as db } from '@/lib/firebaseAdmin';
 
 /**
  * GET /api/admin/weekly/records?week=2024-W40
@@ -26,13 +26,16 @@ export default async function handler(
       .where('weekId', '==', week)
       .get();
 
-    const records = recordsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const records = recordsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
 
     // Buscar informações dos motoristas
-    const driverIds = [...new Set(records.map(r => r.driverId))];
+    const driverIds = [...new Set(records.map((r: any) => r.driverId))];
     const driversMap = new Map();
 
     for (const driverId of driverIds) {
@@ -43,7 +46,7 @@ export default async function handler(
     }
 
     // Enriquecer registros com dados dos motoristas
-    const enrichedRecords = records.map(record => ({
+    const enrichedRecords = records.map((record: any) => ({
       ...record,
       driver: driversMap.get(record.driverId) || null,
     }));
