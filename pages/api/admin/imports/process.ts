@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Verificar autenticação admin
     const session = await getSession(req, res);
-    if (!session?.isLoggedIn) {
+    if (!session?.isLoggedIn || session.role !== 'admin') {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -30,10 +30,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const db = getFirestore();
 
     // Buscar todas as importações com este importId que ainda não foram processadas
-    const importsSnapshot = await db.collection('weeklyDataImports')
-      .where('importId', '==', importId)
-      .where('processed', '==', false)
+    const importsSnapshot = await db.collection("weeklyDataImports")
+      .where("importId", "==", importId)
+      .where("processed", "==", false)
       .get();
+
+    // Buscar os dados brutos referenciados
+    const rawDataPromises = importsSnapshot.docs.map(async (doc) => {
+      const importData = doc.data();
+      if (importData.rawDataSourceRef) {
+        const rawDataDoc = await db.collection("rawWeeklyData").doc(importData.rawDataSourceRef).get();
+        if (rawDataDoc.exists) {
+          return { ...importData, rawData: rawDataDoc.data()?.rawData };
+        }
+      }
+      return importData; // Retorna sem rawData se não houver referência ou documento
+    });
+    const importsWithRawData = await Promise.all(rawDataPromises);
 
     if (importsSnapshot.empty) {
       return res.status(404).json({ error: 'Nenhuma importação pendente encontrada' });
@@ -76,8 +89,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }>();
 
     // Processar cada importação
-    for (const doc of importsSnapshot.docs) {
-      const importData = doc.data();
+    for (let i = 0; i < importsWithRawData.length; i++) {
+      const importData = importsWithRawData[i];
+      const docRef = importsSnapshot.docs[i].ref; // Obter a referência original do documento
       const platform = importData.platform;
 
       try {
@@ -96,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Marcar como processado
-        await doc.ref.update({
+        await docRef.update({
           processed: true,
           processedAt: new Date().toISOString(),
         });
@@ -200,10 +214,10 @@ async function processUberData(
   const rows = importData.rawData?.rows || [];
 
   for (const row of rows) {
-    const uuid = row['UUID do motorista'] || row['Driver UUID'];
+    const uuid = row["UUID do motorista"] || row["Driver UUID"];
     
     if (!uuid) {
-      warnings.push('Uber: Linha sem UUID do motorista (ignorada)');
+      warnings.push("Uber: Linha sem UUID do motorista (ignorada)");
       continue;
     }
 
@@ -221,10 +235,12 @@ async function processUberData(
       continue;
     }
 
-    // Extrair valor "Pago a si"
-    const pagoASi = parseFloat(row['Pago a si'] || row['Paid to you'] || '0');
+    // Extrair valor "Pago a si" e "Portagem"
+    const pagoASi = parseFloat(String(row["Pago a si"]).replace(",", ".") || String(row["Paid to you"]).replace(",", ".") || "0");
+    const portagemUber = parseFloat(String(row["Pago a si:Saldo da viagem:Reembolsos:Portagem"]).replace(",", ".") || String(row["Paid to you:Trip balance:Refunds:Toll"]).replace(",", ".") || "0");
 
-    if (pagoASi <= 0) {
+    // Considerar apenas ganhos positivos
+    if (pagoASi <= 0 && portagemUber <= 0) {
       continue;
     }
 
@@ -233,20 +249,22 @@ async function processUberData(
     if (!driverData) {
       driverData = {
         driverId: driver.id,
-        driverName: driver.name || driver.fullName || 'Unknown',
+        driverName: driver.firstName + " " + driver.lastName || driver.fullName || "Unknown",
         uberTotal: 0,
         boltTotal: 0,
         combustivel: 0,
         viaverde: 0,
         aluguel: driver.rentalFee || 0,
         iban: driver.banking?.iban,
-        type: driver.type || 'affiliate',
+        type: driver.type || "affiliate",
         rentalFee: driver.rentalFee || 0,
       };
       dataByDriver.set(driver.id, driverData);
     }
 
     driverData.uberTotal += pagoASi;
+    // Adicionar portagem Uber ao total de viaverde, pois é uma despesa
+    driverData.viaverde += portagemUber;
   }
 }
 
@@ -262,29 +280,29 @@ async function processBoltData(
   const rows = importData.rawData?.rows || [];
 
   for (const row of rows) {
-    const driverId = row['ID do motorista'] || row['Driver ID'];
+    const driverEmail = row["Email"] || row["email"];
     
-    if (!driverId) {
-      warnings.push('Bolt: Linha sem ID do motorista (ignorada)');
+    if (!driverEmail) {
+      warnings.push("Bolt: Linha sem Email do motorista (ignorada)");
       continue;
     }
 
-    // Buscar motorista pelo ID do Bolt
+    // Buscar motorista pelo Email
     let driver = null;
     for (const [id, d] of driversMap.entries()) {
-      if (d.integrations?.bolt?.id === driverId) {
+      if (d.email === driverEmail) {
         driver = d;
         break;
       }
     }
 
     if (!driver) {
-      warnings.push(`Bolt: Motorista com ID ${driverId} não encontrado`);
+      warnings.push(`Bolt: Motorista com Email ${driverEmail} não encontrado`);
       continue;
     }
 
     // Extrair "Ganhos brutos (total)"
-    const ganhosBrutos = parseFloat(row['Ganhos brutos (total)'] || row['Gross earnings (total)'] || '0');
+    const ganhosBrutos = parseFloat(String(row["Ganhos brutos (total)|€"]).replace(",", ".") || String(row["Gross earnings (total)|€"]).replace(",", ".") || "0");
 
     if (ganhosBrutos <= 0) {
       continue;
@@ -295,14 +313,14 @@ async function processBoltData(
     if (!driverData) {
       driverData = {
         driverId: driver.id,
-        driverName: driver.name || driver.fullName || 'Unknown',
+        driverName: driver.firstName + " " + driver.lastName || driver.fullName || "Unknown",
         uberTotal: 0,
         boltTotal: 0,
         combustivel: 0,
         viaverde: 0,
         aluguel: driver.rentalFee || 0,
         iban: driver.banking?.iban,
-        type: driver.type || 'affiliate',
+        type: driver.type || "affiliate",
         rentalFee: driver.rentalFee || 0,
       };
       dataByDriver.set(driver.id, driverData);
@@ -324,15 +342,11 @@ async function processMyprioData(
   const rows = importData.rawData?.rows || [];
 
   for (const row of rows) {
-    const cardNumber = row['Número do cartão'] || row['Card number'] || row['Cartão'];
-    const valor = parseFloat(row['Valor'] || row['Amount'] || '0');
+    const cardNumber = String(row["CARTÃO"]);
+    const valor = parseFloat(String(row["TOTAL"]).replace(",", ".") || "0");
     
-    if (!cardNumber) {
-      warnings.push('myprio: Transação sem número de cartão (ignorada)');
-      continue;
-    }
-
-    if (valor <= 0) {
+    if (!cardNumber || isNaN(valor) || valor <= 0) {
+      warnings.push(`myprio: Transação inválida ou sem número de cartão/valor (ignorada): ${JSON.stringify(row)}`);
       continue;
     }
 
@@ -355,14 +369,14 @@ async function processMyprioData(
     if (!driverData) {
       driverData = {
         driverId: driver.id,
-        driverName: driver.name || driver.fullName || 'Unknown',
+        driverName: driver.firstName + " " + driver.lastName || driver.fullName || "Unknown",
         uberTotal: 0,
         boltTotal: 0,
         combustivel: 0,
         viaverde: 0,
         aluguel: driver.rentalFee || 0,
         iban: driver.banking?.iban,
-        type: driver.type || 'affiliate',
+        type: driver.type || "affiliate",
         rentalFee: driver.rentalFee || 0,
       };
       dataByDriver.set(driver.id, driverData);
@@ -384,29 +398,37 @@ async function processViaverdeData(
   const rows = importData.rawData?.rows || [];
 
   for (const row of rows) {
-    const plate = row['Matrícula'] || row['License Plate'] || row['Placa'];
-    const valor = parseFloat(row['Valor'] || row['Amount'] || '0');
+    const obu = String(row["OBU"]);
+    const valor = parseFloat(String(row["Value"]).replace(",", ".") || "0");
+    const entryDate = new Date(row["Entry Date"]);
+    const exitDate = new Date(row["Exit Date"]);
+
+    // Filtrar por datas da semana
+    const weekStart = new Date(importData.weekStart);
+    const weekEnd = new Date(importData.weekEnd);
+    weekEnd.setHours(23, 59, 59, 999); // Ajustar para o final do dia
+
+    if (entryDate < weekStart || exitDate > weekEnd) {
+      warnings.push(`ViaVerde: Transação fora do período da semana ${importData.weekStart} - ${importData.weekEnd} (ignorada): ${JSON.stringify(row)}`);
+      continue;
+    }
     
-    if (!plate) {
-      warnings.push('ViaVerde: Transação sem matrícula (ignorada)');
+    if (!obu || isNaN(valor) || valor <= 0) {
+      warnings.push(`ViaVerde: Transação inválida ou sem OBU/valor (ignorada): ${JSON.stringify(row)}`);
       continue;
     }
 
-    if (valor <= 0) {
-      continue;
-    }
-
-    // Buscar motorista pela matrícula
+    // Buscar motorista pelo OBU
     let driver = null;
     for (const [id, d] of driversMap.entries()) {
-      if (d.vehicle?.plate === plate) {
+      if (d.cards?.viaverde === obu) {
         driver = d;
         break;
       }
     }
 
     if (!driver) {
-      warnings.push(`ViaVerde: Motorista com matrícula ${plate} não encontrado`);
+      warnings.push(`ViaVerde: Motorista com OBU ${obu} não encontrado`);
       continue;
     }
 
@@ -415,14 +437,14 @@ async function processViaverdeData(
     if (!driverData) {
       driverData = {
         driverId: driver.id,
-        driverName: driver.name || driver.fullName || 'Unknown',
+        driverName: driver.firstName + " " + driver.lastName || driver.fullName || "Unknown",
         uberTotal: 0,
         boltTotal: 0,
         combustivel: 0,
         viaverde: 0,
         aluguel: driver.rentalFee || 0,
         iban: driver.banking?.iban,
-        type: driver.type || 'affiliate',
+        type: driver.type || "affiliate",
         rentalFee: driver.rentalFee || 0,
       };
       dataByDriver.set(driver.id, driverData);

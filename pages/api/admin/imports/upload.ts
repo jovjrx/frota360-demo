@@ -48,6 +48,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const fileContent = fs.readFileSync(file.filepath);
     const parsedData = await parseFile(file, fileContent, platform);
 
+    // Validar estrutura do arquivo
+    validateFileStructure(parsedData.columns, platform);
+
     // Criar importId único para este batch
     const importId = `import_${Date.now()}`;
 
@@ -174,4 +177,35 @@ function parseExcel(content: Buffer, filename: string): {
     rows: data,
     columns,
   };
+}
+
+
+/**
+ * Valida a estrutura do arquivo com base na plataforma.
+ */
+function validateFileStructure(columns: string[], platform: string) {
+  let requiredColumns: string[] = [];
+
+  switch (platform) {
+    case 'uber':
+      requiredColumns = ['UUID do motorista', 'Pago a si'];
+      break;
+    case 'bolt':
+      requiredColumns = ['Email', 'Ganhos brutos (total)|€'];
+      break;
+    case 'myprio':
+      requiredColumns = ['CARTÃO', 'TOTAL'];
+      break;
+    case 'viaverde':
+      requiredColumns = ['OBU', 'Value', 'Entry Date', 'Exit Date'];
+      break;
+    default:
+      throw new Error(`Plataforma desconhecida: ${platform}`);
+  }
+
+  const missingColumns = requiredColumns.filter(col => !columns.includes(col));
+
+  if (missingColumns.length > 0) {
+    throw new Error(`Colunas obrigatórias ausentes para ${platform}: ${missingColumns.join(', ')}`);
+  }
 }

@@ -106,13 +106,13 @@ export function calculateDriverWeeklyRecord(
     
     iban: data.iban,
     paymentStatus: data.paymentStatus || 'pending',
-    paymentDate: data.paymentDate,
+    paymentDate: data.paymentDate || null,
     
     dataSource: data.dataSource || 'manual',
     
     createdAt: data.createdAt || now,
     updatedAt: now,
-    notes: data.notes,
+    notes: data.notes || null,
   };
 }
 

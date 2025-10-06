@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import {
@@ -18,7 +18,6 @@ import {
   StatNumber,
   Card,
   CardBody,
-  CardHeader,
   Heading,
   Alert,
   AlertIcon,
@@ -33,61 +32,60 @@ import {
   FiClock,
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
-import { PageProps } from '@/interface/Global';
 import { useTranslations } from '@/hooks/useTranslations';
+import { WeeklyDataSources } from '@/schemas/weekly-data-sources';
+import { getSession } from '@/lib/session/ironSession';
+import { checkAdminAuth } from '@/lib/auth/adminCheck';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { ParsedUrlQuery } from 'querystring';
+import { PreviewData } from 'next/types';
 
-interface WeeklyDataSources {
-  weekId: string;
-  weekStart: string;
-  weekEnd: string;
-  status: 'complete' | 'partial' | 'pending';
-  origin: 'auto' | 'manual';
-  isComplete: boolean;
-  lastSync?: string;
+import { Translations } from '@/lib/translations';
+
+interface DataPageProps {
+  translations: Translations;
+  initialWeeks: WeeklyDataSources[];
+  locale: string;
 }
 
-interface DataPageProps extends PageProps {
-  translations: {
-    common: any;
-    page: any;
-  };
-}
-
-export default function DataPage({ translations, locale }: DataPageProps) {
+export default function DataPage({ translations, locale, initialWeeks }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [weeks, setWeeks] = useState<WeeklyDataSources[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [weeks, setWeeks] = useState<WeeklyDataSources[]>(initialWeeks); // Inicializar com dados do SSR
+  const [loading, setLoading] = useState(false); // Já carregado pelo SSR
   const [syncing, setSyncing] = useState(false);
-
   // Funções de tradução
-  const { t: tCommon } = useTranslations({ 
-    translations: { common: translations.common }, 
-    namespace: 'common' 
+  const { t: tCommon } = useTranslations({
+    translations: translations.common,
+    namespace: 'common'
   });
-  
+
   // Fallback para traduções
   const t = tCommon || ((key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations?.common, key, variables) || key;
+    return getTranslation(translations.common, key, variables) || key;
   });
 
   const tAdmin = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations?.page, key, variables) || key;
+    return getTranslation(translations.page, key, variables) || key;
   };
 
+  // useEffect para recarregar dados se necessário (ex: após sync)
   useEffect(() => {
-    loadWeeklyData();
+    // Se initialWeeks estiver vazio, tentar carregar client-side (fallback)
+    if (initialWeeks.length === 0) {
+      loadWeeklyData();
+    }
   }, []);
 
   async function loadWeeklyData() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/weekly/data-sources');
-      
+
       if (!response.ok) {
         throw new Error('Failed to load weekly data');
       }
-      
+
       const data = await response.json();
       setWeeks(data.weeks || []);
     } catch (error: any) {
@@ -110,11 +108,11 @@ export default function DataPage({ translations, locale }: DataPageProps) {
       const response = await fetch('/api/admin/sync/platforms', {
         method: 'POST',
       });
-      
+
       if (!response.ok) {
         throw new Error('Sync failed');
       }
-      
+
       toast({
         title: tAdmin('data.sync.success_title') || 'Sincronização iniciada',
         description: tAdmin('data.sync.success_desc') || 'A sincronização dos dados das plataformas foi iniciada',
@@ -122,12 +120,12 @@ export default function DataPage({ translations, locale }: DataPageProps) {
         duration: 3000,
         isClosable: true,
       });
-      
+
       // Recarregar dados após sync
       setTimeout(() => {
         loadWeeklyData();
       }, 2000);
-      
+
     } catch (error: any) {
       console.error('Error syncing data:', error);
       toast({
@@ -177,12 +175,12 @@ export default function DataPage({ translations, locale }: DataPageProps) {
     });
   }
 
-  const completeWeeks = weeks.filter(w => w.status === 'complete').length;
-  const partialWeeks = weeks.filter(w => w.status === 'partial').length;
-  const pendingWeeks = weeks.filter(w => w.status === 'pending').length;
+  const completeWeeks = weeks.filter(w => w.isComplete).length;
+  const partialWeeks = weeks.filter(w => !w.isComplete && Object.values(w.sources).some(s => s.status === 'partial')).length;
+  const pendingWeeks = weeks.filter(w => !w.isComplete && Object.values(w.sources).every(s => s.status === 'pending')).length;
 
   return (
-    <AdminLayout 
+    <AdminLayout
       title={tAdmin('data.title') || 'Gestão de Dados'}
       subtitle={tAdmin('data.subtitle') || 'Monitorize e gerencie as fontes de dados semanais'}
     >
@@ -197,7 +195,7 @@ export default function DataPage({ translations, locale }: DataPageProps) {
               {tAdmin('data.description') || 'Acompanhe o status das integrações e sincronizações de dados'}
             </Text>
           </VStack>
-          
+
           <HStack>
             <Button
               leftIcon={<Icon as={FiRefreshCw} />}
@@ -207,7 +205,7 @@ export default function DataPage({ translations, locale }: DataPageProps) {
             >
               {t('common.refresh') || 'Atualizar'}
             </Button>
-            
+
             <Button
               leftIcon={<Icon as={FiUpload} />}
               onClick={syncPlatformData}
@@ -225,17 +223,17 @@ export default function DataPage({ translations, locale }: DataPageProps) {
             <StatLabel>{tAdmin('data.stats.total') || 'Total de Semanas'}</StatLabel>
             <StatNumber>{weeks.length}</StatNumber>
           </Stat>
-          
+
           <Stat>
             <StatLabel>{tAdmin('data.stats.complete') || 'Completas'}</StatLabel>
             <StatNumber color="green.500">{completeWeeks}</StatNumber>
           </Stat>
-          
+
           <Stat>
             <StatLabel>{tAdmin('data.stats.partial') || 'Parciais'}</StatLabel>
             <StatNumber color="yellow.500">{partialWeeks}</StatNumber>
           </Stat>
-          
+
           <Stat>
             <StatLabel>{tAdmin('data.stats.pending') || 'Pendentes'}</StatLabel>
             <StatNumber color="red.500">{pendingWeeks}</StatNumber>
@@ -270,32 +268,33 @@ export default function DataPage({ translations, locale }: DataPageProps) {
                       <Text fontWeight="semibold">
                         {tAdmin('data.week') || 'Semana'} {week.weekId}
                       </Text>
-                      <Badge colorScheme={getStatusColor(week.status)}>
-                        {getStatusLabel(week.status)}
+                      <Badge colorScheme={getStatusColor(week.isComplete ? 'complete' : (Object.values(week.sources).some(s => s.status === 'partial') ? 'partial' : 'pending'))}>
+                        {getStatusLabel(week.isComplete ? 'complete' : (Object.values(week.sources).some(s => s.status === 'partial') ? 'partial' : 'pending'))}
                       </Badge>
-                      <Badge variant="outline">
+                      {/* Exibir o status de origem de forma mais consolidada ou individualmente se necessário */}
+                      {/* <Badge variant="outline">
                         {getOriginLabel(week.origin)}
-                      </Badge>
+                      </Badge> */}
                     </HStack>
-                    
+
                     <Text fontSize="sm" color="gray.600">
                       {formatDate(week.weekStart)} - {formatDate(week.weekEnd)}
                     </Text>
-                    
-                    {week.lastSync && (
+
+                    {week.updatedAt && (
                       <Text fontSize="xs" color="gray.500">
-                        {tAdmin('data.last_sync') || 'Última sincronização'}: {formatDate(week.lastSync)}
+                        {tAdmin("data.last_sync") || "Última sincronização"}: {formatDate(week.updatedAt)}
                       </Text>
                     )}
                   </VStack>
-                  
+
                   <HStack>
-                    <Icon 
-                      as={week.isComplete ? FiCheckCircle : FiAlertCircle} 
+                    <Icon
+                      as={week.isComplete ? FiCheckCircle : FiAlertCircle}
                       color={week.isComplete ? 'green.500' : 'yellow.500'}
                       boxSize={5}
                     />
-                    
+
                     <Button
                       size="sm"
                       variant="outline"
@@ -314,7 +313,75 @@ export default function DataPage({ translations, locale }: DataPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  return checkAdminAuth(context);
+export const getServerSideProps: GetServerSideProps<DataPageProps> = async (context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>) => {
+  const { req, res, locale } = context;
+
+  const authResult = await checkAdminAuth(context);
+
+  if ('redirect' in authResult) {
+    const translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']);
+    return {
+      redirect: authResult.redirect,
+      props: {
+        initialWeeks: [],
+        translations: translations,
+        locale: locale || 'pt',
+      },
+    } as GetServerSidePropsResult<DataPageProps>;
+  }
+
+  try {
+    const session = await getSession(req, res);
+
+    if (!session?.isLoggedIn || session.role !== 'admin') {
+      const translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']);
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+        props: {
+          initialWeeks: [],
+          translations,
+          locale: locale || 'pt',
+        },
+      } as GetServerSidePropsResult<DataPageProps>;
+    }
+
+    const weeksSnapshot = await adminDb.collection('weeklyDataSources').orderBy('weekStart', 'desc').get();
+    const initialWeeks = weeksSnapshot.docs.map(doc => {
+      const data = doc.data() as WeeklyDataSources;
+      return {
+        id: doc.id,
+        weekId: data.weekId,
+        weekStart: data.weekStart,
+        weekEnd: data.weekEnd,
+        sources: data.sources, // Garantir que o objeto sources seja incluído
+        isComplete: data.isComplete,
+        createdAt: data.createdAt, // Garantir que createdAt seja incluído
+        updatedAt: data.updatedAt, // Adicionar updatedAt para exibição
+        notes: data.notes, // Incluir notes
+      } as WeeklyDataSources;
+    });
+
+    const translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']);
+
+    return {
+      props: {
+        initialWeeks: initialWeeks || [],
+        translations,
+        locale: locale || 'pt',
+      },
+    };
+  } catch (error) {
+    console.error('Error in getServerSideProps for admin/data:', error);
+    const translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']);
+    return {
+      props: {
+        initialWeeks: [],
+        translations,
+        locale: locale || 'pt',
+      },
+    };
+  }
 };
