@@ -10,6 +10,7 @@ async function debugCartrack() {
   const client = new CartrackClient({
     username: 'ALVO00008',
     password: '4204acaf6943762f716ce3301f38d9f10e699512bbbca783f96aec223cbef805',
+    apiKey: '4204acaf6943762f716ce3301f38d9f10e699512bbbca783f96aec223cbef805',
   });
 
   const endDate = new Date();

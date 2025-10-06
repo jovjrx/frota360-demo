@@ -25,10 +25,7 @@
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": [
     "node_modules",
-    "lib/integrations/bolt/scraper.ts",
     "lib/integrations/viaverde/scraper.ts",
-    "lib/integrations/myprio/scraper.ts",
-    "lib/integrations/unified-scraper.ts",
-    "scripts/**/*.ts"
+    "lib/integrations/myprio/scraper.ts"
   ]
 }

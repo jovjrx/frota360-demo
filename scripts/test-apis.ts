@@ -24,7 +24,7 @@ const platforms = process.argv[2] || 'all';
 async function testUber() {
   console.log('\n🚗 Testando Uber API...');
   try {
-    const client = createUberClient();
+    const client = await createUberClient();
     const result = await client.testConnection();
     
     if (result.success) {
@@ -43,7 +43,7 @@ async function testUber() {
 async function testBolt() {
   console.log('\n⚡ Testando Bolt API...');
   try {
-    const client = createBoltClient();
+    const client = await createBoltClient();
     const result = await client.testConnection();
     
     if (result.success) {
@@ -62,7 +62,7 @@ async function testBolt() {
 async function testCartrack() {
   console.log('\n📍 Testando Cartrack API...');
   try {
-    const client = createCartrackClient();
+    const client = await createCartrackClient();
     const result = await client.testConnection();
     
     if (result.success) {
@@ -81,7 +81,7 @@ async function testCartrack() {
 async function testViaVerde() {
   console.log('\n🛣️  Testando ViaVerde...');
   try {
-    const client = createViaVerdeClient();
+    const client = await createViaVerdeClient();
     const result = await client.testConnection();
     
     if (result.success) {
@@ -97,7 +97,7 @@ async function testViaVerde() {
 async function testFonoa() {
   console.log('\n📄 Testando FONOA...');
   try {
-    const client = createFonoaClient();
+    const client = await createFonoaClient();
     const result = await client.testConnection();
     
     if (result.success) {
@@ -113,7 +113,7 @@ async function testFonoa() {
 async function testMyprio() {
   console.log('\n💰 Testando myprio...');
   try {
-    const client = createMyprioClient();
+    const client = await createMyprioClient();
     const result = await client.testConnection();
     
     if (result.success) {
