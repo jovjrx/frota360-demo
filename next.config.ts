@@ -56,8 +56,8 @@ const nextConfig: NextConfig = {
   // async rewrites() {
   //   return [
   //     {
-  //       source: '/api/drivers/:path*',
-  //       destination: '/api/drivers/:path*',
+  //       source: '/api/painel/:path*',
+  //       destination: '/api/painel/:path*',
   //     },
   //     {
   //       source: '/api/admin/:path*',

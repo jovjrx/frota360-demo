@@ -84,7 +84,7 @@ export const config = {
   matcher: [
     // Proteger rotas de admin e drivers
     '/admin/:path*',
-    '/drivers/:path*',
+    '/painel/:path*',
     // Excluir arquivos estáticos e APIs
     '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
   ],

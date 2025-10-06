@@ -58,7 +58,7 @@ export function useCheckIn() {
       };
 
       // Fazer requisição para API
-      const response = await fetch('/api/drivers/checkin', {
+      const response = await fetch('/api/painel/checkin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export function useCheckIn() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const response = await fetch('/api/drivers/status', {
+      const response = await fetch('/api/painel/status', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ export function useCheckIn() {
     if (!isDriver || !userData?.driverId) return;
 
     try {
-      const response = await fetch('/api/drivers/checkin/history');
+      const response = await fetch('/api/painel/checkin/history');
       if (!response.ok) {
         throw new Error('Falha ao obter histórico');
       }

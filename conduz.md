@@ -444,8 +444,8 @@ Response:
 - [ ] Remover `/pages/drivers/subscription.tsx`
 - [ ] Remover `/pages/services/companies.tsx`
 - [ ] Remover `/pages/api/billing/`
-- [ ] Remover `/pages/api/drivers/checkin.ts`
-- [ ] Remover `/pages/api/drivers/documents.ts`
+- [ ] Remover `/pages/api/painel/checkin.ts`
+- [ ] Remover `/pages/api/painel/documents.ts`
 - [ ] Atualizar `/pages/index.tsx` (remover seção empresas)
 - [ ] Atualizar menu (remover link empresas)
 

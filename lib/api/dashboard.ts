@@ -45,7 +45,7 @@ export const dashboardAPI = {
     formData.append('docType', docType);
     formData.append('userId', userId);
     
-    const response = await fetch('/api/drivers/upload-real', {
+    const response = await fetch('/api/painel/upload-real', {
       method: 'POST',
       body: formData,
     });
@@ -59,7 +59,7 @@ export const dashboardAPI = {
   
   // Verificar status do motorista
   async checkDriverStatus(userId: string): Promise<DriverStatus> {
-    const response = await fetch(`/api/drivers/status?userId=${userId}`);
+    const response = await fetch(`/api/painel/status?userId=${userId}`);
     
     if (!response.ok) {
       throw new Error('Erro ao verificar status');
@@ -70,7 +70,7 @@ export const dashboardAPI = {
   
   // Buscar dados do motorista
   async getDriverData(userId: string): Promise<DriverData> {
-    const response = await fetch(`/api/drivers/data?userId=${userId}`);
+    const response = await fetch(`/api/painel/data?userId=${userId}`);
     
     if (!response.ok) {
       throw new Error('Erro ao buscar dados');
@@ -81,7 +81,7 @@ export const dashboardAPI = {
   
   // Buscar notificações
   async getNotifications(userId: string): Promise<Notification[]> {
-    const response = await fetch(`/api/drivers/notifications?userId=${userId}`);
+    const response = await fetch(`/api/painel/notifications?userId=${userId}`);
     
     if (!response.ok) {
       throw new Error('Erro ao buscar notificações');
@@ -93,7 +93,7 @@ export const dashboardAPI = {
   
   // Marcar notificação como lida
   async markNotificationAsRead(userId: string, notificationId: string) {
-    const response = await fetch('/api/drivers/notifications/read', {
+    const response = await fetch('/api/painel/notifications/read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, notificationId }),
@@ -108,7 +108,7 @@ export const dashboardAPI = {
 
   // Buscar documentos
   async getDocuments(userId: string) {
-    const response = await fetch(`/api/drivers/documents?userId=${userId}`);
+    const response = await fetch(`/api/painel/documents?userId=${userId}`);
     
     if (!response.ok) {
       throw new Error('Erro ao buscar documentos');
@@ -119,7 +119,7 @@ export const dashboardAPI = {
 
   // Deletar documento
   async deleteDocument(userId: string, documentId: string) {
-    const response = await fetch('/api/drivers/documents', {
+    const response = await fetch('/api/painel/documents', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, documentId }),
@@ -134,7 +134,7 @@ export const dashboardAPI = {
 
   // Buscar ganhos
   async getEarnings(userId: string) {
-    const response = await fetch(`/api/drivers/earnings?userId=${userId}`);
+    const response = await fetch(`/api/painel/earnings?userId=${userId}`);
     
     if (!response.ok) {
       throw new Error('Erro ao buscar ganhos');
