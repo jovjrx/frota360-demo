@@ -194,8 +194,8 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
     }
 
     toast({
-      title: 'Upload concluído',
-      description: 'Arquivos enviados. Clique em "Processar Importação" para continuar.',
+      title: tAdmin('weekly.import.messages.uploadCompleted') || 'Upload concluído',
+      description: tAdmin('weekly.import.messages.uploadCompletedDescription') || 'Arquivos enviados. Clique em "Processar Importação" para continuar.',
       status: 'success',
       duration: 5000,
     });
@@ -204,8 +204,8 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
   const handleProcess = async () => {
     if (!importId) {
       toast({
-        title: 'Erro',
-        description: 'Faça o upload dos arquivos primeiro',
+        title: tCommon('errors.title') || 'Erro',
+        description: tAdmin('weekly.import.messages.uploadFirst') || 'Faça o upload dos arquivos primeiro',
         status: 'error',
         duration: 3000,
       });
@@ -231,7 +231,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
       setProcessResult(data.results);
 
       toast({
-        title: 'Processamento concluído',
+        title: tAdmin('weekly.import.messages.processingCompleted') || 'Processamento concluído',
         status: 'success',
         duration: 5000,
       });
@@ -385,8 +385,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
             <CardBody>
               <VStack spacing={4}>
                 <Text>
-                  {uploadedCount} arquivo(s) pronto(s) para processar. 
-                  Clique no botão abaixo para criar/atualizar os registros semanais.
+                  {uploadedCount} {tAdmin('weekly.import.processDescription') || 'arquivo(s) pronto(s) para processar. Clique no botão abaixo para criar/atualizar os registros semanais.'}
                 </Text>
                 <Button
                   leftIcon={<Icon as={FiCheck} />}
@@ -396,7 +395,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
                   isLoading={isProcessing}
                   isDisabled={!canProcess}
                 >
-                  Processar Importação
+                  {tAdmin('weekly.import.processButton') || 'Processar Importação'}
                 </Button>
                 {isProcessing && <Progress size="xs" isIndeterminate w="100%" />}
               </VStack>
@@ -408,7 +407,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
         {processResult && (
           <Card>
             <CardHeader>
-              <Heading size="md">Resultados do Processamento</Heading>
+              <Heading size="md">{tAdmin('weekly.import.resultsTitle') || 'Resultados do Processamento'}</Heading>
             </CardHeader>
             <CardBody>
               <VStack spacing={4} align="stretch">
@@ -416,7 +415,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
                 {processResult.success.length > 0 && (
                   <Box>
                     <Text fontWeight="bold" color="green.600" mb={2}>
-                      ✓ Processado com sucesso:
+                      {tAdmin('weekly.import.successTitle') || '✓ Processado com sucesso:'}
                     </Text>
                     <List spacing={1}>
                       {processResult.success.map((msg, i) => (
@@ -433,7 +432,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
                 {processResult.warnings.length > 0 && (
                   <Box>
                     <Text fontWeight="bold" color="orange.600" mb={2}>
-                      ⚠ Avisos:
+                      {tAdmin('weekly.import.warningsTitle') || '⚠ Avisos:'}
                     </Text>
                     <List spacing={1}>
                       {processResult.warnings.map((msg, i) => (
@@ -450,7 +449,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
                 {processResult.errors.length > 0 && (
                   <Box>
                     <Text fontWeight="bold" color="red.600" mb={2}>
-                      ✗ Erros:
+                      {tAdmin('weekly.import.errorsTitle') || '✗ Erros:'}
                     </Text>
                     <List spacing={1}>
                       {processResult.errors.map((err, i) => (
@@ -468,7 +467,7 @@ export default function ImportPage({ translations, locale, tCommon, tPage }: Imp
                   colorScheme="blue"
                   onClick={() => window.location.href = '/admin/weekly'}
                 >
-                  Ver Controle Semanal
+                  {tAdmin('weekly.import.viewWeeklyControl') || 'Ver Controle Semanal'}
                 </Button>
               </VStack>
             </CardBody>

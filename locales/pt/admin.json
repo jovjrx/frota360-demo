@@ -188,6 +188,51 @@
       "calculatedNet": "Valor Líquido"
     }
   },
+  "weekly": {
+    "title": "Controle Semanal",
+    "subtitle": "Gestão semanal de dados TVDE",
+    "import": {
+      "title": "Importação de Dados Semanais",
+      "subtitle": "Faça upload dos arquivos CSV/Excel de cada plataforma para processar os pagamentos da semana",
+      "period": "Período da Semana",
+      "startDate": "Início da Semana",
+      "endDate": "Fim da Semana",
+      "files": "Arquivos para Importação",
+      "uploadFiles": "Enviar Arquivos",
+      "processTitle": "Processar Importação",
+      "processDescription": "arquivo(s) pronto(s) para processar. Clique no botão abaixo para criar/atualizar os registros semanais.",
+      "processButton": "Processar Importação",
+      "resultsTitle": "Resultados do Processamento",
+      "successTitle": "✓ Processado com sucesso:",
+      "warningsTitle": "⚠ Avisos:",
+      "errorsTitle": "✗ Erros:",
+      "viewWeeklyControl": "Ver Controle Semanal",
+      "fileStatus": {
+        "idle": "Selecionar arquivo",
+        "uploading": "Enviando...",
+        "uploaded": "Enviado",
+        "error": "Erro"
+      },
+      "messages": {
+        "uploadCompleted": "Upload concluído",
+        "uploadCompletedDescription": "Arquivos enviados. Clique em \"Processar Importação\" para continuar.",
+        "uploadFirst": "Faça o upload dos arquivos primeiro",
+        "processingCompleted": "Processamento concluído"
+      }
+    }
+  },
+  "platforms": {
+    "uber": "Uber",
+    "bolt": "Bolt",
+    "myprio": "myprio (Combustível)",
+    "viaverde": "ViaVerde (Portagens)"
+  },
+  "errors": {
+    "unknown": "Erro desconhecido",
+    "processing": "Erro no processamento",
+    "upload": "Erro no upload",
+    "invalidFile": "Arquivo inválido"
+  },
   "metrics": {
     "title": "Métricas Detalhadas",
     "subtitle": "Análise detalhada de performance por plataforma",

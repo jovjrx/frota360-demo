@@ -31,6 +31,7 @@
     "next": "Próximo",
     "close": "Fechar",
     "confirm": "Confirmar",
+    "reset": "Resetar",
     "loading": "A carregar..."
   },
   "status": {
@@ -49,6 +50,11 @@
     "loading": "A carregar...",
     "noData": "Sem dados disponíveis",
     "confirmDelete": "Tem a certeza que deseja eliminar?"
+  },
+  "errors": {
+    "title": "Erro",
+    "unknown": "Erro desconhecido",
+    "tryAgain": "Tente novamente"
   },
   "validation": {
     "required": "Este campo é obrigatório",

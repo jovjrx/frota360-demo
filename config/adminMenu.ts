@@ -77,7 +77,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     {
         id: 'dados',
         label: 'Dados',
-        href: '/admin/dados',
+        href: '/admin/data',
         icon: FiBarChart2,
         description: 'Dados semanais',
         showInMainMenu: false, // Fica no dropdown "Mais"
