@@ -34,6 +34,7 @@ import {
   FiDownload,
   FiCheck,
   FiEye,
+  FiUpload,
 } from 'react-icons/fi';
 import { loadTranslations, getTranslation } from '@/lib/translations';
 import AdminLayout from '@/components/layouts/AdminLayout';
@@ -228,6 +229,14 @@ export default function WeeklyPayoutPage({
             </HStack>
 
             <HStack spacing={2}>
+              <Button
+                leftIcon={<Icon as={FiUpload} />}
+                onClick={() => window.location.href = '/admin/weekly/import'}
+                colorScheme="blue"
+                size="sm"
+              >
+                Importar Dados
+              </Button>
               <Button
                 leftIcon={<Icon as={FiRefreshCw} />}
                 onClick={handleRefresh}

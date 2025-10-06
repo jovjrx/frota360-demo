@@ -29,6 +29,35 @@ export const DriverAdminFieldsSchema = z.object({
   statusUpdatedAt: z.any().nullable().optional(),
   statusUpdatedBy: z.string().nullable().optional(),
   
+  // Tipo de motorista (afiliado ou locatário)
+  type: z.enum(['affiliate', 'renter']).default('affiliate'),
+  
+  // IDs das Plataformas (adicionado conforme estratégia)
+  integrations: z.object({
+    uber: z.object({
+      uuid: z.string().nullable().default(null),
+      name: z.string().nullable().default(null),
+      lastSync: z.string().nullable().default(null),
+    }).optional(),
+    bolt: z.object({
+      id: z.string().nullable().default(null),
+      email: z.string().nullable().default(null),
+      lastSync: z.string().nullable().default(null),
+    }).optional(),
+  }).optional(),
+  
+  // Cartões (adicionado conforme estratégia)
+  cards: z.object({
+    myprio: z.string().nullable().default(null),
+    viaverde: z.string().nullable().default(null),
+  }).optional(),
+  
+  // Dados Bancários (adicionado conforme estratégia)
+  banking: z.object({
+    iban: z.string().nullable().default(null),
+    accountHolder: z.string().nullable().default(null),
+  }).optional(),
+  
   // Métricas e ganhos
   weeklyEarnings: z.number().default(0),
   monthlyEarnings: z.number().default(0),
@@ -56,10 +85,11 @@ export const DriverAdminFieldsSchema = z.object({
   
   // Informações do veículo (preenchidas pelo admin)
   vehicle: z.object({
-    make: z.string().min(1),
-    model: z.string().min(1),
-    year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
-    plate: z.string().min(1),
+    make: z.string().optional(),
+    model: z.string().optional(),
+    year: z.number().int().min(1900).max(new Date().getFullYear() + 1).optional(),
+    plate: z.string().optional(),
+    assignedDate: z.string().nullable().optional(),
   }).optional(),
   
   // Plano e comissão (definidos pelo admin)

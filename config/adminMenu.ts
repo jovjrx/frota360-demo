@@ -51,6 +51,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
     },
     {
+        id: 'drivers',
+        label: 'Motoristas',
+        href: '/admin/drivers',
+        icon: FiUsers,
+        description: 'Gestão de motoristas e integrações',
+        showInMainMenu: true,
+    },
+    {
         id: 'fleet',
         label: 'Frota',
         href: '/admin/fleet',

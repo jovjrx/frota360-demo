@@ -134,14 +134,26 @@ export class CartrackClient extends BaseIntegrationClient {
       const startTimestamp = `${startDate} 00:00:00`;
       const endTimestamp = `${endDate} 23:59:59`;
       
+      console.log(`[Cartrack] Fetching trips from ${startTimestamp} to ${endTimestamp}`);
+      
       const params = new URLSearchParams({
         start_timestamp: startTimestamp,
         end_timestamp: endTimestamp,
         page: '1',
         limit: '1000',
       });
+      
       const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
-      return response.data || [];
+      const trips = response.data || [];
+      
+      console.log(`[Cartrack] Received ${trips.length} trips`);
+      if (trips.length > 0) {
+        const firstTrip = trips[0];
+        const lastTrip = trips[trips.length - 1];
+        console.log(`[Cartrack] First trip: ${firstTrip.start_timestamp}, Last trip: ${lastTrip.start_timestamp}`);
+      }
+      
+      return trips;
     } catch (error) {
       console.error('Error fetching Cartrack trips:', error);
       return [];

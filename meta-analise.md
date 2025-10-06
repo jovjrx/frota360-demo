@@ -19,12 +19,26 @@
 - **Nova Interface:** Tabela semanal com 13 colunas detalhadas
 - **Funcionalidades:** Filtros, resumos, marcar como pago, exportar Excel
 
+### ✅ **CORRIGIDO: Monitor Cartrack - Dados Sempre Atualizados**
+- **Arquivos:** `pages/api/admin/integrations/[platform]/data.ts`, `lib/integrations/cartrack/client.ts`
+- **Problema:** Mostrava apenas dados de setembro (datas fixas)
+- **Solução:** Busca sempre últimos 7 dias a partir de hoje
+- **Melhorias:** 
+  - Ordenação por data mais recente
+  - Aumentado de 10 para 50 viagens
+  - Logs detalhados para debug
+  - Correção: distância em metros → km
+
 ### ✅ **APIS CRIADAS:**
 - `/api/admin/weekly-records/sync` - Sincronização
 - `/api/admin/weekly-records/[recordId]/mark-paid` - Marcar como pago
 - `/api/admin/weekly-records/export` - Exportar CSV/Excel
 
-**📄 Documentação completa:** Ver `IMPLEMENTACAO_CONCLUIDA.md` e `RESUMO_IMPLEMENTACAO.md`
+**📄 Documentação completa:** 
+- `IMPLEMENTACAO_CONCLUIDA.md` - Controle semanal
+- `RESUMO_IMPLEMENTACAO.md` - Guia executivo
+- `CORRECAO_CARTRACK_DATAS.md` - Correção do monitor
+- `UBER_INTEGRATION_PLAN.md` - Plano integração Uber
 
 ---
 

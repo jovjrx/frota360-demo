@@ -53,32 +53,60 @@ export default async function handler(
         try {
           const cartrackClient = await createCartrackClient();
           
-          // Buscar viagens dos últimos 7 dias
-          const endDate = new Date();
-          const startDate = new Date();
-          startDate.setDate(startDate.getDate() - 7);
-
-          // Formatar datas para string ISO
+          // Buscar viagens da semana atual (Segunda-feira até Domingo)
+          const today = new Date();
+          const dayOfWeek = today.getDay(); // 0 (Domingo) a 6 (Sábado)
+          
+          // Calcular início da semana (Segunda-feira)
+          const weekStart = new Date(today);
+          const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+          weekStart.setDate(today.getDate() + daysToMonday);
+          weekStart.setHours(0, 0, 0, 0);
+          
+          // Calcular fim da semana (Domingo)
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          weekEnd.setHours(23, 59, 59, 999);
+          
+          // Se não houver dados da semana atual, buscar últimos 7 dias também
+          const alternativeStart = new Date(today);
+          alternativeStart.setDate(today.getDate() - 7);
+          alternativeStart.setHours(0, 0, 0, 0);
+          
+          console.log(`[Cartrack API] Buscando dados de ${alternativeStart.toISOString().split('T')[0]} até ${today.toISOString().split('T')[0]}`);
+          console.log(`[Cartrack API] Semana atual: ${weekStart.toISOString().split('T')[0]} até ${weekEnd.toISOString().split('T')[0]}`);
+          console.log(`[Cartrack API] Hoje é: ${today.toISOString()}`);
+          
+          // Buscar dados da semana atual E últimos 7 dias para ter mais dados
           const trips = await cartrackClient.getTrips(
-            startDate.toISOString().split('T')[0],
-            endDate.toISOString().split('T')[0]
+            alternativeStart.toISOString().split('T')[0],
+            today.toISOString().split('T')[0]
           );
           const vehicles = await cartrackClient.getVehicles();
+          
+          console.log(`[Cartrack API] Total de viagens recebidas: ${trips.length}`);
+          
+          // Ordenar viagens por data mais recente
+          const sortedTrips = trips.sort((a: any, b: any) => {
+            const dateA = new Date(a.start_timestamp).getTime();
+            const dateB = new Date(b.start_timestamp).getTime();
+            return dateB - dateA; // Mais recente primeiro
+          });
 
           data = {
             platform: 'cartrack',
             lastUpdate: new Date().toISOString(),
-            count: trips.length,
+            count: sortedTrips.length,
             summary: {
-              totalTrips: trips.length,
+              totalTrips: sortedTrips.length,
               totalVehicles: vehicles.length,
-              totalDistance: trips.reduce((sum, trip) => sum + (trip.distance || 0), 0),
+              totalDistance: sortedTrips.reduce((sum, trip) => sum + (trip.trip_distance || 0) / 1000, 0), // metros para km
               period: {
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
+                start: weekStart.toISOString(),
+                end: today.toISOString(),
               },
             },
-            trips: trips.slice(0, 10), // Primeiras 10 viagens
+            trips: sortedTrips.slice(0, 50), // Primeiras 50 viagens (aumentado de 10)
             vehicles: vehicles,
           };
         } catch (error) {
