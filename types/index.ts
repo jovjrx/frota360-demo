@@ -75,3 +75,21 @@ export interface NotificationData {
   data: Record<string, any>;
   scheduledAt?: number;
 }
+
+
+export interface DriverWeeklySummary {
+  weekStart: string;
+  weekEnd: string;
+  grossEarnings: number;
+  netEarnings: number;
+  totalExpenses: number;
+  uberEarnings: number;
+  boltEarnings: number;
+  prioExpenses: number;
+  viaverdeExpenses: number;
+  ivaAmount: number;
+  adminFee: number;
+  rent: number;
+  // Add other relevant fields as needed
+}
+
