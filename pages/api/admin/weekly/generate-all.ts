@@ -178,7 +178,7 @@ export default async function handler(
     archive.pipe(res);
 
     // Adicionar Excel ao ZIP
-    archive.append(excelBuffer, { 
+    archive.append(Buffer.from(excelBuffer), { 
       name: `ControloSemanal_${weekStart}_a_${weekEnd}.xlsx` 
     });
 
