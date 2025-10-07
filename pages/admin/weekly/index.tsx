@@ -37,6 +37,7 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
 import { useRouter } from 'next/router';
+import { getWeekId, getWeekDates } from '@/schemas/driver-weekly-record';
 
 interface WeekOption {
   label: string;
@@ -72,8 +73,6 @@ interface WeeklyPageProps extends AdminPageProps {
   initialRecords: DriverRecord[];
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export default function WeeklyPage({ user, translations, locale, weekOptions, currentWeek, initialRecords }: WeeklyPageProps) {
   const [filterWeek, setFilterWeek] = useState(currentWeek);
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
@@ -101,15 +100,11 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/weekly/process-week', {
-        method: 'POST',
+      const response = await fetch(`/api/admin/weekly/process-week?weekStart=${selectedWeek.start}&weekEnd=${selectedWeek.end}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          weekStart: selectedWeek.start,
-          weekEnd: selectedWeek.end,
-        }),
       });
 
       if (!response.ok) {
@@ -421,16 +416,12 @@ export const getServerSideProps = withAdminSSR(async (context, user) => {
 
   if (currentWeek) {
     const selectedWeek = weekOptions[0];
-    const recordsResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/process-week`, {
-      method: 'POST',
+    const recordsResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/process-week?weekStart=${selectedWeek.start}&weekEnd=${selectedWeek.end}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Cookie: cookie,
       },
-      body: JSON.stringify({
-        weekStart: selectedWeek.start,
-        weekEnd: selectedWeek.end,
-      }),
     });
     const recordsData = await recordsResponse.json();
     initialRecords = recordsData.records || [];
