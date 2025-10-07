@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import {
@@ -721,14 +720,3 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 };
-
-// SSR com autenticação e dados iniciais
-import { withAdminSSR } from '@/lib/admin/withAdminSSR';
-import { getDrivers } from '@/lib/admin/adminQueries';
-
-export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const drivers = await getDrivers({ limit: 100 });
-  return {
-    initialDrivers: drivers,
-  };
-});
