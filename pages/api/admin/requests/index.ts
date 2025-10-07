@@ -1,40 +1,58 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/firebaseAdmin';
-import { requireAdmin } from '@/lib/auth/helpers';
-import { ApiResponse, PaginatedResponse } from '@/types';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { getFirestore } from 'firebase-admin/firestore';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<PaginatedResponse | ApiResponse>
-) {
-  // Verificar autenticação admin
-  const session = await requireAdmin(req, res);
-  if (!session) return;
+interface DriverRequest {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  type: 'affiliate' | 'renter';
+  status: 'pending' | 'evaluation' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt?: string;
+  adminNotes?: string;
+  rejectionReason?: string;
+}
+
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
 
   if (req.method === 'GET') {
     try {
+      const db = getFirestore(firebaseAdmin);
+      let requestsRef: FirebaseFirestore.Query = db.collection('driver_requests');
+
       const { status, page = '1', limit = '10' } = req.query;
       const pageNum = parseInt(page as string);
       const limitNum = parseInt(limit as string);
       const offset = (pageNum - 1) * limitNum;
 
-      // Query base
-      let query = db.collection('driver_requests').orderBy('createdAt', 'desc');
-
       // Filtrar por status se fornecido
       if (status && status !== 'all') {
-        query = query.where('status', '==', status) as any;
+        requestsRef = requestsRef.where('status', '==', status);
       }
 
-      // Contar total
-      const snapshot = await query.get();
-      const total = snapshot.size;
+      // Contar total (sem paginação ainda)
+      const totalSnapshot = await requestsRef.get();
+      const total = totalSnapshot.size;
 
-      // Buscar com paginação
-      const docs = snapshot.docs.slice(offset, offset + limitNum);
-      const requests = docs.map(doc => ({
+      // Aplicar paginação
+      const snapshot = await requestsRef
+        .orderBy('createdAt', 'desc')
+        .limit(limitNum)
+        .offset(offset)
+        .get();
+
+      const requests: DriverRequest[] = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data() as Omit<DriverRequest, 'id'>,
       }));
 
       return res.status(200).json({
@@ -48,17 +66,10 @@ export default async function handler(
         },
       });
     } catch (error: any) {
-      console.error('Error fetching requests:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao buscar solicitações',
-        message: error.message,
-      });
+      console.error('Error fetching driver requests:', error);
+      return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
     }
   }
 
-  return res.status(405).json({
-    success: false,
-    error: 'Method not allowed',
-  });
-}
+  return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+}, sessionOptions);

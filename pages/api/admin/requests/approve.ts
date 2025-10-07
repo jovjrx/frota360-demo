@@ -1,131 +1,101 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { approveRequestSchema } from '@/schemas/request';
-import { db, auth } from '@/lib/firebaseAdmin';
-import { requireAdmin } from '@/lib/auth/helpers';
-import { ApiResponse } from '@/types';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
+import { sendEmail } from '@/lib/email/sendEmail';
+import { approvedDriverEmailTemplate } from '@/lib/email/templates';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ApiResponse>
-) {
-  // Verificar autenticação
-  const session = await requireAdmin(req, res);
-  if (!session) return;
-
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      error: 'Method not allowed',
-    });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+  }
+
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const { requestId, adminNotes } = req.body;
+
+  if (!requestId) {
+    return res.status(400).json({ success: false, error: 'Request ID is required' });
   }
 
   try {
-    const { requestId } = req.query;
-    if (!requestId || typeof requestId !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'ID da solicitação é obrigatório',
-      });
-    }
+    const db = getFirestore(firebaseAdmin);
+    const auth = getAuth(firebaseAdmin);
+    const requestRef = db.collection('driver_requests').doc(requestId);
+    const requestDoc = await requestRef.get();
 
-    // Validar dados
-    const validatedData = approveRequestSchema.parse(req.body);
-
-    // Buscar solicitação
-    const requestDoc = await db.collection('requests').doc(requestId).get();
     if (!requestDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        error: 'Solicitação não encontrada',
-      });
+      return res.status(404).json({ success: false, error: 'Driver request not found' });
     }
 
-    const requestData = requestDoc.data();
+    const requestData = requestDoc.data() as any;
 
-    // Criar usuário no Firebase Auth
-    const userRecord = await auth.createUser({
-      email: requestData?.email,
-      displayName: `${requestData?.firstName} ${requestData?.lastName}`,
-      password: Math.random().toString(36).slice(-8) + 'Aa1!', // Senha temporária
+    if (requestData.status === 'approved') {
+      return res.status(400).json({ success: false, error: 'Request already approved' });
+    }
+
+    // 1. Create Firebase Auth user
+    const password = Math.random().toString(36).slice(-8) + 'Aa1!'; // Generate a random password with complexity
+    const firebaseUser = await auth.createUser({
+      email: requestData.email,
+      password: password,
+      displayName: requestData.fullName,
+      emailVerified: true,
     });
 
-    // Criar documento do motorista
-    const driverData = {
-      uid: userRecord.uid,
-      userId: userRecord.uid,
-      email: requestData?.email,
-      firstName: requestData?.firstName,
-      lastName: requestData?.lastName,
-      name: `${requestData?.firstName} ${requestData?.lastName}`,
-      fullName: `${requestData?.firstName} ${requestData?.lastName}`,
-      phone: requestData?.phone,
-      city: requestData?.city,
-      birthDate: requestData?.birthDate,
-      driverType: requestData?.driverType,
-      licenseNumber: requestData?.licenseNumber,
-      licenseExpiry: requestData?.licenseExpiry,
-      vehicle: requestData?.vehicle,
+    // 2. Set custom claims for 'driver' role
+    await auth.setCustomUserClaims(firebaseUser.uid, { role: 'driver' });
+
+    // 3. Save driver data to Firestore 'drivers' collection
+    await db.collection('drivers').doc(firebaseUser.uid).set({
+      userId: firebaseUser.uid,
+      fullName: requestData.fullName,
+      email: requestData.email,
+      phone: requestData.phone,
+      type: requestData.type, // 'affiliate' or 'renter'
       status: 'active',
-      isActive: true,
-      isApproved: true,
-      approvedAt: Date.now(),
-      approvedBy: session.user.id,
-      locale: requestData?.locale || 'pt',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    await db.collection('drivers').doc(userRecord.uid).set(driverData);
-
-    // Atualizar solicitação
-    await db.collection('requests').doc(requestId).update({
-      status: 'approved',
-      adminNotes: validatedData.adminNotes,
-      reviewedBy: session.user.id,
-      reviewedAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-
-    // Enviar email de boas-vindas com senha temporária
-    try {
-      const { sendEmail } = await import('@/lib/email/sendEmail');
-      const { getApprovalEmailTemplate } = await import('@/lib/email/templates');
-      
-      const tempPassword = Math.random().toString(36).slice(-8) + 'Aa1!';
-      const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/driver/login`;
-      
-      const emailTemplate = getApprovalEmailTemplate({
-        driverName: `${requestData?.firstName} ${requestData?.lastName}`,
-        email: requestData?.email,
-        password: tempPassword,
-        loginUrl: loginUrl,
-      });
-
-      await sendEmail({
-        to: requestData?.email,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-        text: emailTemplate.text,
-      });
-    } catch (emailError) {
-      console.error('Error sending approval email:', emailError);
-      // Não falhar a aprovação se o email falhar
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: 'Solicitação aprovada com sucesso',
-      data: {
-        driverId: userRecord.uid,
+      createdAt: new Date().toISOString(),
+      integrations: { // Default empty integrations
+        uber: { enabled: false, key: '' },
+        bolt: { enabled: false, key: '' },
+        myprio: { enabled: false, key: '' },
+        viaverde: { enabled: false, key: '' },
+        cartrack: { enabled: false, key: '' },
       },
+      // Add other default driver fields as needed
     });
-  } catch (error: any) {
-    console.error('Error approving request:', error);
 
-    return res.status(500).json({
-      success: false,
-      error: 'Erro ao aprovar solicitação',
-      message: error.message,
+    // 4. Update request status to 'approved'
+    await requestRef.update({
+      status: 'approved',
+      updatedAt: new Date().toISOString(),
+      approvedBy: user.id,
+      driverId: firebaseUser.uid,
+      adminNotes: adminNotes || null,
     });
+
+    // 5. Send approval email with login details
+    await sendEmail({
+      to: requestData.email,
+      subject: 'Sua solicitação de motorista foi aprovada na Conduz.pt!',
+      html: approvedDriverEmailTemplate({
+        name: requestData.fullName,
+        email: requestData.email,
+        password: password,
+        loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+      }),
+    });
+
+    return res.status(200).json({ success: true, message: 'Driver request approved and user created' });
+  } catch (error: any) {
+    console.error('Error approving driver request:', error);
+    // If user creation fails, try to clean up the request status if it was updated
+    return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
-}
+}, sessionOptions);
