@@ -1,38 +1,42 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from '@/lib/session/ironSession';
+import { getFirestore } from 'firebase-admin/firestore';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { VerifyDriverSchema } from '@/schemas/driver';
 import { getPortugalTimestamp } from '@/lib/timezone';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   if (req.method !== 'PUT') {
-    return res.status(405).json({ error: 'Método não permitido' });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   try {
-    // Verificar sessão de admin
-    const session = await getSession(req, res);
-    if (!session.userId || session.role !== 'admin') {
-      return res.status(401).json({ error: 'Não autorizado' });
+    const db = getFirestore(firebaseAdmin);
+    const { driverId, ...updateData } = req.body;
+
+    if (!driverId) {
+      return res.status(400).json({ success: false, error: 'ID do motorista é obrigatório' });
     }
 
     // Validar dados
-    const { driverId, ...updateData } = req.body;
     const validatedData = VerifyDriverSchema.parse(updateData);
     
-    if (!driverId) {
-      return res.status(400).json({ error: 'ID do motorista é obrigatório' });
-    }
-
     // Obter timestamp atual em Portugal
     const now = getPortugalTimestamp();
 
     // Atualizar motorista
-    const driverRef = adminDb.collection('drivers').doc(driverId);
+    const driverRef = db.collection('drivers').doc(driverId);
     const driverDoc = await driverRef.get();
     
     if (!driverDoc.exists) {
-      return res.status(404).json({ error: 'Motorista não encontrado' });
+      return res.status(404).json({ success: false, error: 'Motorista não encontrado' });
     }
 
     const currentData = driverDoc.data();
@@ -41,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const updateFields: any = {
       status: validatedData.status,
       statusUpdatedAt: now,
-      statusUpdatedBy: session.userId,
+      statusUpdatedBy: user.id,
       updatedAt: now,
     };
 
@@ -49,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (validatedData.status === 'active' && currentData?.status === 'pending') {
       updateFields.isApproved = true;
       updateFields.approvedAt = now;
-      updateFields.approvedBy = session.userId;
+      updateFields.approvedBy = user.id;
     }
 
     // Se está sendo desativado, marcar como inativo
@@ -60,10 +64,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await driverRef.update(updateFields);
 
     // Log da ação
-    await adminDb.collection('audit_logs').add({
+    await db.collection('audit_logs').add({
       action: 'driver_status_update',
       driverId,
-      adminId: session.userId,
+      adminId: user.id,
       oldStatus: currentData?.status,
       newStatus: validatedData.status,
       reason: validatedData.reason || '',
@@ -76,8 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: 'Status do motorista atualizado com sucesso'
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao atualizar status do motorista:', error);
-    return res.status(500).json({ error: 'Erro interno do servidor' });
+    return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
-}
+}, sessionOptions);

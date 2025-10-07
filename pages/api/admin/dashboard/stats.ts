@@ -1,27 +1,56 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getDashboardStats, getDrivers, getRequests } from '@/lib/admin/adminQueries';
+import { getFirestore } from 'firebase-admin/firestore';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   try {
-    // TODO: Adicionar verificação de autenticação aqui
-    
-    const [stats, recentDrivers, recentRequests] = await Promise.all([
-      getDashboardStats(),
-      getDrivers({ limit: 5 }),
-      getRequests({ limit: 5 }),
-    ]);
+    const db = getFirestore(firebaseAdmin);
+
+    // Get total number of drivers
+    const driversSnapshot = await db.collection('drivers').get();
+    const totalDrivers = driversSnapshot.size;
+
+    // Get total number of requests by status
+    const requestsSnapshot = await db.collection('driver_requests').get();
+    const totalRequests = requestsSnapshot.size;
+    const pendingRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'pending').length;
+    const evaluationRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'evaluation').length;
+
+    // Get recent drivers (e.g., last 5 added)
+    const recentDriversSnapshot = await db.collection('drivers').orderBy('createdAt', 'desc').limit(5).get();
+    const recentDrivers = recentDriversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Get recent requests (e.g., last 5 added)
+    const recentRequestsSnapshot = await db.collection('driver_requests').orderBy('createdAt', 'desc').limit(5).get();
+    const recentRequests = recentRequestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     return res.status(200).json({
-      stats,
-      recentDrivers,
-      recentRequests,
+      success: true,
+      data: {
+        stats: {
+          totalDrivers,
+          totalRequests,
+          pendingRequests,
+          evaluationRequests,
+        },
+        recentDrivers,
+        recentRequests,
+      },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching dashboard stats:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
-}
+}, sessionOptions);

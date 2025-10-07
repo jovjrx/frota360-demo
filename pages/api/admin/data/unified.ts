@@ -1,26 +1,20 @@
-/**
- * API Universal de Dados Admin
- * 
- * Endpoint único que retorna todos os dados unificados do sistema
- * 
- * Query params:
- * - startDate: data inicial (ISO string)
- * - endDate: data final (ISO string)
- * - days: número de dias (alternativa a startDate/endDate)
- * - include: lista separada por vírgula do que incluir (drivers,vehicles,fleet,integrations,requests,weekly)
- * - driverStatus: active|inactive|all
- * - vehicleStatus: active|inactive|maintenance|all
- */
-
 import { NextApiRequest, NextApiResponse } from 'next';
-import { 
-  fetchUnifiedAdminData, 
-  fetchDashboardData, 
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import {
+  fetchUnifiedAdminData,
+  fetchDashboardData,
   fetchDriverMetricsData,
-  FetchOptions 
+  FetchOptions
 } from '@/lib/admin/unified-data';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
@@ -94,4 +88,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       error: error.message || 'Internal server error',
     });
   }
-}
+}, sessionOptions);

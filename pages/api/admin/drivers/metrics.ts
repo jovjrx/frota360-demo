@@ -1,12 +1,23 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
-import { db } from '@/lib/firebaseAdmin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { ApiResponse } from '@/types';
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
@@ -15,15 +26,7 @@ export default async function handler(
   }
 
   try {
-    const session = await getSession(req, res);
-
-    if (!session?.isLoggedIn || (session.role !== 'admin' && session.user?.role !== 'admin')) {
-      return res.status(401).json({
-        success: false,
-        error: 'Não autorizado',
-      });
-    }
-
+    const db = getFirestore(firebaseAdmin);
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
@@ -33,10 +36,10 @@ export default async function handler(
       });
     }
 
-    // Buscar todos os motoristas aprovados
+    // Buscar todos os motoristas ativos
     const driversSnapshot = await db
       .collection('drivers')
-      .where('status', '==', 'approved')
+      .where('status', '==', 'active') // Alterado de 'approved' para 'active'
       .get();
 
     const driversMetrics = [];
@@ -44,13 +47,16 @@ export default async function handler(
     for (const driverDoc of driversSnapshot.docs) {
       const driverData = driverDoc.data();
 
-      // Mock data - Em produção, buscar das integrações reais
+      // Mock data - Em produção, buscar das integrações reais ou de 'driverWeeklyRecords'
+      // Para um sistema mais robusto, esta API deveria agregar dados das collections raw_*
+      // ou de uma collection de métricas pré-calculadas (ex: driverWeeklyRecords).
+      // Por enquanto, mantemos o mock para a estrutura funcionar.
       const metrics = {
         id: driverDoc.id,
-        name: `${driverData.firstName} ${driverData.lastName}`,
+        name: `${driverData.firstName || ''} ${driverData.lastName || ''}`.trim(),
         email: driverData.email,
-        type: driverData.driverType || 'affiliate',
-        status: driverData.isActive ? 'active' : 'inactive',
+        type: driverData.type || 'affiliate', // Alterado de driverType para type
+        status: driverData.status || 'active',
         vehicle: driverData.vehicle?.plate || null,
         metrics: {
           totalTrips: Math.floor(Math.random() * 200) + 50,
@@ -89,4 +95,4 @@ export default async function handler(
       message: error.message,
     });
   }
-}
+}, sessionOptions);

@@ -1,9 +1,9 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getSession } from '@/lib/session';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { parse } from 'csv-parse/sync';
-import { adminDb } from '@/lib/firebaseAdmin';
 
 export const config = {
   api: {
@@ -13,7 +13,7 @@ export const config = {
   },
 };
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{
     success?: boolean;
@@ -21,20 +21,20 @@ export default async function handler(
     error?: string;
   }>,
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
-  const session = await getSession(req, res);
-
-  if (!session?.isLoggedIn || session.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   const { weekId, fileContent } = req.body;
 
   if (!weekId || !fileContent) {
-    return res.status(400).json({ error: 'Missing weekId or fileContent' });
+    return res.status(400).json({ success: false, error: 'Missing weekId or fileContent' });
   }
 
   try {
@@ -44,33 +44,30 @@ export default async function handler(
       trim: true,
     });
 
-    const db = getFirestore();
+    const db = getFirestore(firebaseAdmin);
     const batch = db.batch();
     const rawUberRef = db.collection('raw_uber');
 
     for (const record of records) {
-      // Adicionar weekId ao registro antes de salvar
-      const recordWithWeek = { ...record, weekId, importedAt: new Date().toISOString() };
-      const docRef = rawUberRef.doc(); // Firestore gera um ID único
+      const recordWithWeek = { ...record, weekId, importedAt: new Date().toISOString(), importedBy: user.id };
+      const docRef = rawUberRef.doc();
       batch.set(docRef, recordWithWeek);
     }
 
     await batch.commit();
 
-    // Atualizar status da semana na collection 'weeks'
     const weekRef = db.collection('weeks').doc(weekId);
     await weekRef.set({
       weekId,
       updatedAt: new Date().toISOString(),
       sources: {
-        uber: { status: 'complete', lastImport: new Date().toISOString() },
+        uber: { status: 'complete', lastImport: new Date().toISOString(), importedBy: user.id },
       },
     }, { merge: true });
 
     return res.status(200).json({ success: true, message: 'Uber data imported successfully' });
   } catch (e: any) {
     console.error('Error importing Uber data:', e);
-    return res.status(500).json({ error: e.message || 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: e.message || 'Internal Server Error' });
   }
-}
-
+}, sessionOptions);

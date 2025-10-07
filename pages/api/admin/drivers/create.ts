@@ -1,6 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session/ironSession';
-import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
 /**
  * Gera uma senha temporária aleatória
@@ -19,17 +22,20 @@ function generateTemporaryPassword(): string {
  * API para criar motorista diretamente (sem passar por solicitação)
  * POST /api/admin/drivers/create
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
   try {
-    // Verificar autenticação de admin
-    const session = await getSession(req, res);
-    if (!session.userId || session.role !== 'admin') {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const db = getFirestore(firebaseAdmin);
+    const adminAuth = getAuth(firebaseAdmin);
 
     const {
       // Dados pessoais obrigatórios
@@ -58,12 +64,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Validações básicas
     if (!fullName || !email || !phone || !type || !status) {
       return res.status(400).json({ 
+        success: false,
         error: 'Campos obrigatórios: fullName, email, phone, type, status' 
       });
     }
 
     if (type !== 'affiliate' && type !== 'renter') {
       return res.status(400).json({ 
+        success: false,
         error: 'Tipo inválido. Use "affiliate" ou "renter"' 
       });
     }
@@ -71,12 +79,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Se for locatário, veículo é obrigatório
     if (type === 'renter' && (!vehiclePlate || !vehicleModel)) {
       return res.status(400).json({ 
+        success: false,
         error: 'Locatários precisam ter veículo (vehiclePlate e vehicleModel)' 
       });
     }
 
     // Verificar se email já existe no Firestore
-    const existingDrivers = await adminDb
+    const existingDrivers = await db
       .collection('drivers')
       .where('email', '==', email)
       .limit(1)
@@ -84,6 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!existingDrivers.empty) {
       return res.status(400).json({ 
+        success: false,
         error: 'Email já cadastrado como motorista' 
       });
     }
@@ -114,6 +124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (authError.code === 'auth/email-already-exists') {
         return res.status(400).json({ 
+          success: false,
           error: 'Email já existe no Firebase Auth' 
         });
       }
@@ -173,10 +184,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Timestamps
       createdAt: now,
-      createdBy: session.userId,
+      createdBy: user.id,
       updatedAt: now,
       activatedAt: status === 'active' ? now : null,
-      activatedBy: status === 'active' ? session.userId : null,
+      activatedBy: status === 'active' ? user.id : null,
     };
 
     // Adicionar dados específicos de locatário
@@ -193,7 +204,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Criar documento no Firestore
-    const driverRef = await adminDb.collection('drivers').add(driverData);
+    const driverRef = await db.collection('drivers').add(driverData);
     const driverId = driverRef.id;
 
     // Atualizar custom claim com driverId
@@ -203,7 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // 3. Criar notificação de boas-vindas
-    await adminDb
+    await db
       .collection('drivers')
       .doc(driverId)
       .collection('notifications')
@@ -243,9 +254,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error: any) {
     console.error('Erro ao criar motorista:', error);
     return res.status(500).json({ 
+      success: false,
       error: 'Erro ao criar motorista',
       details: error.message 
     });
   }
-}
-
+}, sessionOptions);

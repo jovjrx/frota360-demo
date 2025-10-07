@@ -1,7 +1,8 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getSession } from '@/lib/session';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { parse } from 'csv-parse/sync';
 
 export const config = {
@@ -12,7 +13,7 @@ export const config = {
   },
 };
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{
     success?: boolean;
@@ -20,20 +21,20 @@ export default async function handler(
     error?: string;
   }>,
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
-  const session = await getSession(req, res);
-
-  if (!session?.isLoggedIn || session.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   const { weekId, fileContent } = req.body;
 
   if (!weekId || !fileContent) {
-    return res.status(400).json({ error: 'Missing weekId or fileContent' });
+    return res.status(400).json({ success: false, error: 'Missing weekId or fileContent' });
   }
 
   try {
@@ -43,31 +44,31 @@ export default async function handler(
       trim: true,
     });
 
-    const db = getFirestore();
+    const db = getFirestore(firebaseAdmin);
     const batch = db.batch();
     const rawBoltRef = db.collection('raw_bolt');
 
     for (const record of records) {
-      const recordWithWeek = { ...record, weekId, importedAt: new Date().toISOString() };
+      const recordWithWeek = { ...record, weekId, importedAt: new Date().toISOString(), importedBy: user.id };
       const docRef = rawBoltRef.doc();
       batch.set(docRef, recordWithWeek);
     }
 
     await batch.commit();
 
+    // Update the 'weeks' collection to mark this week as having Bolt data
     const weekRef = db.collection('weeks').doc(weekId);
     await weekRef.set({
       weekId,
       updatedAt: new Date().toISOString(),
       sources: {
-        bolt: { status: 'complete', lastImport: new Date().toISOString() },
+        bolt: { status: 'complete', lastImport: new Date().toISOString(), importedBy: user.id },
       },
     }, { merge: true });
 
     return res.status(200).json({ success: true, message: 'Bolt data imported successfully' });
   } catch (e: any) {
     console.error('Error importing Bolt data:', e);
-    return res.status(500).json({ error: e.message || 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: e.message || 'Internal Server Error' });
   }
-}
-
+}, sessionOptions);
