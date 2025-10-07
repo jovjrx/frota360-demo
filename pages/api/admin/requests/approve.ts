@@ -86,7 +86,31 @@ export default async function handler(
       updatedAt: Date.now(),
     });
 
-    // TODO: Enviar email de boas-vindas com senha temporária
+    // Enviar email de boas-vindas com senha temporária
+    try {
+      const { sendEmail } = await import('@/lib/email/sendEmail');
+      const { getApprovalEmailTemplate } = await import('@/lib/email/templates');
+      
+      const tempPassword = Math.random().toString(36).slice(-8) + 'Aa1!';
+      const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/driver/login`;
+      
+      const emailTemplate = getApprovalEmailTemplate({
+        driverName: `${requestData?.firstName} ${requestData?.lastName}`,
+        email: requestData?.email,
+        password: tempPassword,
+        loginUrl: loginUrl,
+      });
+
+      await sendEmail({
+        to: requestData?.email,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        text: emailTemplate.text,
+      });
+    } catch (emailError) {
+      console.error('Error sending approval email:', emailError);
+      // Não falhar a aprovação se o email falhar
+    }
 
     return res.status(200).json({
       success: true,

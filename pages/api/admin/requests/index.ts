@@ -19,7 +19,7 @@ export default async function handler(
       const offset = (pageNum - 1) * limitNum;
 
       // Query base
-      let query = db.collection('requests').orderBy('createdAt', 'desc');
+      let query = db.collection('driver_requests').orderBy('createdAt', 'desc');
 
       // Filtrar por status se fornecido
       if (status && status !== 'all') {

@@ -85,7 +85,7 @@ export default function Header({ t }: HeaderProps) {
   const allMenuItems = getAllMenuItems();
 
   return (
-    <Box as="header" borderBottomWidth="0" shadow="sm" position="sticky" top={0} zIndex={900} bg="white" >
+    <Box as="header" borderBottomWidth="0" shadow="sm" position={{ base: "relative", md: "sticky" }} top={0} zIndex={900} bg="white" >
       <Container maxW="7xl" p={4}>
         <Flex align="center" justify="space-between" gap={4}>
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
@@ -297,28 +297,108 @@ export default function Header({ t }: HeaderProps) {
               {/* Mobile Login/Logout */}
               <Box pt={3} borderTop="1px solid" borderColor="gray.200">
                 {user ? (
-                  <VStack spacing={2}>
-                    <Text fontSize="sm" color="gray.600">
-                      Logado como: {user.displayName || user.email}
-                    </Text>
+                  <VStack spacing={2} align="stretch">
+                    <Box p={3} bg="gray.50" borderRadius="md">
+                      <Badge
+                        colorScheme={isAdmin ? "red" : "green"}
+                        mb={2}
+                      >
+                        {isAdmin ? "Administrador" : "Motorista"}
+                      </Badge>
+                      <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                        {userData?.name || user.displayName || user.email}
+                      </Text>
+                      <Text fontSize="xs" color="gray.600">
+                        {userData?.email || user.email}
+                      </Text>
+                    </Box>
+
+                    {/* Menu Items Mobile */}
+                    {isAdmin ? (
+                      <>
+                        {allMenuItems?.map((item) => (
+                          <Button
+                            key={item.id}
+                            variant="ghost"
+                            size="sm"
+                            justifyContent="flex-start"
+                            leftIcon={<Icon as={item.icon} />}
+                            onClick={() => {
+                              router.push(item.href);
+                              setOpen(false);
+                            }}
+                            w="full"
+                          >
+                            {item.label}
+                          </Button>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          justifyContent="flex-start"
+                          leftIcon={<FiUser />}
+                          onClick={() => {
+                            router.push('/dashboard');
+                            setOpen(false);
+                          }}
+                          w="full"
+                        >
+                          Dashboard
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          justifyContent="flex-start"
+                          leftIcon={<FiFileText />}
+                          onClick={() => {
+                            router.push('/dashboard/payslips');
+                            setOpen(false);
+                          }}
+                          w="full"
+                        >
+                          Recibos
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          justifyContent="flex-start"
+                          leftIcon={<FiBarChart2 />}
+                          onClick={() => {
+                            router.push('/dashboard/analytics');
+                            setOpen(false);
+                          }}
+                          w="full"
+                        >
+                          Análises
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          justifyContent="flex-start"
+                          leftIcon={<FiUser />}
+                          onClick={() => {
+                            router.push('/dashboard/profile');
+                            setOpen(false);
+                          }}
+                          w="full"
+                        >
+                          Perfil
+                        </Button>
+                      </>
+                    )}
+
+                    <Divider />
+
                     <Button
                       variant="ghost"
-                      size="sm"
-                      leftIcon={<FiUser />}
-                      w="full"
-                      onClick={() => {
-                        const isAdmin = user?.email?.endsWith('@conduz.pt') || user?.email === 'conduzcontacto@gmail.com';
-                        router.push(isAdmin ? '/admin' : '/drivers');
-                      }}
-                    >
-                      Dashboard
-                    </Button>
-                    <Button
-                      variant="outline"
                       size="sm"
                       leftIcon={<FiLogOut />}
                       onClick={handleLogout}
                       w="full"
+                      color="red.500"
                     >
                       Sair
                     </Button>

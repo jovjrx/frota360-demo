@@ -49,7 +49,27 @@ export default async function handler(
       updatedAt: Date.now(),
     });
 
-    // TODO: Enviar email de rejeição
+    // Enviar email de rejeição
+    try {
+      const { sendEmail } = await import('@/lib/email/sendEmail');
+      const { getRejectionEmailTemplate } = await import('@/lib/email/templates');
+      
+      const requestData = requestDoc.data();
+      const emailTemplate = getRejectionEmailTemplate({
+        driverName: `${requestData?.firstName} ${requestData?.lastName}`,
+        reason: validatedData.rejectionReason,
+      });
+
+      await sendEmail({
+        to: requestData?.email,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+        text: emailTemplate.text,
+      });
+    } catch (emailError) {
+      console.error('Error sending rejection email:', emailError);
+      // Não falhar a rejeição se o email falhar
+    }
 
     return res.status(200).json({
       success: true,
