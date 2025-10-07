@@ -6,9 +6,13 @@ import * as XLSX from "xlsx";
 import { getWeekId } from "@/schemas/driver-weekly-record";
 import { RawFileArchiveEntry } from "@/schemas/raw-file-archive";
 
+// Função auxiliar para normalizar strings (remover acentos e caracteres especiais)
+function normalizeString(str: string): string {
+  return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/[^a-zA-Z0-9_\s]/g, "").trim();
+}
+
 async function importRawData(weekStart: string, weekEnd: string, filesToImport: { platform: string; filePath: string; type: string; fileName: string }[]) {
   const weekId = getWeekId(new Date(weekStart));
-  const importId = `${weekId}-${new Date().getTime()}`; // Gerar um importId único para esta importação
   const rawDataDocIds: string[] = [];
 
   for (const file of filesToImport) {
@@ -28,12 +32,35 @@ async function importRawData(weekStart: string, weekEnd: string, filesToImport: 
       const workbook = XLSX.readFile(file.filePath);
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      rawData.headers = json[0] as string[];
-      rawData.rows = json.slice(1).map(row => {
+      const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false }) as any[][];
+
+      let headerRowIndex = 0; // Assume a primeira linha como cabeçalho por padrão
+
+      // Lógica específica para Prio: encontrar a linha do cabeçalho que contém 'POSTO'
+      if (file.platform === 'myprio') {
+        let foundHeader = false;
+        for (let i = 0; i < sheetData.length; i++) {
+          const row = sheetData[i];
+          if (row.some(cell => typeof cell === 'string' && normalizeString(cell).toUpperCase() === 'POSTO')) {
+            headerRowIndex = i;
+            foundHeader = true;
+            break;
+          }
+        }
+        if (!foundHeader) {
+          console.error(`❌ Cabeçalho 'POSTO' não encontrado no arquivo ${file.fileName} para a plataforma ${file.platform}.`);
+          continue; // Pular este arquivo se o cabeçalho não for encontrado
+        }
+      }
+
+      const headers = sheetData[headerRowIndex].map(cell => normalizeString(String(cell)));
+      const rows = sheetData.slice(headerRowIndex + 1).filter(row => row.some(cell => cell !== null && String(cell).trim() !== '')); // Filtrar linhas vazias
+
+      rawData.headers = headers;
+      rawData.rows = rows.map(row => {
         const obj: any = {};
-        rawData.headers.forEach((header, index) => {
-          obj[header] = row[index];
+        headers.forEach((header, index) => {
+          obj[header] = row[index] === undefined ? null : row[index];
         });
         return obj;
       });
@@ -59,7 +86,7 @@ async function importRawData(weekStart: string, weekEnd: string, filesToImport: 
   }
 
   console.log("🎉 Importação de dados brutos concluída!");
-  return { importId, weekId, rawDataDocIds };
+  return { weekId, rawDataDocIds };
 }
 
 export { importRawData };

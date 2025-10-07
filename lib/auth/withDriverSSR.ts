@@ -1,7 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { getSession } from '@/lib/session/ironSession';
 import { SessionData } from '@/lib/session/ironSession';
-import { getTranslation } from '@/lib/translations';
+import { loadTranslations } from '@/lib/translations';
 
 interface DriverPageProps {
   user: SessionData['user'];
@@ -27,8 +27,7 @@ export function withDriverSSR<P extends { [key: string]: any } = { [key: string]
     }
 
     // Load translations for the driver dashboard
-    const commonTranslations = getTranslation('common', locale || 'pt');
-    const driverTranslations = getTranslation('driver', locale || 'pt');
+    const loadedTranslations = await loadTranslations(locale || 'pt', ['common', 'driver']);
 
     const result = await gssp(context, session.user);
 
@@ -38,8 +37,8 @@ export function withDriverSSR<P extends { [key: string]: any } = { [key: string]
           ...result.props,
           user: session.user,
           translations: {
-            common: commonTranslations,
-            page: driverTranslations,
+            common: loadedTranslations.common,
+            driver: loadedTranslations.driver,
           },
           locale: locale || 'pt',
         } as P & DriverPageProps,
