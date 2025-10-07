@@ -36,6 +36,7 @@ import {
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
+import { getWeekOptions } from '@/lib/admin/adminQueries';
 import { useRouter } from 'next/router';
 import { getWeekId, getWeekDates } from '@/schemas/driver-weekly-record';
 
@@ -400,37 +401,16 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   );
 }
 
+// SSR com autenticação, traduções e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const { req } = context;
-  const cookie = req.headers.cookie || '';
-
-  // Buscar semanas com dados reais
-  const weeksResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/data-sources`, {
-    headers: { Cookie: cookie },
-  });
-  const weeksData = await weeksResponse.json();
-  const weekOptions: WeekOption[] = weeksData.data || [];
-
-  let currentWeek = weekOptions.length > 0 ? weekOptions[0].value : '';
-  let initialRecords: DriverRecord[] = [];
-
-  if (currentWeek) {
-    const selectedWeek = weekOptions[0];
-    const recordsResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/process-week?weekStart=${selectedWeek.start}&weekEnd=${selectedWeek.end}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookie,
-      },
-    });
-    const recordsData = await recordsResponse.json();
-    initialRecords = recordsData.records || [];
-  }
+  // Gerar opções de semanas
+  const weekOptions = getWeekOptions(12);
+  const currentWeek = weekOptions.length > 0 ? weekOptions[0].value : '';
 
   return {
     weekOptions,
     currentWeek,
-    initialRecords,
+    initialRecords: [], // Será carregado via SWR no cliente
   };
 });
 

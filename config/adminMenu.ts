@@ -36,18 +36,10 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     },
     {
         id: 'requests',
-        label: 'Pedidos',
+        label: 'Solicitações',
         href: '/admin/requests',
         icon: FiFileText,
         description: 'Solicitações',
-        showInMainMenu: true,
-    },
-    {
-        id: 'control',
-        label: 'Semanal',
-        href: '/admin/weekly',
-        icon: FiCalendar,
-        description: 'Controle semanal',
         showInMainMenu: true,
     },
     {
@@ -59,18 +51,18 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
     },
     {
-        id: 'fleet',
-        label: 'Frota',
-        href: '/admin/fleet',
-        icon: FiTruck,
-        description: 'Veículos',
+        id: 'control',
+        label: 'Controle & Pagamentos',
+        href: '/admin/weekly',
+        icon: FiCalendar,
+        description: 'Controle semanal',
         showInMainMenu: true,
     },
     {
         id: 'monitor',
-        label: 'Monitor',
+        label: 'Monitoramento',
         href: '/admin/monitor',
-        icon: FiActivity,
+        icon: FiTruck,
         description: 'Rastreamento',
         showInMainMenu: false, // Movido para "Mais"
     },
@@ -83,11 +75,11 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
     {
-        id: 'integrations',
-        label: 'Integrações',
-        href: '/admin/integrations',
-        icon: FiSettings,
-        description: 'APIs e integrações',
+        id: 'users',
+        label: 'Usuários',
+        href: '/admin/users',
+        icon: FiUsers,
+        description: 'Gerenciamento de usuários',
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
 ];

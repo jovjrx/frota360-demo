@@ -52,6 +52,7 @@ import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
+import { getDrivers } from '@/lib/admin/adminQueries';
 
 interface Driver {
   id: string;
@@ -108,7 +109,7 @@ export default function DriversPage({ user, translations, locale, initialDrivers
   const { isOpen, onOpen, onClose } = useDisclosure();
   
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -686,32 +687,13 @@ export default function DriversPage({ user, translations, locale, initialDrivers
   );
 }
 
-export const getServerSideProps = withAdminSSR<DriversPageProps>(async (context, user) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const cookieHeader = context.req.headers.cookie || '';
+// SSR com autenticação, traduções e dados iniciais
+export const getServerSideProps = withAdminSSR(async (context, user) => {
+  // Carregar motoristas diretamente do Firestore
+  const drivers = await getDrivers();
 
-  try {
-    const response = await fetch(`${baseUrl}/api/admin/drivers`, {
-      headers: { Cookie: cookieHeader },
-    });
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to fetch drivers');
-    }
-
-    return {
-      props: {
-        initialDrivers: data.drivers || [],
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching drivers for SSR:', error);
-    return {
-      props: {
-        initialDrivers: [],
-      },
-    };
-  }
+  return {
+    initialDrivers: drivers,
+  };
 });
 

@@ -461,27 +461,12 @@ export default function MonitorPage({ user, translations, locale, initialData }:
   );
 }
 
+// SSR com autenticação e traduções
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const { req } = context;
-  const cookie = req.headers.cookie || '';
-
-  try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/integrations/cartrack/data`, {
-      headers: {
-        Cookie: cookie,
-      },
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch initial Cartrack data', response.status, response.statusText);
-      return { props: { initialData: null } };
-    }
-
-    const result = await response.json();
-    return { props: { initialData: result.data || null } };
-  } catch (error) {
-    console.error('Error fetching initial Cartrack data:', error);
-    return { props: { initialData: null } };
-  }
+  // TODO: Adicionar query específica para Cartrack se necessário
+  // Por enquanto, os dados serão buscados via SWR no cliente
+  return {
+    initialData: null,
+  };
 });
 

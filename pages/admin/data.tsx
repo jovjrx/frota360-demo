@@ -1,4 +1,3 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import {
@@ -20,42 +19,25 @@ import {
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
 import { MdAdd, MdSync } from 'react-icons/md';
-import { AdminLayout } from '@/components/layouts/AdminLayout';
-import { WeeklyDataSourceCard } from '@/components/admin/WeeklyDataSourceCard';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import { WeeklyDataSources } from '@/schemas/weekly-data-sources';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from 'next-auth/react';
-import { loadTranslations } from '@/lib/translations';
-import { useTranslations } from 'next-intl';
+import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
+import { getFirestore } from 'firebase-admin/firestore';
 
-interface DataPageProps {
+interface DataPageProps extends AdminPageProps {
   initialWeeks: WeeklyDataSources[];
-  locale: string;
-  translations: any;
 }
 
-export default function DataPage({ initialWeeks, locale, translations }: DataPageProps) {
+export default function DataPage({ user, translations, locale, initialWeeks }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [weeks, setWeeks] = useState<WeeklyDataSources[]>(initialWeeks); // Inicializar com dados do SSR
-  const [loading, setLoading] = useState(false); // Já carregado pelo SSR
+  const [weeks, setWeeks] = useState<WeeklyDataSources[]>(initialWeeks);
+  const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  // Funções de tradução
-  const { t: tCommon } = useTranslations({
-    translations: translations.common,
-    namespace: 'common'
-  });
-
-  // Fallback para traduções
-  const t = tCommon || ((key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.common, key, variables) || key;
-  });
-
-  const tAdmin = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations.page, key, variables) || key;
-  };
+  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   // useEffect para recarregar dados se necessário (ex: após sync)
   useEffect(() => {
@@ -130,7 +112,13 @@ export default function DataPage({ initialWeeks, locale, translations }: DataPag
   };
 
   return (
-    <AdminLayout locale={locale} translations={translations}>
+    <AdminLayout
+      title={tAdmin('data_sources') || 'Fontes de Dados'}
+      subtitle="Gerencie fontes de dados semanais"
+      breadcrumbs={[
+        { label: tAdmin('data_sources') || 'Dados' }
+      ]}
+    >
       <Flex justifyContent="space-between" alignItems="center" mb={6}>
         <Heading as="h1" size="xl">{tAdmin('data_sources')}</Heading>
         <HStack spacing={4}>
@@ -161,14 +149,24 @@ export default function DataPage({ initialWeeks, locale, translations }: DataPag
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
           {filterWeeks(weeks).map((week) => (
-            <WeeklyDataSourceCard
+            <Box
               key={week.id}
-              week={week}
-              onSync={handleSync}
-              syncing={syncing}
-              t={t}
-              tAdmin={tAdmin}
-            />
+              p={4}
+              borderWidth={1}
+              borderRadius="md"
+              _hover={{ shadow: 'md' }}
+            >
+              <Text fontWeight="bold">{week.weekId}</Text>
+              <Text fontSize="sm">{week.weekStart} - {week.weekEnd}</Text>
+              <Button
+                size="sm"
+                mt={2}
+                onClick={() => handleSync(week.id)}
+                isLoading={syncing}
+              >
+                Sincronizar
+              </Button>
+            </Box>
           ))}
         </SimpleGrid>
       )}
@@ -176,61 +174,35 @@ export default function DataPage({ initialWeeks, locale, translations }: DataPag
   );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<DataPageProps>> {
-  const { req, res, locale } = context;
-  const session = await getSession({ req });
-
-  // Redirecionar se não estiver logado ou não for admin
-  if (!session || session.role !== 'admin') {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-
-  let initialWeeks: WeeklyDataSources[] = [];
-  let translations: any = {};
+// SSR com autenticação, traduções e dados iniciais
+export const getServerSideProps = withAdminSSR(async (context, user) => {
+  const db = getFirestore();
 
   try {
-    const weeksSnapshot = await adminDb.collection('weeklyDataSources').orderBy('weekStart', 'desc').get();
-    initialWeeks = weeksSnapshot.docs.map(doc => {
-      const data = doc.data() as WeeklyDataSources;
+    const weeksSnapshot = await db.collection('weeklyDataSources').orderBy('weekStart', 'desc').get();
+    const initialWeeks = weeksSnapshot.docs.map(doc => {
+      const data = doc.data();
       return {
         id: doc.id,
         weekId: data.weekId,
         weekStart: data.weekStart,
         weekEnd: data.weekEnd,
-        sources: data.sources, // Garantir que o objeto sources seja incluído
+        sources: data.sources,
         isComplete: data.isComplete,
-        createdAt: data.createdAt, // Garantir que createdAt seja incluído
-        updatedAt: data.updatedAt, // Adicionar updatedAt para exibição
-        notes: data.notes, // Incluir notes
-      } as WeeklyDataSources;
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        notes: data.notes,
+      };
     });
 
-    translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']);
-
-  } catch (error) {
-    console.error('Error fetching initial weeks or translations:', error);
-    // Em caso de erro, ainda retornar props válidas para evitar falha na página
-    translations = await loadTranslations(locale || 'pt', ['common', 'admin-data']); // Tentar carregar traduções mesmo com erro
     return {
-      props: {
-        initialWeeks: [],
-        locale: locale || 'pt',
-        translations,
-      },
+      initialWeeks,
+    };
+  } catch (error) {
+    console.error('Error fetching weekly data sources:', error);
+    return {
+      initialWeeks: [],
     };
   }
-
-  return {
-    props: {
-      initialWeeks,
-      locale: locale || 'pt',
-      translations,
-    },
-  };
-}
+});
 

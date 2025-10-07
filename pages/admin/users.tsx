@@ -56,6 +56,7 @@ import {
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { useTranslations } from '@/hooks/useTranslations';
 import { getTranslation } from '@/lib/translations';
+import { getUsers, getUsersStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
 
 interface User {
@@ -92,7 +93,7 @@ export default function UsersManagement({ user, translations, locale, initialUse
   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -442,34 +443,17 @@ export default function UsersManagement({ user, translations, locale, initialUse
   );
 }
 
-export const getServerSideProps = withAdminSSR<UsersPageProps>(async (context, user) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const cookieHeader = context.req.headers.cookie || '';
+// SSR com autenticação, traduções e dados iniciais
+export const getServerSideProps = withAdminSSR(async (context, user) => {
+  // Carregar dados iniciais diretamente do Firestore
+  const [users, stats] = await Promise.all([
+    getUsers(),
+    getUsersStats(),
+  ]);
 
-  try {
-    const response = await fetch(`${baseUrl}/api/admin/user-management`, {
-      headers: { Cookie: cookieHeader },
-    });
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to fetch users');
-    }
-
-    return {
-      props: {
-        initialUsers: data.users || [],
-        initialStats: data.stats || { total: 0, admins: 0, drivers: 0 },
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching users for SSR:', error);
-    return {
-      props: {
-        initialUsers: [],
-        initialStats: { total: 0, admins: 0, drivers: 0 },
-      },
-    };
-  }
+  return {
+    initialUsers: users,
+    initialStats: stats,
+  };
 });
 

@@ -61,16 +61,16 @@ const navItems: NavItem[] = [
     description: 'Gestão da frota de veículos',
   },
   {
-    label: 'Métricas',
-    href: '/admin/metrics',
-    icon: FiBarChart2,
-    description: 'Métricas gerais do sistema',
-  },
-  {
     label: 'Integrações',
     href: '/admin/integrations',
     icon: FiWifi,
     description: 'Integrações externas',
+  },
+  {
+    label: 'Usuários',
+    href: '/admin/users',
+    icon: FiUsers,
+    description: 'Gerenciamento de usuários',
   },
 ];
 
@@ -80,7 +80,7 @@ interface AdminNavProps {
 
 export default function AdminNav({ isCompact = false }: AdminNavProps) {
   const router = useRouter();
-  
+
   const isActive = (href: string) => {
     if (href === '/admin') {
       return router.pathname === href;
@@ -157,9 +157,9 @@ export default function AdminNav({ isCompact = false }: AdminNavProps) {
           </HStack>
         </Button>
       ))}
-      
+
       <Divider my={2} />
-      
+
       <Button
         variant="ghost"
         colorScheme="red"

@@ -1,4 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 /**
  * Queries reutilizáveis para páginas admin
@@ -131,6 +132,67 @@ export async function getRequestsStats(): Promise<{
   });
 
   return stats;
+}
+
+/**
+ * Buscar todos os usuários (Firebase Auth + Firestore)
+ */
+export async function getUsers(): Promise<any[]> {
+  const auth = getAuth();
+  const db = getFirestore();
+
+  try {
+    // Buscar usuários do Firebase Auth
+    const listUsersResult = await auth.listUsers();
+    
+    // Buscar dados adicionais do Firestore
+    const usersWithData = await Promise.all(
+      listUsersResult.users.map(async (userRecord) => {
+        let userData = null;
+        
+        // Tentar buscar dados do motorista
+        const driverDoc = await db.collection('drivers').doc(userRecord.uid).get();
+        if (driverDoc.exists) {
+          userData = { ...driverDoc.data(), collection: 'drivers' };
+        }
+
+        return {
+          id: userRecord.uid,
+          email: userRecord.email,
+          displayName: userRecord.displayName,
+          disabled: userRecord.disabled,
+          emailVerified: userRecord.emailVerified,
+          createdAt: userRecord.metadata.creationTime,
+          lastSignIn: userRecord.metadata.lastSignInTime,
+          customClaims: userRecord.customClaims,
+          role: userRecord.customClaims?.role || 'user',
+          ...userData,
+        };
+      })
+    );
+
+    return usersWithData;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+}
+
+/**
+ * Buscar estatísticas de usuários
+ */
+export async function getUsersStats(): Promise<{
+  total: number;
+  admins: number;
+  drivers: number;
+}> {
+  const users = await getUsers();
+  
+  return {
+    total: users.length,
+    admins: users.filter(u => u.role === 'admin').length,
+    drivers: users.filter(u => u.role === 'driver').length,
+  };
 }
 
 /**
