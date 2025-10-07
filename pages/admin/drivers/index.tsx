@@ -185,7 +185,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
     if (!editingDriver) return;
 
     const pathParts = path.split('.');
-    const updated = { ...editingDriver };
+    const updated = JSON.parse(JSON.stringify(editingDriver));
     
     let current: any = updated;
     for (let i = 0; i < pathParts.length - 1; i++) {
@@ -205,20 +205,22 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
       inactive: 'gray',
       suspended: 'red',
     };
+    const labelMap: Record<string, string> = {
+      active: 'Ativo',
+      pending: 'Pendente',
+      inactive: 'Inativo',
+      suspended: 'Suspenso',
+    };
     return (
       <Badge colorScheme={colorMap[status || 'pending'] || 'gray'}>
-        {status === 'active' ? 'Ativo' :
-         status === 'pending' ? 'Pendente' :
-         status === 'inactive' ? 'Inativo' :
-         status === 'suspended' ? 'Suspenso' :
-         status || 'N/A'}
+        {labelMap[status || 'pending'] || status || 'N/A'}
       </Badge>
     );
   };
 
   const getTypeBadge = (type?: string) => {
     return (
-      <Badge colorScheme={type === 'renter' ? 'blue' : 'purple'}>
+      <Badge colorScheme={type === 'renter' ? 'purple' : 'green'}>
         {type === 'renter' ? 'Locatário' : 'Afiliado'}
       </Badge>
     );
@@ -299,7 +301,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                     <Th>Tipo</Th>
                     <Th>Uber</Th>
                     <Th>Bolt</Th>
-                    <Th>myprio</Th>
+                    <Th>MyPrio</Th>
                     <Th>ViaVerde</Th>
                     <Th>IBAN</Th>
                     <Th>Ações</Th>
@@ -328,7 +330,9 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                         <Td>
                           <VStack spacing={1} align="start">
                             <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.uber?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.uber?.key || '-'}
+                              {driver.integrations?.uber?.key ? 
+                                `${driver.integrations.uber.key.slice(0, 8)}...` : 
+                                '-'}
                             </Text>
                             {driver.integrations?.uber?.enabled && (
                               <Badge size="xs" colorScheme="green">Ativo</Badge>
@@ -348,7 +352,9 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                         <Td>
                           <VStack spacing={1} align="start">
                             <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.myprio?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.myprio?.key || '-'}
+                              {driver.integrations?.myprio?.key ? 
+                                `...${driver.integrations.myprio.key.slice(-4)}` : 
+                                '-'}
                             </Text>
                             {driver.integrations?.myprio?.enabled && (
                               <Badge size="xs" colorScheme="green">Ativo</Badge>
@@ -396,7 +402,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
       {/* Modal de Edição */}
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxH="90vh" overflowY="auto">
           <ModalHeader>Editar Motorista</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -450,7 +456,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>Nome</FormLabel>
+                        <FormLabel>Nome Completo</FormLabel>
                         <Input
                           value={editingDriver.fullName || editingDriver.name || ''}
                           onChange={(e) => updateField('fullName', e.target.value)}
@@ -479,188 +485,108 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                   {/* Tab Integrações */}
                   <TabPanel>
                     <VStack spacing={4}>
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>Uber</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <FormLabel mb="0" fontSize="sm">Integração Ativa</FormLabel>
-                            <Switch
-                              isChecked={editingDriver.integrations?.uber?.enabled || false}
-                              onChange={(e) => updateField('integrations.uber.enabled', e.target.checked)}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">UUID do Motorista</FormLabel>
-                            <Input
-                              placeholder="Ex: 12345678-1234-1234-1234-123456789012"
-                              value={editingDriver.integrations?.uber?.key || ''}
-                              onChange={(e) => updateField('integrations.uber.key', e.target.value)}
-                              isDisabled={!editingDriver.integrations?.uber?.enabled}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              UUID usado para vincular dados da planilha do Uber
-                            </Text>
-                          </FormControl>
-                        </VStack>
+                      {/* Uber */}
+                      <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                        <HStack justify="space-between" mb={3}>
+                          <Heading size="sm">Uber</Heading>
+                          <Switch
+                            isChecked={editingDriver.integrations?.uber?.enabled || false}
+                            onChange={(e) => updateField('integrations.uber.enabled', e.target.checked)}
+                            colorScheme="green"
+                          />
+                        </HStack>
+                        <FormControl>
+                          <FormLabel fontSize="sm">UUID do Motorista</FormLabel>
+                          <Input
+                            placeholder="Ex: 12345678-1234-1234-1234-123456789012"
+                            value={editingDriver.integrations?.uber?.key || ''}
+                            onChange={(e) => updateField('integrations.uber.key', e.target.value)}
+                            isDisabled={!editingDriver.integrations?.uber?.enabled}
+                            fontFamily="mono"
+                            fontSize="sm"
+                          />
+                          <Text fontSize="xs" color="gray.600" mt={1}>
+                            UUID usado para vincular dados da planilha do Uber
+                          </Text>
+                        </FormControl>
                       </Box>
 
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>Bolt</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <FormLabel mb="0" fontSize="sm">Integração Ativa</FormLabel>
-                            <Switch
-                              isChecked={editingDriver.integrations?.bolt?.enabled || false}
-                              onChange={(e) => updateField('integrations.bolt.enabled', e.target.checked)}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Email do Motorista</FormLabel>
-                            <Input
-                              type="email"
-                              placeholder="Email usado no Bolt"
-                              value={editingDriver.integrations?.bolt?.key || editingDriver.email || ''}
-                              onChange={(e) => updateField('integrations.bolt.key', e.target.value)}
-                              isDisabled={!editingDriver.integrations?.bolt?.enabled}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Email usado para vincular dados da planilha do Bolt
-                            </Text>
-                          </FormControl>
-                        </VStack>
+                      {/* Bolt */}
+                      <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                        <HStack justify="space-between" mb={3}>
+                          <Heading size="sm">Bolt</Heading>
+                          <Switch
+                            isChecked={editingDriver.integrations?.bolt?.enabled || false}
+                            onChange={(e) => updateField('integrations.bolt.enabled', e.target.checked)}
+                            colorScheme="green"
+                          />
+                        </HStack>
+                        <FormControl>
+                          <FormLabel fontSize="sm">Email do Motorista</FormLabel>
+                          <Input
+                            type="email"
+                            placeholder="email@exemplo.com"
+                            value={editingDriver.integrations?.bolt?.key || ''}
+                            onChange={(e) => updateField('integrations.bolt.key', e.target.value)}
+                            isDisabled={!editingDriver.integrations?.bolt?.enabled}
+                            fontSize="sm"
+                          />
+                          <Text fontSize="xs" color="gray.600" mt={1}>
+                            Email usado para vincular dados da planilha do Bolt
+                          </Text>
+                        </FormControl>
                       </Box>
 
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>myprio</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <FormLabel mb="0" fontSize="sm">Integração Ativa</FormLabel>
-                            <Switch
-                              isChecked={editingDriver.integrations?.myprio?.enabled || false}
-                              onChange={(e) => updateField('integrations.myprio.enabled', e.target.checked)}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Número do Cartão</FormLabel>
-                            <Input
-                              placeholder="Ex: 1234567890123456"
-                              value={editingDriver.integrations?.myprio?.key || ''}
-                              onChange={(e) => updateField('integrations.myprio.key', e.target.value)}
-                              isDisabled={!editingDriver.integrations?.myprio?.enabled}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Número do cartão myprio para vincular gastos de combustível
-                            </Text>
-                          </FormControl>
-                        </VStack>
+                      {/* MyPrio */}
+                      <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                        <HStack justify="space-between" mb={3}>
+                          <Heading size="sm">MyPrio</Heading>
+                          <Switch
+                            isChecked={editingDriver.integrations?.myprio?.enabled || false}
+                            onChange={(e) => updateField('integrations.myprio.enabled', e.target.checked)}
+                            colorScheme="green"
+                          />
+                        </HStack>
+                        <FormControl>
+                          <FormLabel fontSize="sm">Número do Cartão</FormLabel>
+                          <Input
+                            placeholder="Ex: 1234567890123456"
+                            value={editingDriver.integrations?.myprio?.key || ''}
+                            onChange={(e) => updateField('integrations.myprio.key', e.target.value)}
+                            isDisabled={!editingDriver.integrations?.myprio?.enabled}
+                            fontFamily="mono"
+                            fontSize="sm"
+                          />
+                          <Text fontSize="xs" color="gray.600" mt={1}>
+                            Número do cartão MyPrio para vincular gastos de combustível
+                          </Text>
+                        </FormControl>
                       </Box>
 
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>ViaVerde</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <FormLabel mb="0" fontSize="sm">Integração Ativa</FormLabel>
-                            <Switch
-                              isChecked={editingDriver.integrations?.viaverde?.enabled || false}
-                              onChange={(e) => updateField('integrations.viaverde.enabled', e.target.checked)}
-                            />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Placa do Veículo</FormLabel>
-                            <Input
-                              placeholder="Ex: AB-12-CD"
-                              value={editingDriver.integrations?.viaverde?.key || ''}
-                              onChange={(e) => updateField('integrations.viaverde.key', e.target.value)}
-                              isDisabled={!editingDriver.integrations?.viaverde?.enabled}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Placa do veículo para vincular dados de portagens ViaVerde
-                            </Text>
-                          </FormControl>
-                        </VStack>
-                      </Box>
-                    </VStack>
-                  </TabPanel>
-
-                  {/* Tab Veículo */}
-                        <VStack spacing={3}>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Driver ID</FormLabel>
-                            <Input
-                              placeholder="Ex: 123456"
-                              value={editingDriver.integrations?.bolt?.id || ''}
-                              onChange={(e) => updateField('integrations.bolt.id', e.target.value)}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Este ID é usado para vincular dados da planilha do Bolt
-                            </Text>
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Email no Bolt (opcional)</FormLabel>
-                            <Input
-                              type="email"
-                              placeholder="Email no Bolt"
-                              value={editingDriver.integrations?.bolt?.email || ''}
-                              onChange={(e) => updateField('integrations.bolt.email', e.target.value)}
-                            />
-                          </FormControl>
-                        </VStack>
-                      </Box>
-
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>myprio</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <Switch
-                              id="myprio-enabled"
-                              isChecked={editingDriver.integrations?.myprio?.enabled || false}
-                              onChange={(e) => updateField('integrations.myprio.enabled', e.target.checked)}
-                              mr={3}
-                            />
-                            <FormLabel htmlFor="myprio-enabled" mb={0} fontSize="sm">
-                              Integração Ativa
-                            </FormLabel>
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Número do Cartão</FormLabel>
-                            <Input
-                              placeholder="Número do cartão myprio"
-                              value={editingDriver.integrations?.myprio?.key || ''}
-                              onChange={(e) => updateField('integrations.myprio.key', e.target.value)}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Usado para vincular dados de abastecimento
-                            </Text>
-                          </FormControl>
-                        </VStack>
-                      </Box>
-
-                      <Box w="100%" p={4} borderWidth={1} borderRadius="md">
-                        <Heading size="sm" mb={3}>Via Verde</Heading>
-                        <VStack spacing={3}>
-                          <FormControl display="flex" alignItems="center">
-                            <Switch
-                              id="viaverde-enabled"
-                              isChecked={editingDriver.integrations?.viaverde?.enabled || false}
-                              onChange={(e) => updateField('integrations.viaverde.enabled', e.target.checked)}
-                              mr={3}
-                            />
-                            <FormLabel htmlFor="viaverde-enabled" mb={0} fontSize="sm">
-                              Integração Ativa
-                            </FormLabel>
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel fontSize="sm">Número do Cartão</FormLabel>
-                            <Input
-                              placeholder="Número do cartão ViaVerde"
-                              value={editingDriver.integrations?.viaverde?.key || ''}
-                              onChange={(e) => updateField('integrations.viaverde.key', e.target.value)}
-                            />
-                            <Text fontSize="xs" color="gray.500" mt={1}>
-                              Usado para vincular dados de portagens
-                            </Text>
-                          </FormControl>
-                        </VStack>
+                      {/* ViaVerde */}
+                      <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                        <HStack justify="space-between" mb={3}>
+                          <Heading size="sm">ViaVerde</Heading>
+                          <Switch
+                            isChecked={editingDriver.integrations?.viaverde?.enabled || false}
+                            onChange={(e) => updateField('integrations.viaverde.enabled', e.target.checked)}
+                            colorScheme="green"
+                          />
+                        </HStack>
+                        <FormControl>
+                          <FormLabel fontSize="sm">Matrícula do Veículo</FormLabel>
+                          <Input
+                            placeholder="Ex: AB-12-CD"
+                            value={editingDriver.integrations?.viaverde?.key || editingDriver.vehicle?.plate || ''}
+                            onChange={(e) => updateField('integrations.viaverde.key', e.target.value)}
+                            isDisabled={!editingDriver.integrations?.viaverde?.enabled}
+                            fontFamily="mono"
+                            fontSize="sm"
+                          />
+                          <Text fontSize="xs" color="gray.600" mt={1}>
+                            Matrícula do veículo para vincular dados de portagens ViaVerde
+                          </Text>
+                        </FormControl>
                       </Box>
                     </VStack>
                   </TabPanel>
@@ -674,8 +600,9 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                           placeholder="Ex: AB-12-CD"
                           value={editingDriver.vehicle?.plate || ''}
                           onChange={(e) => updateField('vehicle.plate', e.target.value)}
+                          fontFamily="mono"
                         />
-                        <Text fontSize="xs" color="gray.500" mt={1}>
+                        <Text fontSize="xs" color="gray.600" mt={1}>
                           Usado para vincular dados de ViaVerde
                         </Text>
                       </FormControl>
@@ -719,8 +646,9 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                           placeholder="PT50 0000 0000 0000 0000 0000 0"
                           value={editingDriver.banking?.iban || ''}
                           onChange={(e) => updateField('banking.iban', e.target.value)}
+                          fontFamily="mono"
                         />
-                        <Text fontSize="xs" color="gray.500" mt={1}>
+                        <Text fontSize="xs" color="gray.600" mt={1}>
                           IBAN completo para transferências semanais
                         </Text>
                       </FormControl>
