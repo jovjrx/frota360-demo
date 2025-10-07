@@ -458,8 +458,8 @@ export default function SolicitacoesPage({ user, translations, locale, initialDa
   );
 }
 
-export const getServerSideProps = withAdminSSR<SolicitacoesPageProps>(async (context, user) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+export const getServerSideProps = withAdminSSR<SolicitacoesPageProps>(async (context) => {
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const cookieHeader = context.req.headers.cookie || '';
 
   try {

@@ -410,7 +410,7 @@ export const getServerSideProps = withAdminSSR(async (context, user) => {
   const cookie = req.headers.cookie || '';
 
   // Buscar semanas com dados reais
-  const weeksResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/weekly/data-sources`, {
+  const weeksResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/data-sources`, {
     headers: { Cookie: cookie },
   });
   const weeksData = await weeksResponse.json();
@@ -421,7 +421,7 @@ export const getServerSideProps = withAdminSSR(async (context, user) => {
 
   if (currentWeek) {
     const selectedWeek = weekOptions[0];
-    const recordsResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/weekly/process-week`, {
+    const recordsResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/weekly/process-week`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

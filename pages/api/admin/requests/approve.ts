@@ -85,7 +85,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       driverName: requestData.fullName,
       email: requestData.email,
       password: password,
-      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+      loginUrl: `${process.env.NEXTAUTH_URL}/login`,
     });
 
     await sendEmail({

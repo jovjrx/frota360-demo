@@ -466,7 +466,7 @@ export const getServerSideProps = withAdminSSR(async (context, user) => {
   const cookie = req.headers.cookie || '';
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/integrations/cartrack/data`, {
+    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/integrations/cartrack/data`, {
       headers: {
         Cookie: cookie,
       },

@@ -146,7 +146,7 @@ class EmailService {
           <p>Seu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.</p>
           <p>Enquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.</p>
           <div style="margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/painel" 
+            <a href="${process.env.NEXTAUTH_URL}/painel" 
                style="background-color: #48BB78; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
               Acessar Painel
             </a>
@@ -155,7 +155,7 @@ class EmailService {
           <p>Equipe Conduz.pt</p>
         </div>
       `,
-      text: `Bem-vindo à Conduz.pt!\n\nOlá ${driverName},\n\nObrigado por se inscrever na Conduz.pt! Sua conta foi criada com sucesso.\n\nSeu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.\n\nEnquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.\n\nAcesse: ${process.env.NEXT_PUBLIC_APP_URL}/painel\n\nSe você tiver alguma dúvida, não hesite em nos contatar.\n\nEquipe Conduz.pt`,
+      text: `Bem-vindo à Conduz.pt!\n\nOlá ${driverName},\n\nObrigado por se inscrever na Conduz.pt! Sua conta foi criada com sucesso.\n\nSeu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.\n\nEnquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nSe você tiver alguma dúvida, não hesite em nos contatar.\n\nEquipe Conduz.pt`,
     };
   }
 
@@ -174,7 +174,7 @@ class EmailService {
             <li>Começar a receber corridas</li>
           </ul>
           <div style="margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/painel" 
+            <a href="${process.env.NEXTAUTH_URL}/painel" 
                style="background-color: #48BB78; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
               Acessar Painel
             </a>
@@ -183,7 +183,7 @@ class EmailService {
           <p>Equipe Conduz.pt</p>
         </div>
       `,
-      text: `Parabéns!\n\nOlá ${driverName},\n\nSua conta na Conduz.pt foi aprovada! 🎉\n\nAgora você pode começar a usar nossa plataforma. Acesse o painel do motorista para:\n\n- Configurar sua disponibilidade\n- Escolher um plano de assinatura\n- Começar a receber corridas\n\nAcesse: ${process.env.NEXT_PUBLIC_APP_URL}/painel\n\nBem-vindo à equipe Conduz.pt!\n\nEquipe Conduz.pt`,
+      text: `Parabéns!\n\nOlá ${driverName},\n\nSua conta na Conduz.pt foi aprovada! 🎉\n\nAgora você pode começar a usar nossa plataforma. Acesse o painel do motorista para:\n\n- Configurar sua disponibilidade\n- Escolher um plano de assinatura\n- Começar a receber corridas\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nBem-vindo à equipe Conduz.pt!\n\nEquipe Conduz.pt`,
     };
   }
 
@@ -248,7 +248,7 @@ class EmailService {
           <p>Sua assinatura do plano <strong>${planName}</strong> será renovada automaticamente em ${renewalDateStr}.</p>
           <p>Certifique-se de que seu método de pagamento está atualizado.</p>
           <div style="margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/painel/subscription" 
+            <a href="${process.env.NEXTAUTH_URL}/painel/subscription" 
                style="background-color: #3182CE; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
               Gerenciar Assinatura
             </a>
@@ -257,7 +257,7 @@ class EmailService {
           <p>Equipe Conduz.pt</p>
         </div>
       `,
-      text: `Renovação em breve\n\nOlá ${driverName},\n\nSua assinatura do plano ${planName} será renovada automaticamente em ${renewalDateStr}.\n\nCertifique-se de que seu método de pagamento está atualizado.\n\nGerenciar: ${process.env.NEXT_PUBLIC_APP_URL}/painel/subscription\n\nSe você não deseja renovar, pode cancelar a qualquer momento.\n\nEquipe Conduz.pt`,
+      text: `Renovação em breve\n\nOlá ${driverName},\n\nSua assinatura do plano ${planName} será renovada automaticamente em ${renewalDateStr}.\n\nCertifique-se de que seu método de pagamento está atualizado.\n\nGerenciar: ${process.env.NEXTAUTH_URL}/painel/subscription\n\nSe você não deseja renovar, pode cancelar a qualquer momento.\n\nEquipe Conduz.pt`,
     };
   }
 
@@ -297,7 +297,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/painel" 
+              <a href="${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel" 
                  style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
                 Acessar Painel do Motorista
               </a>
@@ -322,12 +322,12 @@ class EmailService {
           </div>
         </div>
       `,
-      text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nAlvorada Magistral - Gestão de Motoristas TVDE`,
+      text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nAlvorada Magistral - Gestão de Motoristas TVDE`,
     };
   }
 
   private getPasswordResetTemplate(driverName: string, resetToken: string): EmailTemplate {
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://conduz.pt'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/reset-password?token=${resetToken}`;
     
     return {
       subject: 'Recuperação de Senha - Conduz',

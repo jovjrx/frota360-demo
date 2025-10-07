@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!session) return;
 
   const clientId = process.env.UBER_CLIENT_ID;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/integrations/uber/callback`;
+  const redirectUri = `${process.env.NEXTAUTH_URL}/api/admin/integrations/uber/callback`;
   
   // Scopes necessários para Fleet Integration
   const scopes = [
