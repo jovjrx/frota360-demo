@@ -45,13 +45,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Usuário não encontrado no sistema' });
     }
 
-    // Criar sessão
+    // Criar sessão com o campo user populado
     await createSession(req, res, {
       userId: uid,
       role: role,
       email: email,
       name: name,
       driverId: driverId,
+      user: {
+        id: uid,
+        role: role,
+        email: email,
+        name: name,
+      },
     });
 
     return res.status(200).json({ success: true, role: role });

@@ -1,12 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
 import { ApiResponse } from '@/types';
 import integrationService from '@/lib/integrations/integration-service';
 import { IntegrationPlatform } from '@/schemas/integration';
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   const { platform } = req.query;
 
   if (!platform || typeof platform !== 'string') {
@@ -118,4 +126,4 @@ export default async function handler(
       error: error instanceof Error ? error.message : 'Erro ao processar integração',
     });
   }
-}
+}, sessionOptions);

@@ -1,7 +1,9 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getSession } from '@/lib/session';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
 // TODO: Implementar funções de sincronização reais para cada plataforma
 async function syncUberData(credentials: any) {
@@ -34,7 +36,7 @@ async function syncCartrackData(credentials: any) {
   return { success: true, message: 'Cartrack data synced (simulated)' };
 }
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{
     success?: boolean;
@@ -42,14 +44,14 @@ export default async function handler(
     error?: string;
   }>,
 ) {
-  const session = await getSession(req, res);
+  const user = req.session.user;
 
-  if (!session?.isLoggedIn || session.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   if (req.method === 'POST') {
-    const db = getFirestore();
+    const db = getFirestore(firebaseAdmin);
     const integrationsRef = db.collection('integrations');
 
     try {
@@ -124,5 +126,5 @@ export default async function handler(
   }
 
   return res.status(405).json({ error: 'Method Not Allowed' });
-}
+}, sessionOptions);
 

@@ -1,7 +1,9 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getSession } from '@/lib/session';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
+import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
 interface IntegrationConfig {
   id: string;
@@ -14,7 +16,7 @@ interface IntegrationConfig {
   credentials?: any;
 }
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{
     integrations?: IntegrationConfig[];
@@ -23,13 +25,13 @@ export default async function handler(
     error?: string;
   }>,
 ) {
-  const session = await getSession(req, res);
+  const user = req.session.user;
 
-  if (!session?.isLoggedIn || session.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const db = getFirestore();
+  const db = getFirestore(firebaseAdmin);
   const integrationsRef = db.collection('integrations');
 
   if (req.method === 'GET') {
@@ -65,5 +67,5 @@ export default async function handler(
   }
 
   return res.status(405).json({ error: 'Method Not Allowed' });
-}
+}, sessionOptions);
 

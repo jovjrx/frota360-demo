@@ -1,5 +1,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { sessionOptions } from '@/lib/session/ironSession';
 import { ApiResponse } from '@/types';
 import {
   createBoltClient,
@@ -10,15 +12,14 @@ import {
 import { createUberConfig } from '@/lib/uber/base';
 import { UberBusinessClient } from '@/lib/uber/client-business';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from '@/lib/session';
 
-export default async function handler(
+export default withIronSessionApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  const session = await getSession(req, res);
+  const user = req.session.user;
 
-  if (!session?.isLoggedIn || session.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return res.status(401).json({
       success: false,
       error: 'Unauthorized',
@@ -112,5 +113,5 @@ export default async function handler(
       message: error.message,
     });
   }
-}
+}, sessionOptions);
 
