@@ -27,10 +27,11 @@ export async function requireAdmin(
     }
 
     // Retornar dados do usuário admin
+    // SessionData tem: userId, role, email, name, user.id, user.role, user.email, user.name
     return {
-      uid: session.user?.uid || session.uid || '',
+      uid: session.user?.id || session.userId || '',
       email: session.user?.email || session.email || '',
-      displayName: session.user?.displayName || session.displayName || null,
+      displayName: session.user?.name || session.name || null,
       role: 'admin',
     };
   } catch (error) {
