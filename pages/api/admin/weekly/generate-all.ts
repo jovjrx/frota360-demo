@@ -1,20 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { generatePayslipPDF, PayslipData } from '@/lib/pdf/payslipGenerator';
 import ExcelJS from 'exceljs';
 import archiver from 'archiver';
 
-// Inicializar Firebase Admin
-if (!getApps().length) {
-  const serviceAccount = require('@/firebase-service-account.json');
-  initializeApp({
-    credential: cert(serviceAccount),
-  });
-}
-
 interface DriverRecord {
-  id: string;
+  driverId: string;
   driverName: string;
   driverType: string;
   vehicle: string;
@@ -24,7 +14,7 @@ interface DriverRecord {
   boltTotal: number;
   ganhosTotal: number;
   iva: number;
-  ganhosMinusIva: number;
+  ganhosMenosIva: number;
   despesasAdm: number;
   combustivel: number;
   portagens: number;
@@ -43,71 +33,14 @@ export default async function handler(
   }
 
   try {
-    const { weekStart, weekEnd } = req.body;
+    const { weekStart, weekEnd, records } = req.body;
 
     if (!weekStart || !weekEnd) {
       return res.status(400).json({ error: 'weekStart e weekEnd são obrigatórios' });
     }
 
-    const db = getFirestore();
-
-    // Buscar registros da semana
-    const recordsSnapshot = await db
-      .collection('weeklyRecords')
-      .where('weekStart', '==', weekStart)
-      .where('weekEnd', '==', weekEnd)
-      .get();
-
-    if (recordsSnapshot.empty) {
-      return res.status(404).json({ error: 'Nenhum registro encontrado para esta semana' });
-    }
-
-    const records: DriverRecord[] = [];
-
-    // Processar cada registro
-    for (const doc of recordsSnapshot.docs) {
-      const data = doc.data();
-      
-      // Buscar dados do motorista
-      const driverDoc = await db.collection('drivers').doc(data.driverId).get();
-      const driverData = driverDoc.data();
-
-      if (!driverData) {
-        console.warn(`Motorista ${data.driverId} não encontrado`);
-        continue;
-      }
-
-      const uberTotal = data.uber?.total || 0;
-      const boltTotal = data.bolt?.total || 0;
-      const ganhosTotal = uberTotal + boltTotal;
-      const iva = ganhosTotal * 0.06;
-      const ganhosMinusIva = ganhosTotal - iva;
-      const despesasAdm = ganhosMinusIva * 0.07;
-      const combustivel = data.fuel?.total || 0;
-      const portagens = data.viaverde?.total || 0;
-      const aluguel = driverData.type === 'renter' ? (data.rent || 290) : 0;
-      const valorLiquido = ganhosMinusIva - despesasAdm - combustivel - portagens - aluguel;
-
-      records.push({
-        id: doc.id,
-        driverName: data.driverName || driverData.name || 'N/A',
-        driverType: driverData.type === 'renter' ? 'Locatário' : 'Afiliado',
-        vehicle: driverData.vehicle?.plate || 'N/A',
-        weekStart: data.weekStart,
-        weekEnd: data.weekEnd,
-        uberTotal,
-        boltTotal,
-        ganhosTotal,
-        iva,
-        ganhosMinusIva,
-        despesasAdm,
-        combustivel,
-        portagens,
-        aluguel,
-        valorLiquido,
-        iban: driverData.banking?.iban || 'N/A',
-        status: data.payment?.status || 'pending',
-      });
+    if (!records || records.length === 0) {
+      return res.status(400).json({ error: 'Nenhum registro para processar' });
     }
 
     // ============================================================================
@@ -138,7 +71,7 @@ export default async function handler(
     ];
 
     // Adicionar dados
-    records.forEach(record => {
+    records.forEach((record: DriverRecord) => {
       worksheet.addRow({
         motorista: record.driverName,
         tipo: record.driverType,
@@ -148,7 +81,7 @@ export default async function handler(
         boltTotal: record.boltTotal,
         ganhosTotal: record.ganhosTotal,
         iva: record.iva,
-        ganhosMinusIva: record.ganhosMinusIva,
+        ganhosMinusIva: record.ganhosMenosIva,
         despesasAdm: record.despesasAdm,
         combustivel: record.combustivel,
         portagens: record.portagens,
@@ -160,12 +93,12 @@ export default async function handler(
     });
 
     // Adicionar linha de total
-    const totals = records.reduce((acc, record) => ({
+    const totals = records.reduce((acc: any, record: DriverRecord) => ({
       uberTotal: acc.uberTotal + record.uberTotal,
       boltTotal: acc.boltTotal + record.boltTotal,
       ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
       iva: acc.iva + record.iva,
-      ganhosMinusIva: acc.ganhosMinusIva + record.ganhosMinusIva,
+      ganhosMinusIva: acc.ganhosMinusIva + record.ganhosMenosIva,
       despesasAdm: acc.despesasAdm + record.despesasAdm,
       combustivel: acc.combustivel + record.combustivel,
       portagens: acc.portagens + record.portagens,
@@ -261,14 +194,14 @@ export default async function handler(
         boltTotal: record.boltTotal,
         ganhosTotal: record.ganhosTotal,
         ivaValor: record.iva,
-        ganhosMenosIva: record.ganhosMinusIva,
+        ganhosMenosIva: record.ganhosMenosIva,
         comissao: record.despesasAdm,
         combustivel: record.combustivel,
         viaverde: record.portagens,
         aluguel: record.aluguel,
         repasse: record.valorLiquido,
         iban: record.iban,
-        status: record.status === 'PENDENTE' ? 'pending' : 'paid',
+        status: record.status === 'PENDENTE' || record.status === 'pending' ? 'pending' : 'paid',
       };
 
       const pdfBuffer = await generatePayslipPDF(payslipData);
