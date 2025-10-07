@@ -37,7 +37,6 @@ import {
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { getWeekOptions } from '@/lib/admin/adminQueries';
 
 
 interface WeekOption {
@@ -423,7 +422,7 @@ export default function WeeklyNewPage({ weekOptions, currentWeek }: WeeklyPagePr
 
 
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const weekOptions = getWeekOptions(12);
+  const weekOptions = getWeekOptions();
   const currentWeek = weekOptions[0].value;
   
   return {
