@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import {
@@ -53,6 +52,9 @@ import {
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
+import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { getDrivers } from '@/lib/admin/adminQueries';
+
 
 interface Driver {
   id: string;
@@ -683,48 +685,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { checkAdminAuth } = await import('@/lib/auth/adminCheck');
-  const authResult = await checkAdminAuth(context);
 
-  if ('redirect' in authResult) {
-    return authResult;
-  }
-
-  try {
-    const { getFirestore } = await import('firebase-admin/firestore');
-    const db = getFirestore();
-
-    const snapshot = await db.collection('drivers')
-      .orderBy('createdAt', 'desc')
-      .limit(100)
-      .get();
-
-    const initialDrivers = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return {
-      props: {
-        ...authResult.props,
-        initialDrivers,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching drivers:', error);
-    return {
-      props: {
-        ...authResult.props,
-        initialDrivers: [],
-      },
-    };
-  }
-};
-
-// SSR com autenticação e dados iniciais
-import { withAdminSSR } from '@/lib/admin/withAdminSSR';
-import { getDrivers } from '@/lib/admin/adminQueries';
 
 export const getServerSideProps = withAdminSSR(async (context, user) => {
   const drivers = await getDrivers({ limit: 100 });

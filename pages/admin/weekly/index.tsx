@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import {
@@ -37,6 +36,9 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
+import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { getWeekOptions } from '@/lib/admin/adminQueries';
+
 
 interface WeekOption {
   label: string;
@@ -418,21 +420,7 @@ export default function WeeklyNewPage({ weekOptions, currentWeek }: WeeklyPagePr
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const weekOptions = getWeekOptions();
-  const currentWeek = weekOptions[0].value;
 
-  return {
-    props: {
-      weekOptions,
-      currentWeek,
-    },
-  };
-};
-
-// SSR com autenticação e traduções
-import { withAdminSSR } from '@/lib/admin/withAdminSSR';
-import { getWeekOptions } from '@/lib/admin/adminQueries';
 
 export const getServerSideProps = withAdminSSR(async (context, user) => {
   const weekOptions = getWeekOptions(12);

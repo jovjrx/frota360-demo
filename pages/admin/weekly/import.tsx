@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useState } from 'react';
 import { GetServerSideProps } from 'next';
 import {
   Box,
@@ -35,6 +34,8 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
+import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+
 
 interface ImportPageProps extends PageProps {}
 
@@ -370,13 +371,6 @@ export default function ImportNewPage({}: ImportPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return {
-    props: {},
-  };
-};
 
-// SSR com autenticação e traduções
-import { withAdminSSR } from '@/lib/admin/withAdminSSR';
 
 export const getServerSideProps = withAdminSSR();
