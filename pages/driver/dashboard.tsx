@@ -6,6 +6,7 @@ import { fetcher } from '@/lib/utils/fetcher';
 import { SessionData } from '@/lib/session/ironSession';
 import { DriverWeeklySummary } from '@/types'; // Assuming you have this type defined
 import PainelLayout from '@/components/layouts/PainelLayout';
+import CartrackWidget from '@/components/driver/CartrackWidget';
 
 interface DashboardPageProps {
   user: SessionData['user'];
@@ -87,15 +88,12 @@ export default function DriverDashboardPage({ user, translations, locale, initia
           </SimpleGrid>
         </Box>
 
-        {user?.type === 'renter' && user?.integrations?.cartrack?.enabled && (
-          <Box>
-            <Heading as="h2" size="lg" mb={4}>
-              {tPage('dashboard.cartrack_data')}
-            </Heading>
-            <Text>{tPage('dashboard.cartrack_info')}</Text>
-            {/* TODO: Integrate Cartrack component here */}
-          </Box>
-        )}
+        <Box>
+          <Heading as="h2" size="lg" mb={4}>
+            {tPage('dashboard.cartrack_data')}
+          </Heading>
+          <CartrackWidget driverId={user?.id || ''} translations={translations.page} />
+        </Box>
 
         {/* Add more sections like recent trips, notifications, etc. */}
       </VStack>
