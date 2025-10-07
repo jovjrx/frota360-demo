@@ -1,6 +1,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { ApiResponse } from '@/types';
 import {
@@ -114,4 +114,5 @@ export default withIronSessionApiRoute(async function handler(
     });
   }
 }, sessionOptions);
+
 

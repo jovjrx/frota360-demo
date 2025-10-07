@@ -145,9 +145,9 @@ export default function AdminDashboard({ user, translations, locale, initialData
                       <Text>Total de Motoristas</Text>
                     </HStack>
                   </StatLabel>
-                  <StatNumber>{data?.stats.totalDrivers || 0}</StatNumber>
+                  <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
                   <StatHelpText>
-                    {data?.stats.activeDrivers || 0} ativos
+                    {data?.stats?.activeDrivers || 0} ativos
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -162,7 +162,7 @@ export default function AdminDashboard({ user, translations, locale, initialData
                       <Text>Motoristas Ativos</Text>
                     </HStack>
                   </StatLabel>
-                  <StatNumber>{data?.stats.activeDrivers || 0}</StatNumber>
+                  <StatNumber>{data?.stats?.activeDrivers || 0}</StatNumber>
                   <StatHelpText>
                     <StatArrow type="increase" />
                     Em operação
@@ -180,7 +180,7 @@ export default function AdminDashboard({ user, translations, locale, initialData
                       <Text>Solicitações Pendentes</Text>
                     </HStack>
                   </StatLabel>
-                  <StatNumber>{data?.stats.pendingRequests || 0}</StatNumber>
+                  <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
                   <StatHelpText>Aguardando análise</StatHelpText>
                 </Stat>
               </CardBody>
@@ -196,7 +196,7 @@ export default function AdminDashboard({ user, translations, locale, initialData
                     </HStack>
                   </StatLabel>
                   <StatNumber>
-                    {formatCurrency(data?.stats.totalEarningsThisWeek || 0)}
+                    {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
                   </StatNumber>
                   <StatHelpText>Semana atual</StatHelpText>
                 </Stat>
@@ -220,7 +220,7 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data?.recentDrivers.map((driver) => (
+                  {data?.recentDrivers?.map((driver) => (
                     <Tr key={driver.id}>
                       <Td>{driver.fullName}</Td>
                       <Td>{driver.email}</Td>
@@ -257,7 +257,7 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data?.recentRequests.map((request) => (
+                  {data?.recentRequests?.map((request) => (
                     <Tr key={request.id}>
                       <Td>{request.fullName}</Td>
                       <Td>{request.email}</Td>

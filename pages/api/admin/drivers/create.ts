@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
-import { sessionOptions } from '@/lib/session/ironSession';
+import { withIronSessionApiRoute, sessionOptions, SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
@@ -22,7 +21,7 @@ function generateTemporaryPassword(): string {
  * API para criar motorista diretamente (sem passar por solicitação)
  * POST /api/admin/drivers/create
  */
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
 
   if (!user || user.role !== 'admin') {

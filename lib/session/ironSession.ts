@@ -63,3 +63,16 @@ export async function destroySession(
   const session = await getSession(req, res);
   session.destroy();
 }
+
+// Wrapper para compatibilidade com iron-session v6/v7
+// Na versão 8, não existe mais withIronSessionApiRoute
+export function withIronSessionApiRoute(
+  handler: (req: SessionRequest, res: NextApiResponse) => Promise<void> | void,
+  options: typeof sessionOptions = sessionOptions
+) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    const session = await getSession(req, res);
+    (req as SessionRequest).session = session as SessionData;
+    return handler(req as SessionRequest, res);
+  };
+}

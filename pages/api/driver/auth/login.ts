@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAuth } from 'firebase-admin/auth';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
@@ -65,3 +65,4 @@ export default withIronSessionApiRoute(async function loginRoute(req: NextApiReq
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
 }, sessionOptions);
+

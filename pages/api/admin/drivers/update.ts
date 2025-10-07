@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
@@ -79,3 +79,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     res.status(500).json({ success: false, error: error.message || 'Failed to update driver' });
   }
 }, sessionOptions);
+

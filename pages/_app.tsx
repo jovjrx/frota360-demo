@@ -66,7 +66,7 @@ export default function App({ Component, pageProps }: AppProps) {
               locale={router.locale ?? "pt"}
             />
 
-            <Header t={tCommon} />
+            <Header t={tCommon} panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")} />
             <Component
               key={router.locale}
               {...pageProps}

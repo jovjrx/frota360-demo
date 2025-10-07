@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 
 export default withIronSessionApiRoute(async function logoutRoute(req: NextApiRequest, res: NextApiResponse) {
@@ -10,3 +10,4 @@ export default withIronSessionApiRoute(async function logoutRoute(req: NextApiRe
   req.session.destroy();
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 }, sessionOptions);
+

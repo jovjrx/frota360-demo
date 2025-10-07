@@ -317,7 +317,7 @@ export async function fetchUnifiedAdminData(
     // ========== FETCH REQUESTS ==========
     if (includeRequests) {
       try {
-        const requestsSnapshot = await adminD          .collection(\'driver_requests\')
+        const requestsSnapshot = await adminDb.collection('driver_requests')
           .orderBy('createdAt', 'desc')
           .get();
 

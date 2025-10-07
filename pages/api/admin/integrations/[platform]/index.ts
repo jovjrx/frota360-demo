@@ -1,12 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { NextApiResponse } from 'next';
+import { withIronSessionApiRoute, SessionRequest } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { ApiResponse } from '@/types';
 import integrationService from '@/lib/integrations/integration-service';
 import { IntegrationPlatform } from '@/schemas/integration';
 
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
+  req: SessionRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const user = req.session.user;

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
@@ -54,3 +54,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
 }, sessionOptions);
+

@@ -33,7 +33,7 @@ export default function Hero({
   badge,
   actions,
   children,
-  maxW = "7xl",
+  maxW = "8xl",
   minH = "70vh",
   align = "left",
   overlay = true,

@@ -1,17 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { SessionRequest, withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<{
-    success?: boolean;
-    error?: string;
-    drivers?: any[];
-  }>,
-) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
 
   if (!user || user.role !== 'admin') {
@@ -57,3 +50,4 @@ export default withIronSessionApiRoute(async function handler(
 
   return res.status(405).json({ success: false, error: 'Method Not Allowed' });
 }, sessionOptions);
+

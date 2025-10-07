@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import {
   fetchUnifiedAdminData,
@@ -89,3 +89,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     });
   }
 }, sessionOptions);
+

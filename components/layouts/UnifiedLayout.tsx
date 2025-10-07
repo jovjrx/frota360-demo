@@ -100,7 +100,7 @@ export default function UnifiedLayout({
         ))}
 
         {/* Main Content */}
-        <WrapperLayout px={{ base: 4, md: 6 }} py={{ base: 4, md: 8 }}>
+        <WrapperLayout  panel px={{ base: 4, md: 6 }} py={{ base: 4, md: 8 }}>
           <VStack spacing={8} align="stretch">
             {/* Stats Grid - Always one row on desktop */}
             {stats.length > 0 && (

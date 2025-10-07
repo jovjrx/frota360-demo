@@ -1,12 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { withIronSessionApiRoute } from 'iron-session/next';
-import { sessionOptions } from '@/lib/session/ironSession';
+import { sessionOptions, SessionRequest, withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { sendEmail } from '@/lib/email/sendEmail';
-import { rejectedDriverEmailTemplate } from '@/lib/email/templates';
+import { getRejectionEmailTemplate } from '@/lib/email/templates';
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -47,13 +46,16 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     });
 
     // Send rejection email
+    const emailTemplate = getRejectionEmailTemplate({
+      driverName: requestData.fullName,
+      reason: rejectionReason || 'Não especificado',
+    });
+
     await sendEmail({
       to: requestData.email,
-      subject: 'Atualização sobre sua solicitação de motorista na Conduz.pt',
-      html: rejectedDriverEmailTemplate({
-        name: requestData.fullName,
-        rejectionReason: rejectionReason,
-      }),
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
     });
 
     return res.status(200).json({ success: true, message: 'Driver request rejected' });

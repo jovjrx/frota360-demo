@@ -36,9 +36,10 @@ import { WrapperLayout } from "./layouts/WrapperLayout";
 
 interface HeaderProps {
   t: (key: string) => string;
+  panel: boolean;
 }
 
-export default function Header({ t }: HeaderProps) {
+export default function Header({ t, panel = false }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { user, signOut, isAdmin, userData } = useAuth();
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function Header({ t }: HeaderProps) {
 
   return (
     <Box as="header" borderBottomWidth="0" shadow="sm" position={'relative'} top={0} zIndex={900} bg="white" >
-      <WrapperLayout>
+      <WrapperLayout panel py={2}>
         <Flex align="center" justify="space-between" gap={4}>
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
             <Image

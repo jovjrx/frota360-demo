@@ -1,13 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { withIronSessionApiRoute, SessionRequest } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { sendEmail } from '@/lib/email/sendEmail';
-import { approvedDriverEmailTemplate } from '@/lib/email/templates';
+import { getApprovalEmailTemplate } from '@/lib/email/templates';
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -81,15 +81,18 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     });
 
     // 5. Send approval email with login details
+    const emailTemplate = getApprovalEmailTemplate({
+      driverName: requestData.fullName,
+      email: requestData.email,
+      password: password,
+      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+    });
+
     await sendEmail({
       to: requestData.email,
-      subject: 'Sua solicitação de motorista foi aprovada na Conduz.pt!',
-      html: approvedDriverEmailTemplate({
-        name: requestData.fullName,
-        email: requestData.email,
-        password: password,
-        loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
-      }),
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
     });
 
     return res.status(200).json({ success: true, message: 'Driver request approved and user created' });
@@ -99,4 +102,5 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
 }, sessionOptions);
+
 
