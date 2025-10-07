@@ -99,3 +99,4 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
 }, sessionOptions);
+
