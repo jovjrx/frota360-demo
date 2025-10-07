@@ -48,7 +48,7 @@ export type DriverWeeklyRecord = z.infer<typeof DriverWeeklyRecordSchema>;
  * - Despesas administrativas 7% sobre (ganhos - IVA)
  * - Portagens só descontadas de locatários
  */
-export function calculateDriverWeeklyRecord(
+export function createDriverWeeklyRecord(
   data: Partial<DriverWeeklyRecord>,
   driver?: { type: 'affiliate' | 'renter'; rentalFee?: number }
 ): DriverWeeklyRecord {
@@ -104,7 +104,7 @@ export function calculateDriverWeeklyRecord(
     totalDespesas,
     repasse,
     
-    iban: data.iban,
+    iban: data.iban || null,
     paymentStatus: data.paymentStatus || 'pending',
     paymentDate: data.paymentDate || null,
     

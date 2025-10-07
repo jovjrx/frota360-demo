@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from 'next-auth/react';
 import { WeeklyDataSources, createWeeklyDataSources, updateDataSource } from '@/schemas/weekly-data-sources';
 import { DriverWeeklyRecord, createDriverWeeklyRecord, getWeekId } from '@/schemas/driver-weekly-record';
 import { Driver } from '@/schemas/driver';
-import { RawImportData } from '@/schemas/raw-import-data'; // Assuming this schema exists or will be created
+import { RawFileArchiveEntry } from '@/schemas/raw-file-archive';
 
 interface ProcessedDriverData {
   [driverId: string]: {
@@ -15,171 +14,167 @@ interface ProcessedDriverData {
     viaverdeTotal: number;
     uberTrips: number;
     boltTrips: number;
-    uberUuid: string;
-    boltEmail: string;
-    myprioCard: string;
-    viaverdeOBU: string;
   };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Reativar autenticação
-  const session = await getSession({ req });
-  if (!session || session.role !== 'admin') {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const { importId } = req.body; // Agora recebemos um importId para processar
+  const { weekId, rawDataDocIds } = req.body; // Agora recebemos weekId e rawDataDocIds
 
-  if (!importId) {
-    return res.status(400).json({ message: 'Missing importId' });
+  if (!weekId || !rawDataDocIds || !Array.isArray(rawDataDocIds) || rawDataDocIds.length === 0) {
+    return res.status(400).json({ message: 'Missing weekId or rawDataDocIds' });
   }
 
-  try {
-    // 1. Buscar todas as entradas de importação para este importId
-    const importEntriesSnapshot = await adminDb.collection('weeklyDataImports')
-      .where('importId', '==', importId)
-      .get();
+  console.log(`Iniciando processamento para a semana: ${weekId} com arquivos: ${rawDataDocIds.join(', ')}`);
 
-    if (importEntriesSnapshot.empty) {
-      return res.status(404).json({ message: 'No import entries found for this importId' });
+  try {
+    // 1. Buscar as entradas de rawFileArchive
+    const rawFileEntries: RawFileArchiveEntry[] = [];
+    for (const docId of rawDataDocIds) {
+      const doc = await adminDb.collection('rawFileArchive').doc(docId).get();
+      if (doc.exists) {
+        rawFileEntries.push({ id: doc.id, ...doc.data() as RawFileArchiveEntry });
+      } else {
+        console.warn(`Documento rawFileArchive ${docId} não encontrado. Pulando.`);
+      }
     }
 
-    const importEntries: RawImportData[] = importEntriesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data() as RawImportData
-    }));
+    if (rawFileEntries.length === 0) {
+      console.error(`Nenhuma entrada de rawFileArchive válida encontrada para os IDs fornecidos.`);
+      return res.status(404).json({ message: 'No valid rawFileArchive entries found' });
+    }
 
-    // Extrair weekId, weekStart, weekEnd do primeiro entry (assumindo consistência)
-    const { weekId, weekStart, weekEnd } = importEntries[0];
+    const { weekStart, weekEnd } = rawFileEntries[0]; // Assumindo que todos são da mesma semana
+
+    console.log(`Semana: ${weekId} (${weekStart} a ${weekEnd})`);
 
     // 2. Buscar todos os motoristas ativos
     const driversSnapshot = await adminDb.collection('drivers').where('status', '==', 'active').get();
     const drivers: Driver[] = driversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Driver }));
 
-    const processedDriverData: ProcessedDriverData = {};
-
-    // Inicializar processedDriverData com todos os motoristas
-    drivers.forEach(driver => {
-      processedDriverData[driver.id] = {
-        driver,
-        uberTotal: 0,
-        boltTotal: 0,
-        myprioTotal: 0,
-        viaverdeTotal: 0,
-        uberTrips: 0,
-        boltTrips: 0,
-        uberUuid: driver.integrations?.uber?.uuid || '',
-        boltEmail: driver.email || '', // Usar email para Bolt
-        myprioCard: driver.cards?.myprio || '',
-        viaverdeOBU: driver.cards?.viaverde || '',
-      };
+    console.log(`Encontrados ${drivers.length} motoristas ativos.`);
+    drivers.forEach(d => {
+      console.log(`- Motorista: ${d.fullName}, ID: ${d.id}, Uber Key: ${d.integrations?.uber?.key}, Bolt Key: ${d.integrations?.bolt?.key}, Myprio Key: ${d.integrations?.myprio?.key}, ViaVerde Key: ${d.integrations?.viaverde?.key}`);
     });
 
-    // 3. Processar cada arquivo importado
-    for (const entry of importEntries) {
-      const rawDataDoc = await adminDb.collection('rawWeeklyData').doc(entry.rawDataSourceRef!).get();
-      const rawData = rawDataDoc.data()?.rawData.rows; // Assumindo que rawData.rows contém os dados
+    const processedDriverData: ProcessedDriverData = {};
 
-      if (!rawData) {
-        console.warn(`No raw data found for entry ${entry.id}`);
+    drivers.forEach(driver => {
+      if (driver.id) {
+        processedDriverData[driver.id] = {
+          driver,
+          uberTotal: 0,
+          boltTotal: 0,
+          myprioTotal: 0,
+          viaverdeTotal: 0,
+          uberTrips: 0,
+          boltTrips: 0,
+        };
+      } else {
+        console.warn(`Motorista ${driver.fullName} (${driver.email}) sem ID, não será processado.`);
+      }
+    });
+
+    // 3. Processar cada arquivo bruto importado
+    for (const entry of rawFileEntries) {
+      console.log(`Processando plataforma: ${entry.platform} do arquivo ${entry.fileName}`);
+      const rawDataRows = entry.rawData?.rows;
+
+      if (!rawDataRows) {
+        console.warn(`Nenhum dado bruto encontrado para a entrada ${entry.id}. Pulando.`);
         continue;
       }
 
       switch (entry.platform) {
         case 'uber':
-          rawData.forEach((row: any) => {
+          rawDataRows.forEach((row: any) => {
             const driverUuid = row['UUID do motorista'];
-            const driverMatch = drivers.find(d => d.integrations?.uber?.uuid === driverUuid);
-            if (driverMatch) {
-              const total = parseFloat(row['Pago a si'] || '0');
+            const driverMatch = drivers.find(d => d.integrations?.uber?.key === driverUuid);
+            if (driverMatch && driverMatch.id) {
+              const total = parseFloat(row['Pago a si']?.replace(',', '.') || '0');
               const trips = parseInt(row['Viagens'] || '0');
               processedDriverData[driverMatch.id].uberTotal += total;
               processedDriverData[driverMatch.id].uberTrips += trips;
+              console.log(`Match Uber: ${driverMatch.fullName} - ${formatCurrency(total)}`);
             }
           });
           break;
         case 'bolt':
-          rawData.forEach((row: any) => {
-            const driverEmail = row['Email']; // Usar email para Bolt
-            const driverMatch = drivers.find(d => d.email === driverEmail);
-            if (driverMatch) {
-              const total = parseFloat(row['Ganhos brutos (total)|€'] || '0');
+          rawDataRows.forEach((row: any) => {
+            const driverEmail = row['Email'];
+            const driverMatch = drivers.find(d => d.integrations?.bolt?.key === driverEmail);
+            if (driverMatch && driverMatch.id) {
+              const total = parseFloat(row['Ganhos brutos (total)|€']?.replace(',', '.') || '0');
               const trips = parseInt(row['Viagens (total)'] || '0');
               processedDriverData[driverMatch.id].boltTotal += total;
               processedDriverData[driverMatch.id].boltTrips += trips;
+              console.log(`Match Bolt: ${driverMatch.fullName} - ${formatCurrency(total)}`);
             }
           });
           break;
         case 'myprio':
-          rawData.forEach((row: any) => {
+          rawDataRows.forEach((row: any) => {
             const myprioCard = String(row['CARTÃO']);
-            const driverMatch = drivers.find(d => d.cards?.myprio === myprioCard);
-            if (driverMatch) {
-              const total = parseFloat(row['TOTAL'] || '0');
+            const driverMatch = drivers.find(d => d.integrations?.myprio?.key === myprioCard);
+            if (driverMatch && driverMatch.id) {
+              const total = parseFloat(String(row['TOTAL'])?.replace(',', '.') || '0');
               processedDriverData[driverMatch.id].myprioTotal += total;
+              console.log(`Match Myprio: ${driverMatch.fullName} - ${formatCurrency(total)}`);
             }
           });
           break;
         case 'viaverde':
-          rawData.forEach((row: any) => {
+          rawDataRows.forEach((row: any) => {
             const viaverdeOBU = String(row['OBU']);
-            const entryDate = new Date(row['Entry Date']);
-            const exitDate = new Date(row['Exit Date']);
-
-            // Filtrar transações dentro da semana de importação
-            const weekStartDate = new Date(weekStart);
-            const weekEndDate = new Date(weekEnd);
-
-            if (entryDate >= weekStartDate && exitDate <= weekEndDate) {
-              const driverMatch = drivers.find(d => d.cards?.viaverde === viaverdeOBU);
-              if (driverMatch) {
-                const total = parseFloat(row['Value'] || '0');
-                processedDriverData[driverMatch.id].viaverdeTotal += total;
-              } else {
-                console.warn(`Transação ViaVerde para OBU ${viaverdeOBU} não encontrada para motorista ativo.`);
-              }
-            } else {
-              console.warn(`Transação ViaVerde (${row['Entry Date']} - ${row['Exit Date']}) fora do período da semana (${weekStart} - ${weekEnd}). Ignorando.`);
+            const driverMatch = drivers.find(d => d.integrations?.viaverde?.key === viaverdeOBU);
+            if (driverMatch && driverMatch.id) {
+              const total = parseFloat(String(row['Value'])?.replace(',', '.') || '0');
+              processedDriverData[driverMatch.id].viaverdeTotal += total;
+              console.log(`Match ViaVerde: ${driverMatch.fullName} - ${formatCurrency(total)}`);
             }
           });
           break;
       }
     }
 
-    // 4. Atualizar/Criar WeeklyDataSources e DriverWeeklyRecords
-    let weeklyDataSources = await adminDb.collection('weeklyDataSources').doc(weekId).get();
-    let currentSources: WeeklyDataSources;
+    // 4. Atualizar/Criar WeeklyDataSources (agora WeeklyReports) e DriverWeeklyRecords
+    let weeklyReportDoc = await adminDb.collection('weeklyReports').doc(weekId).get();
+    let currentWeeklyReport: WeeklyDataSources; // Reutilizando a interface por enquanto
 
-    if (!weeklyDataSources.exists) {
-      currentSources = createWeeklyDataSources(weekId, weekStart, weekEnd);
+    if (!weeklyReportDoc.exists) {
+      currentWeeklyReport = createWeeklyDataSources(weekId, weekStart, weekEnd);
     } else {
-      currentSources = { id: weeklyDataSources.id, ...weeklyDataSources.data() as WeeklyDataSources };
+      currentWeeklyReport = { id: weeklyReportDoc.id, ...weeklyReportDoc.data() as WeeklyDataSources };
     }
 
-    // Atualizar status de cada fonte processada
-    for (const entry of importEntries) {
-      currentSources = updateDataSource(currentSources, entry.platform as any, {
-        status: 'complete', // Assumimos completo se processado
+    // Atualizar status de cada fonte processada no weeklyReport
+    for (const entry of rawFileEntries) {
+      currentWeeklyReport = updateDataSource(currentWeeklyReport, entry.platform as any, {
+        status: 'completed', // Assumimos completo se processado
         origin: 'manual',
         importedAt: new Date().toISOString(),
-        // driversCount e recordsCount podem ser calculados aqui se necessário
+        archiveRef: entry.id, // Referência ao documento em rawFileArchive
       });
     }
 
-    await adminDb.collection('weeklyDataSources').doc(weekId).set(currentSources, { merge: true });
+    await adminDb.collection('weeklyReports').doc(weekId).set(currentWeeklyReport, { merge: true });
 
+    console.log('Iniciando gravação dos registros semanais dos motoristas...');
     for (const driverId in processedDriverData) {
+      if (!driverId || driverId === 'undefined') {
+        console.error('ID de motorista inválido encontrado. Pulando registro.', processedDriverData[driverId]?.driver);
+        continue;
+      }
+
       const data = processedDriverData[driverId];
       const driver = data.driver;
 
       const record: DriverWeeklyRecord = createDriverWeeklyRecord({
-        driverId: driver.id,
-        driverName: driver.firstName + ' ' + driver.lastName,
+        driverId: driver.id!,
+        driverName: driver.fullName,
         driverEmail: driver.email,
         weekId,
         weekStart,
@@ -190,27 +185,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         viaverdeTotal: data.viaverdeTotal,
         uberTrips: data.uberTrips,
         boltTrips: data.boltTrips,
-        isLocatario: driver.isLocatario || false,
-        aluguel: driver.aluguel || 0,
-        combustivel: data.myprioTotal, // myprioTotal é o combustível
-        viaVerde: data.viaverdeTotal, // viaverdeTotal é o ViaVerde
+        isLocatario: driver.type === 'renter',
+        aluguel: driver.rentalFee || 0,
+        combustivel: data.myprioTotal,
+        viaVerde: data.viaverdeTotal,
       });
 
-      // Salvar ou atualizar o registro semanal do motorista
-      await adminDb.collection('driverWeeklyRecords').doc(`${weekId}-${driver.id}`).set(record, { merge: true });
+      const recordId = `${weekId}-${driver.id}`;
+      console.log(`Gravando registro para ${driver.fullName} (ID: ${recordId})`);
+      // Salvar na subcoleção driverRecords dentro de weeklyReports
+      await adminDb.collection('weeklyReports').doc(weekId).collection('driverRecords').doc(driver.id).set(record, { merge: true });
     }
 
-    // Marcar entradas de importação como processadas
+    // Marcar entradas de rawFileArchive como processadas
     const batch = adminDb.batch();
-    importEntriesSnapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { processed: true, processedAt: new Date().toISOString() });
-    });
+    for (const entry of rawFileEntries) {
+      batch.update(adminDb.collection('rawFileArchive').doc(entry.id!), { processed: true, processedAt: new Date().toISOString() });
+    }
     await batch.commit();
 
+    console.log('🎉 Processamento concluído com sucesso!');
     return res.status(200).json({ message: 'Importation processed successfully', weekId });
   } catch (error: any) {
-    console.error('Error processing import:', error);
-    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    console.error('❌ Erro no processamento da importação:', error);
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message, stack: error.stack });
   }
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
 }
 

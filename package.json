@@ -16,7 +16,9 @@
     "test:apis:uber": "ts-node scripts/test-apis.ts uber",
     "test:apis:bolt": "ts-node scripts/test-apis.ts bolt",
     "test:apis:cartrack": "ts-node scripts/test-apis.ts cartrack",
-    "test:integrations": "ts-node scripts/test-integrations.ts"
+    "test:integrations": "ts-node scripts/test-integrations.ts",
+    "simulate:import": "tsx -r tsconfig-paths/register scripts/simulate_import_and_process.ts",
+    "add:test-driver": "tsx -r tsconfig-paths/register scripts/add_test_driver.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
@@ -81,7 +83,8 @@
     "clsx": "^2.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

@@ -41,7 +41,7 @@ if (!admin.apps.length) {
     try {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as any),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'default-bucket-name', // Adicionado um fallback para evitar erro
       });
       if (typeof window === 'undefined') {
       console.log('Firebase Admin SDK inicializado com sucesso');
