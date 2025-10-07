@@ -32,6 +32,7 @@ import {
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit, FiTruck, FiActivity, FiWifi, FiBarChart2 } from "react-icons/fi";
 import { getAllMenuItems } from "@/config/adminMenu";
+import { WrapperLayout } from "./layouts/WrapperLayout";
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -86,7 +87,7 @@ export default function Header({ t }: HeaderProps) {
 
   return (
     <Box as="header" borderBottomWidth="0" shadow="sm" position={'relative'} top={0} zIndex={900} bg="white" >
-      <Container maxW="7xl" p={4}>
+      <WrapperLayout>
         <Flex align="center" justify="space-between" gap={4}>
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
             <Image
@@ -280,7 +281,7 @@ export default function Header({ t }: HeaderProps) {
             />
           </HStack>
         </Flex>
-      </Container>
+      </WrapperLayout>
 
       {/* Mobile menu */}
       <Collapse in={open} animateOpacity>

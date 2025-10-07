@@ -25,6 +25,7 @@ import {
   getPainelMenuItems,
   isPainelMenuItemActive,
 } from '@/config/painelMenu';
+import { WrapperLayout } from './WrapperLayout';
 
 interface PainelLayoutProps {
   children: React.ReactNode;
@@ -50,17 +51,17 @@ export default function PainelLayout({
   return (
     <Box minH="100vh" bg="gray.50" position='relative'>
       {/* Header */}
-      <Box 
-        bg="green.600" 
-        position={'sticky'} 
-        top={0} 
-        display={{ base: 'none', lg: 'flex' }} 
-        borderBottom="1px" 
-        borderColor="green.700" 
+      <Box
+        bg="green.600"
+        position={'sticky'}
+        top={0}
+        display={{ base: 'none', lg: 'flex' }}
+        borderBottom="1px"
+        borderColor="green.700"
         shadow="sm"
         zIndex={10}
       >
-        <Container maxW="container.xl">
+        <WrapperLayout>
           <HStack spacing={1} flex={1} justify="space-between" gap={4} py={2}>
             {menuItems.map((item) => (
               <Button
@@ -77,13 +78,13 @@ export default function PainelLayout({
               </Button>
             ))}
           </HStack>
-        </Container>
+        </WrapperLayout>
       </Box>
 
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
         <Box bg="white" borderBottom="1px" borderColor="gray.100" py={3}>
-          <Container maxW="container.xl">
+          <WrapperLayout>
             <Breadcrumb separator={<FiChevronRight color="gray.500" />}>
               <BreadcrumbItem>
                 <BreadcrumbLink as={Link} href="/painel" fontSize="sm">
@@ -107,18 +108,18 @@ export default function PainelLayout({
                 </BreadcrumbItem>
               ))}
             </Breadcrumb>
-          </Container>
+          </WrapperLayout>
         </Box>
       )}
 
       {/* Conteúdo Principal */}
-      <Container maxW="container.xl" py={6}>
+      <WrapperLayout>
         {(title || side) && (
-          <HStack 
-            mb={6} 
-            spacing={6} 
-            align="stretch" 
-            justify={'center'} 
+          <HStack
+            mb={6}
+            spacing={6}
+            align="stretch"
+            justify={'center'}
             direction={{ base: 'column', md: 'row' }}
           >
             {title && (
@@ -144,7 +145,7 @@ export default function PainelLayout({
         <VStack spacing={8} align="stretch">
           {children}
         </VStack>
-      </Container>
+      </WrapperLayout>
     </Box>
   );
 }

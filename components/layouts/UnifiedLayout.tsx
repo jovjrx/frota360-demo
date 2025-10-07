@@ -23,6 +23,7 @@ import {
 } from '@chakra-ui/react';
 import { FiBell, FiSettings } from 'react-icons/fi';
 import TopBar from './TopBar';
+import { WrapperLayout } from './WrapperLayout';
 
 interface StatItem {
   label: string;
@@ -99,12 +100,12 @@ export default function UnifiedLayout({
         ))}
 
         {/* Main Content */}
-        <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }} py={{ base: 4, md: 8 }}>
+        <WrapperLayout px={{ base: 4, md: 6 }} py={{ base: 4, md: 8 }}>
           <VStack spacing={8} align="stretch">
             {/* Stats Grid - Always one row on desktop */}
             {stats.length > 0 && (
-              <SimpleGrid 
-                columns={{ base: 1, md: 2, lg: stats.length > 5 ? 5 : stats.length }} 
+              <SimpleGrid
+                columns={{ base: 1, md: 2, lg: stats.length > 5 ? 5 : stats.length }}
                 spacing={6}
               >
                 {stats.map((stat, index) => (
@@ -129,7 +130,7 @@ export default function UnifiedLayout({
             {/* Page Content */}
             {children}
           </VStack>
-        </Box>
+        </WrapperLayout>
       </Box>
     </>
   );

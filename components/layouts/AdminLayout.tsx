@@ -35,6 +35,7 @@ import {
   getAllMenuItems,
   isMenuItemActive,
 } from '@/config/adminMenu';
+import { WrapperLayout } from './WrapperLayout';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -61,7 +62,7 @@ export default function AdminLayout({
     <Box minH="100vh" bg="gray.50" position='relative'>
       {/* Header */}
       <Box bg="red.900" display={{ base: 'none', lg: 'flex' }} borderBottom="1px" borderColor="red.800" shadow="sm">
-        <Container maxW="container.xl">
+        <WrapperLayout>
           <HStack spacing={1} flex={1} justify="space-between" gap={4} py={2}>
             {allMenuItems.map((item) => (
               <Button
@@ -78,13 +79,13 @@ export default function AdminLayout({
               </Button>
             ))}
           </HStack>
-        </Container>
+        </WrapperLayout>
       </Box>
 
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
         <Box bg="white" borderBottom="1px" borderColor="gray.100" py={3}>
-          <Container maxW="container.xl">
+          <WrapperLayout>
             <Breadcrumb separator={<FiChevronRight color="gray.500" />}>
               <BreadcrumbItem>
                 <BreadcrumbLink as={Link} href="/admin" fontSize="sm">
@@ -108,12 +109,12 @@ export default function AdminLayout({
                 </BreadcrumbItem>
               ))}
             </Breadcrumb>
-          </Container>
+          </WrapperLayout>
         </Box>
       )}
 
       {/* Conteúdo Principal */}
-      <Container maxW="container.xl" py={6}>
+      <WrapperLayout>
         {(title || side) && <HStack mb={6} spacing={6} align="stretch" justify={'center'} direction={{ base: 'column', md: 'row' }}>
           {title && (
             <VStack align="start" spacing={1} flexGrow={1}>
@@ -138,7 +139,7 @@ export default function AdminLayout({
           {/* Conteúdo */}
           {children}
         </VStack>
-      </Container>
+      </WrapperLayout>
     </Box>
   );
 }
