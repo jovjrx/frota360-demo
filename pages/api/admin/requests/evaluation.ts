@@ -3,8 +3,6 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
-import { sendEmail } from '@/lib/email/sendEmail';
-import { rejectedDriverEmailTemplate } from '@/lib/email/templates';
 
 export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -17,7 +15,7 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
-  const { requestId, rejectionReason } = req.body;
+  const { requestId, adminNotes } = req.body;
 
   if (!requestId) {
     return res.status(400).json({ success: false, error: 'Request ID is required' });
@@ -32,33 +30,15 @@ export default withIronSessionApiRoute(async function handler(req: NextApiReques
       return res.status(404).json({ success: false, error: 'Driver request not found' });
     }
 
-    const requestData = requestDoc.data() as any;
-
-    if (requestData.status === 'rejected') {
-      return res.status(400).json({ success: false, error: 'Request already rejected' });
-    }
-
-    // Update request status to 'rejected'
     await requestRef.update({
-      status: 'rejected',
-      rejectionReason: rejectionReason || null,
+      status: 'evaluation',
+      adminNotes: adminNotes || null,
       updatedAt: new Date().toISOString(),
-      rejectedBy: user.id,
     });
 
-    // Send rejection email
-    await sendEmail({
-      to: requestData.email,
-      subject: 'Atualização sobre sua solicitação de motorista na Conduz.pt',
-      html: rejectedDriverEmailTemplate({
-        name: requestData.fullName,
-        rejectionReason: rejectionReason,
-      }),
-    });
-
-    return res.status(200).json({ success: true, message: 'Driver request rejected' });
+    return res.status(200).json({ success: true, message: 'Request status updated to evaluation' });
   } catch (error: any) {
-    console.error('Error rejecting driver request:', error);
+    console.error('Error updating request status to evaluation:', error);
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
 }, sessionOptions);
