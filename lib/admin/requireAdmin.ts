@@ -1,7 +1,5 @@
 import { GetServerSidePropsContext } from 'next';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { parseCookies } from 'nookies';
+import { getSession } from '@/lib/session';
 
 export interface AdminUser {
   uid: string;
@@ -14,40 +12,25 @@ export async function requireAdmin(
   context: GetServerSidePropsContext
 ): Promise<AdminUser | null> {
   try {
-    const cookies = parseCookies(context);
-    const token = cookies.token || context.req.headers.authorization?.split('Bearer ')[1];
+    const session = await getSession(context.req, context.res);
 
-    if (!token) {
+    // Verificar se está logado
+    if (!session?.isLoggedIn) {
       return null;
     }
 
-    // Verificar token
-    const auth = getAuth();
-    const decodedToken = await auth.verifyIdToken(token);
-
-    if (!decodedToken) {
+    // Verificar se é admin (verificar ambos os locais possíveis)
+    const isAdmin = session.role === 'admin' || session.user?.role === 'admin';
+    
+    if (!isAdmin) {
       return null;
     }
 
-    // Buscar dados do usuário
-    const db = getFirestore();
-    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
-
-    if (!userDoc.exists) {
-      return null;
-    }
-
-    const userData = userDoc.data();
-
-    // Verificar se é admin
-    if (userData?.role !== 'admin') {
-      return null;
-    }
-
+    // Retornar dados do usuário admin
     return {
-      uid: decodedToken.uid,
-      email: decodedToken.email || '',
-      displayName: decodedToken.name || null,
+      uid: session.user?.uid || session.uid || '',
+      email: session.user?.email || session.email || '',
+      displayName: session.user?.displayName || session.displayName || null,
       role: 'admin',
     };
   } catch (error) {
