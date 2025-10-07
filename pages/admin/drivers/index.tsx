@@ -311,7 +311,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {filteredDrivers.length === 0 ? (
+                  {filteredDrivers?.length === 0 ? (
                     <Tr>
                       <Td colSpan={10} textAlign="center" py={8}>
                         <Text color="gray.500">
@@ -320,7 +320,7 @@ export default function DriversPage({ initialDrivers }: DriversPageProps) {
                       </Td>
                     </Tr>
                   ) : (
-                    filteredDrivers.map((driver) => (
+                    filteredDrivers?.map((driver) => (
                       <Tr key={driver.id}>
                         <Td>
                           <Text fontWeight="medium">{driver.fullName || driver.name || 'N/A'}</Text>

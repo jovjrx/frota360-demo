@@ -6,7 +6,7 @@ export const DriverRequestSchema = z.object({
   email: z.string().email('Email inválido'),
   phone: z.string().min(9, 'Telefone inválido'),
   type: z.enum(['affiliate', 'renter'], {
-    errorMap: () => ({ message: 'Tipo deve ser Afiliado ou Locatário' }),
+    message: 'Tipo deve ser Afiliado ou Locatário',
   }),
   status: z.enum(['pending', 'evaluation', 'approved', 'rejected']).default('pending'),
   notes: z.string().optional(),
