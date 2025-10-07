@@ -55,7 +55,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       // ============================================================================
       
       // Logo CONDUZ (centralizada)
-      const logoPath = path.join(process.cwd(), 'public', 'logo.png');
+      const logoPath = path.join(process.cwd(), 'public', 'img', 'logo.png');
       try {
         // Centralizar: (595 - 180) / 2 = 207.5
         doc.image(logoPath, 207.5, 30, { width: 180 });
@@ -81,7 +81,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       // ============================================================================
       
       doc.fontSize(14).fillColor('#000000').font('Helvetica-Bold')
-        .text('CONTRACHEQUE SEMANAL', { align: 'center' });
+        .text('RESUMO SEMANAL', { align: 'center' });
       
       doc.moveDown(1.5);
       

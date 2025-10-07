@@ -34,6 +34,7 @@ import {
   FiCheck,
   FiEye,
   FiUpload,
+  FiFileText,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { PageProps } from '@/interface/Global';
@@ -63,6 +64,7 @@ export default function WeeklyPayoutPage({
   const [filterDriver, setFilterDriver] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isGeneratingResumos, setIsGeneratingResumos] = useState(false);
   const toast = useToast();
 
   const formatCurrency = (value: number) => {
@@ -124,6 +126,65 @@ export default function WeeklyPayoutPage({
         status: 'error',
         duration: 3000,
       });
+    }
+  };
+
+  const handleGenerateResumos = async () => {
+    setIsGeneratingResumos(true);
+    try {
+      const selectedWeek = weekOptions.find(w => w.value === filterWeek);
+      if (!selectedWeek) {
+        toast({
+          title: 'Erro',
+          description: 'Selecione uma semana',
+          status: 'error',
+          duration: 3000,
+        });
+        return;
+      }
+
+      const response = await fetch('/api/admin/weekly/generate-all', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          weekStart: selectedWeek.start,
+          weekEnd: selectedWeek.end,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar resumos');
+      }
+
+      // Download do arquivo ZIP
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Resumos_${selectedWeek.start}_a_${selectedWeek.end}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'Resumos gerados com sucesso!',
+        description: 'O arquivo ZIP contém o Excel e os PDFs individuais',
+        status: 'success',
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error('Erro ao gerar resumos:', error);
+      toast({
+        title: 'Erro ao gerar resumos',
+        description: 'Tente novamente',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setIsGeneratingResumos(false);
     }
   };
 
@@ -239,6 +300,16 @@ export default function WeeklyPayoutPage({
                   size="sm"
                 >
                   Atualizar
+                </Button>
+                <Button
+                  leftIcon={<Icon as={FiFileText} />}
+                  onClick={handleGenerateResumos}
+                  colorScheme="purple"
+                  size="sm"
+                  isLoading={isGeneratingResumos}
+                  loadingText="Gerando..."
+                >
+                  Gerar Resumos
                 </Button>
                 <Button
                   leftIcon={<Icon as={FiDownload} />}
