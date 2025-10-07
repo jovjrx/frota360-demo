@@ -83,7 +83,7 @@ export async function getRequests(options?: {
   limit?: number;
 }): Promise<Request[]> {
   const db = getFirestore();
-  let query = db.collection('requests').orderBy('createdAt', 'desc');
+  let query = db.collection('driver_requests').orderBy('createdAt', 'desc');
 
   if (options?.status && options.status !== 'all') {
     query = query.where('status', '==', options.status) as any;
@@ -112,7 +112,7 @@ export async function getRequestsStats(): Promise<{
   rejected: number;
 }> {
   const db = getFirestore();
-  const snapshot = await db.collection('requests').get();
+  const snapshot = await db.collection('driver_requests').get();
 
   const stats = {
     total: snapshot.size,
