@@ -24,7 +24,7 @@ async function addTestDriver() {
     integrations: {
       uber: { key: "uber-uuid-test", enabled: true, lastSync: null },
       bolt: { key: "test.driver@example.com", enabled: true, lastSync: null },
-      myprio: { key: "123456789", enabled: true, lastSync: null },
+      myprio: { key: "7824736068450001", enabled: true, lastSync: null },
       viaverde: { key: "AA-00-BB", enabled: true, lastSync: null },
     },
     cards: {

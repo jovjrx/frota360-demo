@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
-import { getWeekId } from '@/schemas/driver-weekly-record';
+import { DriverWeeklyRecord, createDriverWeeklyRecord, getWeekId } from '@/schemas/driver-weekly-record';
+import { WeeklyPlatformAggregates } from '@/schemas/weekly-platform-aggregates';
+import { Driver } from '@/schemas/driver';
 import archiver from 'archiver';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
@@ -40,20 +41,86 @@ export default async function handler(
   const weekId = getWeekId(new Date(weekStart));
 
   try {
-    // 1. Buscar todos os registros semanais de motoristas para a semana
-    const driverRecordsSnapshot = await adminDb
-      .collection('weeklyReports')
-      .doc(weekId)
-      .collection('driverRecords')
+    // 1. Buscar todos os motoristas ativos
+    const driversSnapshot = await adminDb
+      .collection('drivers')
+      .where('status', '==', 'active')
       .get();
+    const drivers: Driver[] = driversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Driver }));
 
-    const records: DriverWeeklyRecord[] = driverRecordsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data() as DriverWeeklyRecord
-    }));
+    // 2. Buscar todos os WeeklyPlatformAggregates para a semana
+    const aggregatesSnapshot = await adminDb
+      .collection('weeklyPlatformAggregates')
+      .where('weekId', '==', weekId)
+      .get();
+    const aggregates: WeeklyPlatformAggregates[] = aggregatesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as WeeklyPlatformAggregates }));
+
+    const records: DriverWeeklyRecord[] = [];
+
+    // Mapear agregados por plataforma e chave de integração para fácil acesso
+    const aggregatedData: { [driverId: string]: { [platform: string]: { totalValue: number; totalTrips: number } } } = {};
+
+    drivers.forEach(driver => {
+      if (driver.id) {
+        aggregatedData[driver.id] = {
+          uber: { totalValue: 0, totalTrips: 0 },
+          bolt: { totalValue: 0, totalTrips: 0 },
+          myprio: { totalValue: 0, totalTrips: 0 },
+          viaverde: { totalValue: 0, totalTrips: 0 },
+        };
+      }
+    });
+
+    aggregates.forEach(aggregate => {
+      // Encontrar o motorista correspondente para cada agregado
+      const driverMatch = drivers.find(d => {
+        switch (aggregate.platform) {
+          case 'uber': return d.integrations?.uber?.key === aggregate.integrationKey;
+          case 'bolt': return d.integrations?.bolt?.key === aggregate.integrationKey;
+          case 'myprio': return d.integrations?.myprio?.key === aggregate.integrationKey;
+          case 'viaverde': return d.integrations?.viaverde?.key === aggregate.integrationKey;
+          default: return false;
+        }
+      });
+
+      if (driverMatch && driverMatch.id) {
+        aggregatedData[driverMatch.id][aggregate.platform].totalValue += aggregate.totalValue;
+        aggregatedData[driverMatch.id][aggregate.platform].totalTrips += aggregate.totalTrips;
+      }
+    });
+
+    // 3. Calcular DriverWeeklyRecord para cada motorista
+    for (const driverId in aggregatedData) {
+      const driver = drivers.find(d => d.id === driverId);
+      if (!driver) continue;
+
+      const data = aggregatedData[driverId];
+
+      const record: DriverWeeklyRecord = createDriverWeeklyRecord({
+        driverId: driver.id!,
+        driverName: driver.fullName,
+        driverEmail: driver.email,
+        weekId,
+        weekStart,
+        weekEnd,
+        uberTotal: data.uber.totalValue,
+        boltTotal: data.bolt.totalValue,
+        myprioTotal: data.myprio.totalValue,
+        viaverdeTotal: data.viaverde.totalValue,
+        uberTrips: data.uber.totalTrips,
+        boltTrips: data.bolt.totalTrips,
+        isLocatario: driver.type === 'renter',
+        aluguel: driver.rentalFee || 0,
+        combustivel: data.myprio.totalValue,
+        viaVerde: data.viaverde.totalValue,
+        iban: driver.banking?.iban || null,
+      }, { type: driver.type, rentalFee: driver.rentalFee });
+
+      records.push(record);
+    }
 
     if (records.length === 0) {
-      return res.status(404).json({ message: 'Nenhum registro semanal encontrado para esta semana.' });
+      return res.status(404).json({ message: 'Nenhum registro semanal encontrado para esta semana após amarração.' });
     }
 
     // Configurar o arquivador ZIP
