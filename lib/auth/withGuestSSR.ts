@@ -46,7 +46,7 @@ export function withGuestSSR<P extends Record<string, any> = {}>(
 
       // Redirecionar para dashboard se já estiver logado
       if (session.isLoggedIn && session.user) {
-        const destination = session.user.role === 'admin' ? '/admin' : '/driver/dashboard';
+        const destination = session.user.role === 'admin' ? '/admin' : '/dashboard';
         return {
           redirect: {
             destination,

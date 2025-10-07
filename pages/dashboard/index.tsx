@@ -187,7 +187,7 @@ export default function PainelDashboard({
               
               <Button
                 as={Link}
-                href="/painel/contracheques"
+                href="/dashboard/contracheques"
                 size="sm"
                 colorScheme="green"
                 variant="outline"
@@ -241,7 +241,7 @@ export default function PainelDashboard({
               
               <Button
                 as={Link}
-                href="/painel/contracheques"
+                href="/dashboard/contracheques"
                 size="sm"
                 colorScheme="orange"
                 variant="outline"
@@ -264,7 +264,7 @@ export default function PainelDashboard({
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
           <Button
             as={Link}
-            href="/painel/dados"
+            href="/dashboard/dados"
             variant="outline"
             colorScheme="green"
             leftIcon={<Icon as={FiUser} />}
@@ -278,7 +278,7 @@ export default function PainelDashboard({
           
           <Button
             as={Link}
-            href="/painel/contracheques"
+            href="/dashboard/contracheques"
             variant="outline"
             colorScheme="green"
             leftIcon={<Icon as={FiFileText} />}
@@ -293,7 +293,7 @@ export default function PainelDashboard({
           {motorista.type === 'renter' && (
             <Button
               as={Link}
-              href="/painel/rastreamento"
+              href="/dashboard/rastreamento"
               variant="outline"
               colorScheme="green"
               leftIcon={<Icon as={FiCalendar} />}
@@ -308,7 +308,7 @@ export default function PainelDashboard({
           
           <Button
             as={Link}
-            href="/painel/ajuda"
+            href="/dashboard/ajuda"
             variant="outline"
             colorScheme="green"
             leftIcon={<Icon as={FiFileText} />}
