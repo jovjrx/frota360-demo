@@ -39,7 +39,7 @@ import {
 import useSWR from 'swr';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
+import { getTranslation } from '@/lib/translations';
 
 interface Request {
   id: string;
@@ -78,6 +78,9 @@ export default function RequestsPage({ user, translations, locale, initialData }
   const [rejectionReason, setRejectionReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+
+  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
 
   // SWR com fallback
   const { data, mutate } = useSWR<RequestsData>(
@@ -123,13 +126,13 @@ export default function RequestsPage({ user, translations, locale, initialData }
       });
 
       if (!response.ok) {
-        throw new Error('Falha na operação');
+        throw new Error(tAdmin('operation_failed'));
       }
 
       toast({
-        title: actionType === 'approve' ? 'Solicitação aprovada' : 
-               actionType === 'reject' ? 'Solicitação rejeitada' : 
-               'Status atualizado',
+        title: actionType === 'approve' ? tAdmin('request_approved_title') : 
+               actionType === 'reject' ? tAdmin('request_rejected_title') : 
+               tAdmin('status_updated_title'),
         status: 'success',
         duration: 3000,
       });
@@ -138,8 +141,8 @@ export default function RequestsPage({ user, translations, locale, initialData }
       onClose();
     } catch (error) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível completar a ação',
+        title: t('error_title'),
+        description: error instanceof Error ? error.message : tAdmin('operation_error_description'),
         status: 'error',
         duration: 4000,
       });
@@ -160,20 +163,20 @@ export default function RequestsPage({ user, translations, locale, initialData }
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      pending: 'Pendente',
-      evaluation: 'Em Avaliação',
-      approved: 'Aprovado',
-      rejected: 'Rejeitado',
+      pending: tAdmin('status_pending'),
+      evaluation: tAdmin('status_evaluation'),
+      approved: tAdmin('status_approved'),
+      rejected: tAdmin('status_rejected'),
     };
     return labels[status] || status;
   };
 
   return (
     <AdminLayout
-      title="Solicitações"
-      subtitle="Gerencie solicitações de novos motoristas"
+      title={tAdmin('requests_title')}
+      subtitle={tAdmin('requests_subtitle')}
       breadcrumbs={[
-        { label: 'Solicitações' }
+        { label: tAdmin('requests_title') }
       ]}
     >
       <VStack spacing={6} align="stretch">
@@ -182,7 +185,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>Total</StatLabel>
+                <StatLabel>{t('total')}</StatLabel>
                 <StatNumber>{data?.stats.total || 0}</StatNumber>
               </Stat>
             </CardBody>
@@ -190,7 +193,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>Pendentes</StatLabel>
+                <StatLabel>{tAdmin('status_pending')}</StatLabel>
                 <StatNumber color="yellow.600">{data?.stats.pending || 0}</StatNumber>
               </Stat>
             </CardBody>
@@ -198,7 +201,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>Em Avaliação</StatLabel>
+                <StatLabel>{tAdmin('status_evaluation')}</StatLabel>
                 <StatNumber color="blue.600">{data?.stats.evaluation || 0}</StatNumber>
               </Stat>
             </CardBody>
@@ -206,7 +209,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>Aprovados</StatLabel>
+                <StatLabel>{tAdmin('status_approved')}</StatLabel>
                 <StatNumber color="green.600">{data?.stats.approved || 0}</StatNumber>
               </Stat>
             </CardBody>
@@ -214,7 +217,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>Rejeitados</StatLabel>
+                <StatLabel>{tAdmin('status_rejected')}</StatLabel>
                 <StatNumber color="red.600">{data?.stats.rejected || 0}</StatNumber>
               </Stat>
             </CardBody>
@@ -225,17 +228,17 @@ export default function RequestsPage({ user, translations, locale, initialData }
         <Card>
           <CardBody>
             <HStack>
-              <Text fontWeight="medium">Filtrar por status:</Text>
+              <Text fontWeight="medium">{tAdmin('filter_by_status')}:</Text>
               <Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 maxW="200px"
               >
-                <option value="all">Todos</option>
-                <option value="pending">Pendentes</option>
-                <option value="evaluation">Em Avaliação</option>
-                <option value="approved">Aprovados</option>
-                <option value="rejected">Rejeitados</option>
+                <option value="all">{t('all')}</option>
+                <option value="pending">{tAdmin('status_pending')}</option>
+                <option value="evaluation">{tAdmin('status_evaluation')}</option>
+                <option value="approved">{tAdmin('status_approved')}</option>
+                <option value="rejected">{tAdmin('status_rejected')}</option>
               </Select>
             </HStack>
           </CardBody>
@@ -248,12 +251,12 @@ export default function RequestsPage({ user, translations, locale, initialData }
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>Nome</Th>
-                    <Th>Email</Th>
-                    <Th>Telefone</Th>
-                    <Th>Tipo</Th>
-                    <Th>Status</Th>
-                    <Th>Ações</Th>
+                    <Th>{t('name')}</Th>
+                    <Th>{t('email')}</Th>
+                    <Th>{t('phone')}</Th>
+                    <Th>{t('type')}</Th>
+                    <Th>{t('status')}</Th>
+                    <Th>{t('actions')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -264,7 +267,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
                       <Td>{request.phone}</Td>
                       <Td>
                         <Badge colorScheme={request.type === 'renter' ? 'purple' : 'blue'}>
-                          {request.type === 'renter' ? 'Locatário' : 'Afiliado'}
+                          {request.type === 'renter' ? t('type_renter') : t('type_affiliate')}
                         </Badge>
                       </Td>
                       <Td>
@@ -281,21 +284,21 @@ export default function RequestsPage({ user, translations, locale, initialData }
                                 colorScheme="blue"
                                 onClick={() => handleAction(request, 'evaluation')}
                               >
-                                Avaliar
+                                {tAdmin('evaluate_button')}
                               </Button>
                               <Button
                                 size="xs"
                                 colorScheme="green"
                                 onClick={() => handleAction(request, 'approve')}
                               >
-                                Aprovar
+                                {tAdmin('approve_button')}
                               </Button>
                               <Button
                                 size="xs"
                                 colorScheme="red"
                                 onClick={() => handleAction(request, 'reject')}
                               >
-                                Rejeitar
+                                {tAdmin('reject_button')}
                               </Button>
                             </>
                           )}
@@ -306,14 +309,14 @@ export default function RequestsPage({ user, translations, locale, initialData }
                                 colorScheme="green"
                                 onClick={() => handleAction(request, 'approve')}
                               >
-                                Aprovar
+                                {tAdmin('approve_button')}
                               </Button>
                               <Button
                                 size="xs"
                                 colorScheme="red"
                                 onClick={() => handleAction(request, 'reject')}
                               >
-                                Rejeitar
+                                {tAdmin('reject_button')}
                               </Button>
                             </>
                           )}
@@ -333,9 +336,9 @@ export default function RequestsPage({ user, translations, locale, initialData }
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            {actionType === 'approve' ? 'Aprovar Solicitação' :
-             actionType === 'reject' ? 'Rejeitar Solicitação' :
-             'Marcar como Em Avaliação'}
+            {actionType === 'approve' ? tAdmin('approve_request_modal_title') :
+             actionType === 'reject' ? tAdmin('reject_request_modal_title') :
+             tAdmin('evaluate_request_modal_title')}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -346,7 +349,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
               
               {actionType === 'reject' && (
                 <Textarea
-                  placeholder="Motivo da rejeição..."
+                  placeholder={tAdmin('rejection_reason_placeholder')}
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   rows={4}
@@ -355,7 +358,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
               
               {actionType !== 'reject' && (
                 <Textarea
-                  placeholder="Notas (opcional)..."
+                  placeholder={tAdmin('notes_optional_placeholder')}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
@@ -365,7 +368,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" mr={3} onClick={onClose}>
-              Cancelar
+              {t('cancel')}
             </Button>
             <Button
               colorScheme={actionType === 'approve' ? 'green' : actionType === 'reject' ? 'red' : 'blue'}
@@ -373,7 +376,7 @@ export default function RequestsPage({ user, translations, locale, initialData }
               isLoading={loading}
               isDisabled={actionType === 'reject' && !rejectionReason}
             >
-              Confirmar
+              {t('confirm')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -384,15 +387,21 @@ export default function RequestsPage({ user, translations, locale, initialData }
 
 // SSR com autenticação e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const [requests, stats] = await Promise.all([
-    getRequests({ limit: 100 }),
-    getRequestsStats(),
-  ]);
+  const requestsResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/requests?limit=100`, {
+    headers: { Cookie: context.req.headers.cookie || '' },
+  });
+  const requestsData = await requestsResponse.json();
+
+  const statsResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/requests/stats`, {
+    headers: { Cookie: context.req.headers.cookie || '' },
+  });
+  const statsData = await statsResponse.json();
 
   return {
     initialData: {
-      requests,
-      stats,
+      requests: requestsData.data || [],
+      stats: statsData.data || { total: 0, pending: 0, evaluation: 0, approved: 0, rejected: 0 },
     },
   };
 });
+

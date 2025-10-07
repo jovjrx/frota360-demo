@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { GetServerSideProps } from 'next';
 import {
   Box,
   Heading,
@@ -33,11 +32,11 @@ import {
   FiDatabase,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { PageProps } from '@/interface/Global';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { getTranslation } from '@/lib/translations';
+import { useRouter } from 'next/router';
 
-
-interface ImportPageProps extends PageProps {}
+interface ImportPageProps extends AdminPageProps {}
 
 interface FileUpload {
   platform: 'uber' | 'bolt' | 'prio' | 'viaverde';
@@ -74,7 +73,8 @@ const getWeekDates = (): { start: string; end: string } => {
   };
 };
 
-export default function ImportNewPage({}: ImportPageProps) {
+export default function ImportNewPage({ user, translations, locale }: ImportPageProps) {
+  const router = useRouter();
   const { start, end } = getWeekDates();
   
   const [weekStart, setWeekStart] = useState(start);
@@ -90,6 +90,9 @@ export default function ImportNewPage({}: ImportPageProps) {
   ]);
 
   const toast = useToast();
+
+  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
 
   const handleFileChange = (platform: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -108,8 +111,8 @@ export default function ImportNewPage({}: ImportPageProps) {
 
     if (filesToUpload.length === 0) {
       toast({
-        title: 'Nenhum arquivo selecionado',
-        description: 'Selecione pelo menos um arquivo para importar',
+        title: tAdmin('no_file_selected_title'),
+        description: tAdmin('no_file_selected_description'),
         status: 'warning',
         duration: 3000,
       });
@@ -123,7 +126,7 @@ export default function ImportNewPage({}: ImportPageProps) {
       const formData = new FormData();
       formData.append('weekStart', weekStart);
       formData.append('weekEnd', weekEnd);
-      formData.append('adminId', 'admin'); // TODO: pegar do contexto de autenticação
+      formData.append('adminId', user.id); // Usar ID do admin logado
 
       filesToUpload.forEach(fileData => {
         if (fileData.file) {
@@ -138,29 +141,29 @@ export default function ImportNewPage({}: ImportPageProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Erro na importação');
+        throw new Error(error.error || tAdmin('import_error_generic'));
       }
 
       const data = await response.json();
       setImportResult(data);
 
       toast({
-        title: 'Importação concluída!',
-        description: `Dados salvos com sucesso. ImportID: ${data.importId}`,
+        title: tAdmin('import_success_title'),
+        description: tAdmin('import_success_description', { importId: data.importId }),
         status: 'success',
         duration: 5000,
       });
 
       // Redirecionar para página weekly
       setTimeout(() => {
-        window.location.href = '/admin/weekly';
+        router.push('/admin/weekly');
       }, 2000);
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      const errorMessage = error instanceof Error ? error.message : t('unknown_error');
       
       toast({
-        title: 'Erro na importação',
+        title: tAdmin('import_error_title'),
         description: errorMessage,
         status: 'error',
         duration: 5000,
@@ -170,16 +173,23 @@ export default function ImportNewPage({}: ImportPageProps) {
     }
   };
 
-  const filesReady = files.filter(f => f.status === 'ready').length;
+  const filesReady = files.filter(f => f.file !== null).length;
   const totalFiles = files.length;
 
   return (
-    <AdminLayout>
+    <AdminLayout
+      title={tAdmin('import_data_title')}
+      subtitle={tAdmin('import_data_subtitle')}
+      breadcrumbs={[
+        { label: tAdmin('weekly_control_title'), href: '/admin/weekly' },
+        { label: tAdmin('import_data_title') }
+      ]}
+    >
       <VStack spacing={6} align="stretch">
         <Box>
-          <Heading size="lg">Importar Dados Semanais</Heading>
+          <Heading size="lg">{tAdmin('import_data_heading')}</Heading>
           <Text color="gray.600" mt={2}>
-            Importe os arquivos das 4 plataformas para processar os dados da semana
+            {tAdmin('import_data_description')}
           </Text>
         </Box>
 
@@ -187,10 +197,9 @@ export default function ImportNewPage({}: ImportPageProps) {
         <Alert status="info" borderRadius="md">
           <AlertIcon />
           <Box>
-            <AlertTitle>Nova estrutura de importação</AlertTitle>
+            <AlertTitle>{tAdmin('new_import_structure_alert_title')}</AlertTitle>
             <AlertDescription>
-              Os dados serão salvos nas collections raw (raw_uber, raw_bolt, raw_prio, raw_viaverde) 
-              e processados em tempo real no painel weekly.
+              {tAdmin('new_import_structure_alert_description')}
             </AlertDescription>
           </Box>
         </Alert>
@@ -198,12 +207,12 @@ export default function ImportNewPage({}: ImportPageProps) {
         {/* Seleção de período */}
         <Card>
           <CardHeader>
-            <Heading size="md">Período da Semana</Heading>
+            <Heading size="md">{tAdmin('week_period_title')}</Heading>
           </CardHeader>
           <CardBody>
             <HStack spacing={4}>
               <FormControl>
-                <FormLabel>Data Início</FormLabel>
+                <FormLabel>{t('start_date')}</FormLabel>
                 <Input
                   type="date"
                   value={weekStart}
@@ -211,7 +220,7 @@ export default function ImportNewPage({}: ImportPageProps) {
                 />
               </FormControl>
               <FormControl>
-                <FormLabel>Data Fim</FormLabel>
+                <FormLabel>{t('end_date')}</FormLabel>
                 <Input
                   type="date"
                   value={weekEnd}
@@ -225,9 +234,9 @@ export default function ImportNewPage({}: ImportPageProps) {
         {/* Upload de arquivos */}
         <Card>
           <CardHeader>
-            <Heading size="md">Arquivos para Importação</Heading>
+            <Heading size="md">{tAdmin('files_for_import_title')}</Heading>
             <Text fontSize="sm" color="gray.600" mt={1}>
-              {filesReady} de {totalFiles} arquivos selecionados
+              {tAdmin('files_selected_count', { ready: filesReady, total: totalFiles })}
             </Text>
           </CardHeader>
           <CardBody>
@@ -251,10 +260,10 @@ export default function ImportNewPage({}: ImportPageProps) {
                       }
                     >
                       {fileData.status === 'ready'
-                        ? 'Pronto'
+                        ? tAdmin('status_ready')
                         : fileData.status === 'error'
-                        ? 'Erro'
-                        : 'Aguardando'}
+                        ? tAdmin('status_error')
+                        : tAdmin('status_waiting')}
                     </Badge>
                   </HStack>
 
@@ -294,20 +303,20 @@ export default function ImportNewPage({}: ImportPageProps) {
         {importResult && (
           <Card>
             <CardHeader>
-              <Heading size="md">Resultado da Importação</Heading>
+              <Heading size="md">{tAdmin('import_result_title')}</Heading>
             </CardHeader>
             <CardBody>
               <VStack align="stretch" spacing={3}>
                 <HStack>
                   <Icon as={FiDatabase} color="blue.500" />
-                  <Text fontWeight="bold">Import ID:</Text>
+                  <Text fontWeight="bold">{tAdmin('import_id_label')}:</Text>
                   <Text fontFamily="mono" fontSize="sm">{importResult.importId}</Text>
                 </HStack>
 
                 {importResult.results.success.length > 0 && (
                   <Box>
                     <Text fontWeight="bold" color="green.600" mb={2}>
-                      Sucesso:
+                      {tAdmin('import_success_section_title')}:
                     </Text>
                     <List spacing={1}>
                       {importResult.results.success.map((msg: string, i: number) => (
@@ -323,7 +332,7 @@ export default function ImportNewPage({}: ImportPageProps) {
                 {importResult.results.errors.length > 0 && (
                   <Box>
                     <Text fontWeight="bold" color="red.600" mb={2}>
-                      Erros:
+                      {tAdmin('import_errors_section_title')}:
                     </Text>
                     <List spacing={1}>
                       {importResult.results.errors.map((err: any, i: number) => (
@@ -348,18 +357,18 @@ export default function ImportNewPage({}: ImportPageProps) {
             size="lg"
             onClick={handleImport}
             isLoading={isImporting}
-            loadingText="Importando..."
+            loadingText={tAdmin('importing_loading_text')}
             isDisabled={filesReady === 0}
           >
-            Importar Dados
+            {tAdmin('import_data_button')}
           </Button>
 
           <Button
             variant="outline"
             size="lg"
-            onClick={() => window.location.href = '/admin/weekly'}
+            onClick={() => router.push('/admin/weekly')}
           >
-            Cancelar
+            {t('cancel')}
           </Button>
         </HStack>
 
@@ -371,6 +380,5 @@ export default function ImportNewPage({}: ImportPageProps) {
   );
 }
 
-
-
 export const getServerSideProps = withAdminSSR();
+

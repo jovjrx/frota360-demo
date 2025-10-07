@@ -33,39 +33,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const {
       // Dados pessoais obrigatórios
-      firstName,
-      lastName,
+      fullName,
       email,
       phone,
+      type, // 'affiliate' ou 'renter'
+      status, // 'active' ou 'inactive'
+
+      // Campos adicionais
+      firstName,
+      lastName,
       birthDate,
       city,
-      
-      // Tipo de motorista
-      type, // 'affiliate' ou 'renter'
-      
-      // Dados bancários
       iban,
       accountHolder,
-      
-      // Dados do veículo (se locatário)
       vehiclePlate,
       vehicleModel,
       rentalFee,
-      
-      // Integrações (opcional)
       uberUuid,
-      uberEnabled,
       boltEmail,
-      boltEnabled,
       myprioCard,
-      myprioEnabled,
       viaverdeEnabled,
     } = req.body;
 
     // Validações básicas
-    if (!firstName || !lastName || !email || !phone || !type) {
+    if (!fullName || !email || !phone || !type || !status) {
       return res.status(400).json({ 
-        error: 'Campos obrigatórios: firstName, lastName, email, phone, type' 
+        error: 'Campos obrigatórios: fullName, email, phone, type, status' 
       });
     }
 
@@ -82,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Verificar se email já existe
+    // Verificar se email já existe no Firestore
     const existingDrivers = await adminDb
       .collection('drivers')
       .where('email', '==', email)
@@ -91,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!existingDrivers.empty) {
       return res.status(400).json({ 
-        error: 'Email já cadastrado' 
+        error: 'Email já cadastrado como motorista' 
       });
     }
 
@@ -104,7 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email,
         password: temporaryPassword,
         emailVerified: false,
-        displayName: `${firstName} ${lastName}`,
+        displayName: fullName,
       });
 
       firebaseUid = userRecord.uid;
@@ -130,12 +123,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 2. Criar documento do motorista no Firestore
     const now = new Date().toISOString();
-    const fullName = `${firstName} ${lastName}`;
 
     const driverData: any = {
       // Dados pessoais
-      firstName,
-      lastName,
+      firstName: firstName || fullName.split(' ')[0] || '',
+      lastName: lastName || fullName.split(' ').slice(1).join(' ') || '',
       fullName,
       email,
       phone,
@@ -143,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       city: city || '',
       
       // Status
-      status: 'active', // Já ativo direto
+      status,
       type,
       
       // Dados bancários
@@ -156,22 +148,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       integrations: {
         uber: {
           key: uberUuid || null,
-          enabled: uberEnabled || !!uberUuid,
+          enabled: !!uberUuid,
           lastSync: null,
         },
         bolt: {
-          key: boltEmail || email, // Usar email como padrão
-          enabled: boltEnabled || false,
+          key: boltEmail || email, // Usar email como padrão se não informado
+          enabled: !!boltEmail,
           lastSync: null,
         },
         myprio: {
           key: myprioCard || null,
-          enabled: myprioEnabled || false,
+          enabled: !!myprioCard,
           lastSync: null,
         },
         viaverde: {
-          key: vehiclePlate || null, // Usar placa do veículo
-          enabled: viaverdeEnabled || false,
+          key: vehiclePlate || null, // Usar placa do veículo como key para ViaVerde
+          enabled: viaverdeEnabled || !!vehiclePlate,
           lastSync: null,
         },
       },
@@ -183,8 +175,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       createdAt: now,
       createdBy: session.userId,
       updatedAt: now,
-      activatedAt: now,
-      activatedBy: session.userId,
+      activatedAt: status === 'active' ? now : null,
+      activatedBy: status === 'active' ? session.userId : null,
     };
 
     // Adicionar dados específicos de locatário
@@ -229,7 +221,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { emailService } = await import('@/lib/email/mailer');
       await emailService.sendDriverCredentialsEmail(
         email,
-        `${firstName} ${lastName}`,
+        fullName,
         temporaryPassword
       );
       console.log(`✅ Email com credenciais enviado para ${email}`);
@@ -256,3 +248,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
