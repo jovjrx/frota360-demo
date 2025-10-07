@@ -1,3 +1,4 @@
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ApiResponse } from '@/types';
 import {
@@ -9,12 +10,20 @@ import {
 import { createUberConfig } from '@/lib/uber/base';
 import { UberBusinessClient } from '@/lib/uber/client-business';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getSession } from '@/lib/session';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  // Não precisa verificar sessão - já verificado no SSR
+  const session = await getSession(req, res);
+
+  if (!session?.isLoggedIn || session.role !== 'admin') {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
 
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -104,3 +113,4 @@ export default async function handler(
     });
   }
 }
+
