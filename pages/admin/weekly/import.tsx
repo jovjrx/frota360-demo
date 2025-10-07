@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useState } from 'react';
 import { GetServerSideProps } from 'next';
 import {
   Box,
@@ -374,3 +375,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {},
   };
 };
+
+// SSR com autenticação e traduções
+import { withAdminSSR } from '@/lib/admin/withAdminSSR';
+
+export const getServerSideProps = withAdminSSR();

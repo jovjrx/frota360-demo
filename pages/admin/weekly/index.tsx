@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import {
@@ -428,3 +429,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   };
 };
+
+// SSR com autenticação e traduções
+import { withAdminSSR } from '@/lib/admin/withAdminSSR';
+import { getWeekOptions } from '@/lib/admin/adminQueries';
+
+export const getServerSideProps = withAdminSSR(async (context, user) => {
+  const weekOptions = getWeekOptions(12);
+  const currentWeek = weekOptions[0].value;
+  
+  return {
+    weekOptions,
+    currentWeek,
+  };
+});
