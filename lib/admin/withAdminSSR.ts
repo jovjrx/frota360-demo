@@ -56,7 +56,7 @@ export function withAdminSSR<P extends Record<string, any> = {}>(
       // 2. Carregar traduções
       const locale = (context.locale || context.defaultLocale || 'pt') as string;
       const translations = await loadTranslations(locale);
-      const adminTranslations = ADMIN[locale as keyof typeof ADMIN] || ADMIN.pt;
+      const adminTranslations = ADMIN; // ADMIN constants são keys, não traduções por locale
 
       // 3. Preparar props base
       const baseProps: AdminPageProps = {
