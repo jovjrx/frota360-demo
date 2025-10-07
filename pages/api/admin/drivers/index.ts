@@ -1,55 +1,58 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getSession } from '@/lib/session';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    const session = await getSession(req, res);
-    if (!session?.isLoggedIn) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<{
+    success?: boolean;
+    error?: string;
+    drivers?: any[];
+  }>,
+) {
+  const session = await getSession(req, res);
 
-    const db = getFirestore();
+  if (!session?.isLoggedIn || session.role !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
-    if (req.method === 'GET') {
-      // Listar motoristas com filtros
+  const db = getFirestore();
+
+  if (req.method === 'GET') {
+    try {
+      let driversRef: any = db.collection('drivers');
+
       const { status, type, search } = req.query;
 
-      let query = db.collection('drivers').orderBy('createdAt', 'desc');
-
-      // Filtro por status
       if (status && status !== 'all') {
-        query = query.where('status', '==', status) as any;
+        driversRef = driversRef.where('status', '==', status);
       }
-
-      // Filtro por tipo
       if (type && type !== 'all') {
-        query = query.where('type', '==', type) as any;
+        driversRef = driversRef.where('type', '==', type);
       }
 
-      const snapshot = await query.get();
-
-      let drivers = snapshot.docs.map(doc => ({
+      const snapshot = await driversRef.get();
+      let drivers = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
-      })) as Array<{ id: string; name?: string; fullName?: string; email?: string; [key: string]: any }>;
+      }));
 
-      // Filtro por busca (nome/email) - aplicado após a query
-      if (search && typeof search === 'string') {
-        const searchLower = search.toLowerCase();
-        drivers = drivers.filter(driver => 
-          (driver.name?.toLowerCase().includes(searchLower)) ||
-          (driver.fullName?.toLowerCase().includes(searchLower)) ||
-          (driver.email?.toLowerCase().includes(searchLower))
-        );
+      if (search) {
+        const searchTerm = (search as string).toLowerCase();
+        drivers = drivers.filter((driver: any) => {
+          const nameMatch = driver.fullName?.toLowerCase().includes(searchTerm) || driver.name?.toLowerCase().includes(searchTerm);
+          const emailMatch = driver.email?.toLowerCase().includes(searchTerm);
+          return nameMatch || emailMatch;
+        });
       }
 
-      return res.status(200).json({ drivers });
+      return res.status(200).json({ success: true, drivers });
+    } catch (e: any) {
+      console.error('Error fetching drivers:', e);
+      return res.status(500).json({ error: e.message || 'Internal Server Error' });
     }
-
-    return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error) {
-    console.error('Error in drivers API:', error);
-    return res.status(500).json({ error: 'Internal server error' });
   }
+
+  return res.status(405).json({ error: 'Method Not Allowed' });
 }
+
