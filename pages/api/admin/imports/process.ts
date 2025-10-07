@@ -224,7 +224,7 @@ async function processUberData(
     // Buscar motorista pelo UUID
     let driver = null;
     for (const [id, d] of driversMap.entries()) {
-      if (d.integrations?.uber?.uuid === uuid) {
+      if (d.integrations?.uber?.key === uuid) {
         driver = d;
         break;
       }
@@ -353,7 +353,7 @@ async function processMyprioData(
     // Buscar motorista pelo cartão
     let driver = null;
     for (const [id, d] of driversMap.entries()) {
-      if (d.cards?.myprio === cardNumber) {
+      if (d.integrations?.myprio?.key === cardNumber) {
         driver = d;
         break;
       }
@@ -421,7 +421,7 @@ async function processViaverdeData(
     // Buscar motorista pelo OBU
     let driver = null;
     for (const [id, d] of driversMap.entries()) {
-      if (d.cards?.viaverde === obu) {
+      if (d.integrations?.viaverde?.key === obu) {
         driver = d;
         break;
       }

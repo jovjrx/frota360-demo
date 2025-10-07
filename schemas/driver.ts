@@ -35,24 +35,28 @@ export const DriverAdminFieldsSchema = z.object({
   // Aluguel semanal (para locatários)
   rentalFee: z.number().default(0),
   
-  // IDs das Plataformas (adicionado conforme estratégia)
+  // IDs das Plataformas (estrutura unificada)
   integrations: z.object({
     uber: z.object({
-      uuid: z.string().nullable().default(null),
-      name: z.string().nullable().default(null),
+      key: z.string().nullable().default(null),      // UUID do motorista
+      enabled: z.boolean().default(false),
       lastSync: z.string().nullable().default(null),
     }).optional(),
     bolt: z.object({
-      id: z.string().nullable().default(null),
-      email: z.string().nullable().default(null),
+      key: z.string().nullable().default(null),      // Email do motorista
+      enabled: z.boolean().default(false),
       lastSync: z.string().nullable().default(null),
     }).optional(),
-  }).optional(),
-  
-  // Cartões (adicionado conforme estratégia)
-  cards: z.object({
-    myprio: z.string().nullable().default(null),
-    viaverde: z.string().nullable().default(null),
+    myprio: z.object({
+      key: z.string().nullable().default(null),      // Número do cartão myprio
+      enabled: z.boolean().default(false),
+      lastSync: z.string().nullable().default(null),
+    }).optional(),
+    viaverde: z.object({
+      key: z.string().nullable().default(null),      // Placa do veículo
+      enabled: z.boolean().default(false),
+      lastSync: z.string().nullable().default(null),
+    }).optional(),
   }).optional(),
   
   // Dados Bancários (adicionado conforme estratégia)

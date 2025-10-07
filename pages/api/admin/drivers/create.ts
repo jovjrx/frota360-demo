@@ -54,7 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Integrações (opcional)
       uberUuid,
-      boltDriverId,
+      uberEnabled,
+      boltEmail,
+      boltEnabled,
+      myprioCard,
       myprioEnabled,
       viaverdeEnabled,
     } = req.body;
@@ -149,24 +152,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         accountHolder: accountHolder || fullName,
       },
       
-      // Integrações
+      // Integrações (estrutura unificada)
       integrations: {
         uber: {
-          uuid: uberUuid || null,
-          name: null,
-          enabled: !!uberUuid,
+          key: uberUuid || null,
+          enabled: uberEnabled || !!uberUuid,
+          lastSync: null,
         },
         bolt: {
-          id: boltDriverId || null,
-          email: null,
-          enabled: !!boltDriverId,
+          key: boltEmail || email, // Usar email como padrão
+          enabled: boltEnabled || false,
+          lastSync: null,
         },
-      },
-      
-      // Cartões de combustível/portagens
-      cards: {
-        myprio: myprioEnabled ? 'enabled' : null,
-        viaverde: viaverdeEnabled ? 'enabled' : null,
+        myprio: {
+          key: myprioCard || null,
+          enabled: myprioEnabled || false,
+          lastSync: null,
+        },
+        viaverde: {
+          key: vehiclePlate || null, // Usar placa do veículo
+          enabled: viaverdeEnabled || false,
+          lastSync: null,
+        },
       },
       
       // Dados do Firebase Auth

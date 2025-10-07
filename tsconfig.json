@@ -26,6 +26,7 @@
   "exclude": [
     "node_modules",
     "lib/integrations/viaverde/scraper.ts",
-    "lib/integrations/myprio/scraper.ts"
+    "lib/integrations/myprio/scraper.ts",
+    "scripts/import_raw_data.ts"
   ]
 }

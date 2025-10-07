@@ -174,10 +174,10 @@ export default async function handler(
       const recordId = generateWeeklyRecordId(driver.id, weekId);
       
       // Buscar dados do motorista
-      const uberTotal = processedData.uber.get(driver.integrations?.uber?.uuid) || 0;
-      const boltTotal = processedData.bolt.get(driver.integrations?.bolt?.id) || 0;
-      const combustivel = processedData.myprio.get(driver.cards?.myprio) || 0;
-      const viaverde = processedData.viaverde.get(driver.vehicle?.plate) || 0;
+      const uberTotal = processedData.uber.get(driver.integrations?.uber?.key) || 0;
+      const boltTotal = processedData.bolt.get(driver.integrations?.bolt?.key) || 0;
+      const combustivel = processedData.myprio.get(driver.integrations?.myprio?.key) || 0;
+      const viaverde = processedData.viaverde.get(driver.integrations?.viaverde?.key) || 0;
       
       // Só criar registro se tiver algum dado
       if (uberTotal > 0 || boltTotal > 0 || combustivel > 0 || viaverde > 0) {

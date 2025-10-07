@@ -39,11 +39,11 @@ export function middleware(request: NextRequest) {
     return response;
   }
   
-  // Para rotas públicas, verificar se precisa redirecionar para inglês
+  // Para rotas públicas, verificar preferência de idioma do navegador
   const acceptLanguage = request.headers.get('accept-language') || '';
   const preferredLocale = getPreferredLocale(acceptLanguage);
   
-  // Se o idioma preferido é inglês, redirecionar para /en/version da página
+  // Se o idioma preferido é inglês E o navegador explicitamente prefere inglês, redirecionar
   if (preferredLocale === 'en') {
     const redirectUrl = new URL(`/en${pathname}`, request.url);
     return NextResponse.redirect(redirectUrl);
@@ -69,14 +69,14 @@ function getPreferredLocale(acceptLanguage: string): string {
     })
     .sort((a, b) => b.quality - a.quality);
 
-  // Encontrar primeiro idioma suportado
-  for (const { locale } of languages) {
-    if (SUPPORTED_LOCALES.includes(locale)) {
-      return locale;
-    }
+  // Só retorna inglês se for a primeira preferência com qualidade alta
+  // ou se explicitamente configurado como preferência principal
+  const topLanguage = languages[0];
+  if (topLanguage && topLanguage.locale === 'en' && topLanguage.quality >= 0.8) {
+    return 'en';
   }
 
-  // Fallback para português
+  // Para qualquer outro caso, incluindo pt-BR, pt-PT, ou indefinido, retorna português
   return DEFAULT_LOCALE;
 }
 
