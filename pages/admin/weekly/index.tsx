@@ -33,10 +33,10 @@ import {
   FiUpload,
   FiFileText,
 } from 'react-icons/fi';
-import useSWR from 'swr';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
+import { useRouter } from 'next/router';
 
 interface WeekOption {
   label: string;
@@ -80,9 +80,10 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingResumos, setIsGeneratingResumos] = useState(false);
   const toast = useToast();
+  const router = useRouter();
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-PT', {

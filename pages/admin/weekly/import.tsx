@@ -92,7 +92,7 @@ export default function ImportNewPage({ user, translations, locale }: ImportPage
   const toast = useToast();
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const handleFileChange = (platform: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -126,7 +126,7 @@ export default function ImportNewPage({ user, translations, locale }: ImportPage
       const formData = new FormData();
       formData.append('weekStart', weekStart);
       formData.append('weekEnd', weekEnd);
-      formData.append('adminId', user.id); // Usar ID do admin logado
+      formData.append('adminId', user.uid); // Usar ID do admin logado
 
       filesToUpload.forEach(fileData => {
         if (fileData.file) {

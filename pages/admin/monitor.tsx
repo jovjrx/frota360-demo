@@ -114,7 +114,7 @@ export default function MonitorPage({ user, translations, locale, initialData }:
   const router = useRouter();
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tMonitor = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tMonitor = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   // Função para buscar dados da API
   const fetchCartrackData = async (showToast = false) => {
