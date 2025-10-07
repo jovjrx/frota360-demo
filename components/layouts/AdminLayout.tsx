@@ -60,7 +60,7 @@ export default function AdminLayout({
   return (
     <Box minH="100vh" bg="gray.50" position='relative'>
       {/* Header */}
-      <Box bg="red.900" position={'sticky'} top={0} display={{ base: 'none', lg: 'flex' }} borderBottom="1px" borderColor="red.800" shadow="sm">
+      <Box bg="red.900" display={{ base: 'none', lg: 'flex' }} borderBottom="1px" borderColor="red.800" shadow="sm">
         <Container maxW="container.xl">
           <HStack spacing={1} flex={1} justify="space-between" gap={4} py={2}>
             {allMenuItems.map((item) => (

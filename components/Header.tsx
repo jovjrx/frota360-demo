@@ -85,7 +85,7 @@ export default function Header({ t }: HeaderProps) {
   const allMenuItems = getAllMenuItems();
 
   return (
-    <Box as="header" borderBottomWidth="0" shadow="sm" position={{ base: "relative", md: "sticky" }} top={0} zIndex={900} bg="white" >
+    <Box as="header" borderBottomWidth="0" shadow="sm" position={'relative'} top={0} zIndex={900} bg="white" >
       <Container maxW="7xl" p={4}>
         <Flex align="center" justify="space-between" gap={4}>
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
