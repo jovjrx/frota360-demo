@@ -1,10 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getAuth } from 'firebase-admin/auth';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default withIronSessionApiRoute(async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function loginRoute(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -51,10 +52,8 @@ export default withIronSessionApiRoute(async function loginRoute(req: NextApiReq
       email: userRecord.email!,
       name: userRecord.displayName || userRecord.email!,
       role: 'driver',
-      isLoggedIn: true,
     };
-    await req.session.save();
-
+    req.session.isLoggedIn = true;
     return res.status(200).json({ success: true, message: 'Logged in successfully' });
   } catch (error: any) {
     console.error('Driver login error:', error);

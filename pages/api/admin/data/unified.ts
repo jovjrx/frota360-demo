@@ -1,4 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import {
@@ -8,7 +9,7 @@ import {
   FetchOptions
 } from '@/lib/admin/unified-data';
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
 
   if (!user || user.role !== 'admin') {

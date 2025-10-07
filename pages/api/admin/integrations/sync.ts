@@ -1,7 +1,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { withIronSessionApiRoute } from '@/lib/session/ironSession';
+import { withIronSessionApiRoute, SessionRequest } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
@@ -37,7 +37,7 @@ async function syncCartrackData(credentials: any) {
 }
 
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
+  req: SessionRequest,
   res: NextApiResponse<{
     success?: boolean;
     message?: string;

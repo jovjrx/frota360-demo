@@ -12,6 +12,7 @@ export const DataSourceStatusSchema = z.object({
   driversCount: z.number().default(0),
   recordsCount: z.number().default(0),
   lastError: z.string().optional(),
+  archiveRef: z.string().optional(),
 });
 
 export type DataSourceStatus = z.infer<typeof DataSourceStatusSchema>;
@@ -28,6 +29,7 @@ export const WeeklyDataSourcesSchema = z.object({
     bolt: DataSourceStatusSchema,
     myprio: DataSourceStatusSchema,
     viaverde: DataSourceStatusSchema,
+    cartrack: DataSourceStatusSchema,
   }),
   
   // Status geral
@@ -68,6 +70,7 @@ export function createWeeklyDataSources(
       bolt: { ...emptySource },
       myprio: { ...emptySource },
       viaverde: { ...emptySource },
+      cartrack: { ...emptySource },
     },
     isComplete: false,
     createdAt: now,
@@ -80,7 +83,7 @@ export function createWeeklyDataSources(
  */
 export function updateDataSource(
   sources: WeeklyDataSources,
-  platform: 'uber' | 'bolt' | 'myprio' | 'viaverde',
+  platform: 'uber' | 'bolt' | 'myprio' | 'viaverde' | 'cartrack',
   update: Partial<DataSourceStatus>
 ): WeeklyDataSources {
   const updatedSources = {
@@ -121,7 +124,8 @@ export function getWeekStats(sources: WeeklyDataSources) {
     sources.sources.uber.driversCount,
     sources.sources.bolt.driversCount,
     sources.sources.myprio.driversCount,
-    sources.sources.viaverde.driversCount
+    sources.sources.viaverde.driversCount,
+    sources.sources.cartrack.driversCount
   );
   
   const completeSources = Object.values(sources.sources).filter(
@@ -136,7 +140,7 @@ export function getWeekStats(sources: WeeklyDataSources) {
     totalDrivers,
     completeSources,
     pendingSources,
-    totalSources: 4,
-    completionPercentage: (completeSources / 4) * 100,
+    totalSources: 5,
+    completionPercentage: (completeSources / 5) * 100,
   };
 }

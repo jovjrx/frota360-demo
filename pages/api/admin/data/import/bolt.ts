@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
@@ -14,7 +15,7 @@ export const config = {
 };
 
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
+  req: SessionRequest,
   res: NextApiResponse<{
     success?: boolean;
     message?: string;
@@ -48,7 +49,7 @@ export default withIronSessionApiRoute(async function handler(
     const batch = db.batch();
     const rawBoltRef = db.collection('raw_bolt');
 
-    for (const record of records) {
+    for (const record of records as Record<string, any>[]) {
       const recordWithWeek = { ...record, weekId, importedAt: new Date().toISOString(), importedBy: user.id };
       const docRef = rawBoltRef.doc();
       batch.set(docRef, recordWithWeek);

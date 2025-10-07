@@ -1,11 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import formidable from 'formidable';
 import * as fs from 'fs';
 import * as path from 'path';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getSession } from 'next-auth/react';
-import { RawImportData } from '@/schemas/raw-import-data';
-import { getWeekId } from '@/schemas/driver-weekly-record';
+import { withIronSessionApiRoute, sessionOptions, SessionRequest } from '@/lib/session/ironSession';
+import { RawFileArchiveEntry } from '@/schemas/raw-file-archive';
+import { getWeekId } from '@/lib/utils/date-helpers';
 import * as XLSX from 'xlsx';
 import { parse as parseCsv } from 'csv-parse/sync';
 
@@ -31,9 +31,9 @@ function validateFileStructure(platform: string, headers: string[]): boolean {
   return required.every(col => headers.includes(col));
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
-  if (!session || session.role !== 'admin') {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
+  const user = req.session.user;
+  if (!user || user.role !== 'admin') {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
@@ -104,41 +104,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: `Invalid file structure for ${platformStr}. Missing required columns.` });
       }
 
-      // 1. Salvar dados brutos na coleção rawWeeklyData
+      // Salvar dados brutos na coleção rawFileArchive
       const rawDataDocId = `${weekId}-${platformStr}`;
-      const rawDataRef = adminDb.collection("rawWeeklyData").doc(rawDataDocId);
-      await rawDataRef.set({
-        importId: importId,
+      const rawDataRef = adminDb.collection("rawFileArchive").doc(rawDataDocId);
+      const rawFileEntry: RawFileArchiveEntry = {
+        id: rawDataDocId,
         weekId: weekId,
         weekStart: weekStartStr,
         weekEnd: weekEndStr,
         platform: platformStr,
         fileName: uploadedFile.originalFilename || uploadedFile.newFilename,
-        data: { headers, rows: rawDataRows },
-        createdAt: new Date().toISOString(),
-      });
-
-      // 2. Criar/Atualizar entrada em weeklyDataImports com referência
-      const importDocRef = adminDb.collection("weeklyDataImports").doc();
-      const importEntry: RawImportData = {
-        id: importDocRef.id,
-        importId: importId,
-        weekId: weekId,
-        weekStart: weekStartStr,
-        weekEnd: weekEndStr,
-        platform: platformStr,
-        fileName: uploadedFile.originalFilename || uploadedFile.newFilename,
-        filePath: uploadedFile.filepath, // Caminho temporário no servidor
-        rawDataRef: rawDataDocId,
+        rawData: { headers, rows: rawDataRows },
+        importedAt: new Date().toISOString(),
+        importedBy: user.id,
         processed: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
-      await importDocRef.set(importEntry);
+      await rawDataRef.set(rawFileEntry);
 
       fs.unlinkSync(filePath); // Remover arquivo temporário após processamento
 
-      return res.status(200).json({ message: 'File uploaded and referenced successfully', importId, platform: platformStr });
+      return res.status(200).json({ message: 'File uploaded and referenced successfully', rawDataDocId, platform: platformStr });
 
     } catch (parseError: any) {
       console.error('Error parsing file:', parseError);
@@ -146,5 +131,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ message: 'Error processing file', error: parseError.message });
     }
   });
-}
-
+}, sessionOptions);

@@ -37,6 +37,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "archiver": "^7.0.1",
     "axios": "^1.12.2",
+    "caniuse-lite": "^1.0.30001748",
     "country-flag-icons": "^1.5.19",
     "critters": "^0.0.25",
     "crypto": "^1.0.1",

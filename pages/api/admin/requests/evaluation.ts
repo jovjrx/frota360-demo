@@ -1,10 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }

@@ -1,12 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
+interface User {
+  id: string;
+  role: 'admin' | 'driver' | 'user'; // Adicione outros roles conforme necessário
+  [key: string]: any; // Para permitir outras propriedades dinâmicas
+}
+
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
+  req: SessionRequest,
   res: NextApiResponse<{
     success?: boolean;
     message?: string;
@@ -29,9 +36,9 @@ export default withIronSessionApiRoute(async function handler(
   if (req.method === 'GET') {
     try {
       const usersSnapshot = await db.collection('users').get();
-      const users = usersSnapshot.docs.map(doc => ({
+      const users: User[] = usersSnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data() as User,
       }));
 
       // Calcular stats

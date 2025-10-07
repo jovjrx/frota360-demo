@@ -1,4 +1,4 @@
-'''
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
@@ -143,4 +143,4 @@ export default async function handler(
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-'''
+

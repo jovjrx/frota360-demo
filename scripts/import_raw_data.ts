@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { parse as parseCsv } from "csv-parse/sync";
 import * as XLSX from "xlsx";
-import { getWeekId } from "@/schemas/driver-weekly-record";
+import { getWeekId } from "@/lib/utils/date-helpers";
 import { RawFileArchiveEntry } from "@/schemas/raw-file-archive";
 
 // Função auxiliar para normalizar strings (remover acentos e caracteres especiais)
@@ -77,6 +77,8 @@ async function importRawData(weekStart: string, weekEnd: string, filesToImport: 
       fileName: file.fileName,
       filePath: file.filePath, // Manter para rastreabilidade, embora o conteúdo esteja em rawData
       rawData,
+      importedAt: new Date().toISOString(),
+      importedBy: 'system',
       createdAt: new Date().toISOString(),
       processed: false,
     };

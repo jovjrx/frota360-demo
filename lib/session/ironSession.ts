@@ -1,6 +1,7 @@
 import { getIronSession } from 'iron-session';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingMessage, ServerResponse } from 'http';
+import { IronSession } from 'iron-session';
 
 export interface SessionData {
   userId?: string;
@@ -18,7 +19,7 @@ export interface SessionData {
 }
 
 export interface SessionRequest extends NextApiRequest {
-  session: SessionData;
+  session: IronSession<SessionData>;
 }
 
 export const sessionOptions = {
@@ -72,7 +73,7 @@ export function withIronSessionApiRoute(
 ) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getSession(req, res);
-    (req as SessionRequest).session = session as SessionData;
+    (req as SessionRequest).session = session;
     return handler(req as SessionRequest, res);
   };
 }

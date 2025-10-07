@@ -5,7 +5,7 @@ import { loadTranslations } from '@/lib/translations';
 
 interface DriverPageProps {
   user: SessionData['user'];
-  translations: Record<string, any>;
+  translations: { [namespace: string]: Record<string, any> };
   locale: string;
 }
 
@@ -36,10 +36,7 @@ export function withDriverSSR<P extends { [key: string]: any } = { [key: string]
         props: {
           ...result.props,
           user: session.user,
-          translations: {
-            common: loadedTranslations.common,
-            driver: loadedTranslations.driver,
-          },
+          translations: loadedTranslations,
           locale: locale || 'pt',
         } as P & DriverPageProps,
       };

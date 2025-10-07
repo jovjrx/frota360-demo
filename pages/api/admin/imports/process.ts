@@ -2,8 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { WeeklyDataSources, createWeeklyDataSources, updateDataSource } from '@/schemas/weekly-data-sources';
 import { RawFileArchiveEntry } from '@/schemas/raw-file-archive';
-import { createWeeklyPlatformAggregates, WeeklyPlatformAggregates } from '@/schemas/weekly-platform-aggregates';
-import { getWeekId } from '@/schemas/driver-weekly-record'; // Apenas para getWeekId
+import { createWeeklyDriverPlatformData, WeeklyDriverPlatformData } from '@/schemas/weekly-driver-platform-data';
+import { getWeekId } from '@/lib/utils/date-helpers';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`Semana: ${weekId} (${weekStart} a ${weekEnd})`);
 
-    const platformAggregates: { [platform_key: string]: WeeklyPlatformAggregates } = {};
+    const platformAggregates: { [driver_platform_week_key: string]: WeeklyDriverPlatformData } = {};
 
     for (const entry of rawFileEntries) {
       console.log(`Processando plataforma: ${entry.platform} do arquivo ${entry.fileName}`);
@@ -56,8 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (driverUuid) {
               const key = `${entry.platform}-${driverUuid}`;
               if (!platformAggregates[key]) {
-                platformAggregates[key] = createWeeklyPlatformAggregates({
-                  weekId, weekStart, weekEnd, platform: 'uber', integrationKey: driverUuid,
+                platformAggregates[key] = createWeeklyDriverPlatformData({
+                  driverId: driverUuid, weekId, platform: 'uber',
                 });
               }
               platformAggregates[key].totalValue += parseFloat(row['Pago a si']?.replace(',', '.') || '0');
@@ -71,8 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (driverEmail) {
               const key = `${entry.platform}-${driverEmail}`;
               if (!platformAggregates[key]) {
-                platformAggregates[key] = createWeeklyPlatformAggregates({
-                  weekId, weekStart, weekEnd, platform: 'bolt', integrationKey: driverEmail,
+                platformAggregates[key] = createWeeklyDriverPlatformData({
+                  driverId: driverEmail, weekId, platform: 'bolt',
                 });
               }
               platformAggregates[key].totalValue += parseFloat(row['Ganhos brutos (total)|€']?.replace(',', '.') || '0');
@@ -86,8 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (myprioCard) {
               const key = `${entry.platform}-${myprioCard}`;
               if (!platformAggregates[key]) {
-                platformAggregates[key] = createWeeklyPlatformAggregates({
-                  weekId, weekStart, weekEnd, platform: 'myprio', integrationKey: myprioCard,
+                platformAggregates[key] = createWeeklyDriverPlatformData({
+                  driverId: myprioCard, weekId, platform: 'myprio',
                 });
               }
               platformAggregates[key].totalValue += parseFloat(String(row['TOTAL'])?.replace(',', '.') || '0');
@@ -100,8 +100,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (viaverdeOBU) {
               const key = `${entry.platform}-${viaverdeOBU}`;
               if (!platformAggregates[key]) {
-                platformAggregates[key] = createWeeklyPlatformAggregates({
-                  weekId, weekStart, weekEnd, platform: 'viaverde', integrationKey: viaverdeOBU,
+                platformAggregates[key] = createWeeklyDriverPlatformData({
+                  driverId: viaverdeOBU, weekId, platform: 'viaverde',
                 });
               }
               platformAggregates[key].totalValue += parseFloat(String(row['Value'])?.replace(',', '.') || '0');
@@ -111,11 +111,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Salvar os agregados por plataforma na coleção 'weeklyPlatformAggregates'
+    // Salvar os agregados por plataforma na coleção 'weeklyDriverPlatformData'
     const batch = adminDb.batch();
     for (const key in platformAggregates) {
       const aggregate = platformAggregates[key];
-      const docRef = adminDb.collection('weeklyPlatformAggregates').doc(`${weekId}-${aggregate.platform}-${aggregate.integrationKey}`);
+      const docRef = adminDb.collection("weeklyDriverPlatformData").doc(`${aggregate.driverId}_${aggregate.weekId}_${aggregate.platform}`);
       batch.set(docRef, aggregate, { merge: true });
     }
 
@@ -131,8 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     for (const entry of rawFileEntries) {
       currentWeeklyReport = updateDataSource(currentWeeklyReport, entry.platform as any, {
-        status: 'completed',
-        origin: 'manual',
+        status: 'complete',        origin: 'manual',
         importedAt: new Date().toISOString(),
         archiveRef: entry.id,
       });

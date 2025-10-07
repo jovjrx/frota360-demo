@@ -24,6 +24,7 @@ import {
   AlertTitle,
   AlertDescription,
   CloseButton,
+  HStack,
 } from '@chakra-ui/react';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
@@ -62,7 +63,7 @@ export default function AddDriver({ user, translations, locale }: AddDriverProps
   });
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.page, key, variables) || key;
+  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({

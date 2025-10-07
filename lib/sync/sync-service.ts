@@ -7,7 +7,7 @@ import {
 } from '@/lib/integrations';
 import { db } from '@/lib/firebaseAdmin';
 import { FleetRecord, calculateFleetRecord } from '@/schemas/fleet-record';
-import { DriverWeeklyRecord, calculateDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { DriverWeeklyRecord, createDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 
 export interface SyncResult {
   success: boolean;

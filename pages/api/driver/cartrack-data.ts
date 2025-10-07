@@ -1,11 +1,12 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { createCartrackClient } from '@/lib/integrations';
 
-export default withIronSessionApiRoute(async function driverCartrackDataRoute(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function driverCartrackDataRoute(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -53,10 +54,7 @@ export default withIronSessionApiRoute(async function driverCartrackDataRoute(re
     }
 
     // 4. Create Cartrack client
-    const cartrackClient = createCartrackClient({
-      username: cartrackIntegration.credentials.username,
-      apiKey: cartrackIntegration.credentials.apiKey,
-    });
+    const cartrackClient = await createCartrackClient();
 
     // 5. Get vehicle data for the driver
     // Assuming driver has a vehicle plate associated in their Cartrack integration

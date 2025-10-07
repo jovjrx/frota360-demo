@@ -27,17 +27,12 @@ async function addTestDriver() {
       myprio: { key: "7824736068450001", enabled: true, lastSync: null },
       viaverde: { key: "AA-00-BB", enabled: true, lastSync: null },
     },
-    cards: {
-      myprio: "123456789",
-      viaverde: "AA-00-BB",
-    },
+
     banking: {
       iban: "PT50000000000000000000000",
       accountHolder: "Test Driver",
     },
-    weeklyEarnings: 0,
-    monthlyEarnings: 0,
-    totalTrips: 0,
+
     rating: 0,
     documents: {
       license: { uploaded: true, verified: true, url: null },
@@ -52,6 +47,9 @@ async function addTestDriver() {
     },
     commission: { percent: 7 },
     notes: "Motorista de teste para simulação de importação.",
+    lastPayoutAmount: 0,
+    checkinCount: 0,
+    nextCheckin: 0,
   };
 
   try {

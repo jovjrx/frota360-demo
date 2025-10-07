@@ -30,7 +30,7 @@ export interface PayslipData {
   
   // Dados bancários
   iban: string;
-  status: 'paid' | 'pending';
+  status: 'paid' | 'pending' | 'cancelled';
 }
 
 /**

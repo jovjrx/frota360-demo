@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb as db } from '@/lib/firebaseAdmin';
-import { getWeekId, getWeekDates } from '@/schemas/driver-weekly-record';
+import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
 import { createWeeklyDataSources } from '@/schemas/weekly-data-sources';
 
 /**

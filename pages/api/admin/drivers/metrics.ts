@@ -1,4 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
@@ -6,7 +7,7 @@ import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { ApiResponse } from '@/types';
 
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
+  req: SessionRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const user = req.session.user;

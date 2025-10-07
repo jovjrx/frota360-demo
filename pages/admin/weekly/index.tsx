@@ -38,7 +38,7 @@ import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
 import { getWeekOptions } from '@/lib/admin/adminQueries';
 import { useRouter } from 'next/router';
-import { getWeekId, getWeekDates } from '@/schemas/driver-weekly-record';
+import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
 
 interface WeekOption {
   label: string;
@@ -47,25 +47,13 @@ interface WeekOption {
   end: string;
 }
 
-interface DriverRecord {
-  driverId: string;
-  driverName: string;
-  driverType: string;
-  vehicle: string;
-  weekStart: string;
-  weekEnd: string;
-  uberTotal: number;
-  boltTotal: number;
-  ganhosTotal: number;
-  iva: number;
-  ganhosMenosIva: number;
-  despesasAdm: number;
-  combustivel: number;
-  portagens: number;
-  aluguel: number;
-  valorLiquido: number;
-  iban: string;
-  status: string;
+import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { WeeklyDriverPlatformData } from '@/schemas/weekly-driver-platform-data';
+
+interface DriverRecord extends DriverWeeklyRecord {
+  driverType: string; // Adicionar de volta se for necessário para exibição
+  vehicle: string; // Adicionar de volta se for necessário para exibição
+  platformData: WeeklyDriverPlatformData[];
 }
 
 interface WeeklyPageProps extends AdminPageProps {
@@ -101,7 +89,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/admin/weekly/process-week?weekStart=${selectedWeek.start}&weekEnd=${selectedWeek.end}`, {
+      const response = await fetch(`/api/admin/weekly/data?weekId=${selectedWeek.value}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -112,8 +100,20 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         throw new Error(tAdmin('error_loading_data'));
       }
 
-      const data = await response.json();
-      setRecords(data.records || []);
+      const { weeklyRecords, platformData } = await response.json();
+
+      const combinedRecords: DriverRecord[] = weeklyRecords.map((record: DriverWeeklyRecord) => {
+        const driverPlatformData = platformData.filter((pd: WeeklyDriverPlatformData) => pd.driverId === record.driverId);
+        // Temporariamente, para driverType e vehicle, vamos usar valores mock ou buscar do driver original se necessário
+        // Por enquanto, vamos assumir que essas informações virão de outro lugar ou serão adicionadas posteriormente.
+        return {
+          ...record,
+          driverType: record.isLocatario ? 'renter' : 'affiliate', // Exemplo, pode precisar de ajuste
+          vehicle: 'N/A', // Exemplo, pode precisar de ajuste
+          platformData: driverPlatformData,
+        };
+      });
+      setRecords(combinedRecords || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -196,20 +196,20 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   // Calcular totais
   const totals = records.reduce((acc, record) => ({
     ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
-    iva: acc.iva + record.iva,
+    ivaValor: acc.ivaValor + record.ivaValor,
     despesasAdm: acc.despesasAdm + record.despesasAdm,
     combustivel: acc.combustivel + record.combustivel,
-    portagens: acc.portagens + record.portagens,
+    viaverde: acc.viaverde + record.viaverde,
     aluguel: acc.aluguel + record.aluguel,
-    valorLiquido: acc.valorLiquido + record.valorLiquido,
+    repasse: acc.repasse + record.repasse,
   }), {
     ganhosTotal: 0,
-    iva: 0,
+    ivaValor: 0,
     despesasAdm: 0,
     combustivel: 0,
-    portagens: 0,
+    viaverde: 0,
     aluguel: 0,
-    valorLiquido: 0,
+    repasse: 0,
   });
 
   return (
@@ -296,9 +296,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
               <Stat>
                 <StatLabel fontSize="xs">{tAdmin('total_discounts')}</StatLabel>
                 <StatNumber fontSize="lg" color="red.600">
-                  {formatCurrency(totals.iva + totals.despesasAdm + totals.combustivel + totals.portagens + totals.aluguel)}
+                  {formatCurrency(totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel)}
                 </StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin('iva_adm_fuel_tolls_rent')}</StatHelpText>
+                <StatHelpText fontSize="xs">{tAdmin("iva_adm_fuel_tolls_rent")}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
@@ -306,9 +306,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel fontSize="xs">{tAdmin('fuel_label')}</StatLabel>
+                <StatLabel fontSize="xs">{tAdmin("fuel_label")}</StatLabel>
                 <StatNumber fontSize="lg" color="orange.600">{formatCurrency(totals.combustivel)}</StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin('prio_label')}</StatHelpText>
+                <StatHelpText fontSize="xs">{tAdmin("prio_label")}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
@@ -316,9 +316,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel fontSize="xs">{tAdmin('net_value')}</StatLabel>
-                <StatNumber fontSize="lg" color="blue.600">{formatCurrency(totals.valorLiquido)}</StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin('total_to_pay')}</StatHelpText>
+                <StatLabel fontSize="xs">{tAdmin("net_value")}</StatLabel>
+                <StatNumber fontSize="lg" color="blue.600">{formatCurrency(totals.repasse)}</StatNumber>
+                <StatHelpText fontSize="xs">{tAdmin("total_to_pay")}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
@@ -327,24 +327,24 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         {/* Tabela de Registros */}
         <Card>
           <CardHeader>
-            <Heading size="md">{tAdmin('weekly_records_title')}</Heading>
+            <Heading size="md">{tAdmin("weekly_records_title")}</Heading>
           </CardHeader>
           <CardBody>
             {isLoading ? (
               <Box textAlign="center" py={10}>
                 <Spinner size="xl" color="blue.500" />
-                <Text mt={4} color="gray.600">{tAdmin('loading_data')}</Text>
+                <Text mt={4} color="gray.600">{tAdmin("loading_data")}</Text>
               </Box>
             ) : records.length === 0 ? (
               <Box textAlign="center" py={10}>
-                <Text color="gray.600">{tAdmin('no_records_found')}</Text>
+                <Text color="gray.600">{tAdmin("no_records_found")}</Text>
                 <Button
                   mt={4}
                   leftIcon={<Icon as={FiUpload} />}
-                  onClick={() => router.push('/admin/data')}
+                  onClick={() => router.push("/admin/data")}
                   colorScheme="blue"
                 >
-                  {tAdmin('import_data_button')}
+                  {tAdmin("import_data_button")}
                 </Button>
               </Box>
             ) : (
@@ -352,17 +352,17 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                 <Table variant="simple" size="sm">
                   <Thead>
                     <Tr>
-                      <Th>{t('driver')}</Th>
-                      <Th>{t('type')}</Th>
+                      <Th>{t("driver")}</Th>
+                      <Th>{t("type")}</Th>
                       <Th isNumeric>Uber</Th>
                       <Th isNumeric>Bolt</Th>
-                      <Th isNumeric>{tAdmin('total_earnings')}</Th>
-                      <Th isNumeric>{tAdmin('iva_short')}</Th>
-                      <Th isNumeric>{tAdmin('adm_expenses_short')}</Th>
-                      <Th isNumeric>{tAdmin('fuel_label')}</Th>
-                      <Th isNumeric>{tAdmin('tolls_label')}</Th>
-                      <Th isNumeric>{tAdmin('rent_label')}</Th>
-                      <Th isNumeric>{tAdmin('net_value')}</Th>
+                      <Th isNumeric>{tAdmin("total_earnings")}</Th>
+                      <Th isNumeric>{tAdmin("iva_short")}</Th>
+                      <Th isNumeric>{tAdmin("adm_expenses_short")}</Th>
+                      <Th isNumeric>{tAdmin("fuel_label")}</Th>
+                      <Th isNumeric>{tAdmin("tolls_label")}</Th>
+                      <Th isNumeric>{tAdmin("rent_label")}</Th>
+                      <Th isNumeric>{tAdmin("net_value")}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -373,20 +373,20 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                           <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
                         </Td>
                         <Td>
-                          <Badge colorScheme={record.driverType === 'renter' ? 'purple' : 'green'}>
-                            {record.driverType === 'renter' ? t('type_renter') : t('type_affiliate')}
+                          <Badge colorScheme={record.driverType === "renter" ? "purple" : "green"}>
+                            {record.driverType === "renter" ? t("type_renter") : t("type_affiliate")}
                           </Badge>
                         </Td>
-                        <Td isNumeric>{formatCurrency(record.uberTotal)}</Td>
-                        <Td isNumeric>{formatCurrency(record.boltTotal)}</Td>
+                        <Td isNumeric>{formatCurrency(record.platformData.find(p => p.platform === "uber")?.totalValue || 0)}</Td>
+                        <Td isNumeric>{formatCurrency(record.platformData.find(p => p.platform === "bolt")?.totalValue || 0)}</Td>
                         <Td isNumeric fontWeight="bold">{formatCurrency(record.ganhosTotal)}</Td>
-                        <Td isNumeric color="red.600">-{formatCurrency(record.iva)}</Td>
+                        <Td isNumeric color="red.600">-{formatCurrency(record.ivaValor)}</Td>
                         <Td isNumeric color="red.600">-{formatCurrency(record.despesasAdm)}</Td>
                         <Td isNumeric color="orange.600">-{formatCurrency(record.combustivel)}</Td>
-                        <Td isNumeric color="orange.600">-{formatCurrency(record.portagens)}</Td>
+                        <Td isNumeric color="orange.600">-{formatCurrency(record.viaverde)}</Td>
                         <Td isNumeric color="purple.600">-{formatCurrency(record.aluguel)}</Td>
                         <Td isNumeric fontWeight="bold" color="blue.600">
-                          {formatCurrency(record.valorLiquido)}
+                          {formatCurrency(record.repasse)}
                         </Td>
                       </Tr>
                     ))}

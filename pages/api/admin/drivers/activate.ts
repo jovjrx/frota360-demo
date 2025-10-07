@@ -1,4 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
+import { SessionRequest } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
@@ -6,7 +7,7 @@ import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { VerifyDriverSchema } from '@/schemas/driver';
 import { getPortugalTimestamp } from '@/lib/timezone';
 
-export default withIronSessionApiRoute(async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
 
   if (!user || user.role !== 'admin') {

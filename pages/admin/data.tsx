@@ -20,7 +20,7 @@ import {
 import { FaSearch } from 'react-icons/fa';
 import { MdAdd, MdSync } from 'react-icons/md';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { WeeklyDataSources } from '@/schemas/weekly-data-sources';
+import { WeeklyDataSources, createWeeklyDataSources } from '@/schemas/weekly-data-sources';
 import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
 import { getTranslation } from '@/lib/translations';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -72,18 +72,38 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
   const handleSync = async (weekId: string) => {
     setSyncing(true);
     try {
-      const response = await fetch(`/api/admin/weekly-records/sync`, {
+      // Primeiro, buscar os rawDataDocIds para a weekId específica
+      const rawDataResponse = await fetch(`/api/admin/imports/get-raw-data-ids?weekId=${weekId}`);
+      if (!rawDataResponse.ok) {
+        throw new Error('Failed to fetch raw data for processing');
+      }
+      const { rawDataDocIds } = await rawDataResponse.json();
+
+      if (!rawDataDocIds || rawDataDocIds.length === 0) {
+        toast({
+          title: t('info'),
+          description: tAdmin('no_raw_data_to_process'),
+          status: 'info',
+          duration: 5000,
+          isClosable: true,
+        });
+        setSyncing(false);
+        return;
+      }
+
+      // Em seguida, chamar o endpoint de processamento com os rawDataDocIds
+      const processResponse = await fetch(`/api/admin/imports/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weekId }),
+        body: JSON.stringify({ weekId, rawDataDocIds }),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to sync week');
+      const data = await processResponse.json();
+      if (!processResponse.ok) {
+        throw new Error(data.message || 'Failed to process raw data');
       }
       toast({
         title: t('success'),
-        description: data.message || tAdmin('week_synced_successfully'),
+        description: data.message || tAdmin('raw_data_processed_successfully'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -92,7 +112,7 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
     } catch (error: any) {
       toast({
         title: t('error'),
-        description: error.message || tAdmin('failed_to_sync_week'),
+        description: error.message || tAdmin('failed_to_process_raw_data'),
         status: 'error',
         duration: 5000,
         isClosable: true,

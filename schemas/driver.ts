@@ -65,10 +65,7 @@ export const DriverAdminFieldsSchema = z.object({
     accountHolder: z.string().nullable().default(null),
   }).optional(),
   
-  // Métricas e ganhos
-  weeklyEarnings: z.number().default(0),
-  monthlyEarnings: z.number().default(0),
-  totalTrips: z.number().default(0),
+  // Métricas e ganhos (movidos para DriverWeeklyRecord)
   rating: z.number().default(0),
   
   // Documentos e verificação
