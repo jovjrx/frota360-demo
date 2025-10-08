@@ -355,6 +355,138 @@
         "uploadFirst": "Faça o upload dos arquivos primeiro",
         "processingCompleted": "Processamento concluído"
       }
+    },
+    "control": {
+      "title": "Controle Semanal",
+      "subtitle": "Gestão semanal de dados TVDE",
+      "actions": {
+        "importData": "Importar dados",
+        "refresh": "Atualizar",
+        "generateSummariesLoading": "A gerar...",
+        "generateSummaries": "Gerar resumos",
+        "exportPayments": "Exportar planilha"
+      },
+      "errors": {
+        "loadData": "Não foi possível carregar os dados.",
+        "selectWeek": "Selecione uma semana válida para continuar.",
+        "generateSummaries": "Não foi possível gerar os resumos."
+      },
+      "files": {
+        "summariesPrefix": "resumos"
+      },
+      "toasts": {
+        "loadData": {
+          "title": "Erro ao carregar dados",
+          "description": "Não foi possível carregar os dados da semana."
+        },
+        "generateSummaries": {
+          "successTitle": "Resumos gerados!",
+          "successDescription": "Os resumos foram gerados com sucesso e o download começou.",
+          "errorTitle": "Erro ao gerar resumos",
+          "errorDescription": "Não foi possível gerar os resumos desta semana."
+        }
+      },
+      "summary": {
+        "title": "Resumo Semanal",
+        "cards": {
+          "totalEarnings": "Ganhos Totais",
+          "driversCountLabel": "motoristas",
+          "totalDiscounts": "Descontos Totais",
+          "discountsHelp": "IVA, Adm, Combustível, Portagens, Aluguel",
+          "fuel": "Combustível",
+          "prioLabel": "PRIO",
+          "netValue": "Valor Líquido",
+          "totalToPay": "Total a pagar"
+        },
+        "table": {
+          "item": "Item",
+          "value": "Valor"
+        },
+        "rows": {
+          "totalEarnings": "Ganhos Totais",
+          "iva": "IVA",
+          "adminExpenses": "Despesas Administrativas",
+          "fuel": "Combustível",
+          "tolls": "Portagens",
+          "rent": "Aluguel",
+          "netValue": "Valor Líquido"
+        }
+      },
+      "records": {
+        "title": "Registos Semanais",
+        "loading": "A carregar dados...",
+        "empty": "Nenhum registo encontrado para esta semana.",
+        "types": {
+          "affiliate": "Afiliado",
+          "renter": "Locatário"
+        },
+        "paymentStatus": {
+          "pending": "Pendente",
+          "paid": "Pago",
+          "cancelled": "Cancelado"
+        },
+        "columns": {
+          "driver": "Motorista",
+          "type": "Tipo",
+          "platformUber": "Uber",
+          "platformBolt": "Bolt",
+          "platformPrio": "PRIO",
+          "platformViaVerde": "ViaVerde",
+          "grossTotal": "Ganhos brutos",
+          "iva": "IVA",
+          "adminExpenses": "Taxa adm.",
+          "fuel": "Combustível",
+          "tolls": "Portagens",
+          "rent": "Aluguel",
+          "net": "Valor líquido",
+          "status": "Status",
+          "actions": "Ações"
+        },
+        "sections": {
+          "platforms": "Plataformas",
+          "financials": "Valores Financeiros"
+        },
+        "actions": {
+          "generatePayslip": "Contracheque",
+          "markAsPending": "Pendente",
+          "markAsPaid": "Pago"
+        },
+        "messages": {
+          "generateInProgress": "A gerar...",
+          "generateError": "Não foi possível gerar o contracheque.",
+          "sendEmailErrorTitle": "Erro ao enviar e-mail",
+          "sendEmailErrorDesc": "Nenhum contracheque selecionado ou PDF não gerado.",
+          "sendEmailError": "Não foi possível enviar o contracheque por e-mail.",
+          "sendEmailSuccessTitle": "E-mail enviado!",
+          "sendEmailSuccessDesc": "Contracheque enviado com sucesso para o motorista.",
+          "exportError": "Não foi possível exportar a planilha de pagamentos.",
+          "exportSuccessTitle": "Exportação concluída!",
+          "exportSuccessDesc": "A planilha de pagamentos foi exportada com sucesso.",
+          "exportErrorTitle": "Erro na exportação",
+          "updateSuccess": "Registro atualizado com sucesso!",
+          "updateErrorTitle": "Erro ao atualizar registro",
+          "updateError": "Não foi possível atualizar o registro.",
+          "updatePaymentStatusSuccess": "Status de pagamento atualizado com sucesso!",
+          "updatePaymentStatusErrorTitle": "Erro ao atualizar status de pagamento",
+          "updatePaymentStatusError": "Não foi possível atualizar o status do pagamento."
+        }
+      },
+      "payslipModal": {
+        "title": "Contracheque Semanal",
+        "downloadPdf": "Baixar PDF",
+        "sendEmail": "Enviar por e-mail",
+        "noPdfTitle": "Nenhum PDF gerado",
+        "noPdfDesc": "Gere o contracheque para visualizá-lo aqui."
+      },
+      "unassigned": {
+        "title": "Registos sem motorista associado",
+        "description": "Revise estes lançamentos e atualize os cadastros para mapear corretamente.",
+        "columns": {
+          "platform": "Plataforma",
+          "reference": "Referência",
+          "value": "Valor"
+        }
+      }
     }
   },
   "platforms": {
