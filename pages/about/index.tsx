@@ -1,4 +1,3 @@
-import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
@@ -8,41 +7,41 @@ import {
   Avatar,
   Badge
 } from "@chakra-ui/react";
-import { loadTranslations } from "@/lib/translations";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { PageProps } from "@/interface/Global";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
+import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
+import { ABOUT } from "@/translations";
 
-export default function About({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+export default function AboutPage({ tPage }: PublicPageProps) {
   return (
     <>
       <Container softBg>
         <Title
-          title={tPage("mission.title") || tPage("mission.title")}
-          description={tPage("mission.subtitle") || tPage("mission.subtitle")}
-          feature={tPage("mission.feature") || tPage("mission.feature")}
+          title={tPage(ABOUT.MISSION.TITLE)}
+          description={tPage(ABOUT.MISSION.SUBTITLE)}
+          feature={tPage(ABOUT.MISSION.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
           <Card
-            title={tPage("mission.card.title")}
-            description={tPage("mission.card.description")}
+            title={tPage(ABOUT.MISSION.CARD.TITLE)}
+            description={tPage(ABOUT.MISSION.CARD.DESCRIPTION)}
             animated
             borded
           >
             <VStack spacing={6} align="stretch">
               <Text fontSize="lg" color="gray.700">
-                {tPage("mission.card.content")}
+                {tPage(ABOUT.MISSION.CARD.CONTENT)}
               </Text>
               <Box>
                 <Text fontWeight="semibold" color="green.600" mb={2}>
-                  {tPage("mission.card.values.title")}
+                  {tPage(ABOUT.MISSION.CARD.VALUES.TITLE)}
                 </Text>
                 <VStack spacing={2} align="stretch">
                   {(() => {
-                    const values = tPage("mission.card.values.list");
+                    const values = tPage(ABOUT.MISSION.CARD.VALUES.LIST);
                     if (!Array.isArray(values)) return null;
                     return values.map((value: any, i: number) => (
                       <Box key={i} display="flex" alignItems="center">
@@ -80,7 +79,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("approach.subtitle")}
           feature={tPage("approach.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
           {(() => {
             const methods = tPage("approach.methods");
             if (!Array.isArray(methods)) return null;
@@ -112,7 +111,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("experience.subtitle")}
           feature={tPage("experience.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
           <Card
             title={tPage("experience.card.title")}
             description={tPage("experience.card.description")}
@@ -165,7 +164,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("team.subtitle")}
           feature={tPage("team.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(3, 1fr)" }}>
           {(() => {
             const members = tPage("team.members");
             if (!Array.isArray(members)) return null;
@@ -211,7 +210,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("approach.subtitle")}
           feature={tPage("approach.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           {(() => {
             const methods = tPage("approach.methods");
             if (!Array.isArray(methods)) return null;
@@ -241,7 +240,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("experience.subtitle")}
           feature={tPage("experience.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
           <Card
             title={tPage("experience.card.title")}
             description={tPage("experience.card.description")}
@@ -291,7 +290,7 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
           description={tPage("team.subtitle")}
           feature={tPage("team.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
           {(() => {
             const members = tPage("team.members");
             if (!Array.isArray(members)) return null;
@@ -338,30 +337,4 @@ export default function About({ tPage, tCommon, locale }: PageProps & { locale: 
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    // Extract locale from middleware header
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
-      : context.req.headers['x-locale'] || 'pt';
-    
-    const translations = await loadTranslations(locale, ["common", "about"]);
-    const { common, about: page } = translations;
-
-    return {
-      props: {
-        translations: { common, page },
-        locale,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to load translations:", error);
-    return {
-      props: {
-        translations: { common: {}, page: {} },
-        locale: 'pt',
-      },
-    };
-  }
-};
-
+export const getServerSideProps = withPublicSSR('about');

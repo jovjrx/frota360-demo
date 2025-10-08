@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import {
   Box,
   SimpleGrid,
@@ -30,9 +29,7 @@ import {
 import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
-import { PageProps } from '@/interface/Global';
-import { checkDriverAuth } from '@/lib/auth/driverCheck';
-import { useTranslations } from '@/hooks/useTranslations';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
 
 interface Motorista {
@@ -58,34 +55,30 @@ interface Contracheque {
   paymentDate: string | null;
 }
 
-interface PainelDashboardProps extends PageProps {
+interface PainelDashboardProps extends DashboardPageProps {
   motorista: Motorista;
   contracheques: Contracheque[];
-  ultimoPagamento: Contracheque | null;
-  semanaAtual: Contracheque | null;
-  translations: {
-    common: any;
-    page: any;
-  };
 }
 
 export default function PainelDashboard({ 
   motorista, 
   contracheques, 
-  ultimoPagamento, 
-  semanaAtual, 
   translations,
   locale 
 }: PainelDashboardProps) {
   const router = useRouter();
   const toast = useToast();
+  
+  // Calcular último pagamento e semana atual
+  const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
+  const semanaAtual = contracheques?.find((c: Contracheque) => c.paymentStatus === 'pending') || null;
   // Funções de tradução com fallbacks
   const t = (key: string, variables?: Record<string, any>) => {
     return getTranslation(translations?.common, key, variables) || key;
   };
 
   const tPainel = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations?.page, key, variables) || key;
+    return getTranslation(translations?.dashboard, key, variables) || key;
   };
 
   // Status da conta
@@ -325,44 +318,11 @@ export default function PainelDashboard({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<PainelDashboardProps> = async (context) => {
-  try {
-    // Verificar autenticação e carregar dados do motorista
-    const authResult = await checkDriverAuth(context, {
-      loadDriverData: true,
-      loadContracheques: true,
-      contrachequeLimit: 2,
-    });
-
-    // Se houve redirecionamento, retornar
-    if ('redirect' in authResult) {
-      return authResult;
-    }
-
-    const { props } = authResult;
-    const { motorista, contracheques } = props;
-
-    // Separar último pagamento e semana atual
-    const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
-    const semanaAtual = contracheques?.find((c: Contracheque) => c.paymentStatus === 'pending') || null;
-
-    return {
-      props: {
-        ...props,
-        motorista,
-        contracheques: contracheques || [],
-        ultimoPagamento,
-        semanaAtual,
-      },
-    };
-
-  } catch (error) {
-    console.error('Erro no getServerSideProps do painel:', error);
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: true, loadContracheques: true, contrachequeLimit: 10 },
+  async (context, user, driverId) => {
+    // motorista e contracheques já vêm automaticamente nas props base
+    // Aqui só precisamos processar e retornar dados adicionais
+    return {};
   }
-};
+);

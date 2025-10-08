@@ -18,26 +18,32 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
-import { MdAdd, MdSync } from 'react-icons/md';
+import { MdAdd } from 'react-icons/md';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { WeeklyDataSources, createWeeklyDataSources } from '@/schemas/weekly-data-sources';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { getTranslation } from '@/lib/translations';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getFirestore } from 'firebase-admin/firestore';
 
 interface DataPageProps extends AdminPageProps {
   initialWeeks: WeeklyDataSources[];
 }
 
-export default function DataPage({ user, translations, locale, initialWeeks }: DataPageProps) {
+export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
   const [weeks, setWeeks] = useState<WeeklyDataSources[]>(initialWeeks);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
+    if (!fn) return fallback ?? key;
+    const value = fn(key);
+    if (typeof value === 'string') return value;
+    return fallback ?? key;
+  };
+
+  const tc = makeSafeT(tCommon);
+  const t = makeSafeT(tPage);
 
   // useEffect para recarregar dados se necessário (ex: após sync)
   useEffect(() => {
@@ -58,8 +64,8 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
       setWeeks(data.weeks);
     } catch (error: any) {
       toast({
-        title: t('error'),
-        description: error.message || t('failed_to_load_data'),
+        title: tc('errors.title'),
+        description: error.message || t('weeklyDataSources.errors.fetch', 'Erro ao carregar semanas.'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -81,8 +87,8 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
 
       if (!rawDataDocIds || rawDataDocIds.length === 0) {
         toast({
-          title: t('info'),
-          description: tAdmin('no_raw_data_to_process'),
+          title: tc('messages.info'),
+          description: t('weeklyDataSources.messages.noRawData', 'Nenhum dado bruto disponível para processar.'),
           status: 'info',
           duration: 5000,
           isClosable: true,
@@ -102,8 +108,8 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
         throw new Error(data.message || 'Failed to process raw data');
       }
       toast({
-        title: t('success'),
-        description: data.message || tAdmin('raw_data_processed_successfully'),
+        title: tc('messages.success'),
+        description: data.message || t('weeklyDataSources.messages.processSuccess', 'Dados processados com sucesso.'),
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -111,8 +117,8 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
       fetchWeeks(); // Recarregar dados após a sincronização
     } catch (error: any) {
       toast({
-        title: t('error'),
-        description: error.message || tAdmin('failed_to_process_raw_data'),
+        title: tc('errors.title'),
+        description: error.message || t('weeklyDataSources.errors.process', 'Falha ao processar dados brutos.'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -133,17 +139,17 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
 
   return (
     <AdminLayout
-      title={tAdmin('data_sources') || 'Fontes de Dados'}
-      subtitle="Gerencie fontes de dados semanais"
+      title={t('weeklyDataSources.title', 'Fontes de dados')}
+      subtitle={t('weeklyDataSources.subtitle', 'Gerencie fontes de dados semanais')}
       breadcrumbs={[
-        { label: tAdmin('data_sources') || 'Dados' }
+        { label: t('weeklyDataSources.breadcrumb', 'Fontes de dados') }
       ]}
     >
       <Flex justifyContent="space-between" alignItems="center" mb={6}>
-        <Heading as="h1" size="xl">{tAdmin('data_sources')}</Heading>
+        <Heading as="h1" size="xl">{t('weeklyDataSources.title', 'Fontes de dados')}</Heading>
         <HStack spacing={4}>
           <Button leftIcon={<MdAdd />} colorScheme="green" onClick={handleAddWeek}>
-            {tAdmin('add_new_week')}
+            {t('weeklyDataSources.actions.addWeek', 'Adicionar semana')}
           </Button>
         </HStack>
       </Flex>
@@ -153,12 +159,12 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
           <InputLeftElement pointerEvents="none">
             <Icon as={FaSearch} color="gray.300" />
           </InputLeftElement>
-          <Input type="text" placeholder={t('search')} />
+          <Input type="text" placeholder={t('weeklyDataSources.filters.search', 'Pesquisar semanas')} />
         </InputGroup>
-        <Select placeholder={t('filter_by_status')}>
-          <option value="complete">{t('complete')}</option>
-          <option value="partial">{t('partial')}</option>
-          <option value="pending">{t('pending')}</option>
+        <Select placeholder={t('weeklyDataSources.filters.statusPlaceholder', 'Filtrar por status')}>
+          <option value="complete">{t('weeklyDataSources.filters.status.complete', 'Completo')}</option>
+          <option value="partial">{t('weeklyDataSources.filters.status.partial', 'Parcial')}</option>
+          <option value="pending">{tc('status.pending')}</option>
         </Select>
       </Stack>
 
@@ -184,7 +190,7 @@ export default function DataPage({ user, translations, locale, initialWeeks }: D
                 onClick={() => handleSync(week.id)}
                 isLoading={syncing}
               >
-                Sincronizar
+                {t('weeklyDataSources.actions.sync', 'Sincronizar')}
               </Button>
             </Box>
           ))}

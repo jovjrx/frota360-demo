@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import {
   Box,
   SimpleGrid,
@@ -19,8 +18,7 @@ import {
   FiAlertCircle,
 } from 'react-icons/fi';
 import PainelLayout from '@/components/layouts/DashboardLayout';
-import { PageProps } from '@/interface/Global';
-import { checkDriverAuth } from '@/lib/auth/driverCheck';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
 
 interface Motorista {
@@ -48,12 +46,8 @@ interface Motorista {
   activatedAt: string | null;
 }
 
-interface PainelDadosProps extends PageProps {
+interface PainelDadosProps extends DashboardPageProps {
   motorista: Motorista;
-  translations: {
-    common: any;
-    page: any;
-  };
 }
 
 export default function PainelDados({ motorista, translations }: PainelDadosProps) {
@@ -63,7 +57,7 @@ export default function PainelDados({ motorista, translations }: PainelDadosProp
   };
 
   const tPainel = (key: string, variables?: Record<string, any>) => {
-    return getTranslation(translations?.page, key, variables) || key;
+    return getTranslation(translations?.dashboard, key, variables) || key;
   };
 
   // Status e labels
@@ -283,34 +277,10 @@ export default function PainelDados({ motorista, translations }: PainelDadosProp
   );
 }
 
-export const getServerSideProps: GetServerSideProps<PainelDadosProps> = async (context) => {
-  try {
-    // Verificar autenticação e carregar dados do motorista
-    const authResult = await checkDriverAuth(context, {
-      loadDriverData: true,
-    });
-
-    // Se houve redirecionamento, retornar
-    if ('redirect' in authResult) {
-      return authResult;
-    }
-
-    const { props } = authResult;
-
-    return {
-      props: {
-        ...props,
-        motorista: props.motorista,
-      },
-    };
-
-  } catch (error) {
-    console.error('Erro no getServerSideProps do painel/dados:', error);
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: true },
+  async (context, user, driverId) => {
+    // motorista já vem automaticamente nas props base
+    return {};
   }
-};
+);

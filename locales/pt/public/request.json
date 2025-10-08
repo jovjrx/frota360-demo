@@ -1,0 +1,68 @@
+{
+  "hero": {
+    "title": "Candidatura de Motorista TVDE",
+    "subtitle": "Você conduz, nós cuidamos do resto!",
+    "feature": "CANDIDATURA"
+  },
+  "contactInfo": {
+    "title": "Informações de Contacto",
+    "description": "Fale connosco"
+  },
+  "benefits": {
+    "title": "Porquê Conduz?",
+    "description": "As vantagens de se juntar à nossa equipa",
+    "list": [
+      "Suporte dedicado 7 dias por semana",
+      "Plataforma de gestão completa",
+      "Pagamentos semanais garantidos",
+      "Sem custos escondidos"
+    ]
+  },
+  "process": {
+    "title": "Como Funciona?",
+    "description": "O processo é simples e rápido",
+    "steps": [
+      {
+        "title": "1. Candidatura",
+        "description": "Preencha o formulário ao lado"
+      },
+      {
+        "title": "2. Análise",
+        "description": "Analisamos a sua candidatura"
+      },
+      {
+        "title": "3. Contacto",
+        "description": "Entramos em contacto consigo"
+      },
+      {
+        "title": "4. Início",
+        "description": "Comece a trabalhar connosco"
+      }
+    ]
+  },
+  "nextSteps": {
+    "title": "Próximos Passos",
+    "description": "Após enviar a candidatura, entraremos em contacto em até 48 horas úteis para dar seguimento ao processo."
+  },
+  "request": {
+    "title": "Candidatura de Motorista",
+    "subtitle": "Preencha o formulário abaixo para se candidatar como motorista TVDE",
+    "firstName": "Nome",
+    "lastName": "Apelido",
+    "email": "Email",
+    "phone": "Telefone",
+    "city": "Cidade",
+    "driverType": "Tipo de Motorista",
+    "driverTypeAffiliate": "Afiliado (veículo próprio)",
+    "driverTypeRenter": "Locatário (aluga veículo da Conduz)",
+    "vehicleInfo": "Informações do Veículo",
+    "vehicleMake": "Marca do Veículo",
+    "vehicleModel": "Modelo do Veículo",
+    "vehicleYear": "Ano do Veículo",
+    "vehiclePlate": "Matrícula",
+    "submit": "Enviar Candidatura",
+    "successTitle": "Candidatura Enviada!",
+    "successMessage": "A sua candidatura foi enviada com sucesso. A nossa equipa irá analisar e entrar em contacto consigo em breve.",
+    "backToHome": "Voltar ao Início"
+  }
+}

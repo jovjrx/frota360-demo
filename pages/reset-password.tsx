@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
-import { loadTranslations, createTranslationFunction } from '../lib/translations';
+import { withPublicSSR, PublicPageProps } from '@/lib/ssr';
 import { confirmPasswordReset } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
@@ -25,14 +24,11 @@ import {
 import { Title } from '@/components/Title';
 import { Container } from '@/components/Container';
 import { FiLock, FiArrowRight, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
+import { PUBLIC } from '@/translations';
 
-interface ResetPasswordPageProps {
-  translations: Record<string, any>;
-}
-
-export default function ResetPasswordPage({ translations }: ResetPasswordPageProps) {
+export default function ResetPasswordPage({ tPage }: PublicPageProps) {
   const router = useRouter();
-  const t = createTranslationFunction(translations.common);
+  const t = tPage!;
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,19 +71,19 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
 
     // Validações
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
+      setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_PASSWORDS_DONT_MATCH));
       setIsLoading(false);
       return;
     }
 
     if (!passwordValidation.isValid) {
-      setError('A senha deve ter pelo menos 6 caracteres, incluindo números e letras.');
+      setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_WEAK_PASSWORD));
       setIsLoading(false);
       return;
     }
 
     if (!oobCode) {
-      setError('Link de recuperação inválido.');
+      setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE));
       setIsLoading(false);
       return;
     }
@@ -99,13 +95,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
     } catch (err: any) {
       console.error('Erro ao redefinir senha:', err);
       if (err.code === 'auth/expired-action-code') {
-        setError('Este link de recuperação expirou. Solicite um novo.');
+        setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_EXPIRED_CODE));
       } else if (err.code === 'auth/invalid-action-code') {
-        setError('Link de recuperação inválido ou já utilizado.');
+        setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE));
       } else if (err.code === 'auth/weak-password') {
-        setError('A senha é muito fraca. Use uma senha mais forte.');
+        setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_WEAK_PASSWORD));
       } else {
-        setError('Erro ao redefinir senha. Tente novamente.');
+        setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_GENERIC));
       }
     } finally {
       setIsLoading(false);
@@ -116,15 +112,15 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
     return (
       <>
         <Head>
-          <title>Senha Redefinida - Conduz.pt</title>
-          <meta name="description" content="Sua senha foi redefinida com sucesso" />
+          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_TITLE)} - Conduz.pt</title>
+          <meta name="description" content={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_DESCRIPTION)} />
         </Head>
 
         <Container softBg maxW="md">
           <Title
-            title="Senha Redefinida!"
-            description="Sua senha foi alterada com sucesso"
-            feature="SUCESSO"
+            title={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_TITLE)}
+            description={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_DESCRIPTION)}
+            feature={tPage(PUBLIC.AUTH.RESET_PASSWORD.FEATURE)}
           />
           <VStack spacing={8} align="stretch">
             <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
@@ -145,19 +141,12 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                 
                 <VStack spacing={2}>
                   <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-                    Senha redefinida com sucesso!
+                    {tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_TITLE)}
                   </Text>
                   <Text color="gray.600">
-                    Sua nova senha foi definida. Agora você pode fazer login com ela.
+                    {tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_DESCRIPTION)}
                   </Text>
                 </VStack>
-
-                <Alert status="success" borderRadius="md">
-                  <AlertIcon />
-                  <Text fontSize="sm">
-                    Sua conta está segura novamente. Faça login para continuar.
-                  </Text>
-                </Alert>
 
                 <Button
                   as={Link}
@@ -167,7 +156,7 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                   w="full"
                   size="lg"
                 >
-                  Fazer Login
+                  {tPage(PUBLIC.AUTH.RESET_PASSWORD.GO_TO_LOGIN)}
                 </Button>
               </VStack>
             </Box>
@@ -181,13 +170,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
     return (
       <>
         <Head>
-          <title>Link Inválido - Conduz.pt</title>
+          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE)} - Conduz.pt</title>
         </Head>
         <Container softBg maxW="md">
           <Title
-            title="Link Inválido"
-            description="Este link de recuperação não é válido"
-            feature="ERRO"
+            title={tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE)}
+            description={tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_NO_CODE)}
+            feature={tPage(PUBLIC.AUTH.RESET_PASSWORD.FEATURE)}
           />
           <VStack spacing={8} align="stretch">
             <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
@@ -195,7 +184,7 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                 <Alert status="error" borderRadius="md">
                   <AlertIcon />
                   <Text fontSize="sm">
-                    Este link de recuperação é inválido ou expirou.
+                    {tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_EXPIRED_CODE)}
                   </Text>
                 </Alert>
                 
@@ -206,7 +195,7 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                   w="full"
                   size="lg"
                 >
-                  Solicitar Novo Link
+                  {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUBMIT)}
                 </Button>
               </VStack>
             </Box>
@@ -219,15 +208,15 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
   return (
     <>
       <Head>
-        <title>Redefinir Senha - Conduz.pt</title>
-        <meta name="description" content="Defina uma nova senha para sua conta" />
+        <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.TITLE)} - Conduz.pt</title>
+        <meta name="description" content={tPage(PUBLIC.AUTH.RESET_PASSWORD.DESCRIPTION)} />
       </Head>
 
       <Container softBg maxW="md">
         <Title
-          title="Redefinir Senha"
-          description="Digite uma nova senha para sua conta"
-          feature="SEGURANÇA"
+          title={tPage(PUBLIC.AUTH.RESET_PASSWORD.TITLE)}
+          description={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUBTITLE)}
+          feature={tPage(PUBLIC.AUTH.RESET_PASSWORD.FEATURE)}
         />
         <VStack spacing={8} align="stretch">
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
@@ -241,13 +230,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                 )}
 
                 <FormControl id="password" isRequired>
-                  <FormLabel>Nova Senha</FormLabel>
+                  <FormLabel>{tPage(PUBLIC.AUTH.RESET_PASSWORD.NEW_PASSWORD)}</FormLabel>
                   <InputGroup>
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Digite sua nova senha"
+                      placeholder={tPage(PUBLIC.AUTH.RESET_PASSWORD.NEW_PASSWORD_PLACEHOLDER)}
                       size="lg"
                       required
                     />
@@ -273,13 +262,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                       />
                       <VStack spacing={1} mt={2} align="start">
                         <Text fontSize="xs" color={passwordValidation.minLength ? 'green.600' : 'red.600'}>
-                          {passwordValidation.minLength ? '✓' : '✗'} Pelo menos 6 caracteres
+                          {passwordValidation.minLength ? '✓' : '✗'} {tPage(PUBLIC.AUTH.RESET_PASSWORD.PASSWORD_REQUIREMENTS.LENGTH)}
                         </Text>
                         <Text fontSize="xs" color={passwordValidation.hasNumber ? 'green.600' : 'red.600'}>
-                          {passwordValidation.hasNumber ? '✓' : '✗'} Contém números
+                          {passwordValidation.hasNumber ? '✓' : '✗'} {tPage(PUBLIC.AUTH.RESET_PASSWORD.PASSWORD_REQUIREMENTS.NUMBER)}
                         </Text>
                         <Text fontSize="xs" color={passwordValidation.hasLetter ? 'green.600' : 'red.600'}>
-                          {passwordValidation.hasLetter ? '✓' : '✗'} Contém letras
+                          {passwordValidation.hasLetter ? '✓' : '✗'} {tPage(PUBLIC.AUTH.RESET_PASSWORD.PASSWORD_REQUIREMENTS.LOWERCASE)}
                         </Text>
                       </VStack>
                     </Box>
@@ -287,13 +276,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                 </FormControl>
 
                 <FormControl id="confirmPassword" isRequired>
-                  <FormLabel>Confirmar Nova Senha</FormLabel>
+                  <FormLabel>{tPage(PUBLIC.AUTH.RESET_PASSWORD.CONFIRM_PASSWORD)}</FormLabel>
                   <InputGroup>
                     <Input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirme sua nova senha"
+                      placeholder={tPage(PUBLIC.AUTH.RESET_PASSWORD.CONFIRM_PASSWORD_PLACEHOLDER)}
                       size="lg"
                       required
                     />
@@ -314,11 +303,11 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
                   colorScheme="blue"
                   size="lg"
                   isLoading={isLoading}
-                  loadingText="Redefinindo..."
+                  loadingText={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUBMIT)}
                   w="full"
                   isDisabled={!passwordValidation.isValid || password !== confirmPassword}
                 >
-                  Redefinir Senha
+                  {tPage(PUBLIC.AUTH.RESET_PASSWORD.SUBMIT)}
                 </Button>
               </Stack>
             </form>
@@ -326,16 +315,13 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
             <Divider my={6} />
 
             <VStack spacing={3}>
-              <Text fontSize="sm" color="gray.600" textAlign="center">
-                Lembrou da sua senha?
-              </Text>
               <Button
                 as={Link}
                 href="/login"
                 variant="outline"
                 w="full"
               >
-                Voltar ao Login
+                {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.BACK_TO_LOGIN)}
               </Button>
             </VStack>
           </Box>
@@ -345,20 +331,4 @@ export default function ResetPasswordPage({ translations }: ResetPasswordPagePro
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ locale = 'pt' }) => {
-  try {
-    const translations = await loadTranslations(locale, ['common']);
-    return {
-      props: {
-        translations: { common: translations.common },
-      },
-    };
-  } catch (error) {
-    console.error('Failed to load translations:', error);
-    return {
-      props: {
-        translations: { common: {} },
-      },
-    };
-  }
-};
+export const getServerSideProps = withPublicSSR('auth', undefined, true);

@@ -1,0 +1,342 @@
+{
+  "dashboard": {
+    "title": "Dashboard de Gestão TVDE",
+    "subtitle": "Visão geral do negócio - Últimos 30 dias",
+    "kpiTitle": "KPIs Financeiros",
+    "totalRevenue": "Receita Total",
+    "totalExpenses": "Despesas Totais",
+    "netProfit": "Lucro Líquido",
+    "totalTrips": "Total de Viagens",
+    "activeVehicles": "Veículos Ativos",
+    "activeDrivers": "Motoristas Ativos",
+    "fleetTitle": "Frota Ativa",
+    "utilizationRate": "Taxa de Utilização",
+    "driversTitle": "Motoristas Ativos",
+    "affiliates": "Afiliados",
+    "renters": "Locatários",
+    "integrationsTitle": "Status das Integrações",
+    "lastSync": "Última Sincronização",
+    "quickActionsTitle": "Ações Rápidas",
+    "manageRequests": "Gestão de Solicitações",
+    "manageDrivers": "Controle de Motoristas",
+    "manageFleet": "Controle da Frota",
+    "detailedMetrics": "Métricas Detalhadas",
+    "integrations": "Integrações",
+    "contentManagement": "Gestão de Conteúdo",
+    "alertsTitle": "Alertas",
+    "integrationProblems": "Problemas nas integrações",
+    "weeklyEarnings": "Ganhos Esta Semana",
+    "welcome": "Bem-vindo, {{name}}",
+    "actions": {
+      "refresh": "Atualizar"
+    },
+    "helpers": {
+      "activeCount": "{{count}} ativos",
+      "operational": "Em operação",
+      "awaitingReview": "Aguardando análise",
+      "currentWeek": "Semana atual"
+    },
+    "sections": {
+      "overview": "Visão Geral",
+      "recentDrivers": "Motoristas Recentes",
+      "recentRequests": "Solicitações Recentes"
+    },
+    "tables": {
+      "drivers": {
+        "type": "Tipo",
+        "status": "Status"
+      },
+      "requests": {
+        "type": "Tipo",
+        "status": "Status"
+      }
+    },
+    "toasts": {
+      "refreshSuccess": "Dados atualizados",
+      "refreshError": "Erro ao atualizar"
+    }
+  },
+  "requests": {
+    "title": "Gestão de Solicitações",
+    "subtitle": "Analise e gerencie as candidaturas de motoristas",
+    "filterAll": "Todas",
+    "filterPending": "Pendentes",
+    "filterApproved": "Aprovadas",
+    "filterRejected": "Rejeitadas",
+    "statsTotal": "Total",
+    "statsPending": "Pendentes",
+    "statsApproved": "Aprovadas",
+    "statsRejected": "Rejeitadas",
+    "tableName": "Nome",
+    "tableEmail": "Email",
+    "tablePhone": "Telefone",
+    "tableType": "Tipo",
+    "tableStatus": "Status",
+    "tableDate": "Data",
+    "tableActions": "Ações",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "notes": "Notas Administrativas",
+    "rejectionReason": "Motivo da Rejeição",
+    "approveModalTitle": "Aprovar Candidatura",
+    "rejectModalTitle": "Rejeitar Candidatura",
+    "approveSuccess": "Candidatura aprovada com sucesso!",
+    "rejectSuccess": "Candidatura rejeitada com sucesso!"
+  },
+  "drivers": {
+    "title": "Controle de Motoristas",
+    "subtitle": "Gestão completa dos motoristas ativos",
+    "addDriver": "Adicionar Motorista",
+    "editDriver": "Editar Motorista",
+    "driverDetails": "Detalhes do Motorista",
+    "filters": {
+      "status": "Status",
+      "type": "Tipo",
+      "search": "Pesquisar"
+    },
+    "table": {
+      "name": "Nome",
+      "email": "Email",
+      "phone": "Telefone",
+      "type": "Tipo",
+      "status": "Status",
+      "vehicle": "Veículo",
+      "joinDate": "Data de Admissão",
+      "totalEarnings": "Ganhos Totais",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "suspended": "Suspenso"
+    },
+    "type": {
+      "affiliate": "Afiliado",
+      "renter": "Locatário"
+    }
+  },
+  "fleet": {
+    "title": "Controle de Frota TVDE",
+    "subtitle": "Gestão financeira da frota - Períodos flexíveis",
+    "addRecord": "Adicionar Registro",
+    "editRecord": "Editar Registro",
+    "syncData": "Sincronizar Dados",
+    "exportExcel": "Exportar Excel",
+    "markAsPaid": "Marcar como Pago",
+    "filters": {
+      "driver": "Motorista",
+      "vehicle": "Veículo",
+      "period": "Período",
+      "status": "Status",
+      "startDate": "Data Início",
+      "endDate": "Data Fim"
+    },
+    "table": {
+      "driver": "Motorista",
+      "vehicle": "Veículo",
+      "period": "Período",
+      "rental": "Aluguel",
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "total": "Total",
+      "fuel": "Combustível",
+      "commission": "Comissão",
+      "payout": "Repasse",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "kpis": {
+      "totalEarnings": "Ganhos Totais",
+      "totalExpenses": "Despesas Totais",
+      "totalCommissions": "Comissões",
+      "totalPayouts": "Repasses",
+      "pending": "Pendentes"
+    },
+    "form": {
+      "driver": "Motorista",
+      "vehicle": "Veículo",
+      "periodStart": "Data Início",
+      "periodEnd": "Data Fim",
+      "earningsUber": "Ganhos Uber (€)",
+      "earningsBolt": "Ganhos Bolt (€)",
+      "tipsUber": "Gorjetas Uber (€)",
+      "tipsBolt": "Gorjetas Bolt (€)",
+      "tolls": "Portagens (€)",
+      "fuel": "Combustível (€)",
+      "rental": "Aluguel (€)",
+      "otherExpenses": "Outras Despesas (€)",
+      "iban": "IBAN",
+      "notes": "Notas",
+      "calculatedTotal": "Ganhos Totais",
+      "calculatedCommission": "Base de Comissão",
+      "calculatedCommissionAmount": "Comissão (7%)",
+      "calculatedPayout": "Repasse Líquido"
+    }
+  },
+  "driversWeekly": {
+    "title": "Controle de Motoristas (Semanal)",
+    "subtitle": "Gestão semanal de motoristas - Períodos de 7 dias",
+    "addRecord": "Adicionar Registro",
+    "editRecord": "Editar Registro",
+    "syncData": "Sincronizar Dados",
+    "exportExcel": "Exportar Excel",
+    "markAsPaid": "Marcar como Pago",
+    "filters": {
+      "driver": "Motorista",
+      "week": "Semana",
+      "status": "Status"
+    },
+    "table": {
+      "week": "Semana",
+      "driver": "Motorista",
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "tips": "Gorjetas",
+      "grossTotal": "Total Bruto",
+      "fuel": "Combustível",
+      "commission": "Comissão",
+      "netPayout": "Líquido",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "form": {
+      "driver": "Motorista",
+      "weekStart": "Início da Semana",
+      "weekEnd": "Fim da Semana",
+      "uberTrips": "Viagens Uber (€)",
+      "uberTips": "Gorjetas Uber (€)",
+      "uberTolls": "Portagens Uber (€)",
+      "boltTrips": "Viagens Bolt (€)",
+      "boltTips": "Gorjetas Bolt (€)",
+      "fuel": "Combustível (€)",
+      "otherCosts": "Outros Custos (€)",
+      "iban": "IBAN",
+      "notes": "Notas",
+      "calculatedGross": "Total Bruto",
+      "calculatedCommission": "Base de Comissão",
+      "calculatedCommissionAmount": "Comissão (7%)",
+      "calculatedNet": "Valor Líquido"
+    }
+  },
+  "weekly": {
+    "title": "Controle Semanal",
+    "subtitle": "Gestão semanal de dados TVDE",
+    "import": {
+      "title": "Importação de Dados Semanais",
+      "subtitle": "Faça upload dos arquivos CSV/Excel de cada plataforma para processar os pagamentos da semana",
+      "period": "Período da Semana",
+      "startDate": "Início da Semana",
+      "endDate": "Fim da Semana",
+      "files": "Arquivos para Importação",
+      "uploadFiles": "Enviar Arquivos",
+      "processTitle": "Processar Importação",
+      "processDescription": "arquivo(s) pronto(s) para processar. Clique no botão abaixo para criar/atualizar os registros semanais.",
+      "processButton": "Processar Importação",
+      "resultsTitle": "Resultados do Processamento",
+      "successTitle": "✓ Processado com sucesso:",
+      "warningsTitle": "⚠ Avisos:",
+      "errorsTitle": "✗ Erros:",
+      "viewWeeklyControl": "Ver Controle Semanal",
+      "fileStatus": {
+        "idle": "Selecionar arquivo",
+        "uploading": "Enviando...",
+        "uploaded": "Enviado",
+        "error": "Erro"
+      },
+      "messages": {
+        "uploadCompleted": "Upload concluído",
+        "uploadCompletedDescription": "Arquivos enviados. Clique em \"Processar Importação\" para continuar.",
+        "uploadFirst": "Faça o upload dos arquivos primeiro",
+        "processingCompleted": "Processamento concluído"
+      }
+    }
+  },
+  "platforms": {
+    "uber": "Uber",
+    "bolt": "Bolt",
+    "myprio": "myprio (Combustível)",
+    "viaverde": "ViaVerde (Portagens)"
+  },
+  "errors": {
+    "unknown": "Erro desconhecido",
+    "processing": "Erro no processamento",
+    "upload": "Erro no upload",
+    "invalidFile": "Arquivo inválido"
+  },
+  "metrics": {
+    "title": "Métricas Detalhadas",
+    "subtitle": "Análise detalhada de performance por plataforma",
+    "filterToday": "Hoje",
+    "filterWeek": "Esta Semana",
+    "filterMonth": "Este Mês",
+    "filterQuarter": "Este Trimestre",
+    "filterYear": "Este Ano",
+    "filterCustom": "Personalizado",
+    "platformUber": "Uber",
+    "platformBolt": "Bolt",
+    "platformCartrack": "Cartrack",
+    "platformViaverde": "ViaVerde",
+    "platformFonoa": "FONOA",
+    "platformMyprio": "myprio",
+    "testConnection": "Testar Conexão",
+    "connectionSuccess": "Conexão bem-sucedida!",
+    "connectionError": "Erro na conexão",
+    "rawData": "Dados Brutos",
+    "success": "Sucesso",
+    "error": "Erro"
+  },
+  "integrations": {
+    "title": "Integrações",
+    "subtitle": "Status e configuração das integrações externas",
+    "testAllConnections": "Testar Todas as Conexões",
+    "syncAllData": "Sincronizar Todos os Dados",
+    "uber": {
+      "name": "Uber",
+      "description": "Integração com Uber para viagens e ganhos",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "bolt": {
+      "name": "Bolt",
+      "description": "Integração com Bolt para viagens e ganhos",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "cartrack": {
+      "name": "Cartrack",
+      "description": "Integração com Cartrack para dados de veículos",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "viaverde": {
+      "name": "ViaVerde",
+      "description": "Integração com ViaVerde para dados de portagens",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "fonoa": {
+      "name": "FONOA",
+      "description": "Integração com FONOA para faturação",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "myprio": {
+      "name": "myprio",
+      "description": "Integração com myprio para despesas de combustível",
+      "status": "Status",
+      "lastSync": "Última Sincronização",
+      "testConnection": "Testar Conexão"
+    },
+    "status": {
+      "connected": "Conectado",
+      "disconnected": "Desconectado",
+      "error": "Erro",
+      "syncing": "Sincronizando"
+    }
+  }
+}

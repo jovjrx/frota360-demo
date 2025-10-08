@@ -50,7 +50,7 @@ import {
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
 import { getDrivers } from '@/lib/admin/adminQueries';
 

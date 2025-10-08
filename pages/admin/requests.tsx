@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useMemo } from 'react';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import {
   Box,
@@ -45,8 +44,7 @@ import {
   StatNumber,
 } from '@chakra-ui/react';
 import { FiSearch, FiFilter, FiMoreVertical, FiCheckCircle, FiXCircle, FiClock, FiMail, FiUserPlus, FiPhone } from 'react-icons/fi';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { getTranslation } from '@/lib/translations';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
 import useSWR from 'swr';
@@ -81,8 +79,65 @@ interface SolicitacoesPageProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function SolicitacoesPage({ user, translations, locale, initialData }: SolicitacoesPageProps) {
-  const router = useRouter();
+const COMMON_FALLBACKS: Record<string, string> = {
+  total: 'Total',
+  all: 'Todas',
+  name: 'Nome',
+  email: 'Email',
+  phone: 'Telefone',
+  type: 'Tipo',
+  status: 'Status',
+  actions: 'Ações',
+  type_renter: 'Locatário',
+  type_affiliate: 'Afiliado',
+  'common.loading': 'A carregar...',
+};
+
+const ADMIN_FALLBACKS: Record<string, string> = {
+  'requests.title': 'Gestão de Solicitações',
+  'requests.subtitle': 'Analise e gerencie as candidaturas de motoristas',
+  'requests.status.pending': 'Pendente',
+  'requests.status.evaluation': 'Em avaliação',
+  'requests.status.approved': 'Aprovada',
+  'requests.status.rejected': 'Rejeitada',
+  'requests.status.unknown': 'Desconhecido',
+  'requests.search_placeholder': 'Pesquisar por nome, email ou telefone',
+  'requests.no_requests.title': 'Nenhuma solicitação encontrada',
+  'requests.no_requests.desc': 'Não há solicitações com os filtros selecionados.',
+  'requests.action.view_details': 'Ver detalhes',
+  'requests.action.evaluate': 'Avaliar',
+  'requests.action.approve': 'Aprovar',
+  'requests.action.reject': 'Rejeitar',
+  'requests.action.evaluate_success_title': 'Solicitação marcada como em avaliação',
+  'requests.action.evaluate_success_desc': 'A solicitação de {{name}} foi marcada como em avaliação.',
+  'requests.action.evaluate_error_title': 'Erro ao marcar avaliação',
+  'requests.action.evaluate_error_desc': 'Não foi possível marcar a solicitação como em avaliação.',
+  'requests.action.approve_success_title': 'Solicitação aprovada',
+  'requests.action.approve_success_desc': 'A solicitação de {{name}} foi aprovada com sucesso.',
+  'requests.action.approve_error_title': 'Erro ao aprovar',
+  'requests.action.approve_error_desc': 'Não foi possível aprovar a solicitação.',
+  'requests.action.reject_success_title': 'Solicitação rejeitada',
+  'requests.action.reject_success_desc': 'A solicitação de {{name}} foi rejeitada.',
+  'requests.action.reject_error_title': 'Erro ao rejeitar',
+  'requests.action.reject_error_desc': 'Não foi possível rejeitar a solicitação.',
+  'requests.view_modal.title': 'Detalhes da solicitação',
+  'requests.view_modal.created_at': 'Criada em',
+  'requests.view_modal.updated_at': 'Atualizada em',
+  'requests.view_modal.admin_notes': 'Notas administrativas',
+  'requests.view_modal.rejection_reason': 'Motivo da rejeição',
+  'requests.evaluation_modal.title': 'Colocar em avaliação',
+  'requests.evaluation_modal.save_button': 'Salvar avaliação',
+  'requests.evaluation_modal.description': 'Adicione notas para a avaliação de {{name}}.',
+  'requests.evaluation_modal.notes_label': 'Notas de avaliação',
+  'requests.evaluation_modal.notes_placeholder': 'Escreva as observações internas',
+  'requests.reject_modal.title': 'Rejeitar solicitação',
+  'requests.reject_modal.reject_button': 'Confirmar rejeição',
+  'requests.reject_modal.confirmation': 'Tem certeza que deseja rejeitar {{name}}?',
+  'requests.reject_modal.reason_label': 'Motivo da rejeição',
+  'requests.reject_modal.reason_placeholder': 'Descreva o motivo da rejeição',
+};
+
+export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }: SolicitacoesPageProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -96,8 +151,25 @@ export default function SolicitacoesPage({ user, translations, locale, initialDa
   const { isOpen: isEvaluationModalOpen, onOpen: onEvaluationModalOpen, onClose: onEvaluationModalClose } = useDisclosure();
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const makeSafeT = (
+    fn: ((key: string) => any) | undefined,
+    fallbacks: Record<string, string>
+  ) => (key: string, variables?: Record<string, any>) => {
+    let value = fn ? fn(key) : undefined;
+    if (typeof value !== 'string' || value === key) {
+      value = fallbacks[key] ?? key;
+    }
+    if (variables && typeof value === 'string') {
+      return Object.entries(variables).reduce(
+        (acc, [varKey, varValue]) => acc.replace(new RegExp(`{{\\s*${varKey}\\s*}}`, 'g'), String(varValue)),
+        value as string
+      );
+    }
+    return value as string;
+  };
+
+  const t = makeSafeT(tCommon, COMMON_FALLBACKS);
+  const tAdmin = makeSafeT(tPage, ADMIN_FALLBACKS);
 
   const { data, mutate } = useSWR<RequestsData>(
     `/api/admin/requests?status=${statusFilter}`,

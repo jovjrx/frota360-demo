@@ -1,0 +1,144 @@
+{
+  "navigation": {
+    "home": "Home",
+    "drivers": "Drivers",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up"
+  },
+  "user": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "phone": "Phone"
+  },
+  "seo": {
+    "default": {
+      "title": "TVDE Portugal | Conduz - You drive, we take care of the rest!",
+      "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more."
+    }
+  },
+  "actions": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading..."
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "suspended": "Suspended"
+  },
+  "messages": {
+    "success": "Operation completed successfully!",
+    "error": "An error occurred. Please try again.",
+    "warning": "Warning!",
+    "info": "Information",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete?"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email",
+    "invalidPhone": "Invalid phone",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters",
+    "passwordsDontMatch": "Passwords don't match"
+  },
+  "company": {
+    "name": "Alvorada Magistral",
+    "description": "You drive, we take care of the rest!",
+    "email": "conduz@alvoradamagistral.eu",
+    "emailDescription": "Support and information",
+    "phone": "+351 913 415 670",
+    "phoneDescription": "Support 7 days/week",
+    "address": "Rua Engenheiro Arantes de Oliveira 143",
+    "postalCode": "3720-253",
+    "city": "Oliveira de Azeméis",
+    "state": "Aveiro",
+    "country": "Portugal",
+    "nipc": "517524945",
+    "whatsapp": "http://wa.me/+351913415670",
+    "whats": "http://wa.me/+351913415670",
+    "whatsDescription": "Fast and efficient support",
+    "website": "conduz.pt"
+  },
+  "footer": {
+    "tagline": "You drive, we take care of the rest!",
+    "description": "The platform that transforms drivers into successful entrepreneurs",
+    "contactInfo": "Contact Information",
+    "quickLinks": "Quick Links",
+    "rights": "© {{year}} Conduz PT. All rights reserved.",
+    "copyright": "All rights reserved",
+    "madeWith": "Made with",
+    "by": "by",
+    "company": "Alvorada Magistral",
+    "developerBy": "Developed by",
+    "developer": "Jose Junior",
+    "privacy": "Privacy Policy",
+    "terms": "Terms and Conditions",
+    "about": "About Us",
+    "contact": "Contact",
+    "services": "Services",
+    "drivers": "For Drivers",
+    "support": "Support",
+    "faq": "FAQ",
+    "help": "Help Center",
+    "legal": "Legal",
+    "followUs": "Follow us",
+    "home": "Home"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to the most common questions",
+    "feature": "FAQ",
+    "items": [
+      {
+        "question": "How can I become a driver?",
+        "answer": "To become a driver, simply fill out the request form on our website. Our team will review your application and contact you."
+      },
+      {
+        "question": "What's the difference between affiliate and renter?",
+        "answer": "Affiliate drivers work with their own vehicles, while renters use vehicles from Conduz PT."
+      },
+      {
+        "question": "How long does approval take?",
+        "answer": "The approval process usually takes between 2 to 5 business days, depending on documentation availability."
+      },
+      {
+        "question": "Which platforms are supported?",
+        "answer": "We work with the main transport platforms in Portugal, including Uber and Bolt."
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "What Our Drivers Say",
+    "subtitle": "Real stories from those who are already part of Conduz PT",
+    "feature": "Testimonials",
+    "items": [
+      {
+        "quote": "Conduz PT made my life as a driver much easier. The support is excellent and the processes are very simple.",
+        "author": "João Silva",
+        "location": "Lisbon"
+      },
+      {
+        "quote": "I've been working as a renter for 6 months and I'm very satisfied. The vehicles are well maintained and the support is constant.",
+        "author": "Maria Santos",
+        "location": "Porto"
+      }
+    ]
+  }
+}

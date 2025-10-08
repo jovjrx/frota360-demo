@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
-import { loadTranslations, createTranslationFunction } from '../lib/translations';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
@@ -26,14 +24,11 @@ import {
 import { Title } from '@/components/Title';
 import { Container } from '@/components/Container';
 import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
+import { withPublicSSR, PublicPageProps } from '@/lib/ssr';
+import { PUBLIC } from '@/translations';
 
-interface LoginPageProps {
-  translations: Record<string, any>;
-}
-
-export default function LoginPage({ translations }: LoginPageProps) {
+export default function LoginPage({ tPage }: PublicPageProps) {
   const router = useRouter();
-  const t = createTranslationFunction(translations.common);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -83,15 +78,15 @@ export default function LoginPage({ translations }: LoginPageProps) {
     } catch (err: any) {
       console.error('Erro de login:', err);
       if (err.code === 'auth/user-not-found') {
-        setError('Usuário não encontrado. Verifique o email.');
+        setError(tPage(PUBLIC.AUTH.LOGIN.ERROR_USER_NOT_FOUND));
       } else if (err.code === 'auth/wrong-password') {
-        setError('Senha incorreta.');
+        setError(tPage(PUBLIC.AUTH.LOGIN.ERROR_WRONG_PASSWORD));
       } else if (err.code === 'auth/invalid-email') {
-        setError('Email inválido.');
+        setError(tPage(PUBLIC.AUTH.LOGIN.ERROR_INVALID_CREDENTIALS));
       } else if (err.code === 'auth/too-many-requests') {
-        setError('Muitas tentativas. Tente novamente mais tarde.');
+        setError(tPage(PUBLIC.AUTH.LOGIN.ERROR_TOO_MANY_REQUESTS));
       } else {
-        setError('Erro ao fazer login. Tente novamente.');
+        setError(tPage(PUBLIC.AUTH.LOGIN.ERROR_GENERIC));
       }
     } finally {
       setIsLoading(false);
@@ -108,44 +103,44 @@ export default function LoginPage({ translations }: LoginPageProps) {
   return (
     <>
       <Head>
-        <title>{`${t('navigation.login')} - Conduz.pt`}</title>
-        <meta name="description" content="Faça login na plataforma Conduz.pt" />
+        <title>{tPage(PUBLIC.AUTH.LOGIN.TITLE)} - Conduz.pt</title>
+        <meta name="description" content={tPage(PUBLIC.AUTH.LOGIN.SUBTITLE)} />
       </Head>
 
       <Container softBg maxW="md">
         <Title
-          title={t('navigation.login')}
-          description="Acesse a sua conta na plataforma"
-          feature="ACESSO"
+          title={tPage(PUBLIC.AUTH.LOGIN.TITLE)}
+          description={tPage(PUBLIC.AUTH.LOGIN.SUBTITLE)}
+          feature="LOGIN"
         />
         <VStack spacing={8} align="stretch">
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
             <form onSubmit={handleSubmit}>
               <Stack spacing={6}>
 
-              {/* Email */}
+                {/* Email */}
                 <FormControl id="email" isRequired>
-                  <FormLabel>{t('user.email')}</FormLabel>
+                  <FormLabel>{tPage(PUBLIC.AUTH.LOGIN.EMAIL)}</FormLabel>
                   <Input
                     type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="seu@email.com"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder={tPage(PUBLIC.AUTH.LOGIN.EMAIL_PLACEHOLDER)}
                     size="lg"
-                />
+                  />
                 </FormControl>
 
-              {/* Password */}
+                {/* Password */}
                 <FormControl id="password" isRequired>
-                  <FormLabel>{t('user.password')}</FormLabel>
+                  <FormLabel>{tPage(PUBLIC.AUTH.LOGIN.PASSWORD)}</FormLabel>
                   <InputGroup>
                     <Input
                       type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="••••••••"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder={tPage(PUBLIC.AUTH.LOGIN.PASSWORD_PLACEHOLDER)}
                       size="lg"
                     />
                     <InputRightElement h="full">
@@ -160,7 +155,7 @@ export default function LoginPage({ translations }: LoginPageProps) {
                   </InputGroup>
                 </FormControl>
 
-            {error && (
+                {error && (
                   <Alert status="error" borderRadius="md">
                     <AlertIcon />
                     {error}
@@ -168,25 +163,25 @@ export default function LoginPage({ translations }: LoginPageProps) {
                 )}
 
                 <Button
-                type="submit"
+                  type="submit"
                   colorScheme="green"
                   size="lg"
                   isLoading={isLoading}
-                  loadingText="Entrando..."
+                  loadingText={tPage(PUBLIC.AUTH.LOGIN.SUBMIT)}
                   rightIcon={<FiArrowRight />}
                 >
-                  {t('navigation.login')}
+                  {tPage(PUBLIC.AUTH.LOGIN.SUBMIT)}
                 </Button>
               </Stack>
             </form>
           </Box>
 
-            {/* Links */}
+          {/* Links */}
           <VStack spacing={4}>
             <Divider />
             <Text color="gray.600" fontSize="sm" textAlign="center">
               <ChakraLink as={Link} href="/forgot-password" color="blue.500" fontWeight="medium">
-                Esqueci a senha
+                {tPage(PUBLIC.AUTH.LOGIN.FORGOT_PASSWORD)}
               </ChakraLink>
             </Text>
           </VStack>
@@ -196,17 +191,4 @@ export default function LoginPage({ translations }: LoginPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // Extract locale from middleware header
-  const headerLocale = Array.isArray(context.req.headers['x-locale']) 
-    ? context.req.headers['x-locale'][0] 
-    : context.req.headers['x-locale'] || 'pt';
-  
-  const translations = await loadTranslations(headerLocale || 'pt', ['common']);
-
-  return {
-    props: {
-      translations,
-    },
-  };
-};
+export const getServerSideProps = withPublicSSR('auth', undefined, true);

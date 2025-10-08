@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "title": "Fale com a Conduz.pt",
+    "subtitle": "Tire dúvidas, cadastre-se ou solicite uma proposta",
+    "feature": "CONTACTO"
+  },
+  "form": {
+    "title": "Formulário de Contato",
+    "subtitle": "Preencha os dados para ser motorista ou empresa parceira",
+    "feature": "FORMULÁRIO",
+    "description": "Preencha o formulário abaixo e nossa equipa entrará em contacto em até 24h.",
+    "fields": {
+      "name": "Nome Completo",
+      "namePlaceholder": "Digite seu nome completo",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "phone": "Telefone",
+      "phonePlaceholder": "Seu número de telefone",
+      "interest": "Tipo de Interesse",
+      "interestPlaceholder": "Selecione uma opção",
+      "message": "Mensagem",
+      "messagePlaceholder": "Descreva a sua dúvida ou solicitação"
+    },
+    "interests": {
+      "rides": "Reservar Viagem/Transfer",
+      "partners": "Parcerias Comerciais",
+      "drivers": "Trabalhar como Motorista",
+      "companies": "Serviços para Empresas",
+      "tourism": "Turismo e Passeios",
+      "support": "Apoio/Atendimento",
+      "other": "Outro"
+    },
+    "validation": {
+      "name": {
+        "required": "Nome é obrigatório"
+      },
+      "email": {
+        "required": "Email é obrigatório",
+        "invalid": "Email inválido"
+      },
+      "service": {
+        "required": "Selecione uma opção"
+      },
+      "message": {
+        "required": "Mensagem é obrigatória",
+        "minLength": "Mensagem deve ter pelo menos 10 caracteres"
+      }
+    },
+    "submit": {
+      "button": "Enviar mensagem",
+      "loading": "Enviando..."
+    },
+    "success": {
+      "title": "Mensagem enviada!",
+      "description": "Obrigado por entrar em contacto. Em breve retornaremos."
+    },
+    "error": {
+      "title": "Erro ao enviar",
+      "description": "Ocorreu um problema. Tente novamente ou use outro canal."
+    },
+    "privacy": "Ao enviar este formulário, concorda com nossa política de privacidade."
+  },
+  "location": {
+    "title": "Nossa Localização",
+    "description": "Será um prazer atendê-lo",
+    "directEmail": "Se preferir",
+    "directEmailDescription": "Envie-nos um email diretamente para discussões detalhadas sobre projetos e parcerias.",
+    "phone": "Por telefone",
+    "phoneDescription": "Fale conosco via WhatsApp para respostas rápidas e suporte imediato."
+  }
+}

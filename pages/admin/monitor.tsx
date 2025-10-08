@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 import {
   Box,
   Card,
@@ -44,8 +43,7 @@ import {
   FiTrendingUp,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { getTranslation } from '@/lib/translations';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 
 // Importação dinâmica do mapa (só carrega no cliente)
 const MapView = dynamic(() => import('@/components/admin/CartrackMap'), {
@@ -105,16 +103,69 @@ interface MonitorPageProps extends AdminPageProps {
   initialData: CartrackData | null;
 }
 
-export default function MonitorPage({ user, translations, locale, initialData }: MonitorPageProps) {
+const MONITOR_FALLBACKS: Record<string, string> = {
+  error_fetching_cartrack_data: 'Falha ao buscar dados do Cartrack.',
+  error_fetching_cartrack_data_generic: 'Ocorreu um erro ao buscar dados do Cartrack.',
+  data_updated_title: 'Dados atualizados',
+  trips_loaded_description: '{{count}} viagens carregadas com sucesso.',
+  error_updating_title: 'Erro ao atualizar dados',
+  monitor_title: 'Monitoramento Cartrack',
+  monitor_subtitle: 'Acompanhe viagens, eventos e desempenho em tempo real',
+  auto_refresh_on: 'Atualização automática ligada',
+  auto_refresh_off: 'Atualização automática desligada',
+  last_update: 'Última atualização',
+  disable_auto_refresh: 'Desligar auto-atualização',
+  enable_auto_refresh: 'Ligar auto-atualização',
+  update_now_button: 'Atualizar agora',
+  total_trips: 'Total de viagens',
+  last_week: 'Últimos 7 dias',
+  active_vehicles: 'Veículos ativos',
+  total_distance: 'Distância total',
+  average_speed: 'Velocidade média',
+  total_time: 'Tempo total',
+  events: 'Eventos',
+  trip_list_tab: 'Lista de viagens',
+  map_tab: 'Mapa',
+  vehicle_column: 'Veículo',
+  driver_column: 'Motorista',
+  start_column: 'Início',
+  end_column: 'Fim',
+  distance_column: 'Distância',
+  duration_column: 'Duração',
+  max_speed_column: 'Velocidade máx.',
+  events_column: 'Eventos',
+  time_column: 'Horário',
+  id_label: 'ID',
+  events_tooltip: 'Travagens fortes: {{braking}} | Curvas bruscas: {{cornering}} | Acelerações bruscas: {{acceleration}} | Excesso de velocidade: {{speeding}}',
+  no_trips_recorded: 'Nenhuma viagem registada neste período.',
+  no_data_for_map: 'Sem dados suficientes para exibir o mapa.',
+};
+
+export default function MonitorPage({ locale, initialData, tPage }: MonitorPageProps) {
   const [data, setData] = useState<CartrackData | null>(initialData);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const toast = useToast();
-  const router = useRouter();
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tMonitor = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const makeSafeT = (
+    fn: ((key: string) => any) | undefined,
+    fallbacks: Record<string, string>
+  ) => (key: string, variables?: Record<string, any>) => {
+    let value = fn ? fn(key) : undefined;
+    if (typeof value !== 'string' || value === key) {
+      value = fallbacks[key] ?? key;
+    }
+    if (variables && typeof value === 'string') {
+      return Object.entries(variables).reduce(
+        (acc, [varKey, varValue]) => acc.replace(new RegExp(`{{\s*${varKey}\s*}}`, 'g'), String(varValue)),
+        value as string
+      );
+    }
+    return value as string;
+  };
+
+  const tMonitor = makeSafeT(tPage, MONITOR_FALLBACKS);
 
   // Função para buscar dados da API
   const fetchCartrackData = async (showToast = false) => {

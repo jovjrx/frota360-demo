@@ -1,0 +1,150 @@
+{
+  "navigation": {
+    "home": "Início",
+    "drivers": "Motoristas",
+    "about": "Sobre",
+    "contact": "Contacto",
+    "login": "Entrar",
+    "logout": "Sair",
+    "signup": "Criar Conta"
+  },
+  "user": {
+    "email": "Email",
+    "password": "Senha",
+    "name": "Nome",
+    "phone": "Telefone"
+  },
+  "seo": {
+    "default": {
+      "title": "TVDE Portugal | Conduz - Você conduz, nós cuidamos do resto!",
+      "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais."
+    }
+  },
+  "actions": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "back": "Voltar",
+    "next": "Próximo",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "reset": "Resetar",
+    "loading": "A carregar..."
+  },
+  "status": {
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado",
+    "suspended": "Suspenso"
+  },
+  "messages": {
+    "success": "Operação realizada com sucesso!",
+    "error": "Ocorreu um erro. Por favor, tente novamente.",
+    "warning": "Atenção!",
+    "info": "Informação",
+    "loading": "A carregar...",
+    "noData": "Sem dados disponíveis",
+    "confirmDelete": "Tem a certeza que deseja eliminar?"
+  },
+  "errors": {
+    "title": "Erro",
+    "unknown": "Erro desconhecido",
+    "tryAgain": "Tente novamente"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "invalidEmail": "Email inválido",
+    "invalidPhone": "Telefone inválido",
+    "minLength": "Mínimo de {{min}} caracteres",
+    "maxLength": "Máximo de {{max}} caracteres",
+    "passwordsDontMatch": "As senhas não coincidem"
+  },
+  "company": {
+    "name": "Alvorada Magistral",
+    "description": "Você conduz, nós cuidamos do resto!",
+    "email": "conduz@alvoradamagistral.eu",
+    "emailDescription": "Suporte e informações",
+    "phone": "+351 913 415 670",
+    "phoneDescription": "Suporte 7 dias/semana",
+    "address": "Rua Engenheiro Arantes de Oliveira 143",
+    "postalCode": "3720-253",
+    "city": "Oliveira de Azeméis",
+    "state": "Aveiro",
+    "country": "Portugal",
+    "nipc": "517524945",
+    "whatsapp": "http://wa.me/+351913415670",
+    "whats": "http://wa.me/+351913415670",
+    "whatsDescription": "Suporte rápido e eficiente",
+    "website": "conduz.pt"
+  },
+  "footer": {
+    "tagline": "Você conduz, nós cuidamos do resto!",
+    "description": "A plataforma que transforma motoristas em empresários de sucesso",
+    "contactInfo": "Informações de Contacto",
+    "quickLinks": "Links Rápidos",
+    "rights": "© {{year}} Conduz PT. Todos os direitos reservados.",
+    "copyright": "Todos os direitos reservados",
+    "madeWith": "Feito com",
+    "by": "por",
+    "company": "Alvorada Magistral",
+    "developerBy": "Desenvolvido por",
+    "developer": "Jose Junior",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos e Condições",
+    "about": "Sobre Nós",
+    "contact": "Contacto",
+    "services": "Serviços",
+    "drivers": "Para Motoristas",
+    "support": "Suporte",
+    "faq": "Perguntas Frequentes",
+    "help": "Central de Ajuda",
+    "legal": "Legal",
+    "followUs": "Siga-nos",
+    "home": "Início"
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Encontre respostas para as dúvidas mais comuns",
+    "feature": "FAQ",
+    "items": [
+      {
+        "question": "Como posso tornar-me motorista?",
+        "answer": "Para se tornar motorista, basta preencher o formulário de solicitação no nosso site. A nossa equipa irá analisar a sua candidatura e entrar em contacto consigo."
+      },
+      {
+        "question": "Qual a diferença entre afiliado e locatário?",
+        "answer": "Motoristas afiliados trabalham com os seus próprios veículos, enquanto locatários utilizam veículos da Conduz PT."
+      },
+      {
+        "question": "Quanto tempo demora a aprovação?",
+        "answer": "O processo de aprovação normalmente demora entre 2 a 5 dias úteis, dependendo da disponibilidade de documentação."
+      },
+      {
+        "question": "Quais as plataformas suportadas?",
+        "answer": "Trabalhamos com as principais plataformas de transporte em Portugal, incluindo Uber e Bolt."
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "O Que Dizem os Nossos Motoristas",
+    "subtitle": "Histórias reais de quem já faz parte da Conduz PT",
+    "feature": "Depoimentos",
+    "items": [
+      {
+        "quote": "A Conduz PT facilitou muito a minha vida como motorista. O suporte é excelente e os processos são muito simples.",
+        "author": "João Silva",
+        "location": "Lisboa"
+      },
+      {
+        "quote": "Trabalho como locatário há 6 meses e estou muito satisfeito. Os veículos são bem mantidos e o apoio é constante.",
+        "author": "Maria Santos",
+        "location": "Porto"
+      }
+    ]
+  }
+}

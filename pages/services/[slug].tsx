@@ -1,48 +1,35 @@
-import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
   VStack,
-  SimpleGrid,
   HStack,
-  Badge,
   Button,
   Icon,
   Link
 } from "@chakra-ui/react";
-import { loadTranslations } from "@/lib/translations";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { PageProps } from "@/interface/Global";
-import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
-import { useRouter } from "next/router";
-import { FaCheckCircle, FaArrowRight, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaCheckCircle, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
+import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
 
-interface ServicePageProps extends PageProps {
+interface ServicePageProps extends PublicPageProps {
   slug: string;
-  locale: string;
 }
 
-export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePageProps) {
-  const router = useRouter();
-
-  // Determinar se é página de motoristas ou empresas
+export default function ServicePage({ tPage, slug }: ServicePageProps) {
   const isDrivers = slug === 'drivers';
-  const isCompanies = slug === 'companies';
-  const pageName = isDrivers ? 'services-drivers' : 'services-companies';
-
   return (
     <>
       <Container softBg>
         <Title
-          title={tPage("benefits.title") || tPage("benefits.title")}
-          description={tPage("benefits.subtitle") || tPage("benefits.subtitle")}
-          feature={tPage("benefits.feature") || tPage("benefits.feature")}
+          title={tPage("benefits.title")}
+          description={tPage("benefits.subtitle")}
+          feature={tPage("benefits.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", lg: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
           <Card
             title={tPage("benefits.card.title")}
             description={tPage("benefits.card.description")}
@@ -91,7 +78,7 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
           description={tPage("services.subtitle")}
           feature={tPage("services.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(3, 1fr)" }}>
           {(() => {
             const services = tPage("services.list");
             if (!Array.isArray(services)) return null;
@@ -135,16 +122,16 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
           description={tPage("support.subtitle")}
           feature={tPage("support.feature")}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
           <Card animated borded>
             <VStack spacing={4} align="center" textAlign="center">
               <Icon as={FaWhatsapp} fontSize="3xl" color="green.500" />
               <Text fontSize="sm" color="gray.600">
-                {tCommon("company.whatsDescription")}
+                {tPage("company.whatsDescription")}
               </Text>
-              <Link href={tCommon("company.whats")} isExternal>
+              <Link href={tPage("company.whats")} isExternal>
                 <Button colorScheme="green" variant="outline" size="sm">
-                  {tCommon("company.phone")}
+                  {tPage("company.phone")}
                 </Button>
               </Link>
             </VStack>
@@ -154,11 +141,11 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
             <VStack spacing={4} align="center" textAlign="center">
               <Icon as={FaPhone} fontSize="3xl" color="green.500" />
               <Text fontSize="sm" color="gray.600">
-                {tCommon("company.phoneDescription")}
+                {tPage("company.phoneDescription")}
               </Text>
-              <Link href={`tel:${tCommon("company.phone")}`} isExternal>
+              <Link href={`tel:${tPage("company.phone")}`} isExternal>
                 <Button colorScheme="green" variant="outline" size="sm">
-                  {tCommon("company.phone")}
+                  {tPage("company.phone")}
                 </Button>
               </Link>
             </VStack>
@@ -168,11 +155,11 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
             <VStack spacing={4} align="center" textAlign="center">
               <Icon as={FaEnvelope} fontSize="3xl" color="green.500" />
               <Text fontSize="sm" color="gray.600">
-                {tCommon("company.emailDescription")}
+                {tPage("company.emailDescription")}
               </Text>
-              <Link href={`mailto:${tCommon("company.email")}`} isExternal>
+              <Link href={`mailto:${tPage("company.email")}`} isExternal>
                 <Button colorScheme="green" variant="outline" size="sm">
-                  {tCommon("company.email")}
+                  {tPage("company.email")}
                 </Button>
               </Link>
             </VStack>
@@ -194,34 +181,9 @@ export default function ServicePage({ tPage, tCommon, slug, locale }: ServicePag
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps = withPublicSSR('services-drivers', async (context, user) => {
   const slug = context.params?.slug as string;
-
-  try {
-    // Extract locale from middleware header
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
-      : context.req.headers['x-locale'] || 'pt';
-    
-    const translations = await loadTranslations(locale, ["common", `services-${slug}`]);
-    const { common, [`services-${slug}`]: page } = translations;
-
-    return {
-      props: {
-        translations: { common, page },
-        slug,
-        locale,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to load translations:", error);
-    return {
-      props: {
-        translations: { common: {}, page: {} },
-        slug,
-        locale: 'pt',
-      },
-    };
-  }
-};
-
+  
+  // Retornar slug para a página
+  return { slug };
+});

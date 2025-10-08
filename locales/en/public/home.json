@@ -1,0 +1,122 @@
+{
+  "hero": {
+      "title": "You drive, we take care of the rest!",
+      "subtitle": "360º management for TVDE drivers — Right platform, real support, guaranteed earnings.",
+      "description": "Conduz.pt is the TVDE arm of Alvorada Magistral. We offer complete solutions for drivers with advanced technology and human support.",
+      "ctaPrimary": "Apply as Driver",
+      "ctaSecondary": "Talk on WhatsApp",
+      "badge": "TVDE PORTUGAL",
+      "highlight": {
+        "title": "You drive, we take care of the rest!",
+        "description": "Onboarding in days, not weeks. Human and responsive support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
+      }
+    },
+    "services": {
+      "title": "Driver Types",
+      "subtitle": "Choose the model that best fits your situation",
+      "affiliate": {
+        "title": "Affiliate Driver",
+        "description": "Work with your own vehicle and have total control over your business.",
+        "benefits": [
+          "Total schedule flexibility",
+          "100% your revenue",
+          "Total vehicle control",
+          "Complete technical support"
+        ]
+      },
+      "renter": {
+        "title": "Renter Driver",
+        "description": "Rent a vehicle from Conduz PT and start working immediately.",
+        "benefits": [
+          "No initial investment",
+          "Always updated vehicles",
+          "Maintenance included",
+          "Complete insurance"
+        ]
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "3 simple steps to get started",
+      "feature": "PROCESS",
+      "steps": [
+        {
+          "number": "1",
+          "title": "Application",
+          "description": "Fill out the online application form"
+        },
+        {
+          "number": "2",
+          "title": "Validation & training",
+          "description": "Compliance, insurance, welcome kit"
+        },
+        {
+          "number": "3",
+          "title": "Start earning",
+          "description": "Real-time monitoring and clear payments"
+        }
+      ]
+    },
+    "features": {
+      "title": "Why Choose Conduz PT?",
+      "items": [
+        {
+          "title": "Complete Integration",
+          "description": "We connect with all major transport platforms"
+        },
+        {
+          "title": "24/7 Support",
+          "description": "We are always available to help you"
+        },
+        {
+          "title": "Total Transparency",
+          "description": "Detailed and transparent reports"
+        },
+        {
+          "title": "Guaranteed Growth",
+          "description": "We help maximize your earnings"
+        }
+      ]
+    },
+    "metrics": {
+      "title": "Our Numbers",
+      "subtitle": "Indicators that prove our efficiency",
+      "feature": "RESULTS",
+      "stats": [
+        {
+          "value": "95",
+          "total": "100",
+          "unit": "%",
+          "label": "Document approval rate",
+          "description": "More than 95% document approval rate"
+        },
+        {
+          "value": "24",
+          "total": "48",
+          "unit": "h",
+          "label": "Average analysis time",
+          "description": "Less than 24h average analysis time when possible"
+        },
+        {
+          "value": "4.8",
+          "total": "5.0",
+          "unit": "/5",
+          "label": "Support satisfaction",
+          "description": "4.8/5 support satisfaction"
+        },
+        {
+          "value": "7",
+          "total": "7",
+          "unit": "days",
+          "label": "Support available",
+          "description": "Support 7 days a week"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to Start Earning?",
+      "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
+      "feature": "NEXT STEP",
+      "button": "Start now"
+    }
+}

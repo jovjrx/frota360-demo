@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
-import { loadTranslations, createTranslationFunction } from '../lib/translations';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
@@ -24,14 +22,10 @@ import {
 import { Title } from '@/components/Title';
 import { Container } from '@/components/Container';
 import { FiMail, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { withPublicSSR, PublicPageProps } from '@/lib/ssr';
+import { PUBLIC } from '@/translations';
 
-interface ForgotPasswordPageProps {
-  translations: Record<string, any>;
-}
-
-export default function ForgotPasswordPage({ translations }: ForgotPasswordPageProps) {
-  const router = useRouter();
-  const t = createTranslationFunction(translations.common);
+export default function ForgotPasswordPage({ tPage }: PublicPageProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,13 +44,13 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
     } catch (err: any) {
       console.error('Erro ao enviar email de recuperação:', err);
       if (err.code === 'auth/user-not-found') {
-        setError('Não encontramos uma conta com este email.');
+        setError(tPage(PUBLIC.AUTH.FORGOT_PASSWORD.ERROR_USER_NOT_FOUND));
       } else if (err.code === 'auth/invalid-email') {
-        setError('Email inválido.');
+        setError(tPage(PUBLIC.AUTH.FORGOT_PASSWORD.ERROR_INVALID_EMAIL));
       } else if (err.code === 'auth/too-many-requests') {
-        setError('Muitas tentativas. Tente novamente mais tarde.');
+        setError(tPage(PUBLIC.AUTH.FORGOT_PASSWORD.ERROR_TOO_MANY_REQUESTS));
       } else {
-        setError('Erro ao enviar email. Tente novamente.');
+        setError(tPage(PUBLIC.AUTH.FORGOT_PASSWORD.ERROR_GENERIC));
       }
     } finally {
       setIsLoading(false);
@@ -67,15 +61,15 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
     return (
       <>
         <Head>
-          <title>Email Enviado - Conduz.pt</title>
-          <meta name="description" content="Email de recuperação de senha enviado" />
+          <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_TITLE)} - Conduz.pt</title>
+          <meta name="description" content={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_DESCRIPTION)} />
         </Head>
 
         <Container softBg maxW="md">
           <Title
-            title="Email Enviado!"
-            description="Verifique sua caixa de entrada"
-            feature="RECUPERAÇÃO"
+            title={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_TITLE)}
+            description={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_DESCRIPTION)}
+            feature={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.FEATURE)}
           />
           <VStack spacing={8} align="stretch">
             <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
@@ -96,12 +90,9 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                 
                 <VStack spacing={2}>
                   <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-                    Email de recuperação enviado!
+                    {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_CHECK_INBOX)}
                   </Text>
                   <Text color="gray.600">
-                    Enviamos um link para redefinir sua senha para:
-                  </Text>
-                  <Text fontWeight="medium" color="blue.600">
                     {email}
                   </Text>
                 </VStack>
@@ -110,12 +101,7 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                   <AlertIcon />
                   <Box>
                     <Text fontSize="sm">
-                      <strong>Próximos passos:</strong>
-                    </Text>
-                    <Text fontSize="sm">
-                      1. Verifique sua caixa de entrada<br/>
-                      2. Clique no link do email<br/>
-                      3. Defina uma nova senha
+                      {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_INSTRUCTIONS)}
                     </Text>
                   </Box>
                 </Alert>
@@ -129,23 +115,8 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                     w="full"
                     size="lg"
                   >
-                    Voltar ao Login
+                    {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.BACK_TO_LOGIN)}
                   </Button>
-                  
-                  <Text fontSize="sm" color="gray.500">
-                    Não recebeu o email? Verifique a pasta de spam ou{' '}
-                    <Button
-                      variant="link"
-                      colorScheme="blue"
-                      size="sm"
-                      onClick={() => {
-                        setSuccess(false);
-                        setEmail('');
-                      }}
-                    >
-                      tente novamente
-                    </Button>
-                  </Text>
                 </VStack>
               </VStack>
             </Box>
@@ -158,15 +129,15 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
   return (
     <>
       <Head>
-        <title>Esqueci a Senha - Conduz.pt</title>
-        <meta name="description" content="Recupere sua senha da plataforma Conduz.pt" />
+        <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.TITLE)} - Conduz.pt</title>
+        <meta name="description" content={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.DESCRIPTION)} />
       </Head>
 
       <Container softBg maxW="md">
         <Title
-          title="Esqueci a Senha"
-          description="Digite seu email para receber um link de recuperação"
-          feature="RECUPERAÇÃO"
+          title={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.TITLE)}
+          description={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUBTITLE)}
+          feature={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.FEATURE)}
         />
         <VStack spacing={8} align="stretch">
           <Box bg="white" p={8} borderRadius="xl" shadow="sm" border="1px" borderColor="gray.200">
@@ -180,7 +151,7 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                 )}
 
                 <FormControl id="email" isRequired>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.EMAIL)}</FormLabel>
                   <InputGroup>
                     <InputLeftElement pointerEvents="none">
                       <FiMail color="gray.400" />
@@ -189,7 +160,7 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
+                      placeholder={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.EMAIL_PLACEHOLDER)}
                       size="lg"
                       required
                     />
@@ -201,10 +172,10 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                   colorScheme="blue"
                   size="lg"
                   isLoading={isLoading}
-                  loadingText="Enviando..."
+                  loadingText={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUBMIT)}
                   w="full"
                 >
-                  Enviar Link de Recuperação
+                  {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUBMIT)}
                 </Button>
               </Stack>
             </form>
@@ -212,9 +183,6 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
             <Divider my={6} />
 
             <VStack spacing={3}>
-              <Text fontSize="sm" color="gray.600" textAlign="center">
-                Lembrou da sua senha?
-              </Text>
               <Button
                 as={Link}
                 href="/login"
@@ -222,7 +190,7 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
                 variant="outline"
                 w="full"
               >
-                Voltar ao Login
+                {tPage(PUBLIC.AUTH.FORGOT_PASSWORD.BACK_TO_LOGIN)}
               </Button>
             </VStack>
           </Box>
@@ -232,20 +200,4 @@ export default function ForgotPasswordPage({ translations }: ForgotPasswordPageP
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ locale = 'pt' }) => {
-  try {
-    const translations = await loadTranslations(locale, ['common']);
-    return {
-      props: {
-        translations: { common: translations.common },
-      },
-    };
-  } catch (error) {
-    console.error('Failed to load translations:', error);
-    return {
-      props: {
-        translations: { common: {} },
-      },
-    };
-  }
-};
+export const getServerSideProps = withPublicSSR('auth', undefined, true);

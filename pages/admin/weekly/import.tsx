@@ -32,7 +32,7 @@ import {
   FiDatabase,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
 import { useRouter } from 'next/router';
 

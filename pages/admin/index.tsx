@@ -11,7 +11,6 @@
 import { useState } from 'react';
 import {
   Box,
-  Container,
   Heading,
   SimpleGrid,
   Card,
@@ -38,7 +37,7 @@ import {
 import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers, FiFileText } from 'react-icons/fi';
 import useSWR from 'swr';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getDashboardStats, getDrivers, getRequests } from '@/lib/admin/adminQueries';
 
 interface DashboardData {
@@ -58,9 +57,22 @@ interface AdminDashboardProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function AdminDashboard({ user, translations, locale, initialData }: AdminDashboardProps) {
+export default function AdminDashboard({ user, locale, initialData, tCommon, tPage }: AdminDashboardProps) {
   const toast = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
+    if (!fn) return fallback ?? key;
+    const value = fn(key);
+    if (typeof value === 'string') return value;
+    return fallback ?? key;
+  };
+
+  const t = makeSafeT(tPage);
+  const tc = makeSafeT(tCommon);
+
+  const subtitleTemplate = t('dashboard.welcome', 'Bem-vindo, {{name}}');
+  const subtitle = subtitleTemplate.replace('{{name}}', user.displayName || user.email || '');
 
   // SWR com fallback dos dados SSR
   const { data, mutate } = useSWR<DashboardData>(
@@ -78,14 +90,14 @@ export default function AdminDashboard({ user, translations, locale, initialData
     try {
       await mutate();
       toast({
-        title: 'Dados atualizados',
+        title: t('dashboard.toasts.refreshSuccess', tc('messages.success')),
         status: 'success',
         duration: 2000,
       });
     } catch (error) {
       toast({
-        title: 'Erro ao atualizar',
-        description: 'Tente novamente',
+        title: t('dashboard.toasts.refreshError', tc('errors.title')),
+        description: tc('errors.tryAgain'),
         status: 'error',
         duration: 3000,
       });
@@ -95,7 +107,8 @@ export default function AdminDashboard({ user, translations, locale, initialData
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-PT', {
+    const intlLocale = locale === 'en' ? 'en-GB' : locale === 'es' ? 'es-ES' : 'pt-PT';
+    return new Intl.NumberFormat(intlLocale, {
       style: 'currency',
       currency: 'EUR',
     }).format(value);
@@ -114,8 +127,8 @@ export default function AdminDashboard({ user, translations, locale, initialData
 
   return (
     <AdminLayout
-      title="Dashboard"
-      subtitle={`Bem-vindo, ${user.displayName || user.email}`}
+      title={t('dashboard.title', 'Dashboard')}
+      subtitle={subtitle}
       side={
         <Button
           leftIcon={<FiRefreshCw />}
@@ -124,17 +137,17 @@ export default function AdminDashboard({ user, translations, locale, initialData
           colorScheme="blue"
           size="sm"
         >
-          Atualizar
+          {t('dashboard.actions.refresh', 'Atualizar')}
         </Button>
       }
       breadcrumbs={[
-        { label: 'Dashboard' }
+        { label: t('dashboard.title', 'Dashboard') }
       ]}
     >
       <VStack spacing={8} align="stretch">
         {/* KPIs */}
         <Box>
-          <Heading size="md" mb={4}>Visão Geral</Heading>
+          <Heading size="md" mb={4}>{t('dashboard.sections.overview', t('dashboard.kpiTitle', 'Visão Geral'))}</Heading>
           <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
             <Card>
               <CardBody>
@@ -142,12 +155,15 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   <StatLabel>
                     <HStack>
                       <Icon as={FiUsers} />
-                      <Text>Total de Motoristas</Text>
+                      <Text>{t('dashboard.totalDrivers', 'Total de Motoristas')}</Text>
                     </HStack>
                   </StatLabel>
                   <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
                   <StatHelpText>
-                    {data?.stats?.activeDrivers || 0} ativos
+                    {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
+                      '{{count}}',
+                      String(data?.stats?.activeDrivers || 0)
+                    )}
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -159,13 +175,13 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   <StatLabel>
                     <HStack>
                       <Icon as={FiTruck} />
-                      <Text>Motoristas Ativos</Text>
+                      <Text>{t('dashboard.activeDrivers', 'Motoristas Ativos')}</Text>
                     </HStack>
                   </StatLabel>
                   <StatNumber>{data?.stats?.activeDrivers || 0}</StatNumber>
                   <StatHelpText>
                     <StatArrow type="increase" />
-                    Em operação
+                    {t('dashboard.helpers.operational', 'Em operação')}
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -177,11 +193,11 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   <StatLabel>
                     <HStack>
                       <Icon as={FiFileText} />
-                      <Text>Solicitações Pendentes</Text>
+                      <Text>{t('dashboard.pendingRequests', 'Solicitações Pendentes')}</Text>
                     </HStack>
                   </StatLabel>
                   <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
-                  <StatHelpText>Aguardando análise</StatHelpText>
+                  <StatHelpText>{t('dashboard.helpers.awaitingReview', 'Aguardando análise')}</StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
@@ -192,13 +208,13 @@ export default function AdminDashboard({ user, translations, locale, initialData
                   <StatLabel>
                     <HStack>
                       <Icon as={FiDollarSign} />
-                      <Text>Ganhos Esta Semana</Text>
+                      <Text>{t('dashboard.weeklyEarnings', 'Ganhos Esta Semana')}</Text>
                     </HStack>
                   </StatLabel>
                   <StatNumber>
                     {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
                   </StatNumber>
-                  <StatHelpText>Semana atual</StatHelpText>
+                  <StatHelpText>{t('dashboard.helpers.currentWeek', 'Semana atual')}</StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
@@ -208,15 +224,15 @@ export default function AdminDashboard({ user, translations, locale, initialData
         {/* Motoristas Recentes */}
         <Card>
           <CardBody>
-            <Heading size="sm" mb={4}>Motoristas Recentes</Heading>
+            <Heading size="sm" mb={4}>{t('dashboard.sections.recentDrivers', 'Motoristas Recentes')}</Heading>
             <Box overflowX="auto">
               <Table size="sm">
                 <Thead>
                   <Tr>
-                    <Th>Nome</Th>
-                    <Th>Email</Th>
-                    <Th>Tipo</Th>
-                    <Th>Status</Th>
+                    <Th>{tc('user.name')}</Th>
+                    <Th>{tc('user.email')}</Th>
+                    <Th>{t('dashboard.tables.drivers.type', 'Tipo')}</Th>
+                    <Th>{t('dashboard.tables.drivers.status', 'Status')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -226,12 +242,16 @@ export default function AdminDashboard({ user, translations, locale, initialData
                       <Td>{driver.email}</Td>
                       <Td>
                         <Badge colorScheme={driver.type === 'renter' ? 'purple' : 'blue'}>
-                          {driver.type === 'renter' ? 'Locatário' : 'Afiliado'}
+                          {driver.type === 'renter'
+                            ? t('drivers.type.renter', 'Locatário')
+                            : t('drivers.type.affiliate', 'Afiliado')}
                         </Badge>
                       </Td>
                       <Td>
                         <Badge colorScheme={getStatusColor(driver.status)}>
-                          {driver.status === 'active' ? 'Ativo' : 'Inativo'}
+                          {driver.status === 'active'
+                            ? tc('status.active')
+                            : tc('status.inactive')}
                         </Badge>
                       </Td>
                     </Tr>
@@ -245,15 +265,15 @@ export default function AdminDashboard({ user, translations, locale, initialData
         {/* Solicitações Recentes */}
         <Card>
           <CardBody>
-            <Heading size="sm" mb={4}>Solicitações Recentes</Heading>
+            <Heading size="sm" mb={4}>{t('dashboard.sections.recentRequests', 'Solicitações Recentes')}</Heading>
             <Box overflowX="auto">
               <Table size="sm">
                 <Thead>
                   <Tr>
-                    <Th>Nome</Th>
-                    <Th>Email</Th>
-                    <Th>Tipo</Th>
-                    <Th>Status</Th>
+                    <Th>{tc('user.name')}</Th>
+                    <Th>{tc('user.email')}</Th>
+                    <Th>{t('dashboard.tables.requests.type', 'Tipo')}</Th>
+                    <Th>{t('dashboard.tables.requests.status', 'Status')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -263,14 +283,20 @@ export default function AdminDashboard({ user, translations, locale, initialData
                       <Td>{request.email}</Td>
                       <Td>
                         <Badge colorScheme={request.type === 'renter' ? 'purple' : 'blue'}>
-                          {request.type === 'renter' ? 'Locatário' : 'Afiliado'}
+                          {request.type === 'renter'
+                            ? t('drivers.type.renter', 'Locatário')
+                            : t('drivers.type.affiliate', 'Afiliado')}
                         </Badge>
                       </Td>
                       <Td>
                         <Badge colorScheme={getStatusColor(request.status)}>
-                          {request.status === 'pending' ? 'Pendente' :
-                           request.status === 'approved' ? 'Aprovado' :
-                           request.status === 'rejected' ? 'Rejeitado' : request.status}
+                          {request.status === 'pending'
+                            ? tc('status.pending')
+                            : request.status === 'approved'
+                              ? tc('status.approved')
+                              : request.status === 'rejected'
+                                ? tc('status.rejected')
+                                : request.status}
                         </Badge>
                       </Td>
                     </Tr>

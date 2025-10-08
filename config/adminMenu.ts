@@ -28,7 +28,7 @@ export interface AdminMenuItem {
 export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     {
         id: 'dashboard',
-        label: 'Início',
+        label: 'Administração',
         href: '/admin',
         icon: FiHome,
         description: 'Visão geral',

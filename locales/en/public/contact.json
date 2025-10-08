@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "title": "Talk to Conduz.pt",
+    "subtitle": "Ask questions, sign up or request a quote",
+    "feature": "CONTACT"
+  },
+  "form": {
+    "title": "Contact Form",
+    "subtitle": "Fill in your details to become a driver or a partner company",
+    "feature": "FORM",
+    "description": "Fill out the form below and our team will get back to you within 24h.",
+    "fields": {
+      "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "Your phone number",
+      "interest": "Area of Interest",
+      "interestPlaceholder": "Select an option",
+      "message": "Message",
+      "messagePlaceholder": "Describe your question or request"
+    },
+    "interests": {
+      "rides": "Book Ride/Transfer",
+      "partners": "Business Partnerships",
+      "drivers": "Work as a Driver",
+      "companies": "Services for Companies",
+      "tourism": "Tourism and Trips",
+      "support": "Support/Service",
+      "other": "Other"
+    },
+    "validation": {
+      "name": {
+        "required": "Name is required"
+      },
+      "email": {
+        "required": "Email is required",
+        "invalid": "Invalid email"
+      },
+      "service": {
+        "required": "Select an option"
+      },
+      "message": {
+        "required": "Message is required",
+        "minLength": "Message must be at least 10 characters"
+      }
+    },
+    "submit": {
+      "button": "Send message",
+      "loading": "Sending..."
+    },
+    "success": {
+      "title": "Message sent!",
+      "description": "Thanks for contacting us. We’ll get back to you shortly."
+    },
+    "error": {
+      "title": "Failed to send",
+      "description": "Something went wrong. Please try again or use another channel."
+    },
+    "privacy": "By submitting this form, you agree to our privacy policy."
+  },
+  "location": {
+    "title": "Our Location",
+    "description": "It will be a pleasure to assist you",
+    "directEmail": "Prefer email?",
+    "directEmailDescription": "Send us an email directly for in‑depth discussions about projects and partnerships.",
+    "phone": "By phone",
+    "phoneDescription": "Talk to us via WhatsApp for quick responses and immediate support."
+  }
+}

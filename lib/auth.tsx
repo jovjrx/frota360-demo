@@ -31,10 +31,28 @@ const AuthContext = createContext<AuthContextValue>({
   isDriver: false,
 });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+interface AuthProviderProps {
+  children: ReactNode;
+  initialUserData?: UserData | null;
+}
+
+export function AuthProvider({ children, initialUserData }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<UserData | null>(initialUserData || null);
+  const [loading, setLoading] = useState(!initialUserData);
+
+  // Sincronizar userData quando initialUserData mudar (navegação entre páginas)
+  useEffect(() => {
+    if (initialUserData) {
+      const currentDataStr = JSON.stringify(userData);
+      const newDataStr = JSON.stringify(initialUserData);
+      if (currentDataStr !== newDataStr) {
+        console.log('🔄 Atualizando userData do SSR:', initialUserData);
+        setUserData(initialUserData);
+        setLoading(false);
+      }
+    }
+  }, [initialUserData]); // Não incluir userData nas dependências para evitar loop
 
   // Buscar dados completos do usuário e criar sessão se necessário
   const fetchUserData = async (firebaseUser: User) => {
@@ -90,17 +108,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // Buscar dados completos do usuário
-        await fetchUserData(firebaseUser);
+        // Se já temos userData (do SSR ou de fetch anterior), não buscar novamente
+        if (!userData) {
+          console.log('🔍 Buscando dados do usuário (não tem userData)');
+          await fetchUserData(firebaseUser);
+        } else {
+          console.log('✅ Já temos userData, pulando fetch');
+          setLoading(false);
+        }
       } else {
+        // Usuário não está logado
         setUserData(null);
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
     
     return unsubscribe;
-  }, []);
+  }, []); // Lista de dependências vazia - só executa na montagem
 
   const signOut = async () => {
     await fbSignOut(auth);

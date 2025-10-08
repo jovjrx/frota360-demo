@@ -53,9 +53,7 @@ import {
   FiTrash2,
   FiMoreVertical,
 } from 'react-icons/fi';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
-import { useTranslations } from '@/hooks/useTranslations';
-import { getTranslation } from '@/lib/translations';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getUsers, getUsersStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
 
@@ -77,7 +75,7 @@ interface UsersPageProps extends AdminPageProps {
   };
 }
 
-export default function UsersManagement({ user, translations, locale, initialUsers, initialStats }: UsersPageProps) {
+export default function UsersManagement({ tPage, tAdmin, initialUsers, initialStats }: UsersPageProps) {
   const router = useRouter();
   const toast = useToast();
   const [users, setUsers] = useState<User[]>(initialUsers);
@@ -91,9 +89,6 @@ export default function UsersManagement({ user, translations, locale, initialUse
   const { isOpen: isViewModalOpen, onOpen: onViewModalOpen, onClose: onViewModalClose } = useDisclosure();
   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
-
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {

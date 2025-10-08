@@ -27,7 +27,7 @@ import {
   HStack,
 } from '@chakra-ui/react';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { withAdminSSR, AdminPageProps } from '@/lib/admin/withAdminSSR';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
 
 interface AddDriverProps extends AdminPageProps {}

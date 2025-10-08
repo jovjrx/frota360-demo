@@ -1,39 +1,39 @@
-import { GetServerSideProps } from "next";
 import {
   Box,
   Text,
   VStack,
   Divider,
 } from "@chakra-ui/react";
-import { loadTranslations } from "@/lib/translations";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { PageProps } from "@/interface/Global";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { RequestForm } from "@/components/RequestForm";
 import Link from "next/link";
+import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
+import { REQUEST, COMMON } from "@/translations";
 
-export default function Request({ tPage, tCommon, locale }: PageProps & { locale: string }) {
+export default function RequestPage({ tPage, tCommon }: PublicPageProps) {
+  
   return (
     <>
       <Container softBg>
         <Title
-          title="Candidatura de Motorista TVDE"
-          description="Você conduz, nós cuidamos do resto!"
-          feature="CANDIDATURA"
+          title={tPage(REQUEST.HERO.TITLE)}
+          description={tPage(REQUEST.HERO.SUBTITLE)}
+          feature={tPage(REQUEST.HERO.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "2fr 1fr" }}>
           <RequestForm tPage={tPage} tCommon={tCommon} />
 
           <VStack spacing={4} minW={'full'} align={'stretch'}>
             <Card
-              title="Informações de Contacto"
-              description="Fale connosco"
+              title={tPage(REQUEST.CONTACT_INFO.TITLE)}
+              description={tPage(REQUEST.CONTACT_INFO.DESCRIPTION)}
               borded
             >
               <VStack spacing={1} align="stretch">
-                <Text>{tCommon("company.address")}</Text>
+                <Text>{tCommon(COMMON.COMPANY.ADDRESS)}</Text>
                 <Text>{tCommon("company.postalCode")}</Text>
                 <Text>{tCommon("company.city")} - {tCommon("company.state")}</Text>
                 <Text>{tCommon("company.country")}</Text>
@@ -72,7 +72,7 @@ export default function Request({ tPage, tCommon, locale }: PageProps & { locale
           description="Escolha o modelo que melhor se adapta à sua situação"
           feature="OPÇÕES"
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           <Card animated borded>
             <VStack spacing={4} align="start">
               <Box>
@@ -116,28 +116,4 @@ export default function Request({ tPage, tCommon, locale }: PageProps & { locale
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
-      : context.req.headers['x-locale'] || 'pt';
-    
-    const translations = await loadTranslations(locale, ["common", "request"]);
-    const { common, request: page } = translations;
-
-    return {
-      props: {
-        translations: { common, page },
-        locale,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to load translations:", error);
-    return {
-      props: {
-        translations: { common: {}, page: {} },
-        locale: 'pt',
-      },
-    };
-  }
-};
+export const getServerSideProps = withPublicSSR('request');

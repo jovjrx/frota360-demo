@@ -22,9 +22,9 @@ import {
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
-  getPainelMenuItems,
-  isPainelMenuItemActive,
-} from '@/config/painelMenu';
+  getDashboardMenuItems,
+  isDashboardMenuItemActive,
+} from '@/config/dashboardMenu';
 import { WrapperLayout } from './WrapperLayout';
 
 interface PainelLayoutProps {
@@ -46,7 +46,7 @@ export default function PainelLayout({
   breadcrumbs = []
 }: PainelLayoutProps) {
   const router = useRouter();
-  const menuItems = getPainelMenuItems();
+  const menuItems = getDashboardMenuItems();
 
   return (
     <Box minH="100vh" bg="gray.50" position='relative'>
@@ -68,7 +68,7 @@ export default function PainelLayout({
                 key={item.id}
                 as={Link}
                 href={item.href}
-                variant={isPainelMenuItemActive(item.href, router.pathname) ? 'solid' : 'ghost'}
+                variant={isDashboardMenuItemActive(item.href, router.pathname) ? 'solid' : 'ghost'}
                 colorScheme={'whiteAlpha'}
                 size="sm"
                 textColor={'white'}

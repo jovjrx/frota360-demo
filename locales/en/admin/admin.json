@@ -1,0 +1,297 @@
+{
+  "dashboard": {
+    "title": "TVDE Management Dashboard",
+    "subtitle": "Business overview - Last 30 days",
+    "kpiTitle": "Financial KPIs",
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "netProfit": "Net Profit",
+    "totalTrips": "Total Trips",
+    "activeVehicles": "Active Vehicles",
+    "activeDrivers": "Active Drivers",
+    "fleetTitle": "Active Fleet",
+    "utilizationRate": "Utilization Rate",
+    "driversTitle": "Active Drivers",
+    "affiliates": "Affiliates",
+    "renters": "Renters",
+    "integrationsTitle": "Integration Status",
+    "lastSync": "Last Sync",
+    "quickActionsTitle": "Quick Actions",
+    "manageRequests": "Manage Requests",
+    "manageDrivers": "Driver Control",
+    "manageFleet": "Fleet Control",
+    "detailedMetrics": "Detailed Metrics",
+    "integrations": "Integrations",
+    "contentManagement": "Content Management",
+    "alertsTitle": "Alerts",
+    "integrationProblems": "Integration issues",
+    "weeklyEarnings": "Earnings This Week",
+    "welcome": "Welcome, {{name}}",
+    "actions": {
+      "refresh": "Refresh"
+    },
+    "helpers": {
+      "activeCount": "{{count}} active",
+      "operational": "In operation",
+      "awaitingReview": "Awaiting review",
+      "currentWeek": "Current week"
+    },
+    "sections": {
+      "overview": "Overview",
+      "recentDrivers": "Recent Drivers",
+      "recentRequests": "Recent Requests"
+    },
+    "tables": {
+      "drivers": {
+        "type": "Type",
+        "status": "Status"
+      },
+      "requests": {
+        "type": "Type",
+        "status": "Status"
+      }
+    },
+    "toasts": {
+      "refreshSuccess": "Data refreshed",
+      "refreshError": "Failed to refresh"
+    }
+  },
+  "requests": {
+    "title": "Request Management",
+    "subtitle": "Review and manage driver applications",
+    "filterAll": "All",
+    "filterPending": "Pending",
+    "filterApproved": "Approved",
+    "filterRejected": "Rejected",
+    "statsTotal": "Total",
+    "statsPending": "Pending",
+    "statsApproved": "Approved",
+    "statsRejected": "Rejected",
+    "tableName": "Name",
+    "tableEmail": "Email",
+    "tablePhone": "Phone",
+    "tableType": "Type",
+    "tableStatus": "Status",
+    "tableDate": "Date",
+    "tableActions": "Actions",
+    "approve": "Approve",
+    "reject": "Reject",
+    "notes": "Administrative Notes",
+    "rejectionReason": "Rejection Reason",
+    "approveModalTitle": "Approve Application",
+    "rejectModalTitle": "Reject Application",
+    "approveSuccess": "Application approved successfully!",
+    "rejectSuccess": "Application rejected successfully!"
+  },
+  "drivers": {
+    "title": "Driver Control",
+    "subtitle": "Complete management of active drivers",
+    "addDriver": "Add Driver",
+    "editDriver": "Edit Driver",
+    "driverDetails": "Driver Details",
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "search": "Search"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "type": "Type",
+      "status": "Status",
+      "vehicle": "Vehicle",
+      "joinDate": "Join Date",
+      "totalEarnings": "Total Earnings",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    },
+    "type": {
+      "affiliate": "Affiliate",
+      "renter": "Renter"
+    }
+  },
+  "fleet": {
+    "title": "TVDE Fleet Control",
+    "subtitle": "Fleet financial management - Flexible periods",
+    "addRecord": "Add Record",
+    "editRecord": "Edit Record",
+    "syncData": "Sync Data",
+    "exportExcel": "Export Excel",
+    "markAsPaid": "Mark as Paid",
+    "filters": {
+      "driver": "Driver",
+      "vehicle": "Vehicle",
+      "period": "Period",
+      "status": "Status",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "table": {
+      "driver": "Driver",
+      "vehicle": "Vehicle",
+      "period": "Period",
+      "rental": "Rental",
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "total": "Total",
+      "fuel": "Fuel",
+      "commission": "Commission",
+      "payout": "Payout",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "kpis": {
+      "totalEarnings": "Total Earnings",
+      "totalExpenses": "Total Expenses",
+      "totalCommissions": "Commissions",
+      "totalPayouts": "Payouts",
+      "pending": "Pending"
+    },
+    "form": {
+      "driver": "Driver",
+      "vehicle": "Vehicle",
+      "periodStart": "Start Date",
+      "periodEnd": "End Date",
+      "earningsUber": "Uber Earnings (€)",
+      "earningsBolt": "Bolt Earnings (€)",
+      "tipsUber": "Uber Tips (€)",
+      "tipsBolt": "Bolt Tips (€)",
+      "tolls": "Tolls (€)",
+      "fuel": "Fuel (€)",
+      "rental": "Rental (€)",
+      "otherExpenses": "Other Expenses (€)",
+      "iban": "IBAN",
+      "notes": "Notes",
+      "calculatedTotal": "Total Earnings",
+      "calculatedCommission": "Commission Base",
+      "calculatedCommissionAmount": "Commission (7%)",
+      "calculatedPayout": "Net Payout"
+    }
+  },
+  "driversWeekly": {
+    "title": "Driver Control (Weekly)",
+    "subtitle": "Weekly driver management - 7-day periods",
+    "addRecord": "Add Record",
+    "editRecord": "Edit Record",
+    "syncData": "Sync Data",
+    "exportExcel": "Export Excel",
+    "markAsPaid": "Mark as Paid",
+    "filters": {
+      "driver": "Driver",
+      "week": "Week",
+      "status": "Status"
+    },
+    "table": {
+      "week": "Week",
+      "driver": "Driver",
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "tips": "Tips",
+      "grossTotal": "Gross Total",
+      "fuel": "Fuel",
+      "commission": "Commission",
+      "netPayout": "Net",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "form": {
+      "driver": "Driver",
+      "weekStart": "Week Start",
+      "weekEnd": "Week End",
+      "uberTrips": "Uber Trips (€)",
+      "uberTips": "Uber Tips (€)",
+      "uberTolls": "Uber Tolls (€)",
+      "boltTrips": "Bolt Trips (€)",
+      "boltTips": "Bolt Tips (€)",
+      "fuel": "Fuel (€)",
+      "otherCosts": "Other Costs (€)",
+      "iban": "IBAN",
+      "notes": "Notes",
+      "calculatedGross": "Gross Total",
+      "calculatedCommission": "Commission Base",
+      "calculatedCommissionAmount": "Commission (7%)",
+      "calculatedNet": "Net Amount"
+    }
+  },
+  "metrics": {
+    "title": "Detailed Metrics",
+    "subtitle": "Detailed performance analysis by platform",
+    "filterToday": "Today",
+    "filterWeek": "This Week",
+    "filterMonth": "This Month",
+    "filterQuarter": "This Quarter",
+    "filterYear": "This Year",
+    "filterCustom": "Custom",
+    "platformUber": "Uber",
+    "platformBolt": "Bolt",
+    "platformCartrack": "Cartrack",
+    "platformViaverde": "ViaVerde",
+    "platformFonoa": "FONOA",
+    "platformMyprio": "myprio",
+    "testConnection": "Test Connection",
+    "connectionSuccess": "Connection successful!",
+    "connectionError": "Connection error",
+    "rawData": "Raw Data",
+    "success": "Success",
+    "error": "Error"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Status and configuration of external integrations",
+    "testAllConnections": "Test All Connections",
+    "syncAllData": "Sync All Data",
+    "uber": {
+      "name": "Uber",
+      "description": "Uber integration for trips and earnings",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "bolt": {
+      "name": "Bolt",
+      "description": "Bolt integration for trips and earnings",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "cartrack": {
+      "name": "Cartrack",
+      "description": "Cartrack integration for vehicle data",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "viaverde": {
+      "name": "ViaVerde",
+      "description": "ViaVerde integration for toll data",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "fonoa": {
+      "name": "FONOA",
+      "description": "FONOA integration for billing",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "myprio": {
+      "name": "myprio",
+      "description": "myprio integration for fuel expenses",
+      "status": "Status",
+      "lastSync": "Last Sync",
+      "testConnection": "Test Connection"
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "error": "Error",
+      "syncing": "Syncing"
+    }
+  }
+}

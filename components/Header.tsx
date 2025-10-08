@@ -37,13 +37,28 @@ import { WrapperLayout } from "./layouts/WrapperLayout";
 interface HeaderProps {
   t: (key: string) => string;
   panel: boolean;
+  serverUser?: {
+    uid: string;
+    email: string;
+    displayName: string | null;
+    role: 'admin' | 'driver';
+  } | null;
 }
 
-export default function Header({ t, panel = false }: HeaderProps) {
+export default function Header({ t, panel = false, serverUser }: HeaderProps) {
   const [open, setOpen] = useState(false);
-  const { user, signOut, isAdmin, userData } = useAuth();
+  const { user: clientUser, signOut, isAdmin: clientIsAdmin, userData: clientUserData } = useAuth();
   const router = useRouter();
   const getLocalizedHref = useLocalizedHref();
+
+  // Usar dados do servidor se disponíveis (SSR), caso contrário usar do client (useAuth)
+  const user = serverUser || clientUser;
+  const isAdmin = serverUser ? serverUser.role === 'admin' : clientIsAdmin;
+  const userData = serverUser ? {
+    name: serverUser.displayName || serverUser.email,
+    email: serverUser.email,
+    role: serverUser.role,
+  } : clientUserData;
 
   const isActive = (path: string) => router.pathname === path;
 
@@ -88,7 +103,7 @@ export default function Header({ t, panel = false }: HeaderProps) {
 
   return (
     <Box as="header" borderBottomWidth="0" shadow="sm" position={'relative'} top={0} zIndex={900} bg="white" >
-      <WrapperLayout panel py={2}>
+      <WrapperLayout panel={panel} py={2}>
         <Flex align="center" justify="space-between" gap={4}>
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
             <Image

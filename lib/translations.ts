@@ -17,6 +17,7 @@ type SupportedLocale = typeof SUPPORTED_LOCALES[number];
 
 /**
  * Load translations for a specific locale and namespaces
+ * Namespaces can be in format "category/file" (e.g., "public/home") or just "file" (defaults to common)
  */
 export async function loadTranslations(
   locale: string = DEFAULT_LOCALE,
@@ -36,7 +37,18 @@ export async function loadTranslations(
 
   for (const namespace of namespaces) {
     try {
-      const filePath = path.join(process.cwd(), 'locales', normalizedLocale, `${namespace}.json`);
+      // Parse namespace to support both "category/file" and "file" formats
+      let category = 'common';
+      let fileName = namespace;
+      
+      if (namespace.includes('/')) {
+        [category, fileName] = namespace.split('/');
+      } else if (namespace === 'admin' || namespace === 'dashboard') {
+        category = namespace;
+        fileName = namespace;
+      }
+      
+      const filePath = path.join(process.cwd(), 'locales', normalizedLocale, category, `${fileName}.json`);
       
       if (fs.existsSync(filePath)) {
         const fileContent = fs.readFileSync(filePath, 'utf8');
