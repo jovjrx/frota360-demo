@@ -1,6 +1,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withIronSessionApiRoute } from '@/lib/session/ironSession';
+import { SessionRequest, withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { ApiResponse } from '@/types';
 import {
@@ -14,8 +14,12 @@ import { UberBusinessClient } from '@/lib/uber/client-business';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export default withIronSessionApiRoute(async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ApiResponse>
+  req: SessionRequest,
+  res: NextApiResponse<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+  }>,
 ) {
   const user = req.session.user;
 
@@ -89,8 +93,7 @@ export default withIronSessionApiRoute(async function handler(
 
       return res.status(200).json({
         success: true,
-        message: `Conexão com ${platform} estabelecida com sucesso`,
-        data: result.data,
+        message: `Conexão com ${platform} estabelecida com sucesso`
       });
     } else {
       // Atualizar status de erro no Firestore
