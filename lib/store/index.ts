@@ -53,6 +53,15 @@ export interface StorageProvider {
     findAll(): Promise<any[]>;
     findByActorId(actorId: string): Promise<any[]>;
   };
+  driverPayments: {
+    create(data: any): Promise<string>;
+    update(id: string, data: any): Promise<void>;
+    findById(id: string): Promise<any | null>;
+    findAll(): Promise<any[]>;
+    findByDriverId(driverId: string): Promise<any[]>;
+    findByRecordId(recordId: string): Promise<any | null>;
+    delete(id: string): Promise<void>;
+  };
 }
 
 class FirestoreProvider implements StorageProvider {
@@ -263,6 +272,47 @@ class FirestoreProvider implements StorageProvider {
     async findByActorId(actorId: string): Promise<any[]> {
       const snapshot = await adminDb.collection('audit').where('actorId', '==', actorId).orderBy('at', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+  };
+
+  driverPayments = {
+    async create(data: any): Promise<string> {
+      const now = new Date().toISOString();
+      const docRef = await adminDb.collection('driverPayments').add({
+        ...data,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return docRef.id;
+    },
+    async update(id: string, data: any): Promise<void> {
+      await adminDb.collection('driverPayments').doc(id).update({
+        ...data,
+        updatedAt: new Date().toISOString(),
+      });
+    },
+    async findById(id: string): Promise<any | null> {
+      const doc = await adminDb.collection('driverPayments').doc(id).get();
+      return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    },
+    async findAll(): Promise<any[]> {
+      const snapshot = await adminDb.collection('driverPayments').orderBy('paymentDate', 'desc').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+    async findByDriverId(driverId: string): Promise<any[]> {
+      const snapshot = await adminDb.collection('driverPayments').where('driverId', '==', driverId).orderBy('paymentDate', 'desc').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+    async findByRecordId(recordId: string): Promise<any | null> {
+      const snapshot = await adminDb.collection('driverPayments').where('recordId', '==', recordId).orderBy('paymentDate', 'desc').limit(1).get();
+      if (snapshot.empty) {
+        return null;
+      }
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    },
+    async delete(id: string): Promise<void> {
+      await adminDb.collection('driverPayments').doc(id).delete();
     },
   };
 }

@@ -2,11 +2,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import * as XLSX from 'xlsx';
 import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
+import { DriverPayment } from '@/schemas/driver-payment';
 
 interface DriverRecord extends DriverWeeklyRecord {
   driverType: 'affiliate' | 'renter';
   vehicle: string;
   platformData: WeeklyNormalizedData[];
+  paymentInfo?: DriverPayment | null;
 }
 
 
@@ -36,6 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Repasse Líquido (€)': record.repasse,
       'Status Pagamento': record.paymentStatus === 'paid' ? 'Pago' : 'Pendente',
       'Data Pagamento': record.paymentDate ? new Date(record.paymentDate).toLocaleDateString('pt-PT') : 'N/A',
+      'Bônus (€)': record.paymentInfo?.bonusAmount ?? 0,
+      'Desconto (€)': record.paymentInfo?.discountAmount ?? 0,
+      'Valor Pago (€)': record.paymentInfo?.totalAmount ?? 0,
+      'Observações Pagamento': record.paymentInfo?.notes ?? '',
+      'Comprovante (URL)': record.paymentInfo?.proofUrl ?? '',
+      'Comprovante (Arquivo)': record.paymentInfo?.proofFileName ?? '',
       'Última Atualização': new Date(record.updatedAt).toLocaleString('pt-PT'),
     }));
 

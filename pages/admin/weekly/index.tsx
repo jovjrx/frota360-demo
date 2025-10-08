@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import {
   Box,
   Heading,
@@ -20,8 +21,6 @@ import {
   Select,
   ButtonGroup,
   Icon,
-  Stat,
-  StatHelpText,
   useToast,
   Spinner,
   Alert,
@@ -29,13 +28,19 @@ import {
   AlertTitle,
   AlertDescription,
   useBreakpointValue,
+  FormControl,
+  FormLabel,
+  FormHelperText,
+  Input,
+  Textarea,
 } from '@chakra-ui/react';
 import {
   FiRefreshCw,
   FiUpload,
   FiFileText,
   FiCheckCircle,
-  FiRotateCcw,
+  FiExternalLink,
+  FiPaperclip,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
@@ -46,8 +51,10 @@ import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
 import EditableNumberField from '@/components/admin/EditableNumberField';
 import StatCard from '@/components/admin/StatCard';
 import WeeklyRecordCard from '@/components/admin/WeeklyRecordCard';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 import { FiDownload, FiMail } from 'react-icons/fi';
+import { storage } from '@/lib/firebase';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 interface WeekOption {
   label: string;
@@ -57,12 +64,14 @@ interface WeekOption {
 }
 
 import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { DriverPayment } from '@/schemas/driver-payment';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 
 interface DriverRecord extends DriverWeeklyRecord {
   driverType: 'affiliate' | 'renter';
   vehicle: string;
   platformData: WeeklyNormalizedData[];
+  paymentInfo?: DriverPayment | null;
 }
 
 interface WeeklyPageProps extends AdminPageProps {
@@ -93,6 +102,16 @@ export default function WeeklyPage({
   const [unassigned, setUnassigned] = useState<WeeklyNormalizedData[]>([]);
   const [generatingRecordId, setGeneratingRecordId] = useState<string | null>(null);
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
+  const { isOpen: isPaymentModalOpen, onOpen: onOpenPaymentModal, onClose: onClosePaymentModal } = useDisclosure();
+  const [selectedPaymentRecord, setSelectedPaymentRecord] = useState<DriverRecord | null>(null);
+  const [paymentDateValue, setPaymentDateValue] = useState<string>('');
+  const [paymentNotes, setPaymentNotes] = useState<string>('');
+  const [isSavingPayment, setIsSavingPayment] = useState<boolean>(false);
+  const [bonusValue, setBonusValue] = useState<string>('0');
+  const [discountValue, setDiscountValue] = useState<string>('0');
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const MAX_PROOF_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   const toast = useToast();
   const router = useRouter();
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
@@ -135,6 +154,69 @@ export default function WeeklyPage({
     }).format(value || 0);
   };
 
+  const parseMoneyInput = (value: string) => {
+    if (!value) return 0;
+    const normalized = value.replace(',', '.');
+    const numeric = Number(normalized);
+    if (!Number.isFinite(numeric)) {
+      return 0;
+    }
+    return Number(Math.round(numeric * 100) / 100);
+  };
+
+  const formatDateTimeLocalValue = (value?: string) => {
+    const fallback = new Date();
+    const date = value ? new Date(value) : fallback;
+
+    if (Number.isNaN(date.getTime())) {
+      return `${fallback.getFullYear()}-${(fallback.getMonth() + 1).toString().padStart(2, '0')}-${fallback.getDate().toString().padStart(2, '0')}T${fallback.getHours().toString().padStart(2, '0')}:${fallback.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    const pad = (num: number) => num.toString().padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const paymentBaseAmount = selectedPaymentRecord?.repasse ?? 0;
+  const paymentBonusAmount = parseMoneyInput(bonusValue);
+  const paymentDiscountAmount = parseMoneyInput(discountValue);
+  const paymentTotalAmount = Number(
+    Math.round((paymentBaseAmount + paymentBonusAmount - paymentDiscountAmount) * 100) / 100
+  );
+  const paymentTotalInvalid = paymentTotalAmount <= 0;
+
+  const handleProofFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+
+    if (!file) {
+      setPaymentProofFile(null);
+      return;
+    }
+
+    if (file.size > MAX_PROOF_FILE_SIZE) {
+      toast({
+        title: t('weekly.control.paymentModal.proofTooLargeTitle', 'Arquivo muito grande'),
+        description: t('weekly.control.paymentModal.proofTooLargeDescription', 'Selecione um arquivo de até 10MB.'),
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    setPaymentProofFile(file);
+  };
+
+  const handleRemoveProof = () => {
+    setPaymentProofFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const loadWeekData = async (weekValue: string) => {
     const selectedWeek = weekOptions.find(w => w.value === weekValue);
     if (!selectedWeek) {
@@ -157,11 +239,12 @@ export default function WeeklyPage({
 
       const data = await response.json();
 
-      const recordsResponse: DriverRecord[] = (data.records || []).map((record: DriverRecord) => ({
+      const recordsResponse: DriverRecord[] = (data.records || []).map((record: any) => ({
         ...record,
         driverType: record.driverType,
         vehicle: record.vehicle,
         platformData: record.platformData || [],
+        paymentInfo: record.paymentInfo ?? null,
       }));
 
       setRecords(recordsResponse);
@@ -446,6 +529,7 @@ export default function WeeklyPage({
             ? {
               ...item,
               ...updatedRecord,
+              paymentInfo: item.paymentInfo,
             }
             : item
         )
@@ -468,65 +552,196 @@ export default function WeeklyPage({
     }
   };
 
-  const handleTogglePaymentStatus = async (record: DriverRecord) => {
+  const handleOpenPaymentModal = (record: DriverRecord) => {
     if (!record?.id) {
       return;
     }
 
-    const nextStatus = record.paymentStatus === "paid" ? "pending" : "paid";
-    setUpdatingPaymentId(record.id);
+    setSelectedPaymentRecord(record);
+    setPaymentDateValue(formatDateTimeLocalValue());
+    setPaymentNotes('');
+    setBonusValue('0');
+    setDiscountValue('0');
+    setPaymentProofFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onOpenPaymentModal();
+  };
+
+  const handleClosePaymentModal = () => {
+    if (isSavingPayment) {
+      return;
+    }
+
+    setSelectedPaymentRecord(null);
+    setPaymentDateValue('');
+    setPaymentNotes('');
+    setBonusValue('0');
+    setDiscountValue('0');
+    setPaymentProofFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onClosePaymentModal();
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedPaymentRecord) {
+      return;
+    }
+
+    if (!paymentDateValue) {
+      toast({
+        title: t('weekly.control.records.messages.paymentErrorTitle', 'Erro ao registrar pagamento'),
+        description: t('weekly.control.records.messages.paymentDateMissing', 'Informe a data em que o pagamento foi efetuado.'),
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const parsedDate = new Date(paymentDateValue);
+    if (Number.isNaN(parsedDate.getTime())) {
+      toast({
+        title: t('weekly.control.records.messages.paymentErrorTitle', 'Erro ao registrar pagamento'),
+        description: t('weekly.control.records.messages.paymentDateInvalid', 'A data informada é inválida.'),
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (paymentTotalInvalid) {
+      toast({
+        title: t('weekly.control.records.messages.paymentErrorTitle', 'Erro ao registrar pagamento'),
+        description: t('weekly.control.records.messages.paymentTotalInvalid', 'O valor total do pagamento deve ser maior que zero.'),
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const paymentDateIso = parsedDate.toISOString();
+    setUpdatingPaymentId(selectedPaymentRecord.id);
+    setIsSavingPayment(true);
+
+    let proofPayload:
+      | {
+          url: string;
+          storagePath: string;
+          fileName: string;
+          size: number;
+          contentType?: string;
+          uploadedAt: string;
+        }
+      | undefined;
+    let uploadedProofPath: string | null = null;
 
     try {
-      const response = await fetch("/api/admin/weekly/update-record", {
-        method: "PUT",
+      if (paymentProofFile) {
+        const storagePath = `driverPayments/${selectedPaymentRecord.weekId}/${selectedPaymentRecord.driverId}/${Date.now()}-${paymentProofFile.name}`;
+        const fileRef = storageRef(storage, storagePath);
+        await uploadBytes(fileRef, paymentProofFile, {
+          contentType: paymentProofFile.type || undefined,
+        });
+        const url = await getDownloadURL(fileRef);
+        proofPayload = {
+          url,
+          storagePath,
+          fileName: paymentProofFile.name,
+          size: paymentProofFile.size,
+          contentType: paymentProofFile.type || undefined,
+          uploadedAt: new Date().toISOString(),
+        };
+        uploadedProofPath = storagePath;
+      }
+
+      const response = await fetch('/api/admin/weekly/payments', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recordId: record.id,
-          updates: {
-            paymentStatus: nextStatus,
-            paymentDate: nextStatus === "paid" ? new Date().toISOString() : null,
+          record: selectedPaymentRecord,
+          payment: {
+            bonusAmount: paymentBonusAmount,
+            discountAmount: paymentDiscountAmount,
+            paymentDate: paymentDateIso,
+            notes: paymentNotes,
+            iban: selectedPaymentRecord.iban ?? null,
+            ...(proofPayload ? { proof: proofPayload } : {}),
+          },
+          actor: {
+            uid: user?.uid,
+            email: user?.email,
+            name: user?.displayName ?? null,
           },
         }),
       });
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || t('weekly.control.records.messages.updatePaymentStatusError', 'Não foi possível atualizar o status do pagamento.'));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.paymentError', 'Não foi possível registrar o pagamento.'));
       }
 
       const payload = await response.json();
-      const updated: DriverWeeklyRecord = payload?.record;
+      const updated: DriverWeeklyRecord | undefined = payload?.record;
+      const paymentInfo: DriverPayment | undefined = payload?.payment;
 
       setRecords((prev) =>
         prev.map((item) =>
-          item.id === record.id
+          item.id === selectedPaymentRecord.id
             ? {
-              ...item,
-              paymentStatus: updated?.paymentStatus ?? nextStatus,
-              paymentDate: updated?.paymentDate ?? item.paymentDate,
-              updatedAt: updated?.updatedAt ?? item.updatedAt,
-            }
+                ...item,
+                paymentStatus: updated?.paymentStatus ?? 'paid',
+                paymentDate: updated?.paymentDate ?? paymentDateIso,
+                updatedAt: updated?.updatedAt ?? item.updatedAt,
+                paymentInfo: paymentInfo ?? item.paymentInfo ?? null,
+              }
             : item
         )
       );
 
       toast({
-        title: t('weekly.control.records.messages.updatePaymentStatusSuccess', 'Status de pagamento atualizado com sucesso!'),
-        status: "success",
-        duration: 3000,
+        title: t('weekly.control.records.messages.paymentSuccessTitle', 'Pagamento registrado!'),
+        description: t('weekly.control.records.messages.paymentSuccessDescription', 'O pagamento foi marcado como concluído.'),
+        status: 'success',
+        duration: 4000,
         isClosable: true,
       });
+
+      setSelectedPaymentRecord(null);
+      setPaymentNotes('');
+      setPaymentDateValue('');
+      setBonusValue('0');
+      setDiscountValue('0');
+      setPaymentProofFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      onClosePaymentModal();
+      uploadedProofPath = null;
     } catch (error: any) {
+      if (uploadedProofPath) {
+        try {
+          await deleteObject(storageRef(storage, uploadedProofPath));
+        } catch (cleanupError) {
+          console.error('Failed to rollback proof upload:', cleanupError);
+        }
+      }
       toast({
-        title: t('weekly.control.records.messages.updatePaymentStatusErrorTitle', 'Erro ao atualizar status de pagamento'),
-        description: error?.message || t('weekly.control.records.messages.updatePaymentStatusError', 'Não foi possível atualizar o status do pagamento.'),
-        status: "error",
+        title: t('weekly.control.records.messages.paymentErrorTitle', 'Erro ao registrar pagamento'),
+        description: error?.message || t('weekly.control.records.messages.paymentError', 'Não foi possível registrar o pagamento.'),
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
     } finally {
+      setIsSavingPayment(false);
       setUpdatingPaymentId(null);
     }
   };
@@ -723,7 +938,7 @@ export default function WeeklyPage({
                   statusColor={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}
                   locale={locale || 'pt-PT'}
                   onViewPayslip={handleViewPayslip}
-                  onTogglePaymentStatus={handleTogglePaymentStatus}
+                  onInitiatePayment={handleOpenPaymentModal}
                   onUpdateField={handleUpdateRecord}
                   generatingRecordId={generatingRecordId}
                   updatingPaymentId={updatingPaymentId}
@@ -741,8 +956,6 @@ export default function WeeklyPage({
                     <Th>{t('weekly.control.records.columns.type', 'Tipo')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.platformUber', 'Uber')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.platformBolt', 'Bolt')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.platformPrio', 'PRIO')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.platformViaVerde', 'ViaVerde')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.grossTotal', 'Ganhos brutos')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.iva', 'IVA')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.adminExpenses', 'Taxa adm.')}</Th>
@@ -777,20 +990,6 @@ export default function WeeklyPage({
                         {formatCurrency(
                           record.platformData
                             .filter((p) => p.platform === 'bolt')
-                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                        )}
-                      </Td>
-                      <Td isNumeric>
-                        {formatCurrency(
-                          record.platformData
-                            .filter((p) => p.platform === 'myprio')
-                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                        )}
-                      </Td>
-                      <Td isNumeric>
-                        {formatCurrency(
-                          record.platformData
-                            .filter((p) => p.platform === 'viaverde')
                             .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
                         )}
                       </Td>
@@ -846,10 +1045,55 @@ export default function WeeklyPage({
                           <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
                             {statusLabels[record.paymentStatus] || record.paymentStatus}
                           </Badge>
-                          {record.paymentDate && (
+                          {record.paymentInfo?.paymentDate ? (
+                            <Text fontSize="xs" color="gray.500">
+                              {formatDateLabel(record.paymentInfo.paymentDate, locale || 'pt-PT')}
+                            </Text>
+                          ) : record.paymentDate ? (
                             <Text fontSize="xs" color="gray.500">
                               {formatDateLabel(record.paymentDate, locale || 'pt-PT')}
                             </Text>
+                          ) : null}
+                          {record.paymentInfo && (
+                            <VStack align="flex-start" spacing={0} fontSize="xs" pt={1} w="full">
+                              <Text fontWeight="bold" color="green.600">
+                                {t('weekly.control.records.paymentSummary.total', 'Valor pago')}: {formatCurrency(record.paymentInfo.totalAmount)}
+                              </Text>
+                              {record.paymentInfo.bonusCents > 0 && (
+                                <Text color="green.600">
+                                  {t('weekly.control.records.paymentSummary.bonus', 'Bônus')}: +{formatCurrency(record.paymentInfo.bonusAmount)}
+                                </Text>
+                              )}
+                              {record.paymentInfo.discountCents > 0 && (
+                                <Text color="red.600">
+                                  {t('weekly.control.records.paymentSummary.discount', 'Desconto')}: -{formatCurrency(record.paymentInfo.discountAmount)}
+                                </Text>
+                              )}
+                              <Text color="gray.600">
+                                {t('weekly.control.records.paymentSummary.base', 'Valor base')}: {formatCurrency(record.paymentInfo.baseAmount)}
+                              </Text>
+                              {record.paymentInfo.notes && (
+                                <Text color="gray.500">
+                                  {t('weekly.control.records.paymentSummary.notes', 'Observações')}: {record.paymentInfo.notes}
+                                </Text>
+                              )}
+                              {record.paymentInfo.proofUrl && (
+                                <Button
+                                  as="a"
+                                  href={record.paymentInfo.proofUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  size="xs"
+                                  variant="link"
+                                  colorScheme="blue"
+                                  leftIcon={<Icon as={FiExternalLink} />}
+                                  justifyContent="flex-start"
+                                  px={0}
+                                >
+                                  {t('weekly.control.records.paymentSummary.proof', 'Ver comprovante')}
+                                </Button>
+                              )}
+                            </VStack>
                           )}
                         </VStack>
                       </Td>
@@ -864,17 +1108,38 @@ export default function WeeklyPage({
                           >
                             {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
                           </Button>
-                          <Button
-                            leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
-                            colorScheme={record.paymentStatus === 'paid' ? 'yellow' : 'green'}
-                            onClick={() => handleTogglePaymentStatus(record)}
-                            isLoading={updatingPaymentId === record.id}
-                            size="xs"
-                          >
-                            {record.paymentStatus === 'paid'
-                              ? t('weekly.control.records.actions.markAsPending', 'Pendente')
-                              : t('weekly.control.records.actions.markAsPaid', 'Pago')}
-                          </Button>
+                          {record.paymentInfo?.proofUrl && (
+                            <Button
+                              as="a"
+                              href={record.paymentInfo.proofUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              leftIcon={<Icon as={FiExternalLink} />}
+                              size="xs"
+                            >
+                              {t('weekly.control.records.actions.viewProof', 'Comprovante')}
+                            </Button>
+                          )}
+                          {record.paymentStatus === 'paid' ? (
+                            <Button
+                              leftIcon={<Icon as={FiCheckCircle} />}
+                              colorScheme="green"
+                              size="xs"
+                              isDisabled
+                            >
+                              {t('weekly.control.records.actions.alreadyPaid', 'Pago')}
+                            </Button>
+                          ) : (
+                            <Button
+                              leftIcon={<Icon as={FiCheckCircle} />}
+                              colorScheme="green"
+                              onClick={() => handleOpenPaymentModal(record)}
+                              isLoading={updatingPaymentId === record.id}
+                              size="xs"
+                            >
+                              {t('weekly.control.records.actions.markAsPaid', 'Pagar')}
+                            </Button>
+                          )}
                         </ButtonGroup>
                       </Td>
                     </Tr>
@@ -885,6 +1150,177 @@ export default function WeeklyPage({
           )}
         </CardBody>
       </Card>
+
+      <Modal isOpen={isPaymentModalOpen} onClose={handleClosePaymentModal} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{t('weekly.control.paymentModal.title', 'Confirmar pagamento')}</ModalHeader>
+          <ModalCloseButton isDisabled={isSavingPayment} />
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              {selectedPaymentRecord && (
+                <Box>
+                  <Text fontWeight="semibold" fontSize="lg">
+                    {selectedPaymentRecord.driverName}
+                  </Text>
+                  <Text fontSize="sm" color="gray.600">
+                    {t('weekly.control.paymentModal.weekLabel', 'Semana')}: {selectedPaymentRecord.weekStart} → {selectedPaymentRecord.weekEnd}
+                  </Text>
+                </Box>
+              )}
+
+              {selectedPaymentRecord?.iban ? (
+                <FormControl>
+                  <FormLabel>{t('weekly.control.paymentModal.ibanLabel', 'IBAN')}</FormLabel>
+                  <Input value={selectedPaymentRecord.iban} isReadOnly variant="filled" />
+                </FormControl>
+              ) : (
+                <Alert status="warning" borderRadius="md">
+                  <AlertIcon />
+                  <Box>
+                    <Text fontWeight="medium">
+                      {t('weekly.control.paymentModal.missingIbanTitle', 'IBAN não encontrado')}
+                    </Text>
+                    <Text fontSize="sm">
+                      {t('weekly.control.paymentModal.missingIbanDescription', 'Cadastre o IBAN do motorista antes de efetuar o pagamento.')}
+                    </Text>
+                  </Box>
+                </Alert>
+              )}
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.baseAmountLabel', 'Valor base')}</FormLabel>
+                <Input
+                  value={formatCurrency(paymentBaseAmount)}
+                  isReadOnly
+                  variant="filled"
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.bonusLabel', 'Bônus (opcional)')}</FormLabel>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={bonusValue}
+                  onChange={(event) => setBonusValue(event.target.value)}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.discountLabel', 'Desconto (opcional)')}</FormLabel>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={discountValue}
+                  onChange={(event) => setDiscountValue(event.target.value)}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.totalAmountLabel', 'Valor a pagar')}</FormLabel>
+                <Input
+                  value={formatCurrency(paymentTotalAmount)}
+                  isReadOnly
+                  variant="filled"
+                  color={paymentTotalInvalid ? 'red.600' : undefined}
+                />
+              </FormControl>
+
+              {paymentTotalInvalid && (
+                <Alert status="error" borderRadius="md">
+                  <AlertIcon />
+                  <Text fontSize="sm">
+                    {t('weekly.control.paymentModal.totalAmountInvalid', 'O valor final deve ser maior que zero.')}
+                  </Text>
+                </Alert>
+              )}
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.proofLabel', 'Comprovante do pagamento')}</FormLabel>
+                <VStack align="stretch" spacing={2}>
+                  <Button
+                    as="label"
+                    leftIcon={<Icon as={FiPaperclip} />}
+                    variant="outline"
+                    colorScheme="blue"
+                    cursor="pointer"
+                    isDisabled={isSavingPayment}
+                  >
+                    {paymentProofFile
+                      ? t('weekly.control.paymentModal.changeProof', 'Trocar arquivo')
+                      : t('weekly.control.paymentModal.selectProof', 'Selecionar arquivo')}
+                    <Input
+                      type="file"
+                      accept="application/pdf,image/*"
+                      display="none"
+                      ref={fileInputRef}
+                      onChange={handleProofFileChange}
+                    />
+                  </Button>
+                  {paymentProofFile ? (
+                    <HStack spacing={2} justify="space-between" w="full">
+                      <Text fontSize="sm" noOfLines={1}>
+                        {paymentProofFile.name}
+                      </Text>
+                      <Button
+                        variant="link"
+                        size="xs"
+                        colorScheme="red"
+                        onClick={handleRemoveProof}
+                        isDisabled={isSavingPayment}
+                      >
+                        {t('weekly.control.paymentModal.removeProof', 'Remover')}
+                      </Button>
+                    </HStack>
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">
+                      {t('weekly.control.paymentModal.noProofSelected', 'Nenhum arquivo selecionado.')}
+                    </Text>
+                  )}
+                  <FormHelperText>
+                    {t('weekly.control.paymentModal.proofHelp', 'Aceita PDF ou imagem até 10MB.')}
+                  </FormHelperText>
+                </VStack>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>{t('weekly.control.paymentModal.dateLabel', 'Data do pagamento')}</FormLabel>
+                <Input
+                  type="datetime-local"
+                  value={paymentDateValue}
+                  onChange={(event) => setPaymentDateValue(event.target.value)}
+                  max={formatDateTimeLocalValue()}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>{t('weekly.control.paymentModal.notesLabel', 'Observações')}</FormLabel>
+                <Textarea
+                  value={paymentNotes}
+                  onChange={(event) => setPaymentNotes(event.target.value)}
+                  placeholder={t('weekly.control.paymentModal.notesPlaceholder', 'Anote informações relevantes sobre o pagamento (opcional).')}
+                  rows={3}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={handleClosePaymentModal} isDisabled={isSavingPayment}>
+              {t('weekly.control.paymentModal.cancel', 'Cancelar')}
+            </Button>
+            <Button
+              colorScheme="green"
+              leftIcon={<Icon as={FiCheckCircle} />}
+              onClick={handleConfirmPayment}
+              isLoading={isSavingPayment}
+              isDisabled={paymentTotalInvalid || isSavingPayment}
+            >
+              {t('weekly.control.paymentModal.confirm', 'Confirmar pagamento')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Modal de Visualização do Contracheque */}
       <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="5xl">

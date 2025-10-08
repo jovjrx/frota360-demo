@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { createDriverWeeklyRecord, DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { DriverPayment, DriverPaymentSchema } from '@/schemas/driver-payment';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 import { getWeekDates, generateWeeklyRecordId } from '@/lib/utils/date-helpers';
 
@@ -29,6 +30,13 @@ interface DriverMaps {
   byMyPrio: Map<string, DriverInfo>;
   byPlate: Map<string, DriverInfo>;
   byViaVerde: Map<string, DriverInfo>;
+}
+
+interface AggregatedRecord extends DriverWeeklyRecord {
+  driverType: 'affiliate' | 'renter';
+  vehicle: string;
+  platformData: WeeklyNormalizedData[];
+  paymentInfo?: DriverPayment | null;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -69,13 +77,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const drivers = driversSnapshot.docs.map((doc) => buildDriverInfo(doc.id, doc.data() as any));
     const driverMaps = buildDriverMaps(drivers);
 
+    const paymentsSnapshot = await adminDb
+      .collection('driverPayments')
+      .where('weekId', '==', weekId)
+      .orderBy('paymentDate', 'desc')
+      .get();
+
+    const paymentsByRecordId = new Map<string, DriverPayment>();
+    paymentsSnapshot.forEach((doc) => {
+      try {
+        const parsed = DriverPaymentSchema.parse({ id: doc.id, ...doc.data() });
+        if (!paymentsByRecordId.has(parsed.recordId)) {
+          paymentsByRecordId.set(parsed.recordId, parsed);
+        }
+      } catch (error) {
+        console.error('Failed to parse driver payment record:', error);
+      }
+    });
+
     const aggregation = aggregateWeeklyRecords(
       normalizedData,
       driverMaps,
       weekId,
       weekStart,
       weekEnd,
-      storedRecords
+      storedRecords,
+      paymentsByRecordId
     );
 
     return res.status(200).json(aggregation);
@@ -139,7 +166,8 @@ function aggregateWeeklyRecords(
   weekId: string,
   weekStart: string,
   weekEnd: string,
-  storedRecords: Map<string, DriverWeeklyRecord>
+  storedRecords: Map<string, DriverWeeklyRecord>,
+  paymentsMap: Map<string, DriverPayment>
 ) {
   const totals = new Map<string, {
     driver: DriverInfo;
@@ -225,11 +253,8 @@ function aggregateWeeklyRecords(
       driverType: driver.type,
       vehicle: driver.vehiclePlate ?? '',
       platformData: references,
-    } as DriverWeeklyRecord & {
-      driverType: 'affiliate' | 'renter';
-      vehicle: string;
-      platformData: WeeklyNormalizedData[];
-    };
+      paymentInfo: paymentsMap.get(record.id) ?? null,
+    } as AggregatedRecord;
   });
 
   return {

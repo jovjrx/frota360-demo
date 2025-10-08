@@ -6,7 +6,6 @@ import {
   Text,
   Badge,
   Button,
-  ButtonGroup,
   Icon,
   Divider,
   Card,
@@ -15,14 +14,16 @@ import {
   Grid,
   GridItem,
 } from '@chakra-ui/react';
-import { FiFileText, FiCheckCircle, FiRotateCcw } from 'react-icons/fi';
+import { FiFileText, FiCheckCircle, FiExternalLink } from 'react-icons/fi';
 import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
+import { DriverPayment } from '@/schemas/driver-payment';
 
 interface DriverRecord extends DriverWeeklyRecord {
   driverType: 'affiliate' | 'renter';
   vehicle: string;
   platformData: WeeklyNormalizedData[];
+  paymentInfo?: DriverPayment | null;
 }
 
 interface WeeklyRecordCardProps {
@@ -34,7 +35,7 @@ interface WeeklyRecordCardProps {
   statusColor: string;
   locale: string;
   onViewPayslip: (record: DriverRecord) => void;
-  onTogglePaymentStatus: (record: DriverRecord) => void;
+  onInitiatePayment: (record: DriverRecord) => void;
   onUpdateField?: (recordId: string, updates: Partial<DriverWeeklyRecord>) => void;
   generatingRecordId: string | null;
   updatingPaymentId: string | null;
@@ -50,7 +51,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
   statusColor,
   locale,
   onViewPayslip,
-  onTogglePaymentStatus,
+  onInitiatePayment,
   onUpdateField,
   generatingRecordId,
   updatingPaymentId,
@@ -64,12 +65,6 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
       .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
     bolt: record.platformData
       .filter((p) => p.platform === 'bolt')
-      .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
-    prio: record.platformData
-      .filter((p) => p.platform === 'myprio')
-      .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
-    viaverde: record.platformData
-      .filter((p) => p.platform === 'viaverde')
       .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
   };
 
@@ -117,14 +112,6 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               <GridItem>
                 <Text fontSize="xs" color="gray.600">Bolt</Text>
                 <Text fontSize="sm" fontWeight="medium">{formatCurrency(platformValues.bolt)}</Text>
-              </GridItem>
-              <GridItem>
-                <Text fontSize="xs" color="gray.600">PRIO</Text>
-                <Text fontSize="sm" fontWeight="medium">{formatCurrency(platformValues.prio)}</Text>
-              </GridItem>
-              <GridItem>
-                <Text fontSize="xs" color="gray.600">ViaVerde</Text>
-                <Text fontSize="sm" fontWeight="medium">{formatCurrency(platformValues.viaverde)}</Text>
               </GridItem>
             </Grid>
           </Box>
@@ -213,19 +200,103 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
             >
               {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
             </Button>
-            <Button
-              leftIcon={<Icon as={isPaid ? FiRotateCcw : FiCheckCircle} />}
-              colorScheme={isPaid ? "yellow" : "green"}
-              onClick={() => onTogglePaymentStatus(record)}
-              isLoading={updatingPaymentId === record.id}
-              size="sm"
-              width="100%"
-            >
-              {isPaid
-                ? t('weekly.control.records.actions.markAsPending', 'Pendente')
-                : t('weekly.control.records.actions.markAsPaid', 'Pago')}
-            </Button>
+            {isPaid ? (
+              <Button
+                leftIcon={<Icon as={FiCheckCircle} />}
+                colorScheme="green"
+                size="sm"
+                width="100%"
+                isDisabled
+              >
+                {t('weekly.control.records.actions.alreadyPaid', 'Pago')}
+              </Button>
+            ) : (
+              <Button
+                leftIcon={<Icon as={FiCheckCircle} />}
+                colorScheme="green"
+                onClick={() => onInitiatePayment(record)}
+                isLoading={updatingPaymentId === record.id}
+                size="sm"
+                width="100%"
+              >
+                {t('weekly.control.records.actions.markAsPaid', 'Pagar')}
+              </Button>
+            )}
           </VStack>
+
+          {record.paymentInfo && (
+            <>
+              <Divider />
+              <Box>
+                <Text fontSize="sm" fontWeight="semibold" mb={1} color="gray.700">
+                  {t('weekly.control.records.paymentSummary.title', 'Pagamento')}
+                </Text>
+                <VStack align="stretch" spacing={1} fontSize="xs">
+                  <Flex justify="space-between">
+                    <Text color="gray.600">
+                      {t('weekly.control.records.paymentSummary.base', 'Valor base')}
+                    </Text>
+                    <Text fontWeight="medium">
+                      {formatCurrency(record.paymentInfo.baseAmount)}
+                    </Text>
+                  </Flex>
+                  {record.paymentInfo.bonusCents > 0 && (
+                    <Flex justify="space-between">
+                      <Text color="green.600">
+                        {t('weekly.control.records.paymentSummary.bonus', 'Bônus')}
+                      </Text>
+                      <Text fontWeight="medium" color="green.600">
+                        +{formatCurrency(record.paymentInfo.bonusAmount)}
+                      </Text>
+                    </Flex>
+                  )}
+                  {record.paymentInfo.discountCents > 0 && (
+                    <Flex justify="space-between">
+                      <Text color="red.600">
+                        {t('weekly.control.records.paymentSummary.discount', 'Desconto')}
+                      </Text>
+                      <Text fontWeight="medium" color="red.600">
+                        -{formatCurrency(record.paymentInfo.discountAmount)}
+                      </Text>
+                    </Flex>
+                  )}
+                  <Flex justify="space-between" mt={1}>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {t('weekly.control.records.paymentSummary.total', 'Valor pago')}
+                    </Text>
+                    <Text fontWeight="bold" color="green.600" fontSize="sm">
+                      {formatCurrency(record.paymentInfo.totalAmount)}
+                    </Text>
+                  </Flex>
+                  <Text color="gray.500">
+                    {t('weekly.control.records.paymentSummary.paidAt', 'Pago em')}{' '}
+                    {formatDateLabel(record.paymentInfo.paymentDate, locale)}
+                  </Text>
+                  {record.paymentInfo.notes && (
+                    <Text color="gray.600">
+                      {t('weekly.control.records.paymentSummary.notes', 'Observações')}: {record.paymentInfo.notes}
+                    </Text>
+                  )}
+                  {record.paymentInfo.proofUrl && (
+                    <Button
+                      as="a"
+                      href={record.paymentInfo.proofUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="link"
+                      size="xs"
+                      colorScheme="blue"
+                      leftIcon={<Icon as={FiExternalLink} />}
+                      justifyContent="flex-start"
+                      p={0}
+                    >
+                      {t('weekly.control.records.paymentSummary.proof', 'Ver comprovante')}
+                    </Button>
+                  )}
+                </VStack>
+              </Box>
+            </>
+          )}
         </VStack>
       </CardBody>
     </Card>

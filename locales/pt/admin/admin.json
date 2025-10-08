@@ -448,8 +448,9 @@
         },
         "actions": {
           "generatePayslip": "Contracheque",
-          "markAsPending": "Pendente",
-          "markAsPaid": "Pago"
+          "markAsPaid": "Pagar",
+          "alreadyPaid": "Pago",
+          "viewProof": "Comprovante"
         },
         "messages": {
           "generateInProgress": "A gerar...",
@@ -466,10 +467,49 @@
           "updateSuccess": "Registro atualizado com sucesso!",
           "updateErrorTitle": "Erro ao atualizar registro",
           "updateError": "Não foi possível atualizar o registro.",
-          "updatePaymentStatusSuccess": "Status de pagamento atualizado com sucesso!",
-          "updatePaymentStatusErrorTitle": "Erro ao atualizar status de pagamento",
-          "updatePaymentStatusError": "Não foi possível atualizar o status do pagamento."
+          "paymentSuccessTitle": "Pagamento registrado!",
+          "paymentSuccessDescription": "O pagamento foi marcado como concluído.",
+          "paymentErrorTitle": "Erro ao registrar pagamento",
+          "paymentError": "Não foi possível registrar o pagamento.",
+          "paymentDateMissing": "Informe a data em que o pagamento foi efetuado.",
+          "paymentDateInvalid": "A data informada é inválida.",
+          "paymentTotalInvalid": "O valor total do pagamento deve ser maior que zero."
+        },
+        "paymentSummary": {
+          "title": "Pagamento",
+          "base": "Valor base",
+          "bonus": "Bônus",
+          "discount": "Desconto",
+          "total": "Valor pago",
+          "paidAt": "Pago em",
+          "notes": "Observações",
+          "proof": "Ver comprovante"
         }
+      },
+      "paymentModal": {
+        "title": "Confirmar pagamento",
+        "weekLabel": "Semana",
+        "ibanLabel": "IBAN",
+        "missingIbanTitle": "IBAN não encontrado",
+        "missingIbanDescription": "Cadastre o IBAN do motorista antes de efetuar o pagamento.",
+        "baseAmountLabel": "Valor base",
+        "bonusLabel": "Bônus (opcional)",
+        "discountLabel": "Desconto (opcional)",
+        "totalAmountLabel": "Valor a pagar",
+        "totalAmountInvalid": "O valor final deve ser maior que zero.",
+        "dateLabel": "Data do pagamento",
+        "notesLabel": "Observações",
+        "notesPlaceholder": "Anote informações relevantes sobre o pagamento (opcional).",
+        "proofLabel": "Comprovante do pagamento",
+        "selectProof": "Selecionar arquivo",
+        "changeProof": "Trocar arquivo",
+        "removeProof": "Remover",
+        "noProofSelected": "Nenhum arquivo selecionado.",
+        "proofHelp": "Aceita PDF ou imagem até 10MB.",
+        "proofTooLargeTitle": "Arquivo muito grande",
+        "proofTooLargeDescription": "Selecione um arquivo de até 10MB.",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar pagamento"
       },
       "payslipModal": {
         "title": "Contracheque Semanal",

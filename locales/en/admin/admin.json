@@ -448,8 +448,9 @@
         },
         "actions": {
           "generatePayslip": "Payslip",
-          "markAsPending": "Pending",
-          "markAsPaid": "Paid"
+          "markAsPaid": "Pay",
+          "alreadyPaid": "Paid",
+          "viewProof": "Payment proof"
         },
         "messages": {
           "generateInProgress": "Generating...",
@@ -466,10 +467,49 @@
           "updateSuccess": "Record updated successfully!",
           "updateErrorTitle": "Error updating record",
           "updateError": "Couldn't update the record.",
-          "updatePaymentStatusSuccess": "Payment status updated successfully!",
-          "updatePaymentStatusErrorTitle": "Error updating payment status",
-          "updatePaymentStatusError": "Couldn't update the payment status."
+          "paymentSuccessTitle": "Payment recorded!",
+          "paymentSuccessDescription": "The payment has been marked as completed.",
+          "paymentErrorTitle": "Failed to record payment",
+          "paymentError": "We couldn't register the payment.",
+          "paymentDateMissing": "Select the date the payment was made.",
+          "paymentDateInvalid": "The provided date is invalid.",
+          "paymentTotalInvalid": "The total payment amount must be greater than zero."
+        },
+        "paymentSummary": {
+          "title": "Payment",
+          "base": "Base amount",
+          "bonus": "Bonus",
+          "discount": "Discount",
+          "total": "Paid amount",
+          "paidAt": "Paid on",
+          "notes": "Notes",
+          "proof": "View proof"
         }
+      },
+      "paymentModal": {
+        "title": "Confirm payment",
+        "weekLabel": "Week",
+        "ibanLabel": "IBAN",
+        "missingIbanTitle": "IBAN missing",
+        "missingIbanDescription": "Register the driver's IBAN before completing the payment.",
+        "baseAmountLabel": "Base amount",
+        "bonusLabel": "Bonus (optional)",
+        "discountLabel": "Discount (optional)",
+        "totalAmountLabel": "Amount to pay",
+        "totalAmountInvalid": "The final amount must be greater than zero.",
+        "dateLabel": "Payment date",
+        "notesLabel": "Notes",
+        "notesPlaceholder": "Add any relevant notes about the payment (optional).",
+        "proofLabel": "Payment proof",
+        "selectProof": "Choose file",
+        "changeProof": "Change file",
+        "removeProof": "Remove",
+        "noProofSelected": "No file selected.",
+        "proofHelp": "PDF or image up to 10MB.",
+        "proofTooLargeTitle": "File too large",
+        "proofTooLargeDescription": "Please choose a file up to 10MB.",
+        "cancel": "Cancel",
+        "confirm": "Confirm payment"
       },
       "payslipModal": {
         "title": "Weekly Payslip",
