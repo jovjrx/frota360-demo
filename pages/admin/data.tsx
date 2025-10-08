@@ -258,7 +258,14 @@ export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps
             {tc('actions.refresh', 'Atualizar')}
           </Button>
           <Button leftIcon={<MdAdd />} colorScheme="green" onClick={handleAddWeek} size="sm">
-            {t('weeklyDataSources.actions.addWeek', 'Adicionar semana')}
+            {t("weeklyDataSources.actions.addWeek", "Adicionar semana")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/admin/integrations")}
+            size="sm"
+          >
+            {t("weeklyDataSources.actions.integrations", "Integrações")}
           </Button>
         </HStack>
       }

@@ -32,7 +32,8 @@ import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { FiNavigation, FiTrendingUp } from 'react-icons/fi';
 
 interface Motorista {
   id: string;
@@ -57,6 +58,23 @@ interface Contracheque {
   paymentDate: string | null;
 }
 
+interface CartrackData {
+  vehicle: {
+    plate: string;
+    make: string;
+    model: string;
+    year: number;
+    kilometers: number;
+    status: string;
+  };
+  weeklyStats: {
+    totalKilometers: number;
+    totalTrips: number;
+    averageSpeed: number;
+    totalDuration: number;
+  };
+}
+
 interface PainelDashboardProps extends DashboardPageProps {
   motorista: Motorista;
   contracheques: Contracheque[];
@@ -71,10 +89,35 @@ export default function PainelDashboard({
   const router = useRouter();
   const toast = useToast();
   const [downloadingPayslipId, setDownloadingPayslipId] = useState<string | null>(null);
+  const [cartrackData, setCartrackData] = useState<CartrackData | null>(null);
+  const [loadingCartrack, setLoadingCartrack] = useState(false);
   
   // Calcular último pagamento e semana atual
   const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
   const semanaAtual = contracheques?.find((c: Contracheque) => c.paymentStatus === 'pending') || null;
+
+  // Buscar dados do Cartrack
+  useEffect(() => {
+    const fetchCartrackData = async () => {
+      setLoadingCartrack(true);
+      try {
+        const response = await fetch(`/api/driver/cartrack-data?driverId=${motorista.id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setCartrackData(result.data);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do Cartrack:', error);
+      } finally {
+        setLoadingCartrack(false);
+      }
+    };
+
+    if (motorista?.id) {
+      fetchCartrackData();
+    }
+  }, [motorista?.id]);
 
   const handleDownloadPayslip = async (payslipId: string) => {
     setDownloadingPayslipId(payslipId);
@@ -307,6 +350,75 @@ export default function PainelDashboard({
           )}
         </Box>
       </SimpleGrid>
+
+      {/* Rastreamento Cartrack */}
+      {cartrackData && (
+        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
+          <HStack mb={4} justify="space-between">
+            <HStack>
+              <Icon as={FiNavigation} boxSize={5} color="blue.500" />
+              <Text fontSize="lg" fontWeight="bold">Rastreamento Cartrack</Text>
+            </HStack>
+            <Badge colorScheme="blue" fontSize="sm">
+              Últimos 7 dias
+            </Badge>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={4}>
+            <Box>
+              <Text fontSize="xs" color="gray.600">Viagens</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                {cartrackData.weeklyStats.totalTrips}
+              </Text>
+            </Box>
+            
+            <Box>
+              <Text fontSize="xs" color="gray.600">Distância</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                {cartrackData.weeklyStats.totalKilometers.toFixed(1)} km
+              </Text>
+            </Box>
+            
+            <Box>
+              <Text fontSize="xs" color="gray.600">Velocidade Média</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                {cartrackData.weeklyStats.averageSpeed.toFixed(0)} km/h
+              </Text>
+            </Box>
+            
+            <Box>
+              <Text fontSize="xs" color="gray.600">Tempo Total</Text>
+              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                {Math.floor(cartrackData.weeklyStats.totalDuration / 60)}h {cartrackData.weeklyStats.totalDuration % 60}m
+              </Text>
+            </Box>
+          </SimpleGrid>
+          
+          <Divider my={4} />
+          
+          <HStack justify="space-between">
+            <VStack align="start" spacing={0}>
+              <Text fontSize="sm" color="gray.600">Veículo</Text>
+              <Text fontSize="md" fontWeight="semibold">
+                {cartrackData.vehicle.make} {cartrackData.vehicle.model} ({cartrackData.vehicle.year})
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                {cartrackData.vehicle.plate} • {cartrackData.vehicle.kilometers.toLocaleString()} km
+              </Text>
+            </VStack>
+            
+            <Button
+              as={Link}
+              href="/dashboard/tracking"
+              size="sm"
+              colorScheme="blue"
+              leftIcon={<Icon as={FiTrendingUp} />}
+            >
+              Ver Detalhes
+            </Button>
+          </HStack>
+        </Box>
+      )}
 
       {/* Acesso Rápido */}
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">

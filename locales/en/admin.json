@@ -79,6 +79,22 @@
   "tolls_label": "Tolls",
   "rent_label": "Rent",
   "select_week_placeholder": "Select Week",
+  "weeklyDataSources.actions.integrations": "Integrations",
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Manage your integrations with external services",
+    "breadcrumb": "Integrations",
+    "cartrack": {
+      "title": "Cartrack",
+      "description": "Integration with Cartrack API for fleet monitoring.",
+      "statusNotConfigured": "Status: Not configured"
+    },
+    "bolt": {
+      "title": "Bolt",
+      "description": "Currently, there is no public Bolt API for direct fleet data integration.",
+      "statusUnavailable": "Status: Unavailable"
+    }
+  },
   "dashboard": {
     "sections": {
       "overview": "Overview",
@@ -117,3 +133,4 @@
     }
   }
 }
+

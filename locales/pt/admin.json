@@ -79,6 +79,22 @@
   "tolls_label": "Portagens",
   "rent_label": "Aluguel",
   "select_week_placeholder": "Selecione a Semana",
+  "weeklyDataSources.actions.integrations": "Integrações",
+  "integrations": {
+    "title": "Integrações",
+    "subtitle": "Gerencie suas integrações com serviços externos",
+    "breadcrumb": "Integrações",
+    "cartrack": {
+      "title": "Cartrack",
+      "description": "Integração com a API da Cartrack para monitoramento de frota.",
+      "statusNotConfigured": "Status: Não configurado"
+    },
+    "bolt": {
+      "title": "Bolt",
+      "description": "Atualmente, não há uma API pública da Bolt para integração direta de dados de frota.",
+      "statusUnavailable": "Status: Indisponível"
+    }
+  },
   "dashboard": {
     "sections": {
       "overview": "Visão Geral",
@@ -117,3 +133,4 @@
     }
   }
 }
+
