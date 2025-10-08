@@ -9,17 +9,18 @@ export function getWeekId(date: Date): string {
 }
 
 /**
- * Obtém datas de início e fim de uma semana
+ * Obtém datas de início e fim de uma semana (ISO 8601)
+ * Semana começa na segunda-feira e termina no domingo
  */
 export function getWeekDates(weekId: string): { start: string; end: string } {
   const [year, week] = weekId.split('-W').map(Number);
   
-  // Primeiro dia do ano
-  const jan1 = new Date(year, 0, 1);
-  
-  // Primeiro dia da semana (segunda-feira)
-  const daysToMonday = (jan1.getDay() === 0 ? 6 : jan1.getDay() - 1);
-  const firstMonday = new Date(year, 0, 1 + (7 - daysToMonday) % 7);
+  // ISO 8601: Semana 1 é a primeira semana com quinta-feira
+  // Encontrar a primeira quinta-feira do ano
+  const jan4 = new Date(year, 0, 4);
+  const dayOfWeek = jan4.getDay() || 7; // Domingo = 7
+  const firstMonday = new Date(jan4);
+  firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
   
   // Calcular início da semana desejada
   const weekStart = new Date(firstMonday);
@@ -29,9 +30,17 @@ export function getWeekDates(weekId: string): { start: string; end: string } {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
   
+  // Format date without timezone conversion (YYYY-MM-DD)
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
   return {
-    start: weekStart.toISOString().split('T')[0],
-    end: weekEnd.toISOString().split('T')[0],
+    start: formatDate(weekStart),
+    end: formatDate(weekEnd),
   };
 }
 
@@ -43,4 +52,3 @@ export function getWeekDates(weekId: string): { start: string; end: string } {
 export function generateWeeklyRecordId(driverId: string, weekId: string): string {
   return `${driverId}_${weekId}`;
 }
-
