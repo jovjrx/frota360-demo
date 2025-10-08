@@ -150,20 +150,6 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.text(`${data.boltTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       y += 15;
 
-      // PRIO (se houver)
-      if (data.prioTotal > 0) {
-        doc.text("PRIO (Total Repassado)", leftMargin, y);
-        doc.text(`${data.prioTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-        y += 15;
-      }
-
-      // ViaVerde (se houver)
-      if (data.viaverdeTotal > 0) {
-        doc.text("ViaVerde (Total Repassado)", leftMargin, y);
-        doc.text(`${data.viaverdeTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-        y += 15;
-      }
-      
       // GANHOS TOTAL
       doc.font("Helvetica-Bold");
       doc.text("GANHOS TOTAL", leftMargin, y);
