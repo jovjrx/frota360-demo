@@ -33,6 +33,7 @@ import { MdAdd } from 'react-icons/md';
 import { FiRefreshCw } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import type { WeeklyDataOverview, WeeklyPlatform } from '@/lib/admin/weeklyDataShared';
 import { WEEKLY_PLATFORMS } from '@/lib/admin/weeklyDataShared';
 
@@ -105,13 +106,6 @@ function getWeekStatus(week: WeeklyDataOverview): WeekStatus {
   return 'pending';
 }
 
-const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
-  if (!fn) return fallback ?? key;
-  const value = fn(key);
-  if (typeof value === 'string') return value;
-  return fallback ?? key;
-};
-
 export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
@@ -122,8 +116,8 @@ export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<WeekStatus | ''>('');
 
-  const tc = useMemo(() => makeSafeT(tCommon), [tCommon]);
-  const t = useMemo(() => makeSafeT(tPage), [tPage]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
 
   const platformLabels = useMemo(() => {
     return WEEKLY_PLATFORMS.reduce<Record<WeeklyPlatform, string>>((acc, platform) => {

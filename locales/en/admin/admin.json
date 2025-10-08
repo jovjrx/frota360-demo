@@ -115,6 +115,112 @@
       "renter": "Renter"
     }
   },
+  "users": {
+    "title": "Manage Users",
+    "subtitle": "Manage administrators and drivers across the platform",
+    "breadcrumb": "Users",
+    "search": {
+      "placeholder": "Search users..."
+    },
+    "filter": {
+      "roles": {
+        "all": "All roles",
+        "admin": "Administrators",
+        "driver": "Drivers"
+      }
+    },
+    "actions": {
+      "exportCsv": "Export CSV",
+      "addUser": "Add User"
+    },
+    "stats": {
+      "total": "Total Users",
+      "admins": "Administrators",
+      "drivers": "Drivers"
+    },
+    "table": {
+      "title": "User List",
+      "headers": {
+        "user": "User",
+        "contact": "Contact",
+        "role": "Role",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "empty": "No users found. Adjust the filters or try another search."
+    },
+    "roles": {
+      "admin": "Administrator",
+      "driver": "Driver",
+      "unknown": "Unknown"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role"
+    },
+    "export": {
+      "headers": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "createdAt": "Created"
+      },
+      "filename": "users.csv"
+    },
+    "toasts": {
+      "actions": {
+        "updated": "updated",
+        "deleted": "deleted",
+        "roleChanged": "role changed"
+      },
+      "success": {
+        "title": "User updated!",
+        "description": "The user was {{action}} successfully."
+      },
+      "error": {
+        "title": "Error!",
+        "description": "We couldn't manage the user.",
+        "generic": "Error while managing the user",
+        "refresh": "We couldn't refresh the user list. Please try again shortly."
+      }
+    },
+    "modals": {
+      "view": {
+        "title": "User Details",
+        "tabs": {
+          "general": "General Info",
+          "permissions": "Permissions",
+          "history": "History"
+        },
+        "labels": {
+          "createdAt": "Created",
+          "updatedAt": "Last Updated"
+        },
+        "permissionsPlaceholder": "User permissions will be displayed here.",
+        "historyPlaceholder": "Activity history will be displayed here."
+      },
+      "edit": {
+        "title": "Edit User",
+        "requiredFields": {
+          "title": "Required fields",
+          "description": "Please fill out all fields."
+        },
+        "saveButton": "Save Changes"
+      },
+      "delete": {
+        "title": "Delete User",
+        "confirmButton": "Delete User",
+        "confirmation": "Are you sure you want to delete the user",
+        "note": "This action cannot be undone."
+      }
+    }
+  },
   "fleet": {
     "title": "TVDE Fleet Control",
     "subtitle": "Fleet financial management - Flexible periods",

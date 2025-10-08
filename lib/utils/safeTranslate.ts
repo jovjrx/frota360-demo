@@ -6,6 +6,16 @@ export type SafeTranslator = (
   maybeVariables?: Record<string, any>
 ) => string;
 
+const applyVariables = (value: string, variables?: Record<string, any>) => {
+  if (!variables) {
+    return value;
+  }
+
+  return Object.entries(variables).reduce((acc, [varKey, varValue]) => {
+    return acc.replace(new RegExp(`{{\\s*${varKey}\\s*}}`, 'g'), String(varValue));
+  }, value);
+};
+
 /**
  * Wraps a translation function and ensures we always return a safe string.
  * Supports both `(key, variables)` and `(key, fallback, variables?)` call signatures.
@@ -18,15 +28,19 @@ export function createSafeTranslator(translator?: RawTranslator): SafeTranslator
         ? fallbackOrVariables
         : maybeVariables;
 
-    if (!translator) {
-      return fallback ?? key;
+    let translated: unknown;
+
+    if (translator) {
+      translated = translator(key, variables);
     }
 
-    const value = translator(key, variables);
-    if (!value || value === key) {
-      return fallback ?? key;
+    const translatedString = typeof translated === 'string' ? translated : undefined;
+
+    if (!translatedString || translatedString === key) {
+      const fallbackValue = fallback ?? key;
+      return applyVariables(String(fallbackValue), variables);
     }
 
-    return value;
+    return applyVariables(translatedString, variables);
   };
 }

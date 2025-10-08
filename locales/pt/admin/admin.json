@@ -115,6 +115,112 @@
       "renter": "Locatário"
     }
   },
+  "users": {
+    "title": "Gerenciar Usuários",
+    "subtitle": "Administre administradores e motoristas do sistema",
+    "breadcrumb": "Usuários",
+    "search": {
+      "placeholder": "Buscar usuários..."
+    },
+    "filter": {
+      "roles": {
+        "all": "Todos os roles",
+        "admin": "Administradores",
+        "driver": "Motoristas"
+      }
+    },
+    "actions": {
+      "exportCsv": "Exportar CSV",
+      "addUser": "Adicionar Usuário"
+    },
+    "stats": {
+      "total": "Total de Usuários",
+      "admins": "Administradores",
+      "drivers": "Motoristas"
+    },
+    "table": {
+      "title": "Lista de Usuários",
+      "headers": {
+        "user": "Usuário",
+        "contact": "Contato",
+        "role": "Role",
+        "createdAt": "Criação",
+        "actions": "Ações"
+      },
+      "actions": {
+        "viewDetails": "Ver Detalhes",
+        "edit": "Editar",
+        "delete": "Excluir"
+      },
+      "empty": "Nenhum usuário encontrado. Ajuste os filtros ou tente outra busca."
+    },
+    "roles": {
+      "admin": "Administrador",
+      "driver": "Motorista",
+      "unknown": "Desconhecido"
+    },
+    "fields": {
+      "name": "Nome",
+      "email": "Email",
+      "role": "Role"
+    },
+    "export": {
+      "headers": {
+        "name": "Nome",
+        "email": "Email",
+        "role": "Role",
+        "createdAt": "Data de Criação"
+      },
+      "filename": "usuarios.csv"
+    },
+    "toasts": {
+      "actions": {
+        "updated": "atualizado",
+        "deleted": "excluído",
+        "roleChanged": "role alterado"
+      },
+      "success": {
+        "title": "Usuário atualizado!",
+        "description": "O usuário foi {{action}} com sucesso."
+      },
+      "error": {
+        "title": "Erro!",
+        "description": "Não foi possível gerenciar o usuário.",
+        "generic": "Erro ao gerenciar usuário",
+        "refresh": "Não foi possível atualizar a lista de usuários. Tente novamente em instantes."
+      }
+    },
+    "modals": {
+      "view": {
+        "title": "Detalhes do Usuário",
+        "tabs": {
+          "general": "Informações Gerais",
+          "permissions": "Permissões",
+          "history": "Histórico"
+        },
+        "labels": {
+          "createdAt": "Data de Criação",
+          "updatedAt": "Última Atualização"
+        },
+        "permissionsPlaceholder": "Permissões do usuário serão exibidas aqui.",
+        "historyPlaceholder": "Histórico de atividades será exibido aqui."
+      },
+      "edit": {
+        "title": "Editar Usuário",
+        "requiredFields": {
+          "title": "Campos obrigatórios",
+          "description": "Por favor, preencha todos os campos."
+        },
+        "saveButton": "Salvar Alterações"
+      },
+      "delete": {
+        "title": "Excluir Usuário",
+        "confirmButton": "Excluir Usuário",
+        "confirmation": "Tem certeza que deseja excluir o usuário",
+        "note": "Esta ação não pode ser desfeita."
+      }
+    }
+  },
   "fleet": {
     "title": "Controle de Frota TVDE",
     "subtitle": "Gestão financeira da frota - Períodos flexíveis",

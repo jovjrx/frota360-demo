@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Box,
@@ -44,6 +44,7 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 
 // Importação dinâmica do mapa (só carrega no cliente)
 const MapView = dynamic(() => import('@/components/admin/CartrackMap'), {
@@ -148,24 +149,11 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const toast = useToast();
 
-  const makeSafeT = (
-    fn: ((key: string) => any) | undefined,
-    fallbacks: Record<string, string>
-  ) => (key: string, variables?: Record<string, any>) => {
-    let value = fn ? fn(key) : undefined;
-    if (typeof value !== 'string' || value === key) {
-      value = fallbacks[key] ?? key;
-    }
-    if (variables && typeof value === 'string') {
-      return Object.entries(variables).reduce(
-        (acc, [varKey, varValue]) => acc.replace(new RegExp(`{{\s*${varKey}\s*}}`, 'g'), String(varValue)),
-        value as string
-      );
-    }
-    return value as string;
-  };
-
-  const tMonitor = makeSafeT(tPage, MONITOR_FALLBACKS);
+  const tMonitor = useMemo(() => {
+    const base = createSafeTranslator(tPage);
+    return (key: string, variables?: Record<string, any>) =>
+      base(key, MONITOR_FALLBACKS[key] ?? key, variables);
+  }, [tPage]);
 
   // Função para buscar dados da API
   const fetchCartrackData = async (showToast = false) => {

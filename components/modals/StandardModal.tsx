@@ -33,6 +33,7 @@ interface StandardModalProps {
   showSave?: boolean;
   size?: string;
   error?: string;
+  disableAutoToast?: boolean;
 }
 
 export default function StandardModal({
@@ -50,6 +51,7 @@ export default function StandardModal({
   showSave = true,
   size = 'lg',
   error,
+  disableAutoToast = false,
 }: StandardModalProps) {
   const toast = useToast();
 
@@ -57,23 +59,27 @@ export default function StandardModal({
     try {
       if (onSave) {
         await onSave();
-        toast({
-          title: 'Sucesso!',
-          description: 'Operação realizada com sucesso.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        if (!disableAutoToast) {
+          toast({
+            title: 'Sucesso!',
+            description: 'Operação realizada com sucesso.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
         onClose();
       }
     } catch (error: any) {
-      toast({
-        title: 'Erro!',
-        description: error.message || 'Ocorreu um erro ao salvar.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      if (!disableAutoToast) {
+        toast({
+          title: 'Erro!',
+          description: error.message || 'Ocorreu um erro ao salvar.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -81,23 +87,27 @@ export default function StandardModal({
     try {
       if (onDelete) {
         await onDelete();
-        toast({
-          title: 'Sucesso!',
-          description: 'Item excluído com sucesso.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        if (!disableAutoToast) {
+          toast({
+            title: 'Sucesso!',
+            description: 'Item excluído com sucesso.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
         onClose();
       }
     } catch (error: any) {
-      toast({
-        title: 'Erro!',
-        description: error.message || 'Ocorreu um erro ao excluir.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      if (!disableAutoToast) {
+        toast({
+          title: 'Erro!',
+          description: error.message || 'Ocorreu um erro ao excluir.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     }
   };
 

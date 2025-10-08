@@ -8,7 +8,7 @@
  * - SWR com fallback para atualizações em tempo real
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Heading,
@@ -38,6 +38,7 @@ import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers, FiFileText } from 'react-i
 import useSWR from 'swr';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getDashboardStats, getDrivers, getRequests } from '@/lib/admin/adminQueries';
 
 interface DashboardData {
@@ -64,15 +65,8 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
   const toast = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
-    if (!fn) return fallback ?? key;
-    const value = fn(key);
-    if (typeof value === 'string') return value;
-    return fallback ?? key;
-  };
-
-  const t = makeSafeT(tPage);
-  const tc = makeSafeT(tCommon);
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
 
   const subtitleTemplate = t('dashboard.welcome', 'Bem-vindo, {{name}}');
   const subtitle = subtitleTemplate.replace('{{name}}', user.displayName || user.email || '');
@@ -132,7 +126,7 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
 
   return (
     <AdminLayout
-      title={t('dashboard.title', 'Dashboard')}
+  title={t('dashboard.title', 'Dashboard')}
       subtitle={subtitle}
       side={
         <Button

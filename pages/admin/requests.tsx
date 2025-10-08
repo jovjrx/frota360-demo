@@ -45,6 +45,7 @@ import {
 } from '@chakra-ui/react';
 import { FiSearch, FiFilter, FiMoreVertical, FiCheckCircle, FiXCircle, FiClock, FiMail, FiUserPlus, FiPhone } from 'react-icons/fi';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
 import useSWR from 'swr';
@@ -137,7 +138,7 @@ const ADMIN_FALLBACKS: Record<string, string> = {
   'requests.reject_modal.reason_placeholder': 'Descreva o motivo da rejeição',
 };
 
-export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }: SolicitacoesPageProps) {
+export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, tAdmin: tAdminProp }: SolicitacoesPageProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -151,25 +152,20 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }
   const { isOpen: isEvaluationModalOpen, onOpen: onEvaluationModalOpen, onClose: onEvaluationModalClose } = useDisclosure();
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
 
-  const makeSafeT = (
-    fn: ((key: string) => any) | undefined,
-    fallbacks: Record<string, string>
-  ) => (key: string, variables?: Record<string, any>) => {
-    let value = fn ? fn(key) : undefined;
-    if (typeof value !== 'string' || value === key) {
-      value = fallbacks[key] ?? key;
-    }
-    if (variables && typeof value === 'string') {
-      return Object.entries(variables).reduce(
-        (acc, [varKey, varValue]) => acc.replace(new RegExp(`{{\\s*${varKey}\\s*}}`, 'g'), String(varValue)),
-        value as string
-      );
-    }
-    return value as string;
-  };
+  const tCommonBase = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdminBase = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tAdminProp, tPage]);
 
-  const t = makeSafeT(tCommon, COMMON_FALLBACKS);
-  const tAdmin = makeSafeT(tPage, ADMIN_FALLBACKS);
+  const t = useMemo(
+    () => (key: string, variables?: Record<string, any>) =>
+      tCommonBase(key, COMMON_FALLBACKS[key] ?? key, variables),
+    [tCommonBase]
+  );
+
+  const tAdmin = useMemo(
+    () => (key: string, variables?: Record<string, any>) =>
+      tAdminBase(key, ADMIN_FALLBACKS[key] ?? key, variables),
+    [tAdminBase]
+  );
 
   const { data, mutate } = useSWR<RequestsData>(
     `/api/admin/requests?status=${statusFilter}`,

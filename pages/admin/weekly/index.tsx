@@ -558,410 +558,399 @@ export default function WeeklyPage({
       title={tAdmin('weekly_control_title')}
       subtitle={tAdmin('weekly_control_subtitle')}
       breadcrumbs={[{ label: tAdmin('weekly_control_title') }]}
+      side={<Button
+        leftIcon={<Icon as={FiUpload} />}
+        onClick={() => router.push('/admin/data')}
+        colorScheme="blue"
+        size="sm"
+      >
+        {tAdmin('import_data_button')}
+      </Button>}
     >
-      <VStack spacing={6} align="stretch">
-        {/* Alerta */}
-        <Alert status="info" borderRadius="md">
-          <AlertIcon />
-          {tAdmin('new_structure_alert')}
-        </Alert>
-
-        {/* Filtros e Ações */}
-        <Card>
-          <CardBody>
-            <VStack spacing={4} align="stretch">
-              <Box>
-                <Text fontSize="sm" mb={2} fontWeight="medium">{tAdmin('week_label')}:</Text>
-                <Select
-                  value={filterWeek}
-                  onChange={(e) => setFilterWeek(e.target.value)}
-                  w={{ base: "100%", md: "300px" }}
-                >
-                  {weekOptions.map(week => (
-                    <option key={week.value} value={week.value}>
-                      {week.label}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
-
-              <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={2}>
-                <Button
-                  leftIcon={<Icon as={FiUpload} />}
-                  onClick={() => router.push('/admin/data')}
-                  colorScheme="blue"
-                  size="sm"
-                >
-                  {tAdmin('import_data_button')}
-                </Button>
-                <Button
-                  leftIcon={<Icon as={FiRefreshCw} />}
-                  onClick={() => loadWeekData(filterWeek)}
-                  isLoading={isLoading}
-                  size="sm"
-                >
-                  {tAdmin('dashboard.actions.refresh', 'Atualizar')}
-                </Button>
-                <Button
-                  leftIcon={<Icon as={FiFileText} />}
-                  onClick={handleGenerateResumos}
-                  colorScheme="purple"
-                  size="sm"
-                  isLoading={isGeneratingResumos}
-                  loadingText={tAdmin("generating_summaries_loading")}
-                  isDisabled={records.length === 0}
-                >
-                  {tAdmin("generate_summaries_button")}
-                </Button>
-                <Button
-                  leftIcon={<Icon as={FiDownload} />}
-                  onClick={handleExportPayments}
-                  colorScheme="teal"
-                  size="sm"
-                  isDisabled={records.length === 0}
-                >
-                  {tAdmin("export_payments_button", "Exportar Planilha")}
-                </Button>
-              </SimpleGrid>
-            </VStack>
-          </CardBody>
-        </Card>
-
-        {/* Resumo */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">{tAdmin("weekly_summary_title", "Resumo Semanal")}</Heading>
-          </CardHeader>
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-              <StatCard label={tAdmin("total_earnings", "Ganhos Totais")} value={totals.ganhosTotal} color="green.600" helpText={`${records.length} ${tAdmin("drivers_label", "motoristas")}`} />
-              <StatCard label={tAdmin("total_discounts", "Descontos Totais")} value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel} color="red.600" helpText={tAdmin("iva_adm_fuel_tolls_rent", "IVA, Adm, Combustível, Portagens, Aluguel")} />
-              <StatCard label={tAdmin("fuel_label", "Combustível")} value={totals.combustivel} color="orange.600" helpText={tAdmin("prio_label", "PRIO")} />
-              <StatCard label={tAdmin("net_value", "Valor Líquido")} value={totals.repasse} color="blue.600" helpText={tAdmin("total_to_pay", "Total a Pagar")} />
-            </SimpleGrid>
-            <Table variant="simple" size="sm" mt={6}>
-              <Thead>
-                <Tr>
-                  <Th>{tAdmin("summary_item", "Item")}</Th>
-                  <Th isNumeric>{tAdmin("summary_value", "Valor")}</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>{tAdmin("total_earnings", "Ganhos Totais")}</Td>
-                  <Td isNumeric>{formatCurrency(totals.ganhosTotal)}</Td>
-                </Tr>
-                <Tr>
-                  <Td>{tAdmin("iva_label", "IVA")}</Td>
-                  <Td isNumeric color="red.600">-{formatCurrency(totals.ivaValor)}</Td>
-                </Tr>
-                <Tr>
-                  <Td>{tAdmin("admin_expenses_label", "Despesas Administrativas")}</Td>
-                  <Td isNumeric color="red.600">-{formatCurrency(totals.despesasAdm)}</Td>
-                </Tr>
-                <Tr>
-                  <Td>{tAdmin("fuel_label", "Combustível")}</Td>
-                  <Td isNumeric color="orange.600">-{formatCurrency(totals.combustivel)}</Td>
-                </Tr>
-                <Tr>
-                  <Td>{tAdmin("tolls_label", "Portagens")}</Td>
-                  <Td isNumeric color="orange.600">-{formatCurrency(totals.viaverde)}</Td>
-                </Tr>
-                <Tr>
-                  <Td>{tAdmin("rent_label", "Aluguel")}</Td>
-                  <Td isNumeric color="purple.600">-{formatCurrency(totals.aluguel)}</Td>
-                </Tr>
-                <Tr>
-                  <Td fontWeight="bold">{tAdmin("net_value", "Valor Líquido")}</Td>
-                  <Td isNumeric fontWeight="bold" color="blue.600">{formatCurrency(totals.repasse)}</Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </CardBody>
-        </Card>
-
-        {/* Tabela de Registros */}
-        <Card>
-          <CardHeader>
-            <Heading size="md">{tAdmin("weekly_records_title")}</Heading>
-          </CardHeader>
-          <CardBody>
-            {isLoading ? (
-              <Box textAlign="center" py={10}>
-                <Spinner size="xl" color="blue.500" />
-                <Text mt={4} color="gray.600">{tAdmin("loading_data")}</Text>
-              </Box>
-            ) : records.length === 0 ? (
-              <Box textAlign="center" py={10}>
-                <Text color="gray.600">{tAdmin("no_records_found")}</Text>
-                <Button
-                  mt={4}
-                  leftIcon={<Icon as={FiUpload} />}
-                  onClick={() => router.push("/admin/data")}
-                  colorScheme="blue"
-                >
-                  {tAdmin("import_data_button")}
-                </Button>
-              </Box>
-            ) : isMobile ? (
-              // Mobile: Exibir como cartões
-              <VStack spacing={4} align="stretch">
-                {records.map((record, index) => (
-                  <WeeklyRecordCard
-                    key={index}
-                    record={record}
-                    formatCurrency={formatCurrency}
-                    formatDateLabel={formatDateLabel}
-                    typeLabels={typeLabels}
-                    statusLabels={statusLabels}
-                    statusColor={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}
-                    locale={locale || 'pt-PT'}
-                    onViewPayslip={handleViewPayslip}
-                    onTogglePaymentStatus={handleTogglePaymentStatus}
-                    onUpdateField={handleUpdateRecord}
-                    generatingRecordId={generatingRecordId}
-                    updatingPaymentId={updatingPaymentId}
-                    tAdmin={tAdmin}
-                  />
+      {/* Filtros e Ações */}
+      <Card>
+        <CardBody>
+          <VStack spacing={4} align="stretch">
+              <Select
+                value={filterWeek}
+                onChange={(e) => setFilterWeek(e.target.value)}
+                w={{ base: "100%", md: "300px" }}
+              >
+                {weekOptions.map(week => (
+                  <option key={week.value} value={week.value}>
+                    {week.label}
+                  </option>
                 ))}
-              </VStack>
-            ) : (
-              // Desktop: Exibir como tabela
-              <Box overflowX="auto">
-                <Table variant="simple" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>{tAdmin('weekly_records.columns.driver', 'Motorista')}</Th>
-                      <Th>{tAdmin('weekly_records.columns.type', 'Tipo')}</Th>
-                      <Th isNumeric>{tAdmin("weekly_records.columns.platformUber", "Uber")}</Th>
-                      <Th isNumeric>{tAdmin("weekly_records.columns.platformBolt", "Bolt")}</Th>
-                      <Th isNumeric>{tAdmin("weekly_records.columns.platformPrio", "PRIO")}</Th>
-                      <Th isNumeric>{tAdmin("weekly_records.columns.platformViaVerde", "ViaVerde")}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.iva', 'IVA')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.fuel', 'Combustível')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.tolls', 'Portagens')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.rent', 'Aluguel')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.net', 'Valor líquido')}</Th>
-                      <Th>{tAdmin('weekly_records.columns.status', 'Status')}</Th>
-                      <Th textAlign="right">{tAdmin('weekly_records.columns.actions', 'Ações')}</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {records.map((record, index) => (
-                      <Tr key={index}>
-                        <Td>
-                          <Text fontWeight="medium">{record.driverName}</Text>
-                          <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
-                        </Td>
-                        <Td>
-                          <Badge colorScheme={record.driverType === 'renter' ? 'purple' : 'green'}>
-                            {typeLabels[record.driverType]}
-                          </Badge>
-                        </Td>
-                        <Td isNumeric>
-                          {formatCurrency(
-                            record.platformData
-                              .filter((p) => p.platform === 'uber')
-                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                          )}
-                        </Td>
-                        <Td isNumeric>
-                          {formatCurrency(
-                            record.platformData
-                              .filter((p) => p.platform === 'bolt')
-                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                          )}
-                        </Td>
-                        <Td isNumeric>
-                          {formatCurrency(
-                            record.platformData
-                              .filter((p) => p.platform === 'myprio')
-                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                          )}
-                        </Td>
-                        <Td isNumeric>
-                          {formatCurrency(
-                            record.platformData
-                              .filter((p) => p.platform === 'viaverde')
-                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                          )}
-                        </Td>
-                        <EditableNumberField
-                          value={record.ganhosTotal}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                        />
-                        <EditableNumberField
-                          value={record.ivaValor}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="red.600"
-                          prefix="-"
-                        />
-                        <EditableNumberField
-                          value={record.despesasAdm}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="red.600"
-                          prefix="-"
-                        />
-                        <EditableNumberField
-                          value={record.combustivel}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="orange.600"
-                          prefix="-"
-                        />
-                        <EditableNumberField
-                          value={record.viaverde}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="orange.600"
-                          prefix="-"
-                        />
-                        <EditableNumberField
-                          value={record.aluguel}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="purple.600"
-                          prefix="-"
-                        />
-                        <EditableNumberField
-                          value={record.repasse}
-                          onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
-                          isPaid={record.paymentStatus === 'paid'}
-                          color="blue.600"
-                          fontWeight="bold"
-                        />
-                        <Td>
-                          <VStack align="flex-start" spacing={1}>
-                            <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
-                              {statusLabels[record.paymentStatus] || record.paymentStatus}
-                            </Badge>
-                            {record.paymentDate && (
-                              <Text fontSize="xs" color="gray.500">
-                                {formatDateLabel(record.paymentDate, locale || 'pt-PT')}
-                              </Text>
-                            )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <ButtonGroup size="xs" variant="outline" spacing={2} justifyContent="flex-end">
-                            <Button
-                              leftIcon={<Icon as={FiFileText} />}
-                              onClick={() => handleViewPayslip(record)}
-                              isLoading={generatingRecordId === record.id}
-                              loadingText={tAdmin("weekly_records.messages.generateInProgress", "A gerar...")}
-                              size="xs"
-                            >
-                              {tAdmin("weekly_records.actions.generatePayslip", "Contracheque")}
-                            </Button>
-                            <Button
-                              leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
-                              colorScheme={record.paymentStatus === 'paid' ? 'yellow' : 'green'}
-                              onClick={() => handleTogglePaymentStatus(record)}
-                              isLoading={updatingPaymentId === record.id}
-                              size="xs"
-                            >
-                              {record.paymentStatus === 'paid'
-                                ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
-                                : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
-                            </Button>
-                          </ButtonGroup>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-            )}
-          </CardBody>
-        </Card>
+              </Select>
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={2}>
+              <Button
+                leftIcon={<Icon as={FiRefreshCw} />}
+                onClick={() => loadWeekData(filterWeek)}
+                isLoading={isLoading}
+                size="sm"
+              >
+                {tAdmin('dashboard.actions.refresh', 'Atualizar')}
+              </Button>
+              <Button
+                leftIcon={<Icon as={FiFileText} />}
+                onClick={handleGenerateResumos}
+                colorScheme="purple"
+                size="sm"
+                isLoading={isGeneratingResumos}
+                loadingText={tAdmin("generating_summaries_loading")}
+                isDisabled={records.length === 0}
+              >
+                {tAdmin("generate_summaries_button")}
+              </Button>
+              <Button
+                leftIcon={<Icon as={FiDownload} />}
+                onClick={handleExportPayments}
+                colorScheme="teal"
+                size="sm"
+                isDisabled={records.length === 0}
+              >
+                {tAdmin("export_payments_button", "Exportar Planilha")}
+              </Button>
+            </SimpleGrid>
+          </VStack>
+        </CardBody>
+      </Card>
 
-        {/* Modal de Visualização do Contracheque */}
-        <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>
-              <VStack align="start" spacing={1}>
-                <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
-                {selectedPayslipRecord && (
-                  <Text fontSize="sm" fontWeight="normal" color="gray.600">
-                    {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
-                  </Text>
-                )}
-              </VStack>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <VStack spacing={4} align="stretch" height="100%">
-                <HStack spacing={4} justify="flex-end">
-                  <Button
-                    leftIcon={<Icon as={FiDownload} />}
-                    onClick={handleDownloadPayslip}
-                    colorScheme="blue"
-                  >
-                    {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
-                  </Button>
-                  <Button
-                    leftIcon={<Icon as={FiMail} />}
-                    onClick={handleSendPayslipEmail}
-                    colorScheme="green"
-                  >
-                    {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
-                  </Button>
-                </HStack>
-                {payslipPdfUrl ? (
-                  <Box flex="1" height="calc(100vh - 200px)">
-                    <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
-                  </Box>
-                ) : (
-                  <Alert status="info" borderRadius="lg">
-                    <AlertIcon />
-                    <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
-                    <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
-                  </Alert>
-                )}
-              </VStack>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+      {/* Resumo */}
+      <Card>
+        <CardHeader>
+          <Heading size="md">{tAdmin("weekly_summary_title", "Resumo Semanal")}</Heading>
+        </CardHeader>
+        <CardBody>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+            <StatCard label={tAdmin("total_earnings", "Ganhos Totais")} value={totals.ganhosTotal} color="green.600" helpText={`${records.length} ${tAdmin("drivers_label", "motoristas")}`} />
+            <StatCard label={tAdmin("total_discounts", "Descontos Totais")} value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel} color="red.600" helpText={tAdmin("iva_adm_fuel_tolls_rent", "IVA, Adm, Combustível, Portagens, Aluguel")} />
+            <StatCard label={tAdmin("fuel_label", "Combustível")} value={totals.combustivel} color="orange.600" helpText={tAdmin("prio_label", "PRIO")} />
+            <StatCard label={tAdmin("net_value", "Valor Líquido")} value={totals.repasse} color="blue.600" helpText={tAdmin("total_to_pay", "Total a Pagar")} />
+          </SimpleGrid>
+          <Table variant="simple" size="sm" mt={6}>
+            <Thead>
+              <Tr>
+                <Th>{tAdmin("summary_item", "Item")}</Th>
+                <Th isNumeric>{tAdmin("summary_value", "Valor")}</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              <Tr>
+                <Td>{tAdmin("total_earnings", "Ganhos Totais")}</Td>
+                <Td isNumeric>{formatCurrency(totals.ganhosTotal)}</Td>
+              </Tr>
+              <Tr>
+                <Td>{tAdmin("iva_label", "IVA")}</Td>
+                <Td isNumeric color="red.600">-{formatCurrency(totals.ivaValor)}</Td>
+              </Tr>
+              <Tr>
+                <Td>{tAdmin("admin_expenses_label", "Despesas Administrativas")}</Td>
+                <Td isNumeric color="red.600">-{formatCurrency(totals.despesasAdm)}</Td>
+              </Tr>
+              <Tr>
+                <Td>{tAdmin("fuel_label", "Combustível")}</Td>
+                <Td isNumeric color="orange.600">-{formatCurrency(totals.combustivel)}</Td>
+              </Tr>
+              <Tr>
+                <Td>{tAdmin("tolls_label", "Portagens")}</Td>
+                <Td isNumeric color="orange.600">-{formatCurrency(totals.viaverde)}</Td>
+              </Tr>
+              <Tr>
+                <Td>{tAdmin("rent_label", "Aluguel")}</Td>
+                <Td isNumeric color="purple.600">-{formatCurrency(totals.aluguel)}</Td>
+              </Tr>
+              <Tr>
+                <Td fontWeight="bold">{tAdmin("net_value", "Valor Líquido")}</Td>
+                <Td isNumeric fontWeight="bold" color="blue.600">{formatCurrency(totals.repasse)}</Td>
+              </Tr>
+            </Tbody>
+          </Table>
+        </CardBody>
+      </Card>
 
-        {unassigned.length > 0 && (
-          <Card variant="outline">
-            <CardHeader>
-              <Heading size="sm" color="orange.500">
-                {tAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
-              </Heading>
-            </CardHeader>
-            <CardBody>
-              <Text fontSize="sm" color="gray.600" mb={3}>
-                {tAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
-              </Text>
-              <Table size="sm" variant="simple">
+      {/* Tabela de Registros */}
+      <Card>
+        <CardHeader>
+          <Heading size="md">{tAdmin("weekly_records_title")}</Heading>
+        </CardHeader>
+        <CardBody>
+          {isLoading ? (
+            <Box textAlign="center" py={10}>
+              <Spinner size="xl" color="blue.500" />
+              <Text mt={4} color="gray.600">{tAdmin("loading_data")}</Text>
+            </Box>
+          ) : records.length === 0 ? (
+            <Box textAlign="center" py={10}>
+              <Text color="gray.600">{tAdmin("no_records_found")}</Text>
+              <Button
+                mt={4}
+                leftIcon={<Icon as={FiUpload} />}
+                onClick={() => router.push("/admin/data")}
+                colorScheme="blue"
+              >
+                {tAdmin("import_data_button")}
+              </Button>
+            </Box>
+          ) : isMobile ? (
+            // Mobile: Exibir como cartões
+            <VStack spacing={4} align="stretch">
+              {records.map((record, index) => (
+                <WeeklyRecordCard
+                  key={index}
+                  record={record}
+                  formatCurrency={formatCurrency}
+                  formatDateLabel={formatDateLabel}
+                  typeLabels={typeLabels}
+                  statusLabels={statusLabels}
+                  statusColor={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}
+                  locale={locale || 'pt-PT'}
+                  onViewPayslip={handleViewPayslip}
+                  onTogglePaymentStatus={handleTogglePaymentStatus}
+                  onUpdateField={handleUpdateRecord}
+                  generatingRecordId={generatingRecordId}
+                  updatingPaymentId={updatingPaymentId}
+                  tAdmin={tAdmin}
+                />
+              ))}
+            </VStack>
+          ) : (
+            // Desktop: Exibir como tabela
+            <Box overflowX="auto">
+              <Table variant="simple" size="sm">
                 <Thead>
                   <Tr>
-                    <Th>{tAdmin('platform_label', 'Plataforma')}</Th>
-                    <Th>{tAdmin('reference_label', 'Referência')}</Th>
-                    <Th>{tAdmin('value_label', 'Valor')}</Th>
+                    <Th>{tAdmin('weekly_records.columns.driver', 'Motorista')}</Th>
+                    <Th>{tAdmin('weekly_records.columns.type', 'Tipo')}</Th>
+                    <Th isNumeric>{tAdmin("weekly_records.columns.platformUber", "Uber")}</Th>
+                    <Th isNumeric>{tAdmin("weekly_records.columns.platformBolt", "Bolt")}</Th>
+                    <Th isNumeric>{tAdmin("weekly_records.columns.platformPrio", "PRIO")}</Th>
+                    <Th isNumeric>{tAdmin("weekly_records.columns.platformViaVerde", "ViaVerde")}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.iva', 'IVA')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.fuel', 'Combustível')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.tolls', 'Portagens')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.rent', 'Aluguel')}</Th>
+                    <Th isNumeric>{tAdmin('weekly_records.columns.net', 'Valor líquido')}</Th>
+                    <Th>{tAdmin('weekly_records.columns.status', 'Status')}</Th>
+                    <Th textAlign="right">{tAdmin('weekly_records.columns.actions', 'Ações')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {unassigned.map((entry) => (
-                    <Tr key={entry.id}>
-                      <Td textTransform="capitalize">{entry.platform}</Td>
-                      <Td>{entry.referenceLabel || entry.referenceId}</Td>
-                      <Td isNumeric>{formatCurrency(entry.totalValue)}</Td>
+                  {records.map((record, index) => (
+                    <Tr key={index}>
+                      <Td>
+                        <Text fontWeight="medium">{record.driverName}</Text>
+                        <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
+                      </Td>
+                      <Td>
+                        <Badge colorScheme={record.driverType === 'renter' ? 'purple' : 'green'}>
+                          {typeLabels[record.driverType]}
+                        </Badge>
+                      </Td>
+                      <Td isNumeric>
+                        {formatCurrency(
+                          record.platformData
+                            .filter((p) => p.platform === 'uber')
+                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                        )}
+                      </Td>
+                      <Td isNumeric>
+                        {formatCurrency(
+                          record.platformData
+                            .filter((p) => p.platform === 'bolt')
+                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                        )}
+                      </Td>
+                      <Td isNumeric>
+                        {formatCurrency(
+                          record.platformData
+                            .filter((p) => p.platform === 'myprio')
+                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                        )}
+                      </Td>
+                      <Td isNumeric>
+                        {formatCurrency(
+                          record.platformData
+                            .filter((p) => p.platform === 'viaverde')
+                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                        )}
+                      </Td>
+                      <EditableNumberField
+                        value={record.ganhosTotal}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                      />
+                      <EditableNumberField
+                        value={record.ivaValor}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="red.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField
+                        value={record.despesasAdm}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="red.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField
+                        value={record.combustivel}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="orange.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField
+                        value={record.viaverde}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="orange.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField
+                        value={record.aluguel}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="purple.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField
+                        value={record.repasse}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
+                        isPaid={record.paymentStatus === 'paid'}
+                        color="blue.600"
+                        fontWeight="bold"
+                      />
+                      <Td>
+                        <VStack align="flex-start" spacing={1}>
+                          <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
+                            {statusLabels[record.paymentStatus] || record.paymentStatus}
+                          </Badge>
+                          {record.paymentDate && (
+                            <Text fontSize="xs" color="gray.500">
+                              {formatDateLabel(record.paymentDate, locale || 'pt-PT')}
+                            </Text>
+                          )}
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <ButtonGroup size="xs" variant="outline" spacing={2} justifyContent="flex-end">
+                          <Button
+                            leftIcon={<Icon as={FiFileText} />}
+                            onClick={() => handleViewPayslip(record)}
+                            isLoading={generatingRecordId === record.id}
+                            loadingText={tAdmin("weekly_records.messages.generateInProgress", "A gerar...")}
+                            size="xs"
+                          >
+                            {tAdmin("weekly_records.actions.generatePayslip", "Contracheque")}
+                          </Button>
+                          <Button
+                            leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
+                            colorScheme={record.paymentStatus === 'paid' ? 'yellow' : 'green'}
+                            onClick={() => handleTogglePaymentStatus(record)}
+                            isLoading={updatingPaymentId === record.id}
+                            size="xs"
+                          >
+                            {record.paymentStatus === 'paid'
+                              ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
+                              : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
+                          </Button>
+                        </ButtonGroup>
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>
               </Table>
-            </CardBody>
-          </Card>
-        )}
-      </VStack>
+            </Box>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Modal de Visualização do Contracheque */}
+      <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <VStack align="start" spacing={1}>
+              <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
+              {selectedPayslipRecord && (
+                <Text fontSize="sm" fontWeight="normal" color="gray.600">
+                  {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
+                </Text>
+              )}
+            </VStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4} align="stretch" height="100%">
+              <HStack spacing={4} justify="flex-end">
+                <Button
+                  leftIcon={<Icon as={FiDownload} />}
+                  onClick={handleDownloadPayslip}
+                  colorScheme="blue"
+                >
+                  {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
+                </Button>
+                <Button
+                  leftIcon={<Icon as={FiMail} />}
+                  onClick={handleSendPayslipEmail}
+                  colorScheme="green"
+                >
+                  {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
+                </Button>
+              </HStack>
+              {payslipPdfUrl ? (
+                <Box flex="1" height="calc(100vh - 200px)">
+                  <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
+                </Box>
+              ) : (
+                <Alert status="info" borderRadius="lg">
+                  <AlertIcon />
+                  <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
+                  <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
+                </Alert>
+              )}
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {unassigned.length > 0 && (
+        <Card variant="outline">
+          <CardHeader>
+            <Heading size="sm" color="orange.500">
+              {tAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            <Text fontSize="sm" color="gray.600" mb={3}>
+              {tAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
+            </Text>
+            <Table size="sm" variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>{tAdmin('platform_label', 'Plataforma')}</Th>
+                  <Th>{tAdmin('reference_label', 'Referência')}</Th>
+                  <Th>{tAdmin('value_label', 'Valor')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {unassigned.map((entry) => (
+                  <Tr key={entry.id}>
+                    <Td textTransform="capitalize">{entry.platform}</Td>
+                    <Td>{entry.referenceLabel || entry.referenceId}</Td>
+                    <Td isNumeric>{formatCurrency(entry.totalValue)}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </CardBody>
+        </Card>
+      )}
+
     </AdminLayout>
   );
 }
