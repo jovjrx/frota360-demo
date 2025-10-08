@@ -1,71 +1,160 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Badge,
   Box,
   Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Divider,
   Flex,
-  Heading,
   HStack,
+  Heading,
   Icon,
   Input,
   InputGroup,
   InputLeftElement,
   Select,
   SimpleGrid,
+  Spacer,
   Spinner,
   Stack,
+  Tag,
+  TagLabel,
   Text,
+  Tooltip,
+  VStack,
   useToast,
 } from '@chakra-ui/react';
 import { FaSearch } from 'react-icons/fa';
 import { MdAdd } from 'react-icons/md';
+import { FiRefreshCw } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
-import { WeeklyDataSources, createWeeklyDataSources } from '@/schemas/weekly-data-sources';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import { getFirestore } from 'firebase-admin/firestore';
+import {
+  fetchWeeklyDataOverview,
+  WEEKLY_PLATFORMS,
+  WeeklyDataOverview,
+  WeeklyPlatform,
+} from '@/lib/admin/weeklyDataOverview';
 
-interface DataPageProps extends AdminPageProps {
-  initialWeeks: WeeklyDataSources[];
+type DataPageProps = AdminPageProps & {
+  initialWeeks: WeeklyDataOverview[];
+};
+
+type WeekStatus = 'complete' | 'partial' | 'pending';
+
+const STATUS_BADGE_COLOR: Record<WeekStatus, string> = {
+  complete: 'green',
+  partial: 'yellow',
+  pending: 'gray',
+};
+
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+};
+
+const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  ...DATE_FORMAT_OPTIONS,
+  hour: '2-digit',
+  minute: '2-digit',
+};
+
+function formatDate(value: string | undefined, locale: string) {
+  if (!value) return '—';
+  try {
+    return new Intl.DateTimeFormat(locale, DATE_FORMAT_OPTIONS).format(new Date(value));
+  } catch (_error) {
+    return value;
+  }
 }
+
+function formatDateTime(value: string | undefined, locale: string) {
+  if (!value) return '—';
+  try {
+    return new Intl.DateTimeFormat(locale, DATE_TIME_FORMAT_OPTIONS).format(new Date(value));
+  } catch (_error) {
+    return value;
+  }
+}
+
+function getWeekStatus(week: WeeklyDataOverview): WeekStatus {
+  if (week.isComplete) {
+    return 'complete';
+  }
+
+  const statuses = WEEKLY_PLATFORMS
+    .map((platform) => week.sources?.[platform]?.status as WeekStatus | undefined)
+    .filter((status): status is WeekStatus => Boolean(status));
+
+  if (statuses.length === 0) {
+    return week.totalRawFiles > 0 ? 'partial' : 'pending';
+  }
+
+  if (statuses.every((status) => status === 'complete')) {
+    return 'complete';
+  }
+
+  if (statuses.some((status) => status === 'complete' || status === 'partial')) {
+    return 'partial';
+  }
+
+  return 'pending';
+}
+
+const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
+  if (!fn) return fallback ?? key;
+  const value = fn(key);
+  if (typeof value === 'string') return value;
+  return fallback ?? key;
+};
 
 export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [weeks, setWeeks] = useState<WeeklyDataSources[]>(initialWeeks);
+
+  const [weeks, setWeeks] = useState<WeeklyDataOverview[]>(initialWeeks);
   const [loading, setLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
+  const [syncingWeekId, setSyncingWeekId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<WeekStatus | ''>('');
 
-  const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: string) => {
-    if (!fn) return fallback ?? key;
-    const value = fn(key);
-    if (typeof value === 'string') return value;
-    return fallback ?? key;
-  };
+  const tc = useMemo(() => makeSafeT(tCommon), [tCommon]);
+  const t = useMemo(() => makeSafeT(tPage), [tPage]);
 
-  const tc = makeSafeT(tCommon);
-  const t = makeSafeT(tPage);
+  const platformLabels = useMemo(() => {
+    return WEEKLY_PLATFORMS.reduce<Record<WeeklyPlatform, string>>((acc, platform) => {
+      acc[platform] = t(`weeklyDataSources.platforms.${platform}`, platform.toUpperCase());
+      return acc;
+    }, {} as Record<WeeklyPlatform, string>);
+  }, [t]);
 
-  // useEffect para recarregar dados se necessário (ex: após sync)
-  useEffect(() => {
-    // Se initialWeeks estiver vazio, tentar carregar do cliente (fallback)
-    if (initialWeeks.length === 0) {
-      fetchWeeks();
-    }
-  }, []);
+  const statusLabels = useMemo(
+    () => ({
+      complete: t('weeklyDataSources.status.complete', 'Completo'),
+      partial: t('weeklyDataSources.status.partial', 'Parcial'),
+      pending: t('weeklyDataSources.status.pending', 'Pendente'),
+    }),
+    [t]
+  );
 
-  const fetchWeeks = async () => {
+  const reloadWeeks = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/weekly-data-sources');
+      const response = await fetch('/api/admin/weekly/data-sources');
       if (!response.ok) {
         throw new Error('Failed to fetch weekly data sources');
       }
       const data = await response.json();
-      setWeeks(data.weeks);
+      setWeeks(data.weeks ?? []);
     } catch (error: any) {
       toast({
-        title: tc('errors.title'),
-        description: error.message || t('weeklyDataSources.errors.fetch', 'Erro ao carregar semanas.'),
+        title: tc('errors.title', 'Erro'),
+        description: error?.message || t('weeklyDataSources.errors.fetch', 'Falha ao carregar semanas.'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -73,162 +162,261 @@ export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps
     } finally {
       setLoading(false);
     }
-  };
+  }, [t, tc, toast]);
 
-  const handleSync = async (weekId: string) => {
-    setSyncing(true);
-    try {
-      // Primeiro, buscar os rawDataDocIds para a weekId específica
-      const rawDataResponse = await fetch(`/api/admin/imports/get-raw-data-ids?weekId=${weekId}`);
-      if (!rawDataResponse.ok) {
-        throw new Error('Failed to fetch raw data for processing');
-      }
-      const { rawDataDocIds } = await rawDataResponse.json();
-
-      if (!rawDataDocIds || rawDataDocIds.length === 0) {
-        toast({
-          title: tc('messages.info'),
-          description: t('weeklyDataSources.messages.noRawData', 'Nenhum dado bruto disponível para processar.'),
-          status: 'info',
-          duration: 5000,
-          isClosable: true,
-        });
-        setSyncing(false);
-        return;
-      }
-
-      // Em seguida, chamar o endpoint de processamento com os rawDataDocIds
-      const processResponse = await fetch(`/api/admin/imports/process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weekId, rawDataDocIds }),
-      });
-      const data = await processResponse.json();
-      if (!processResponse.ok) {
-        throw new Error(data.message || 'Failed to process raw data');
-      }
-      toast({
-        title: tc('messages.success'),
-        description: data.message || t('weeklyDataSources.messages.processSuccess', 'Dados processados com sucesso.'),
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-      fetchWeeks(); // Recarregar dados após a sincronização
-    } catch (error: any) {
-      toast({
-        title: tc('errors.title'),
-        description: error.message || t('weeklyDataSources.errors.process', 'Falha ao processar dados brutos.'),
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setSyncing(false);
+  useEffect(() => {
+    if (!initialWeeks || initialWeeks.length === 0) {
+      reloadWeeks();
     }
-  };
+  }, [initialWeeks, reloadWeeks]);
+
+  const filteredWeeks = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    return weeks.filter((week) => {
+      const status = getWeekStatus(week);
+      const matchesStatus = !statusFilter || statusFilter === status;
+      const matchesSearch =
+        !normalizedSearch ||
+        [week.weekId, week.weekStart, week.weekEnd]
+          .map((value) => value?.toLowerCase() ?? '')
+          .some((value) => value.includes(normalizedSearch));
+      return matchesSearch && matchesStatus;
+    });
+  }, [weeks, searchTerm, statusFilter]);
 
   const handleAddWeek = () => {
     router.push('/admin/weekly/import');
   };
 
-  const filterWeeks = (weeksToFilter: WeeklyDataSources[]) => {
-    // Implementar lógica de filtro aqui se necessário
-    return weeksToFilter;
+  const handleSync = async (weekId: string) => {
+    setSyncingWeekId(weekId);
+    try {
+      const rawDataResponse = await fetch(`/api/admin/imports/get-raw-data-ids?weekId=${weekId}`);
+      if (!rawDataResponse.ok) {
+        throw new Error('Failed to fetch raw data references');
+      }
+      const { rawDataDocIds } = await rawDataResponse.json();
+
+      if (!rawDataDocIds || rawDataDocIds.length === 0) {
+        toast({
+          title: tc('messages.info', 'Informação'),
+          description: t('weeklyDataSources.messages.noRawData', 'Nenhum dado bruto disponível para processar.'),
+          status: 'info',
+          duration: 5000,
+          isClosable: true,
+        });
+        setSyncingWeekId(null);
+        return;
+      }
+
+      const processResponse = await fetch('/api/admin/imports/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weekId, rawDataDocIds }),
+      });
+      const data = await processResponse.json();
+
+      if (!processResponse.ok) {
+        throw new Error(data?.message || 'Failed to process raw data');
+      }
+
+      toast({
+        title: tc('messages.success', 'Sucesso'),
+        description: data?.message || t('weeklyDataSources.messages.processSuccess', 'Dados processados com sucesso.'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      await reloadWeeks();
+    } catch (error: any) {
+      toast({
+        title: tc('errors.title', 'Erro'),
+        description: error?.message || t('weeklyDataSources.errors.process', 'Falha ao processar dados brutos.'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setSyncingWeekId(null);
+    }
   };
 
   return (
     <AdminLayout
       title={t('weeklyDataSources.title', 'Fontes de dados')}
-      subtitle={t('weeklyDataSources.subtitle', 'Gerencie fontes de dados semanais')}
-      breadcrumbs={[
-        { label: t('weeklyDataSources.breadcrumb', 'Fontes de dados') }
-      ]}
-    >
-      <Flex justifyContent="space-between" alignItems="center" mb={6}>
-        <Heading as="h1" size="xl">{t('weeklyDataSources.title', 'Fontes de dados')}</Heading>
-        <HStack spacing={4}>
-          <Button leftIcon={<MdAdd />} colorScheme="green" onClick={handleAddWeek}>
+      subtitle={t('weeklyDataSources.subtitle', 'Gerencie importações, status e processamento semanal')}
+      breadcrumbs={[{ label: t('weeklyDataSources.breadcrumb', 'Fontes de dados') }]}
+      side={
+        <HStack spacing={3}>
+          <Button
+            variant="outline"
+            leftIcon={<FiRefreshCw />}
+            onClick={reloadWeeks}
+            isLoading={loading}
+            size="sm"
+          >
+            {tc('actions.refresh', 'Atualizar')}
+          </Button>
+          <Button leftIcon={<MdAdd />} colorScheme="green" onClick={handleAddWeek} size="sm">
             {t('weeklyDataSources.actions.addWeek', 'Adicionar semana')}
           </Button>
         </HStack>
-      </Flex>
+      }
+    >
+      <Stack spacing={6}>
+        <Card>
+          <CardBody>
+            <Stack direction={{ base: 'column', md: 'row' }} spacing={4} align={{ base: 'stretch', md: 'center' }}>
+              <InputGroup maxW={{ base: '100%', md: '320px' }}>
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={FaSearch} color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder={t('weeklyDataSources.filters.search', 'Pesquisar semanas')}
+                />
+              </InputGroup>
 
-      <Stack spacing={4} mb={6}>
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <Icon as={FaSearch} color="gray.300" />
-          </InputLeftElement>
-          <Input type="text" placeholder={t('weeklyDataSources.filters.search', 'Pesquisar semanas')} />
-        </InputGroup>
-        <Select placeholder={t('weeklyDataSources.filters.statusPlaceholder', 'Filtrar por status')}>
-          <option value="complete">{t('weeklyDataSources.filters.status.complete', 'Completo')}</option>
-          <option value="partial">{t('weeklyDataSources.filters.status.partial', 'Parcial')}</option>
-          <option value="pending">{tc('status.pending')}</option>
-        </Select>
-      </Stack>
-
-      {loading ? (
-        <Flex justifyContent="center" alignItems="center" minH="200px">
-          <Spinner size="xl" />
-        </Flex>
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {filterWeeks(weeks).map((week) => (
-            <Box
-              key={week.id}
-              p={4}
-              borderWidth={1}
-              borderRadius="md"
-              _hover={{ shadow: 'md' }}
-            >
-              <Text fontWeight="bold">{week.weekId}</Text>
-              <Text fontSize="sm">{week.weekStart} - {week.weekEnd}</Text>
-              <Button
-                size="sm"
-                mt={2}
-                onClick={() => handleSync(week.id)}
-                isLoading={syncing}
+              <Select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as WeekStatus | '')}
+                maxW={{ base: '100%', md: '220px' }}
               >
-                {t('weeklyDataSources.actions.sync', 'Sincronizar')}
-              </Button>
-            </Box>
-          ))}
-        </SimpleGrid>
-      )}
+                <option value="">{t('weeklyDataSources.filters.status.all', 'Todos os status')}</option>
+                <option value="complete">{t('weeklyDataSources.filters.status.complete', 'Completo')}</option>
+                <option value="partial">{t('weeklyDataSources.filters.status.partial', 'Parcial')}</option>
+                <option value="pending">{t('weeklyDataSources.filters.status.pending', 'Pendente')}</option>
+              </Select>
+            </Stack>
+          </CardBody>
+        </Card>
+
+        {loading ? (
+          <Flex justify="center" py={20}>
+            <Spinner size="xl" />
+          </Flex>
+        ) : filteredWeeks.length === 0 ? (
+          <Box textAlign="center" py={16}>
+            <Text color="gray.600">
+              {t('weeklyDataSources.messages.empty', 'Nenhuma semana encontrada para os filtros selecionados.')}
+            </Text>
+          </Box>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={6}>
+            {filteredWeeks.map((week) => {
+              const status = getWeekStatus(week);
+
+              return (
+                <Card key={week.weekId} p={0} borderWidth="1px" borderColor="gray.200">
+                  <CardHeader pb={4}>
+                    <VStack align="start" spacing={1}>
+                      <HStack w="full">
+                        <Heading size="md">{week.weekId}</Heading>
+                        <Spacer />
+                        <Badge colorScheme={STATUS_BADGE_COLOR[status]}>{statusLabels[status]}</Badge>
+                      </HStack>
+                      <Text fontSize="sm" color="gray.600">
+                        {formatDate(week.weekStart, router.locale || 'pt')} —{' '}
+                        {formatDate(week.weekEnd, router.locale || 'pt')}
+                      </Text>
+                    </VStack>
+                  </CardHeader>
+
+                  <Divider />
+
+                  <CardBody>
+                    <VStack align="stretch" spacing={3}>
+                      {WEEKLY_PLATFORMS.map((platform) => {
+                        const source = week.sources?.[platform];
+                        const raw = week.rawFiles[platform];
+                        const platformStatus = (source?.status as WeekStatus | undefined) ?? 'pending';
+
+                        return (
+                          <Box key={platform} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3}>
+                            <HStack align="start" justify="space-between" spacing={3}>
+                              <VStack align="start" spacing={1}>
+                                <Text fontWeight="semibold">{platformLabels[platform]}</Text>
+                                <Text fontSize="xs" color="gray.500">
+                                  {t('weeklyDataSources.labels.rawFiles', 'Arquivos brutos')}: {raw.total}
+                                </Text>
+                              </VStack>
+                              <VStack align="end" spacing={1}>
+                                <Tooltip label={statusLabels[platformStatus]}>
+                                  <Badge colorScheme={STATUS_BADGE_COLOR[platformStatus]}>
+                                    {statusLabels[platformStatus]}
+                                  </Badge>
+                                </Tooltip>
+                                {raw.total > 0 ? (
+                                  <Tag variant="subtle" colorScheme={raw.pending > 0 ? 'orange' : 'green'} size="sm">
+                                    <TagLabel>
+                                      {raw.pending > 0
+                                        ? `${raw.pending} ${t('weeklyDataSources.labels.pendingRaw', 'pendente(s)')}`
+                                        : t('weeklyDataSources.labels.allProcessed', 'Todos processados')}
+                                    </TagLabel>
+                                  </Tag>
+                                ) : (
+                                  <Tag variant="subtle" size="sm">
+                                    <TagLabel>{t('weeklyDataSources.labels.noRaw', 'Nenhum envio')}</TagLabel>
+                                  </Tag>
+                                )}
+                              </VStack>
+                            </HStack>
+                          </Box>
+                        );
+                      })}
+                    </VStack>
+                  </CardBody>
+
+                  <Divider />
+
+                  <CardFooter pt={4} justifyContent="space-between" flexWrap="wrap" gap={4}>
+                    <VStack align="start" spacing={1}>
+                      {week.lastImportAt && (
+                        <Text fontSize="xs" color="gray.500">
+                          {t('weeklyDataSources.labels.updatedAt', 'Última importação')}: {formatDateTime(week.lastImportAt, router.locale || 'pt')}
+                        </Text>
+                      )}
+                      <Text fontSize="xs" color="gray.500">
+                        {t('weeklyDataSources.labels.pendingRaw', 'Pendentes')}: {week.pendingRawFiles} ·{' '}
+                        {t('weeklyDataSources.labels.processedRaw', 'Processados')}: {week.totalRawFiles - week.pendingRawFiles}
+                      </Text>
+                    </VStack>
+
+                    <HStack spacing={2}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.push(`/admin/weekly?week=${week.weekId}`)}
+                      >
+                        {t('weeklyDataSources.actions.viewWeek', 'Ver semana')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        onClick={() => handleSync(week.weekId)}
+                        isLoading={syncingWeekId === week.weekId}
+                        isDisabled={week.pendingRawFiles === 0 || (syncingWeekId !== null && syncingWeekId !== week.weekId)}
+                      >
+                        {t('weeklyDataSources.actions.sync', 'Sincronizar')}
+                      </Button>
+                    </HStack>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </SimpleGrid>
+        )}
+      </Stack>
     </AdminLayout>
   );
 }
 
-// SSR com autenticação, traduções e dados iniciais
-export const getServerSideProps = withAdminSSR(async (context, user) => {
-  const db = getFirestore();
-
-  try {
-    const weeksSnapshot = await db.collection('weeklyDataSources').orderBy('weekStart', 'desc').get();
-    const initialWeeks = weeksSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        weekId: data.weekId,
-        weekStart: data.weekStart,
-        weekEnd: data.weekEnd,
-        sources: data.sources,
-        isComplete: data.isComplete,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        notes: data.notes,
-      };
-    });
-
-    return {
-      initialWeeks,
-    };
-  } catch (error) {
-    console.error('Error fetching weekly data sources:', error);
-    return {
-      initialWeeks: [],
-    };
-  }
+export const getServerSideProps = withAdminSSR(async () => {
+  const initialWeeks = await fetchWeeklyDataOverview();
+  return {
+    initialWeeks,
+  };
 });
 

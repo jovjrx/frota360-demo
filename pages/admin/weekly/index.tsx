@@ -48,12 +48,12 @@ interface WeekOption {
 }
 
 import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
-import { WeeklyDriverPlatformData } from '@/schemas/weekly-driver-platform-data';
+import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 
 interface DriverRecord extends DriverWeeklyRecord {
-  driverType: string; // Adicionar de volta se for necessário para exibição
-  vehicle: string; // Adicionar de volta se for necessário para exibição
-  platformData: WeeklyDriverPlatformData[];
+  driverType: 'affiliate' | 'renter';
+  vehicle: string;
+  platformData: WeeklyNormalizedData[];
 }
 
 interface WeeklyPageProps extends AdminPageProps {
@@ -67,11 +67,16 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingResumos, setIsGeneratingResumos] = useState(false);
+  const [unassigned, setUnassigned] = useState<WeeklyNormalizedData[]>([]);
   const toast = useToast();
   const router = useRouter();
 
   const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
   const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const translateAdmin = (key: string, fallback: string) => {
+    const value = tAdmin(key);
+    return value === key ? fallback : value;
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-PT', {
@@ -100,20 +105,17 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         throw new Error(tAdmin('error_loading_data'));
       }
 
-      const { weeklyRecords, platformData } = await response.json();
+      const data = await response.json();
 
-      const combinedRecords: DriverRecord[] = weeklyRecords.map((record: DriverWeeklyRecord) => {
-        const driverPlatformData = platformData.filter((pd: WeeklyDriverPlatformData) => pd.driverId === record.driverId);
-        // Temporariamente, para driverType e vehicle, vamos usar valores mock ou buscar do driver original se necessário
-        // Por enquanto, vamos assumir que essas informações virão de outro lugar ou serão adicionadas posteriormente.
-        return {
-          ...record,
-          driverType: record.isLocatario ? 'renter' : 'affiliate', // Exemplo, pode precisar de ajuste
-          vehicle: 'N/A', // Exemplo, pode precisar de ajuste
-          platformData: driverPlatformData,
-        };
-      });
-      setRecords(combinedRecords || []);
+      const recordsResponse: DriverRecord[] = (data.records || []).map((record: DriverRecord) => ({
+        ...record,
+        driverType: record.driverType,
+        vehicle: record.vehicle,
+        platformData: record.platformData || [],
+      }));
+
+      setRecords(recordsResponse);
+      setUnassigned(data.unassigned || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -377,8 +379,8 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                             {record.driverType === "renter" ? t("type_renter") : t("type_affiliate")}
                           </Badge>
                         </Td>
-                        <Td isNumeric>{formatCurrency(record.platformData.find(p => p.platform === "uber")?.totalValue || 0)}</Td>
-                        <Td isNumeric>{formatCurrency(record.platformData.find(p => p.platform === "bolt")?.totalValue || 0)}</Td>
+                        <Td isNumeric>{formatCurrency(record.platformData.filter(p => p.platform === "uber").reduce((acc, curr) => acc + (curr.totalValue || 0), 0))}</Td>
+                        <Td isNumeric>{formatCurrency(record.platformData.filter(p => p.platform === "bolt").reduce((acc, curr) => acc + (curr.totalValue || 0), 0))}</Td>
                         <Td isNumeric fontWeight="bold">{formatCurrency(record.ganhosTotal)}</Td>
                         <Td isNumeric color="red.600">-{formatCurrency(record.ivaValor)}</Td>
                         <Td isNumeric color="red.600">-{formatCurrency(record.despesasAdm)}</Td>
@@ -396,6 +398,39 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
             )}
           </CardBody>
         </Card>
+
+        {unassigned.length > 0 && (
+          <Card variant="outline">
+            <CardHeader>
+              <Heading size="sm" color="orange.500">
+                {translateAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
+              </Heading>
+            </CardHeader>
+            <CardBody>
+              <Text fontSize="sm" color="gray.600" mb={3}>
+                {translateAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
+              </Text>
+              <Table size="sm" variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>{translateAdmin('platform_label', 'Plataforma')}</Th>
+                    <Th>{translateAdmin('reference_label', 'Referência')}</Th>
+                    <Th>{translateAdmin('value_label', 'Valor')}</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {unassigned.map((entry) => (
+                    <Tr key={entry.id}>
+                      <Td textTransform="capitalize">{entry.platform}</Td>
+                      <Td>{entry.referenceLabel || entry.referenceId}</Td>
+                      <Td isNumeric>{formatCurrency(entry.totalValue)}</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </CardBody>
+          </Card>
+        )}
       </VStack>
     </AdminLayout>
   );

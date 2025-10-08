@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { getWeekDates } from '@/lib/utils/date-helpers';
+import { fetchWeeklyDataOverview } from '@/lib/admin/weeklyDataOverview';
 import { withIronSessionApiRoute, SessionRequest, sessionOptions } from '@/lib/session/ironSession';
 
 interface WeekOption {
@@ -25,22 +24,7 @@ export default withIronSessionApiRoute(async function handler(
 
   if (req.method === 'GET') {
     try {
-      const weeklyDataSourcesSnapshot = await adminDb.collection("weeklyDataSources").orderBy("weekStart", "desc").get();
-
-      const weeks = weeklyDataSourcesSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          weekId: data.weekId,
-          weekStart: data.weekStart,
-          weekEnd: data.weekEnd,
-          sources: data.sources,
-          isComplete: data.isComplete,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-          notes: data.notes,
-        };
-      });
+      const weeks = await fetchWeeklyDataOverview();
 
       return res.status(200).json({ weeks });
     } catch (e) {

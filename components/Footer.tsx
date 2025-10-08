@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { useMemo } from "react";
 import {
   Heading,
   Text,
@@ -12,20 +13,33 @@ import {
 import { Container } from "./Container";
 import { ContainerDivisions } from "./ContainerDivisions";
 import { useLocalizedHref } from "@/lib/linkUtils";
+import { getPublicMenuItems } from "@/config/publicMenu";
 
 interface FooterProps {
   t: (key: string) => string;
+  panel?: boolean;
 }
 
-export default function Footer({ t }: FooterProps) {
+export default function Footer({ t, panel = false }: FooterProps) {
   const year = new Date().getFullYear();
   const getLocalizedHref = useLocalizedHref();
   const color = "white";
   const colorSoft = "whiteAlpha.600";
   const border = "whiteAlpha.300";
 
+  const publicMenuItems = useMemo(
+    () =>
+      getPublicMenuItems().map((item) => ({
+        id: item.id,
+        href: item.external ? item.href : getLocalizedHref(item.href),
+        label: t(item.translationKey),
+        external: item.external ?? false,
+      })),
+    [t, getLocalizedHref]
+  );
+
   return (
-    <Container bg="#0d152b" softBg>
+    <Container bg="#0d152b" softBg maxW={panel ? 'full' : '8xl'}>
       <VStack spacing={6} minW="full">
         <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }}>
 
@@ -88,18 +102,21 @@ export default function Footer({ t }: FooterProps) {
 
         <ContainerDivisions template={{ base: "1fr", md: "repeat(2, auto)" }} gap={{ base: 2, md: 6 }}>
           <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
-              {t("navigation.home")}
-            </Link>
-            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/about")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
-              {t("navigation.about")}
-            </Link>
-            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/services/drivers")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
-              {t("navigation.drivers")}
-            </Link>
-            <Link as={NextLink} fontSize="sm" href={getLocalizedHref("/contact")} color="white" _hover={{ textDecoration: "underline", color: "brand.400" }}>
-              {t("navigation.contact")}
-            </Link>
+            {publicMenuItems.map((item) => (
+              <Link
+                key={item.id}
+                as={item.external ? "a" : NextLink}
+                fontSize="sm"
+                href={item.href}
+                color="white"
+                _hover={{ textDecoration: "underline", color: "brand.400" }}
+                isExternal={item.external}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
           </HStack>
 
           <HStack justify={{ base: "center", md: "flex-start" }}>

@@ -32,6 +32,7 @@ import {
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit, FiTruck, FiActivity, FiWifi, FiBarChart2 } from "react-icons/fi";
 import { getAllMenuItems } from "@/config/adminMenu";
+import { getPublicMenuItems } from "@/config/publicMenu";
 import { WrapperLayout } from "./layouts/WrapperLayout";
 
 interface HeaderProps {
@@ -72,22 +73,26 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
   };
 
 
-  const items = useMemo(
-    () => [
-      { href: getLocalizedHref("/"), label: t("navigation.home") },
-      { href: getLocalizedHref("/services/drivers"), label: t("navigation.drivers") },
-      { href: getLocalizedHref("/about"), label: t("navigation.about") },
-      { href: getLocalizedHref("/contact"), label: t("navigation.contact") }
-    ],
+  const publicMenuItems = useMemo(
+    () =>
+      getPublicMenuItems().map((item) => ({
+        id: item.id,
+        href: item.external ? item.href : getLocalizedHref(item.href),
+        label: t(item.translationKey),
+        external: item.external ?? false,
+        activePath: item.href,
+      })),
     [t, getLocalizedHref]
   );
 
 
-  const NavLink = ({ href, label }: { href: string; label: string }) => (
+  const NavLink = ({ href, label, external, activePath }: { href: string; label: string; external?: boolean; activePath?: string }) => (
     <Button
-      as={NextLink}
+      as={external ? "a" : NextLink}
       href={href}
-      variant={isActive(href) ? "solid" : "ghost"}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      variant={!external && activePath && isActive(activePath) ? "solid" : "ghost"}
       fontSize="sm"
       fontWeight="medium"
       onClick={() => {
@@ -115,8 +120,8 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
           </Link>
 
           <HStack spacing={2} display={{ base: "none", md: "flex" }}>
-            {items.map((item) => (
-              <NavLink key={item.href} href={item.href} label={item.label} />
+            {publicMenuItems.map((item) => (
+              <NavLink key={item.id} href={item.href} label={item.label} external={item.external} activePath={item.activePath} />
             ))}
           </HStack>
 
@@ -307,8 +312,8 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
         >
           <Container maxW="6xl" py={4}>
             <Flex direction="column" gap={3}>
-              {items.map((item) => (
-                <NavLink key={item.href} href={item.href} label={item.label} />
+              {publicMenuItems.map((item) => (
+                <NavLink key={item.id} href={item.href} label={item.label} external={item.external} activePath={item.activePath} />
               ))}
 
               {/* Mobile Login/Logout */}

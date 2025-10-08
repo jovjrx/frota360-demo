@@ -293,5 +293,107 @@
       "error": "Error",
       "syncing": "Syncing"
     }
-  }
+  },
+  "weeklyDataSources": {
+    "title": "Weekly data sources",
+    "subtitle": "Monitor uploads, processing and integration status",
+    "breadcrumb": "Data sources",
+    "actions": {
+      "addWeek": "Add week",
+      "sync": "Synchronize",
+      "viewWeek": "View week"
+    },
+    "filters": {
+      "search": "Search weeks",
+      "status": {
+        "all": "All statuses",
+        "complete": "Complete",
+        "partial": "Partial",
+        "pending": "Pending"
+      },
+      "statusPlaceholder": "Filter by status"
+    },
+    "status": {
+      "complete": "Complete",
+      "partial": "Partial",
+      "pending": "Pending"
+    },
+    "labels": {
+      "rawFiles": "Raw files",
+      "pendingRaw": "Pending",
+      "processedRaw": "Processed",
+      "allProcessed": "All processed",
+      "noRaw": "No uploads",
+      "updatedAt": "Last import"
+    },
+    "messages": {
+      "noRawData": "No raw data available for processing.",
+      "processSuccess": "Data processed successfully.",
+      "empty": "No weeks found for the selected filters."
+    },
+    "errors": {
+      "fetch": "Failed to load weeks.",
+      "process": "Failed to process raw data."
+    },
+    "platforms": {
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "myprio": "myprio",
+      "viaverde": "ViaVerde",
+      "cartrack": "Cartrack"
+    }
+  },
+  "weekly_control_title": "Weekly control",
+  "weekly_control_subtitle": "Consolidated management of weekly earnings and expenses",
+  "new_structure_alert": "This view shows normalized data from all platforms for automatic payslip calculation.",
+  "week_label": "Week",
+  "import_data_button": "Import data",
+  "generate_summaries_button": "Generate payslips",
+  "generating_summaries_loading": "Generating payslips...",
+  "drivers_label": "drivers",
+  "total_discounts": "Total deductions",
+  "iva_adm_fuel_tolls_rent": "VAT, admin, fuel, tolls and rent",
+  "fuel_label": "Fuel",
+  "prio_label": "myprio",
+  "tolls_label": "Tolls",
+  "rent_label": "Rent",
+  "net_value": "Net value",
+  "total_to_pay": "Total to pay",
+  "weekly_records_title": "Consolidated records",
+  "loading_data": "Loading data...",
+  "no_records_found": "No records found for this week.",
+  "error_loading_data": "Unable to load the data.",
+  "error_loading_data_title": "Error loading data",
+  "error_loading_data_description": "Check the connection and try again.",
+  "select_week_error": "Select a week to continue.",
+  "error_generating_summaries": "Couldn't generate the payslips.",
+  "error_generating_summaries_title": "Error generating payslips",
+  "error_generating_summaries_description": "Review the data and try again.",
+  "summaries_generated_success_title": "Payslips generated",
+  "summaries_generated_success_description": "The ZIP file was downloaded successfully.",
+  "summaries_filename_prefix": "payslips",
+  "weekly_unassigned_title": "Records without assigned driver",
+  "weekly_unassigned_description": "Review these entries and update the registrations to map them correctly.",
+  "platform_label": "Platform",
+  "reference_label": "Reference",
+  "value_label": "Amount",
+  "no_file_selected_title": "Select the files",
+  "no_file_selected_description": "Upload at least one file before starting the processing.",
+  "import_error_generic": "An error occurred while importing the files.",
+  "import_success_title": "Import completed",
+  "import_success_description": "Data imported successfully (ID: {{importId}}).",
+  "import_error_title": "Import error",
+  "import_data_title": "Data import",
+  "import_data_subtitle": "Upload the CSV/Excel files for each platform",
+  "import_data_heading": "Prepare weekly import",
+  "import_data_description": "Select the period and upload the files for each platform to generate the normalized data.",
+  "new_import_structure_alert_title": "New import structure",
+  "new_import_structure_alert_description": "Uploaded files will be archived and processed automatically into the dataWeekly collection.",
+  "week_period_title": "Week period",
+  "files_for_import_title": "Files for import",
+  "files_selected_count": "{{ready}} of {{total}} file(s) ready",
+  "status_ready": "Ready",
+  "status_error": "Error",
+  "status_waiting": "Waiting",
+  "import_result_title": "Processing results"
 }

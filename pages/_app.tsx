@@ -22,11 +22,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const translations = (pageProps as any)?.translations || {};
   const { common = {}, page = {} } = translations;
-  
+
   // Extrair dados do usuário do SSR se disponíveis (de withAdminSSR ou withDriverSSR)
   // Usar useMemo para evitar recriação desnecessária mas permitir atualização na navegação
   const serverUser = useMemo(() => (pageProps as any)?.user || null, [pageProps]);
-  
+
   // Converter serverUser para formato do AuthProvider se disponível
   const initialUserData = useMemo(() => serverUser ? {
     uid: serverUser.uid,
@@ -45,8 +45,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const path = router.pathname;
     if (path === "/") return "home";
     if (path === "/about") return "about";
-    if (path === "/services-drivers") return "services";
-    if (path === "/services-companies") return "services-companies";
+    if (path === "/drivers") return "drivers";
     if (path === "/contact") return "contact";
     if (path === "/login") return "login";
     if (path === "/signup") return "signup";
@@ -78,9 +77,9 @@ export default function App({ Component, pageProps }: AppProps) {
               locale={router.locale ?? "pt"}
             />
 
-            <Header 
-              t={tCommon} 
-              panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")} 
+            <Header
+              t={tCommon}
+              panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")}
               serverUser={serverUser}
             />
             <Component
@@ -91,7 +90,7 @@ export default function App({ Component, pageProps }: AppProps) {
               tArray={tArray}
               ns={scopedNs}
             />
-            <Footer t={tCommon} />
+            <Footer t={tCommon} panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")} />
             <GoogleAnalytics gaMeasurementId={GA_ID} trackPageViews />
             <Analytics />
             <SpeedInsights />

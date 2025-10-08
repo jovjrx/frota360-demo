@@ -14,12 +14,7 @@ import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { FaCheckCircle, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
 import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
-import { loadTranslations } from "@/lib/translations";
 import { SERVICES } from "@/translations/services/constants";
-
-interface ServicePageProps extends PublicPageProps {
-  slug: string;
-}
 
 interface ServiceItem {
   title: string;
@@ -29,58 +24,51 @@ interface ServiceItem {
   features?: string[];
 }
 
-export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) {
-  const translatePageFn = (tPage as ((key: string) => unknown) | undefined) ?? ((key: string) => key);
-  const translateCommon = tCommon ?? ((key: string) => key);
-  const isDrivers = slug === "drivers";
+export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
+  const pageT = (tPage as ((key: string) => unknown) | undefined) ?? ((key: string) => key);
+  const commonT = (tCommon as ((key: string) => string) | undefined) ?? ((key: string) => key);
 
-  const translatePageText = (key: string): string => {
-    const value = translatePageFn(key);
-    return typeof value === "string" ? value : key;
-  };
+  const benefitsData = pageT(SERVICES.BENEFITS.CARD.LIST_ITEMS);
+  const benefitsList = Array.isArray(benefitsData) ? (benefitsData as string[]) : [];
 
-  const translatePageList = <T = unknown>(key: string): T[] => {
-    const value = translatePageFn(key);
-    return Array.isArray(value) ? (value as T[]) : [];
-  };
+  const servicesData = pageT(SERVICES.SERVICES.LIST);
+  const servicesList = Array.isArray(servicesData) ? (servicesData as ServiceItem[]) : [];
 
-  const benefitsList = translatePageList<string>(SERVICES.BENEFITS.CARD.LIST_ITEMS);
-  const servicesList = translatePageList<ServiceItem>(SERVICES.SERVICES.LIST);
+  const phoneNumber = commonT("company.phone");
+  const sanitizedPhone = typeof phoneNumber === "string" ? phoneNumber.replace(/\s+/g, "") : "";
+  const whatsappCandidate = commonT("company.whatsapp");
+  const whatsappFallback = commonT("company.whats");
+  const whatsappLink = typeof whatsappCandidate === "string" ? whatsappCandidate : whatsappFallback;
+  const whatsappDescription = commonT("company.whatsDescription");
+  const phoneDescription = commonT("company.phoneDescription");
+  const emailAddress = commonT("company.email");
+  const emailDescription = commonT("company.emailDescription");
 
-  const phoneNumber = translateCommon("company.phone");
-  const sanitizedPhone =
-    typeof phoneNumber === "string" ? phoneNumber.replace(/\s+/g, "") : "";
-  const whatsappLink =
-    translateCommon("company.whatsapp") ?? translateCommon("company.whats");
-  const whatsappDescription = translateCommon("company.whatsDescription");
-  const phoneDescription = translateCommon("company.phoneDescription");
-  const emailAddress = translateCommon("company.email");
-  const emailDescription = translateCommon("company.emailDescription");
-
-  const ctaLink = translatePageFn(SERVICES.CTA.LINK);
+  const ctaValue = pageT(SERVICES.CTA.LINK);
+  const ctaLink = typeof ctaValue === "string" ? ctaValue : undefined;
 
   return (
     <>
       <Container softBg>
         <Title
-          title={translatePageText(SERVICES.BENEFITS.TITLE)}
-          description={translatePageText(SERVICES.BENEFITS.SUBTITLE)}
-          feature={translatePageText(SERVICES.BENEFITS.FEATURE)}
+          title={pageT(SERVICES.BENEFITS.TITLE) as string}
+          description={pageT(SERVICES.BENEFITS.SUBTITLE) as string}
+          feature={pageT(SERVICES.BENEFITS.FEATURE) as string}
         />
         <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
           <Card
-            title={translatePageText(SERVICES.BENEFITS.CARD.TITLE)}
-            description={translatePageText(SERVICES.BENEFITS.CARD.DESCRIPTION)}
+            title={pageT(SERVICES.BENEFITS.CARD.TITLE) as string}
+            description={pageT(SERVICES.BENEFITS.CARD.DESCRIPTION) as string}
             animated
             borded
           >
             <VStack spacing={6} align="stretch">
               <Text fontSize="lg" color="gray.700">
-                {translatePageText(SERVICES.BENEFITS.CARD.CONTENT)}
+                {pageT(SERVICES.BENEFITS.CARD.CONTENT) as string}
               </Text>
               <Box>
                 <Text fontWeight="semibold" color="green.600" mb={3}>
-                  {translatePageText(SERVICES.BENEFITS.CARD.LIST_TITLE)}
+                  {pageT(SERVICES.BENEFITS.CARD.LIST_TITLE) as string}
                 </Text>
                 <VStack spacing={2} align="stretch">
                   {benefitsList.map((benefit, index) => (
@@ -95,9 +83,9 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
           </Card>
 
           <Highlight
-            title={translatePageText(SERVICES.BENEFITS.HIGHLIGHT.TITLE)}
-            description={translatePageText(SERVICES.BENEFITS.HIGHLIGHT.DESCRIPTION)}
-            bgImage={isDrivers ? "/img/service-drivers.jpg" : "/img/service-companies.jpg"}
+            title={pageT(SERVICES.BENEFITS.HIGHLIGHT.TITLE) as string}
+            description={pageT(SERVICES.BENEFITS.HIGHLIGHT.DESCRIPTION) as string}
+            bgImage="/img/service-drivers.jpg"
             bgSizePersonalized="cover"
             overlayPos="bl"
             delayImage={0.2}
@@ -108,9 +96,9 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
 
       <Container>
         <Title
-          title={translatePageText(SERVICES.SERVICES.TITLE)}
-          description={translatePageText(SERVICES.SERVICES.SUBTITLE)}
-          feature={translatePageText(SERVICES.SERVICES.FEATURE)}
+          title={pageT(SERVICES.SERVICES.TITLE) as string}
+          description={pageT(SERVICES.SERVICES.SUBTITLE) as string}
+          feature={pageT(SERVICES.SERVICES.FEATURE) as string}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(3, 1fr)" }}>
           {servicesList.map((service, index) => (
@@ -148,9 +136,9 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
 
       <Container softBg>
         <Title
-          title={translatePageText(SERVICES.SUPPORT.TITLE)}
-          description={translatePageText(SERVICES.SUPPORT.SUBTITLE)}
-          feature={translatePageText(SERVICES.SUPPORT.FEATURE)}
+          title={pageT(SERVICES.SUPPORT.TITLE) as string}
+          description={pageT(SERVICES.SUPPORT.SUBTITLE) as string}
+          feature={pageT(SERVICES.SUPPORT.FEATURE) as string}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
           <Card animated borded>
@@ -199,11 +187,11 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
 
       <Container softBg>
         <Title
-          title={translatePageText(SERVICES.CTA.TITLE)}
-          description={translatePageText(SERVICES.CTA.SUBTITLE)}
-          feature={translatePageText(SERVICES.CTA.FEATURE)}
-          ctaText={translatePageText(SERVICES.CTA.BUTTON)}
-          cta={typeof ctaLink === "string" ? ctaLink : undefined}
+          title={pageT(SERVICES.CTA.TITLE) as string}
+          description={pageT(SERVICES.CTA.SUBTITLE) as string}
+          feature={pageT(SERVICES.CTA.FEATURE) as string}
+          ctaText={pageT(SERVICES.CTA.BUTTON) as string}
+          cta={ctaLink}
           center
         />
       </Container>
@@ -211,18 +199,4 @@ export default function ServicePage({ tPage, tCommon, slug }: ServicePageProps) 
   );
 }
 
-export const getServerSideProps = withPublicSSR("services-drivers", async (context) => {
-  const slugParam = context.params?.slug;
-  const slug = typeof slugParam === "string" ? slugParam : "drivers";
-  const locale = (context.locale || context.defaultLocale || "pt") as string;
-  const pageName = slug === "companies" ? "services-companies" : "services-drivers";
-  const translations = await loadTranslations(locale, ["common/common", `public/${pageName}`]);
-
-  return {
-    slug,
-    translations: {
-      common: translations["common/common"] || {},
-      page: translations[`public/${pageName}`] || {},
-    },
-  };
-});
+export const getServerSideProps = withPublicSSR("services-drivers");

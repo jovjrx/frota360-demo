@@ -30,7 +30,7 @@ export function middleware(request: NextRequest) {
   const isPublicPage = pathname === '/' || 
                       pathname.startsWith('/about') || 
                       pathname.startsWith('/contact') || 
-                      pathname.startsWith('/services');
+                      pathname.startsWith('/drivers');
   
   // Se não é uma rota pública, permitir acesso normal (português padrão)
   if (!isPublicPage) {

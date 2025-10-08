@@ -338,5 +338,107 @@
       "error": "Erro",
       "syncing": "Sincronizando"
     }
-  }
+  },
+  "weeklyDataSources": {
+    "title": "Fontes de dados semanais",
+    "subtitle": "Monitorize uploads, processamento e estado das integrações",
+    "breadcrumb": "Fontes de dados",
+    "actions": {
+      "addWeek": "Adicionar semana",
+      "sync": "Sincronizar",
+      "viewWeek": "Ver semana"
+    },
+    "filters": {
+      "search": "Pesquisar semanas",
+      "status": {
+        "all": "Todos os status",
+        "complete": "Completo",
+        "partial": "Parcial",
+        "pending": "Pendente"
+      },
+      "statusPlaceholder": "Filtrar por status"
+    },
+    "status": {
+      "complete": "Completo",
+      "partial": "Parcial",
+      "pending": "Pendente"
+    },
+    "labels": {
+      "rawFiles": "Arquivos brutos",
+      "pendingRaw": "Pendentes",
+      "processedRaw": "Processados",
+      "allProcessed": "Todos processados",
+      "noRaw": "Nenhum envio",
+      "updatedAt": "Última importação"
+    },
+    "messages": {
+      "noRawData": "Nenhum dado bruto disponível para processar.",
+      "processSuccess": "Dados processados com sucesso.",
+      "empty": "Nenhuma semana encontrada para os filtros selecionados."
+    },
+    "errors": {
+      "fetch": "Falha ao carregar semanas.",
+      "process": "Falha ao processar dados brutos."
+    },
+    "platforms": {
+      "uber": "Uber",
+      "bolt": "Bolt",
+      "myprio": "myprio",
+      "viaverde": "ViaVerde",
+      "cartrack": "Cartrack"
+    }
+  },
+  "weekly_control_title": "Controle semanal",
+  "weekly_control_subtitle": "Gestão consolidada dos dados de ganhos e despesas da semana",
+  "new_structure_alert": "Esta vista exibe os dados normalizados de todas as plataformas para cálculo automático dos contracheques.",
+  "week_label": "Semana",
+  "import_data_button": "Importar dados",
+  "generate_summaries_button": "Gerar contracheques",
+  "generating_summaries_loading": "A gerar contracheques...",
+  "drivers_label": "motoristas",
+  "total_discounts": "Descontos totais",
+  "iva_adm_fuel_tolls_rent": "IVA, despesas administrativas, combustível, portagens e aluguel",
+  "fuel_label": "Combustível",
+  "prio_label": "myprio",
+  "tolls_label": "Portagens",
+  "rent_label": "Aluguel",
+  "net_value": "Valor líquido",
+  "total_to_pay": "Total a pagar",
+  "weekly_records_title": "Registos consolidados",
+  "loading_data": "A carregar dados...",
+  "no_records_found": "Nenhum registo encontrado para esta semana.",
+  "error_loading_data": "Não foi possível carregar os dados.",
+  "error_loading_data_title": "Erro ao carregar dados",
+  "error_loading_data_description": "Verifique a ligação e tente novamente.",
+  "select_week_error": "Selecione uma semana para continuar.",
+  "error_generating_summaries": "Não foi possível gerar os contracheques.",
+  "error_generating_summaries_title": "Erro ao gerar contracheques",
+  "error_generating_summaries_description": "Revise os dados e tente novamente.",
+  "summaries_generated_success_title": "Contracheques gerados",
+  "summaries_generated_success_description": "O ficheiro ZIP foi descarregado com sucesso.",
+  "summaries_filename_prefix": "contracheques",
+  "weekly_unassigned_title": "Registos sem motorista associado",
+  "weekly_unassigned_description": "Revise estes lançamentos e atualize os cadastros para mapear corretamente.",
+  "platform_label": "Plataforma",
+  "reference_label": "Referência",
+  "value_label": "Valor",
+  "no_file_selected_title": "Selecione os arquivos",
+  "no_file_selected_description": "Carregue pelo menos um arquivo antes de iniciar o processamento.",
+  "import_error_generic": "Ocorreu um erro ao importar os arquivos.",
+  "import_success_title": "Importação concluída",
+  "import_success_description": "Dados importados com sucesso (ID: {{importId}}).",
+  "import_error_title": "Erro na importação",
+  "import_data_title": "Importação de dados",
+  "import_data_subtitle": "Faça upload dos ficheiros CSV/Excel de cada plataforma",
+  "import_data_heading": "Preparar importação semanal",
+  "import_data_description": "Selecione o período e carregue os ficheiros correspondentes a cada plataforma para gerar os dados normalizados.",
+  "new_import_structure_alert_title": "Nova estrutura de importação",
+  "new_import_structure_alert_description": "Os arquivos carregados serão arquivados e processados automaticamente na coleção dataWeekly.",
+  "week_period_title": "Período da semana",
+  "files_for_import_title": "Arquivos para importação",
+  "files_selected_count": "{{ready}} de {{total}} arquivo(s) prontos",
+  "status_ready": "Pronto",
+  "status_error": "Erro",
+  "status_waiting": "Aguardando",
+  "import_result_title": "Resultados do processamento"
 }

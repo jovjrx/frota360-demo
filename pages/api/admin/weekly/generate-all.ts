@@ -2,12 +2,23 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { DriverWeeklyRecord, createDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import { getWeekId } from '@/lib/utils/date-helpers';
-import { WeeklyDriverPlatformData } from '@/schemas/weekly-driver-platform-data';
+import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 import { Driver } from '@/schemas/driver';
 import archiver from 'archiver';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import { PayslipData, generatePayslipPDF } from '@/lib/pdf/payslipGenerator';
+
+type Platform = 'uber' | 'bolt' | 'myprio' | 'viaverde';
+
+interface DriverIndex {
+  byId: Map<string, Driver>;
+  byUber: Map<string, Driver>;
+  byBolt: Map<string, Driver>;
+  byMyPrio: Map<string, Driver>;
+  byPlate: Map<string, Driver>;
+  byViaVerde: Map<string, Driver>;
+}
 
 // Função auxiliar para formatar moeda
 const formatCurrency = (value: number) => {
@@ -50,29 +61,58 @@ export default async function handler(
       .get();
     const drivers: Driver[] = driversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Driver }));
 
-    // 2. Buscar todos os WeeklyDriverPlatformData para a semana
-    const platformDataSnapshot = await adminDb
-      .collection("weeklyDriverPlatformData")
-      .where("weekId", "==", weekId)
+    // 2. Buscar dados normalizados da semana
+    const normalizedSnapshot = await adminDb
+      .collection('dataWeekly')
+      .where('weekId', '==', weekId)
       .get();
-    const allPlatformData: WeeklyDriverPlatformData[] = platformDataSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as WeeklyDriverPlatformData }));
+    const normalizedEntries: WeeklyNormalizedData[] = normalizedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as WeeklyNormalizedData }));
+
+    const driverIndex = buildDriverIndex(drivers);
+
+    const platformDataByDriver: Record<string, { uber: number; bolt: number }> = {};
+    const expensesByDriver: Record<string, { combustivel: number; viaverde: number }> = {};
+
+    normalizedEntries.forEach(entry => {
+      const driver = resolveDriverForExport(entry, driverIndex);
+      if (!driver?.id) {
+        return;
+      }
+
+      if (!platformDataByDriver[driver.id]) {
+        platformDataByDriver[driver.id] = { uber: 0, bolt: 0 };
+      }
+      if (!expensesByDriver[driver.id]) {
+        expensesByDriver[driver.id] = { combustivel: 0, viaverde: 0 };
+      }
+
+      switch (entry.platform) {
+        case 'uber':
+          platformDataByDriver[driver.id].uber += entry.totalValue || 0;
+          break;
+        case 'bolt':
+          platformDataByDriver[driver.id].bolt += entry.totalValue || 0;
+          break;
+        case 'myprio':
+          expensesByDriver[driver.id].combustivel += entry.totalValue || 0;
+          break;
+        case 'viaverde':
+          expensesByDriver[driver.id].viaverde += entry.totalValue || 0;
+          break;
+        default:
+          break;
+      }
+    });
 
     const records: DriverWeeklyRecord[] = [];
 
-    // Mapear platformData por driverId para fácil acesso
-    const platformDataByDriver: { [driverId: string]: { [platform: string]: number } } = {};
-    allPlatformData.forEach(data => {
-      if (!platformDataByDriver[data.driverId]) {
-        platformDataByDriver[data.driverId] = {};
-      }
-      platformDataByDriver[data.driverId][data.platform] = data.totalValue;
-    });
-
-    // 3. Gerar DriverWeeklyRecord para cada motorista
     for (const driver of drivers) {
-      if (!driver.id) continue;
+      if (!driver.id) {
+        continue;
+      }
 
-      const driverPlatformData = platformDataByDriver[driver.id] || {};
+      const incomeTotals = platformDataByDriver[driver.id] || { uber: 0, bolt: 0 };
+      const expenseTotals = expensesByDriver[driver.id] || { combustivel: 0, viaverde: 0 };
 
       const record: DriverWeeklyRecord = createDriverWeeklyRecord({
         driverId: driver.id,
@@ -81,9 +121,12 @@ export default async function handler(
         weekId,
         weekStart,
         weekEnd,
+        combustivel: expenseTotals.combustivel,
+        viaverde: expenseTotals.viaverde,
         isLocatario: driver.type === 'renter',
         aluguel: driver.type === 'renter' ? (driver.rentalFee || 0) : 0,
-        iban: driver.banking?.iban || null,      }, driverPlatformData, { type: driver.type, rentalFee: driver.rentalFee });
+        iban: driver.banking?.iban || null,
+      }, incomeTotals, { type: driver.type, rentalFee: driver.rentalFee });
 
       records.push(record);
     }
@@ -132,7 +175,7 @@ export default async function handler(
 
     // Adicionar dados
     records.forEach((record: DriverWeeklyRecord) => {
-      const driverPlatformData = platformDataByDriver[record.driverId] || {};
+      const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
       worksheet.addRow({
         driverName: record.driverName,
         driverType: record.isLocatario ? 'Locatário' : 'Afiliado',
@@ -153,7 +196,7 @@ export default async function handler(
 
     // Adicionar linha de total
     const totals = records.reduce((acc: any, record: DriverWeeklyRecord) => {
-      const driverPlatformData = platformDataByDriver[record.driverId] || {};
+      const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
       return {
         uberTotal: acc.uberTotal + (driverPlatformData.uber || 0),
         boltTotal: acc.boltTotal + (driverPlatformData.bolt || 0),
@@ -235,7 +278,7 @@ export default async function handler(
       const driverDoc = await adminDb.collection("drivers").doc(record.driverId).get();
       const driverData = driverDoc.data();
 
-      const driverPlatformData = platformDataByDriver[record.driverId] || {};
+    const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
 
       // Preparar dados para o PDF
       const payslipData: PayslipData = {
@@ -279,5 +322,91 @@ export default async function handler(
       res.status(500).json({ message: 'Internal Server Error', error: error.message, stack: error.stack });
     }
   }
+}
+
+function buildDriverIndex(drivers: Driver[]): DriverIndex {
+  const byId = new Map<string, Driver>();
+  const byUber = new Map<string, Driver>();
+  const byBolt = new Map<string, Driver>();
+  const byMyPrio = new Map<string, Driver>();
+  const byPlate = new Map<string, Driver>();
+  const byViaVerde = new Map<string, Driver>();
+
+  drivers.forEach((driver) => {
+    if (!driver.id) {
+      return;
+    }
+
+    byId.set(driver.id, driver);
+
+    const uberKey = driver.integrations?.uber?.key;
+    if (uberKey) {
+      byUber.set(normalizeKey(uberKey), driver);
+    }
+
+    const boltKey = driver.integrations?.bolt?.key;
+    if (boltKey) {
+      byBolt.set(normalizeKey(boltKey), driver);
+    }
+
+    const myprioKey = driver.integrations?.myprio?.key;
+    if (myprioKey) {
+      byMyPrio.set(normalizeKey(myprioKey), driver);
+    }
+
+    const plate = driver.vehicle?.plate || driver.integrations?.viaverde?.key;
+    if (plate) {
+      byPlate.set(normalizePlate(plate), driver);
+    }
+
+    const viaverdeKey = driver.integrations?.viaverde?.key;
+    if (viaverdeKey) {
+      byViaVerde.set(normalizeKey(viaverdeKey), driver);
+    }
+  });
+
+  return { byId, byUber, byBolt, byMyPrio, byPlate, byViaVerde };
+}
+
+function resolveDriverForExport(entry: WeeklyNormalizedData, index: DriverIndex): Driver | undefined {
+  if (entry.driverId) {
+    const driver = index.byId.get(entry.driverId);
+    if (driver) {
+      return driver;
+    }
+  }
+
+  switch (entry.platform as Platform) {
+    case 'uber':
+      return index.byUber.get(normalizeKey(entry.referenceId));
+    case 'bolt':
+      return index.byBolt.get(normalizeKey(entry.referenceId));
+    case 'myprio': {
+      const cardMatch = index.byMyPrio.get(normalizeKey(entry.referenceId));
+      if (cardMatch) return cardMatch;
+      return index.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
+    }
+    case 'viaverde': {
+      const plateMatch = index.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
+      if (plateMatch) return plateMatch;
+      return index.byViaVerde.get(normalizeKey(entry.referenceId));
+    }
+    default:
+      return undefined;
+  }
+}
+
+function normalizeKey(value: any): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value).trim().toLowerCase();
+}
+
+function normalizePlate(value: any): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value).trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
