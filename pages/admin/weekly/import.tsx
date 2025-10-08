@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Heading,
@@ -33,7 +33,7 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import { getTranslation } from '@/lib/translations';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { useRouter } from 'next/router';
 
 interface ImportPageProps extends AdminPageProps {}
@@ -73,7 +73,7 @@ const getWeekDates = (): { start: string; end: string } => {
   };
 };
 
-export default function ImportNewPage({ user, translations, locale }: ImportPageProps) {
+export default function ImportNewPage({ user, locale, tCommon, tPage, tAdmin: tAdminProp }: ImportPageProps) {
   const router = useRouter();
   const { start, end } = getWeekDates();
   
@@ -91,8 +91,8 @@ export default function ImportNewPage({ user, translations, locale }: ImportPage
 
   const toast = useToast();
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
 
   const handleFileChange = (platform: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;

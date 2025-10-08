@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Heading,
@@ -24,6 +24,7 @@ import {
 import { FiRefreshCw, FiCheckCircle, FiXCircle, FiAlertTriangle } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 
 interface IntegrationStatus {
   platform: string;
@@ -43,6 +44,9 @@ function IntegrationsPage({ tCommon, tPage }: AdminPageProps) {
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
   const toast = useToast();
+
+  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdmin = useMemo(() => createSafeTranslator(tPage), [tPage]);
 
   const fetchCartrackStatus = async () => {
     setLoading(true);
@@ -132,9 +136,9 @@ function IntegrationsPage({ tCommon, tPage }: AdminPageProps) {
 
   return (
     <AdminLayout
-      title={tPage('integrations.title', 'Integrações')}
-      subtitle={tPage('integrations.subtitle', 'Gerencie suas integrações com serviços externos')}
-      breadcrumbs={[{ label: tPage('integrations.breadcrumb', 'Integrações') }]}
+      title={tAdmin('integrations.title', 'Integrações')}
+      subtitle={tAdmin('integrations.subtitle', 'Gerencie suas integrações com serviços externos')}
+      breadcrumbs={[{ label: tAdmin('integrations.breadcrumb', 'Integrações') }]}
     >
       {loading ? (
         <Box textAlign="center" py={10}>

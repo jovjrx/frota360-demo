@@ -41,7 +41,7 @@ import {
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import { getTranslation } from '@/lib/translations';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getWeekOptions } from '@/lib/admin/adminQueries';
 import { useRouter } from 'next/router';
 import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
@@ -79,17 +79,16 @@ const PAYMENT_STATUS_COLOR: Record<DriverWeeklyRecord['paymentStatus'], string> 
   cancelled: 'red',
 };
 
-const makeSafeT = (dictionary?: Record<string, any>) => (
-  key: string,
-  fallback?: string,
-  variables?: Record<string, any>
-) => {
-  if (!dictionary) return fallback ?? key;
-  const value = getTranslation(dictionary, key, variables);
-  return value === key ? (fallback ?? key) : value;
-};
-
-export default function WeeklyPage({ user, translations, locale, weekOptions, currentWeek, initialRecords }: WeeklyPageProps) {
+export default function WeeklyPage({
+  user,
+  locale,
+  weekOptions,
+  currentWeek,
+  initialRecords,
+  tCommon,
+  tPage,
+  tAdmin: tAdminProp,
+}: WeeklyPageProps) {
   const [filterWeek, setFilterWeek] = useState(currentWeek);
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,8 +98,8 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
   const toast = useToast();
   const router = useRouter();
-  const t = useMemo(() => makeSafeT(translations.common), [translations.common]);
-  const tAdmin = useMemo(() => makeSafeT(translations.admin), [translations.admin]);
+  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
   const isMobile = useBreakpointValue({ base: true, md: false });
   const typeLabels = useMemo(
     () => ({
@@ -448,9 +447,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         prev.map((item) =>
           item.id === recordId
             ? {
-                ...item,
-                ...updatedRecord,
-              }
+              ...item,
+              ...updatedRecord,
+            }
             : item
         )
       );
@@ -507,11 +506,11 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         prev.map((item) =>
           item.id === record.id
             ? {
-                ...item,
-                paymentStatus: updated?.paymentStatus ?? nextStatus,
-                paymentDate: updated?.paymentDate ?? item.paymentDate,
-                updatedAt: updated?.updatedAt ?? item.updatedAt,
-              }
+              ...item,
+              paymentStatus: updated?.paymentStatus ?? nextStatus,
+              paymentDate: updated?.paymentDate ?? item.paymentDate,
+              updatedAt: updated?.updatedAt ?? item.updatedAt,
+            }
             : item
         )
       );
@@ -573,9 +572,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
             <VStack spacing={4} align="stretch">
               <Box>
                 <Text fontSize="sm" mb={2} fontWeight="medium">{tAdmin('week_label')}:</Text>
-                <Select 
-                  value={filterWeek} 
-                  onChange={(e) => setFilterWeek(e.target.value)} 
+                <Select
+                  value={filterWeek}
+                  onChange={(e) => setFilterWeek(e.target.value)}
                   w={{ base: "100%", md: "300px" }}
                 >
                   {weekOptions.map(week => (
@@ -752,7 +751,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                   <Tbody>
                     {records.map((record, index) => (
                       <Tr key={index}>
-                          <Td>
+                        <Td>
                           <Text fontWeight="medium">{record.driverName}</Text>
                           <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
                         </Td>
@@ -789,53 +788,53 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                               .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
                           )}
                         </Td>
-                      <EditableNumberField 
-                        value={record.ganhosTotal}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                      />
-                      <EditableNumberField 
-                        value={record.ivaValor}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="red.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField 
-                        value={record.despesasAdm}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="red.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField 
-                        value={record.combustivel}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="orange.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField 
-                        value={record.viaverde}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="orange.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField 
-                        value={record.aluguel}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="purple.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField 
-                        value={record.repasse}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="blue.600"
-                        fontWeight="bold"
-                      />
+                        <EditableNumberField
+                          value={record.ganhosTotal}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                        />
+                        <EditableNumberField
+                          value={record.ivaValor}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="red.600"
+                          prefix="-"
+                        />
+                        <EditableNumberField
+                          value={record.despesasAdm}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="red.600"
+                          prefix="-"
+                        />
+                        <EditableNumberField
+                          value={record.combustivel}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="orange.600"
+                          prefix="-"
+                        />
+                        <EditableNumberField
+                          value={record.viaverde}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="orange.600"
+                          prefix="-"
+                        />
+                        <EditableNumberField
+                          value={record.aluguel}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="purple.600"
+                          prefix="-"
+                        />
+                        <EditableNumberField
+                          value={record.repasse}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="blue.600"
+                          fontWeight="bold"
+                        />
                         <Td>
                           <VStack align="flex-start" spacing={1}>
                             <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
@@ -870,65 +869,65 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                                 ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
                                 : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
                             </Button>
-                  </ButtonGroup>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
-    )}
-  </CardBody>
-</Card>
+                          </ButtonGroup>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
+            )}
+          </CardBody>
+        </Card>
 
-{/* Modal de Visualização do Contracheque */}
-<Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
-  <ModalOverlay />
-  <ModalContent>
-    <ModalHeader>
-      <VStack align="start" spacing={1}>
-        <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
-        {selectedPayslipRecord && (
-          <Text fontSize="sm" fontWeight="normal" color="gray.600">
-            {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
-          </Text>
-        )}
-      </VStack>
-    </ModalHeader>
-    <ModalCloseButton />
-    <ModalBody pb={6}>
-      <VStack spacing={4} align="stretch" height="100%">
-        <HStack spacing={4} justify="flex-end">
-          <Button
-            leftIcon={<Icon as={FiDownload} />}
-            onClick={handleDownloadPayslip}
-            colorScheme="blue"
-          >
-            {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
-          </Button>
-          <Button
-            leftIcon={<Icon as={FiMail} />}
-            onClick={handleSendPayslipEmail}
-            colorScheme="green"
-          >
-            {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
-          </Button>
-        </HStack>
-        {payslipPdfUrl ? (
-          <Box flex="1" height="calc(100vh - 200px)">
-            <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
-          </Box>
-        ) : (
-          <Alert status="info" borderRadius="lg">
-            <AlertIcon />
-            <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
-            <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
-          </Alert>
-        )}
-      </VStack>
-    </ModalBody>
-  </ModalContent>
-</Modal>
+        {/* Modal de Visualização do Contracheque */}
+        <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>
+              <VStack align="start" spacing={1}>
+                <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
+                {selectedPayslipRecord && (
+                  <Text fontSize="sm" fontWeight="normal" color="gray.600">
+                    {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
+                  </Text>
+                )}
+              </VStack>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody pb={6}>
+              <VStack spacing={4} align="stretch" height="100%">
+                <HStack spacing={4} justify="flex-end">
+                  <Button
+                    leftIcon={<Icon as={FiDownload} />}
+                    onClick={handleDownloadPayslip}
+                    colorScheme="blue"
+                  >
+                    {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
+                  </Button>
+                  <Button
+                    leftIcon={<Icon as={FiMail} />}
+                    onClick={handleSendPayslipEmail}
+                    colorScheme="green"
+                  >
+                    {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
+                  </Button>
+                </HStack>
+                {payslipPdfUrl ? (
+                  <Box flex="1" height="calc(100vh - 200px)">
+                    <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
+                  </Box>
+                ) : (
+                  <Alert status="info" borderRadius="lg">
+                    <AlertIcon />
+                    <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
+                    <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
+                  </Alert>
+                )}
+              </VStack>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
 
         {unassigned.length > 0 && (
           <Card variant="outline">

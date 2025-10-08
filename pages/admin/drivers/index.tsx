@@ -51,7 +51,7 @@ import {
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import { getTranslation } from '@/lib/translations';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getDrivers } from '@/lib/admin/adminQueries';
 
 interface Driver {
@@ -96,7 +96,14 @@ interface DriversPageProps extends AdminPageProps {
   initialDrivers: Driver[];
 }
 
-export default function DriversPage({ user, translations, locale, initialDrivers }: DriversPageProps) {
+export default function DriversPage({
+  user,
+  locale,
+  initialDrivers,
+  tCommon,
+  tPage,
+  tAdmin: tAdminProp,
+}: DriversPageProps) {
   const router = useRouter();
   const toast = useToast();
   const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
@@ -108,8 +115,8 @@ export default function DriversPage({ user, translations, locale, initialDrivers
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
 
   const fetchDrivers = async () => {
     setIsLoading(true);

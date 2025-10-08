@@ -79,7 +79,6 @@ export default function UsersManagement({ tPage, tAdmin, initialUsers, initialSt
   const router = useRouter();
   const toast = useToast();
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [stats, setStats] = useState(initialStats);
   const [loading, setLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');

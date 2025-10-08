@@ -35,7 +35,7 @@ interface WeeklyRecordCardProps {
   locale: string;
   onViewPayslip: (record: DriverRecord) => void;
   onTogglePaymentStatus: (record: DriverRecord) => void;
-  onUpdateField: (recordId: string, field: string, value: number) => void;
+  onUpdateField?: (recordId: string, updates: Partial<DriverWeeklyRecord>) => void;
   generatingRecordId: string | null;
   updatingPaymentId: string | null;
   tAdmin: (key: string, fallback?: string) => string;

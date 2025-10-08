@@ -3,7 +3,7 @@
  * Usa withAdminSSR para autenticação e traduções via SSR
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Box,
@@ -28,11 +28,11 @@ import {
 } from '@chakra-ui/react';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import { getTranslation } from '@/lib/translations';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 
 interface AddDriverProps extends AdminPageProps {}
 
-export default function AddDriver({ user, translations, locale }: AddDriverProps) {
+export default function AddDriver({ user, locale, tCommon, tPage, tAdmin: tAdminProp }: AddDriverProps) {
   const router = useRouter();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
@@ -62,8 +62,8 @@ export default function AddDriver({ user, translations, locale }: AddDriverProps
     viaverdeEnabled: false,
   });
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
+  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({
