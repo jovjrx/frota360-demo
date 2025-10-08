@@ -80,28 +80,29 @@ async function fetchCartrackTrips(
 ): Promise<CartracTrip[]> {
   try {
     // Endpoint da API Cartrack para buscar viagens
-    const url = `${baseUrl}/trips`;
+    // Conforme documentação: GET /trips com parâmetros de data
+    const url = `${baseUrl}/trips?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
     
     const auth = Buffer.from(`${username}:${apiKey}`).toString('base64');
     
+    console.log('Fetching Cartrack trips from:', url);
+    
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        start_date: startDate,
-        end_date: endDate,
-      }),
     });
 
     if (!response.ok) {
-      console.error('Cartrack API error:', response.status, response.statusText);
-      throw new Error(`Cartrack API returned ${response.status}`);
+      const errorText = await response.text();
+      console.error('Cartrack API error:', response.status, response.statusText, errorText);
+      throw new Error(`Cartrack API returned ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('Cartrack API response:', JSON.stringify(data).substring(0, 200));
     
     // Transformar dados da API Cartrack para o formato esperado
     const trips: CartracTrip[] = (data.trips || data.data || []).map((trip: CartrackAPITrip) => {
@@ -191,7 +192,8 @@ export default async function handler(
     startDate.setDate(startDate.getDate() - 7);
 
     const formatDate = (date: Date) => {
-      return date.toISOString().replace('T', ' ').substring(0, 19);
+      // Formato esperado pela API Cartrack: YYYY-MM-DD
+      return date.toISOString().split('T')[0];
     };
 
     let trips: CartracTrip[] = [];
