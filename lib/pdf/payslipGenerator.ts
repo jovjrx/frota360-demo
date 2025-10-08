@@ -43,7 +43,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
     try {
       const doc = new PDFDocument({ 
         size: 'A4', 
-        margins: { top: 50, bottom: 50, left: 50, right: 50 } 
+        margins: { top: 40, bottom: 40, left: 50, right: 50 } 
       });
       
       const chunks: Buffer[] = [];
@@ -51,6 +51,10 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
+
+      const leftMargin = 50;
+      const rightMargin = 545; // 595 - 50
+      const contentWidth = 495; // rightMargin - leftMargin
 
       // ============================================================================
       // HEADER COM LOGO
@@ -60,13 +64,13 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       const logoPath = path.join(process.cwd(), 'public', 'img', 'logo.png');
       try {
         // Centralizar: (595 - 180) / 2 = 207.5
-        doc.image(logoPath, 207.5, 30, { width: 180 });
+        doc.image(logoPath, 207.5, 40, { width: 180 });
+        doc.moveDown(5);
       } catch (e) {
         // Se logo não existir, usar texto
-        doc.fontSize(24).fillColor('#48BB78').text('CONDUZ', { align: 'center' });
+        doc.fontSize(24).fillColor('#48BB78').text('CONDUZ.PT', { align: 'center' });
+        doc.moveDown(1);
       }
-      
-      doc.moveDown(1.5);
       
       // Alvorada Magistral LDA
       doc.fontSize(10).fillColor("#666666")
@@ -76,113 +80,121 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.fontSize(9).fillColor("#4472C4")
         .text("conduz.pt", { align: "center" });
       
-      doc.moveDown(1.5);
+      doc.moveDown(2);
       
       // ============================================================================
       // TÍTULO
       // ============================================================================
       
-      doc.fontSize(14).fillColor("#000000").font("Helvetica-Bold")
-        .text("RESUMO SEMANAL", { align: "center" });
+      doc.fontSize(16).fillColor("#000000").font("Helvetica-Bold")
+        .text("CONTRACHEQUE SEMANAL", { align: "center" });
       
-      doc.moveDown(1);
+      doc.moveDown(2);
       
       // ============================================================================
       // DADOS DO MOTORISTA
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("DADOS DO MOTORISTA");
+        .text("DADOS DO MOTORISTA", leftMargin);
       
       doc.moveDown(0.5);
       
       doc.fontSize(10).font("Helvetica");
       
-      const leftCol = 50;
-      const rightCol = 150;
       let y = doc.y;
       
-      doc.text("Nome:", leftCol, y, { continued: true, width: 100 });
-      doc.text(data.driverName, rightCol, y);
-      y += 18; // Increased spacing
+      // Nome
+      doc.text("Nome:", leftMargin, y, { continued: false });
+      doc.text(data.driverName, leftMargin + 150, y);
+      y += 15;
       
-      doc.text("Tipo:", leftCol, y, { continued: true, width: 100 });
-      doc.text(data.driverType === "renter" ? "Locatário" : "Afiliado", rightCol, y);
-      y += 18; // Increased spacing
+      // Tipo
+      doc.text("Tipo:", leftMargin, y);
+      doc.text(data.driverType === "renter" ? "Locatário" : "Afiliado", leftMargin + 150, y);
+      y += 15;
       
+      // Veículo
       if (data.vehiclePlate) {
-        doc.text("Veículo:", leftCol, y, { continued: true, width: 100 });
-        doc.text(data.vehiclePlate, rightCol, y);
-        y += 18; // Increased spacing
+        doc.text("Veículo:", leftMargin, y);
+        doc.text(data.vehiclePlate, leftMargin + 150, y);
+        y += 15;
       }
       
-      doc.text("Período:", leftCol, y, { continued: true, width: 100 });
-      doc.text(`${data.weekStart} - ${data.weekEnd}`, rightCol, y);
+      // Período
+      doc.text("Período:", leftMargin, y);
+      doc.text(`${data.weekStart} - ${data.weekEnd}`, leftMargin + 150, y);
       
-      doc.moveDown(1.5);
+      doc.moveDown(2);
       
       // ============================================================================
       // RECEITAS
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("RECEITAS");
+        .text("RECEITAS", leftMargin);
       
       doc.moveDown(0.5);
       
       doc.fontSize(10).font("Helvetica");
       
       y = doc.y;
-      doc.text("Uber (Total Repassado)", leftCol, y);
-      doc.text(`${data.uberTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-      y += 18;
       
-      doc.text("Bolt (Total Repassado)", leftCol, y);
-      doc.text(`${data.boltTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-      y += 18;
+      // Uber
+      doc.text("Uber (Total Repassado)", leftMargin, y);
+      doc.text(`${data.uberTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 15;
+      
+      // Bolt
+      doc.text("Bolt (Total Repassado)", leftMargin, y);
+      doc.text(`${data.boltTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 15;
 
+      // PRIO (se houver)
       if (data.prioTotal > 0) {
-        doc.text("PRIO (Total Repassado)", leftCol, y);
-        doc.text(`${data.prioTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-        y += 18;
+        doc.text("PRIO (Total Repassado)", leftMargin, y);
+        doc.text(`${data.prioTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+        y += 15;
       }
 
+      // ViaVerde (se houver)
       if (data.viaverdeTotal > 0) {
-        doc.text("ViaVerde (Total Repassado)", leftCol, y);
-        doc.text(`${data.viaverdeTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-        y += 18;
+        doc.text("ViaVerde (Total Repassado)", leftMargin, y);
+        doc.text(`${data.viaverdeTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+        y += 15;
       }
       
-      doc.moveDown(0.5);
+      // GANHOS TOTAL
       doc.font("Helvetica-Bold");
-      doc.text("GANHOS TOTAL", leftCol, y);
-      doc.text(`${data.ganhosTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      doc.text("GANHOS TOTAL", leftMargin, y);
+      doc.text(`${data.ganhosTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 20;
       
-      doc.moveDown(1);
-      
-      // IVA e Comissão
+      // IVA
       doc.font("Helvetica");
-      y = doc.y;
+      doc.text("IVA (6%)", leftMargin, y);
+      doc.text(`-${data.ivaValor.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 15;
       
-      doc.text("IVA (6%)", leftCol, y);
-      doc.text(`-${data.ivaValor.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-      y += 18;
-      
+      // Ganhos - IVA
       doc.font("Helvetica-Bold");
-      doc.text("Ganhos - IVA", leftCol, y);
-      doc.text(`${data.ganhosMenosIva.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-      y += 18;
+      doc.text("Ganhos - IVA", leftMargin, y);
+      doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 15;
       
+      // Despesas Administrativas
       doc.font("Helvetica");
-      doc.text("Despesas Administrativas (7%)", leftCol, y);
-      doc.text(`-${data.comissao.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      doc.text("Despesas Administrativas (7%)", leftMargin, y);
+      doc.text(`-${data.comissao.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       
-      doc.moveDown(1.5);    
+      doc.moveDown(2);
+      
       // ============================================================================
       // DESCONTOS
       // ============================================================================
+      
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("DESCONTOS");
+        .text("DESCONTOS", leftMargin);
       
       doc.moveDown(0.5);
       
@@ -190,62 +202,72 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       
       y = doc.y;
       
-      doc.text("Combustível", leftCol, y);
-      doc.text(`-${data.combustivel.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-      y += 18;
+      // Combustível
+      doc.text("Combustível", leftMargin, y);
+      doc.text(`-${data.combustivel.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+      y += 15;
       
+      // Aluguel (se houver)
       if (data.aluguel > 0) {
-        doc.text("Aluguel Semanal", leftCol, y);
-        doc.text(`-${data.aluguel.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-        y += 18;
+        doc.text("Aluguel Semanal", leftMargin, y);
+        doc.text(`-${data.aluguel.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+        y += 15;
       }
       
+      // Portagens (se houver)
       if (data.viaverde > 0) {
-        doc.text("Portagens (ViaVerde)", leftCol, y);
-        doc.text(`-${data.viaverde.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
-        y += 18;
+        doc.text("Portagens (ViaVerde)", leftMargin, y);
+        doc.text(`-${data.viaverde.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+        y += 15;
       }
       
-      doc.moveDown(1.5);   
+      doc.moveDown(2);
+      
       // ============================================================================
-      // VALOR LÍQUIDO
+      // VALOR LÍQUIDO A RECEBER
       // ============================================================================
       
-      doc.fontSize(14).font("Helvetica-Bold");
+      y = doc.y;
       
-      // Box com fundo azul claro
-      const boxY = doc.y;
-      doc.rect(leftCol, boxY, 495, 30)
-        .fillAndStroke("#C8DCFF", "#4472C4");
+      // Box com borda azul
+      doc.rect(leftMargin, y, contentWidth, 35)
+        .lineWidth(2)
+        .strokeColor("#4472C4")
+        .fillColor("#E8F0FE")
+        .fillAndStroke();
       
-      doc.fillColor("#000000")
-        .text("VALOR LÍQUIDO A RECEBER", leftCol + 10, boxY + 8);
-      doc.text(`${data.repasse.toFixed(2)} €`, 500, boxY + 8, { width: 85, align: "right" });
+      doc.fontSize(14).font("Helvetica-Bold").fillColor("#000000");
+      doc.text("VALOR LÍQUIDO A RECEBER", leftMargin + 10, y + 10, { continued: false });
+      doc.text(`${data.repasse.toFixed(2)} EUR`, rightMargin - 110, y + 10, { width: 100, align: "right" });
       
-      doc.moveDown(1.5);
+      doc.moveDown(3);
       
       // ============================================================================
       // DADOS BANCÁRIOS
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("DADOS BANCÁRIOS");
+        .text("DADOS BANCÁRIOS", leftMargin);
       
       doc.moveDown(0.5);
       
       doc.fontSize(10).font("Helvetica");
       
       y = doc.y;
-      doc.text("IBAN:", leftCol, y, { continued: true, width: 100 });
-      doc.text(data.iban, rightCol, y);
-      y += 18;
       
-      doc.text("Status:", leftCol, y, { continued: true, width: 100 });
-      doc.fillColor(data.status === "paid" ? "#48BB78" : "#D69E2E")
-        .text(data.status === "paid" ? "PAGO" : "PENDENTE", rightCol, y);
+      // IBAN
+      doc.text("IBAN:", leftMargin, y);
+      doc.text(data.iban, leftMargin + 150, y);
+      y += 15;
+      
+      // Status
+      doc.text("Status:", leftMargin, y);
+      const statusText = data.status === "paid" ? "PAGO" : "PENDENTE";
+      const statusColor = data.status === "paid" ? "#48BB78" : "#D69E2E";
+      doc.fillColor(statusColor).text(statusText, leftMargin + 150, y);
       
       doc.fillColor("#000000");
-      doc.moveDown(1.5);
+      doc.moveDown(2);
       
       // ============================================================================
       // OBSERVAÇÕES
@@ -258,13 +280,13 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         "- Valores Uber e Bolt são os totais repassados pelas plataformas",
         "- IVA de 6% aplicado sobre ganhos totais",
         "- Despesas administrativas de 7% aplicadas sobre (Ganhos - IVA)",
-        data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
+        data.aluguel > 0 ? "- Sem aluguel (Afiliado)" : "- Aluguel semanal incluído (Locatário)",
         data.viaverde > 0 
-          ? `- Portagens (ViaVerde): ${data.viaverde.toFixed(2)} € - Pago pela empresa (descontado)`
-          : "- Portagens (ViaVerde): Pago pelo motorista (não descontado)"
+          ? `- Portagens (ViaVerde): ${data.viaverde.toFixed(2)} EUR - Pago pelo motorista (não descontado)`
+          : "- Portagens (ViaVerde): 0.00 EUR - Pago pelo motorista (não descontado)"
       ];
       
-      doc.text(obs.join("\n"), leftCol, doc.y, { width: 495 });
+      doc.text(obs.join("\n"), leftMargin, doc.y, { width: contentWidth, lineGap: 2 });
       
       // ============================================================================
       // FOOTER
@@ -272,10 +294,10 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       
       doc.fontSize(8).fillColor("#999999")
         .text(
-          `Gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`,
-          leftCol,
+          `Página 1`,
+          leftMargin,
           doc.page.height - 30,
-          { align: "center", width: 495 }
+          { align: "center", width: contentWidth }
         );
       
       doc.end();
