@@ -324,6 +324,171 @@
       "calculatedNet": "Net Amount"
     }
   },
+  "weekly": {
+    "title": "Weekly Control",
+    "subtitle": "Weekly TVDE data management",
+    "import": {
+      "title": "Weekly Data Import",
+      "subtitle": "Upload platform CSV/Excel files to process the week's payments",
+      "period": "Week Period",
+      "startDate": "Week Start",
+      "endDate": "Week End",
+      "files": "Files to Import",
+      "uploadFiles": "Upload Files",
+      "processTitle": "Process Import",
+      "processDescription": "file(s) ready to process. Click the button below to create/update the weekly records.",
+      "processButton": "Process Import",
+      "resultsTitle": "Processing Results",
+      "successTitle": "✓ Processed successfully:",
+      "warningsTitle": "⚠ Warnings:",
+      "errorsTitle": "✗ Errors:",
+      "viewWeeklyControl": "View Weekly Control",
+      "fileStatus": {
+        "idle": "Select file",
+        "uploading": "Uploading...",
+        "uploaded": "Uploaded",
+        "error": "Error"
+      },
+      "messages": {
+        "uploadCompleted": "Upload completed",
+        "uploadCompletedDescription": "Files uploaded. Click \"Process Import\" to continue.",
+        "uploadFirst": "Upload the files first",
+        "processingCompleted": "Processing completed"
+      }
+    },
+    "control": {
+      "title": "Weekly Control",
+      "subtitle": "Weekly TVDE data management",
+      "actions": {
+        "importData": "Import data",
+        "refresh": "Refresh",
+        "generateSummariesLoading": "Generating...",
+        "generateSummaries": "Generate summaries",
+        "exportPayments": "Export spreadsheet"
+      },
+      "errors": {
+        "loadData": "Could not load data.",
+        "selectWeek": "Select a valid week to continue.",
+        "generateSummaries": "Couldn't generate the summaries."
+      },
+      "files": {
+        "summariesPrefix": "summaries"
+      },
+      "toasts": {
+        "loadData": {
+          "title": "Error loading data",
+          "description": "We couldn't load this week's data."
+        },
+        "generateSummaries": {
+          "successTitle": "Summaries generated!",
+          "successDescription": "Summaries generated successfully and the download has started.",
+          "errorTitle": "Error generating summaries",
+          "errorDescription": "We couldn't generate this week's summaries."
+        }
+      },
+      "summary": {
+        "title": "Weekly Summary",
+        "cards": {
+          "totalEarnings": "Total Earnings",
+          "driversCountLabel": "drivers",
+          "totalDiscounts": "Total Discounts",
+          "discountsHelp": "VAT, Admin, Fuel, Tolls, Rent",
+          "fuel": "Fuel",
+          "prioLabel": "PRIO",
+          "netValue": "Net Value",
+          "totalToPay": "Total to pay"
+        },
+        "table": {
+          "item": "Item",
+          "value": "Value"
+        },
+        "rows": {
+          "totalEarnings": "Total Earnings",
+          "iva": "VAT",
+          "adminExpenses": "Admin Expenses",
+          "fuel": "Fuel",
+          "tolls": "Tolls",
+          "rent": "Rent",
+          "netValue": "Net Value"
+        }
+      },
+      "records": {
+        "title": "Weekly Records",
+        "loading": "Loading data...",
+        "empty": "No records found for this week.",
+        "types": {
+          "affiliate": "Affiliate",
+          "renter": "Renter"
+        },
+        "paymentStatus": {
+          "pending": "Pending",
+          "paid": "Paid",
+          "cancelled": "Cancelled"
+        },
+        "columns": {
+          "driver": "Driver",
+          "type": "Type",
+          "platformUber": "Uber",
+          "platformBolt": "Bolt",
+          "platformPrio": "PRIO",
+          "platformViaVerde": "ViaVerde",
+          "grossTotal": "Gross total",
+          "iva": "VAT",
+          "adminExpenses": "Admin fee",
+          "fuel": "Fuel",
+          "tolls": "Tolls",
+          "rent": "Rent",
+          "net": "Net value",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "sections": {
+          "platforms": "Platforms",
+          "financials": "Financial values"
+        },
+        "actions": {
+          "generatePayslip": "Payslip",
+          "markAsPending": "Pending",
+          "markAsPaid": "Paid"
+        },
+        "messages": {
+          "generateInProgress": "Generating...",
+          "generateError": "Couldn't generate the payslip.",
+          "sendEmailErrorTitle": "Error sending email",
+          "sendEmailErrorDesc": "No payslip selected or PDF not generated.",
+          "sendEmailError": "Couldn't email the payslip.",
+          "sendEmailSuccessTitle": "Email sent!",
+          "sendEmailSuccessDesc": "Payslip sent to the driver successfully.",
+          "exportError": "Couldn't export the payment spreadsheet.",
+          "exportSuccessTitle": "Export complete!",
+          "exportSuccessDesc": "The payment spreadsheet was exported successfully.",
+          "exportErrorTitle": "Export error",
+          "updateSuccess": "Record updated successfully!",
+          "updateErrorTitle": "Error updating record",
+          "updateError": "Couldn't update the record.",
+          "updatePaymentStatusSuccess": "Payment status updated successfully!",
+          "updatePaymentStatusErrorTitle": "Error updating payment status",
+          "updatePaymentStatusError": "Couldn't update the payment status."
+        }
+      },
+      "payslipModal": {
+        "title": "Weekly Payslip",
+        "downloadPdf": "Download PDF",
+        "sendEmail": "Send by email",
+        "noPdfTitle": "No PDF generated",
+        "noPdfDesc": "Generate the payslip to preview it here."
+      },
+      "unassigned": {
+        "title": "Records without an assigned driver",
+        "description": "Review these entries and update the records to map them correctly.",
+        "columns": {
+          "platform": "Platform",
+          "reference": "Reference",
+          "value": "Amount"
+        }
+      }
+    }
+  },
   "metrics": {
     "title": "Detailed Metrics",
     "subtitle": "Detailed performance analysis by platform",
