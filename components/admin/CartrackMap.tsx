@@ -35,7 +35,7 @@ export default function CartrackMap({ trips }: CartrackMapProps) {
 
     // Criar mapa centrado em Portugal
     if (!mapRef.current) {
-      mapRef.current = L.map(mapContainerRef.current).setView([41.1579, -8.6291], 12);
+      mapRef.current = L.map(mapContainerRef.current).setView([39.5, -8.0], 7);
 
       // Adicionar camada de tiles OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
