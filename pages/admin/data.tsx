@@ -63,13 +63,10 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 function formatDate(value: string | undefined, locale: string) {
   if (!value) return '—';
   try {
-    // Parse date without timezone conversion (YYYY-MM-DD)
-    const [year, month, day] = value.split('-').map(Number);
+    // Simply format YYYY-MM-DD to DD/MM/YYYY without any timezone conversion
+    const [year, month, day] = value.split('-');
     if (!year || !month || !day) return value;
-    
-    // Create date in local timezone
-    const date = new Date(year, month - 1, day);
-    return new Intl.DateTimeFormat(locale, DATE_FORMAT_OPTIONS).format(date);
+    return `${day}/${month}/${year}`;
   } catch (_error) {
     return value;
   }
