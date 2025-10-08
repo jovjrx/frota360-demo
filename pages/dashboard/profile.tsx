@@ -63,17 +63,37 @@ export default function DriverProfile({
 
   const handleSave = async () => {
     try {
-      // Implementar salvamento
-      console.log('Salvando perfil:', formData);
+      const response = await fetch("/api/painel/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || tDriver("profile.messages.errorSaving"));
+      }
+
       toast({
-        title: tDriver('profile.messages.profileUpdated'),
-        description: tDriver('profile.messages.profileUpdatedDesc'),
-        status: 'success',
+        title: tDriver("profile.messages.profileUpdated"),
+        description: tDriver("profile.messages.profileUpdatedDesc"),
+        status: "success",
         duration: 3000,
         isClosable: true,
       });
-    } catch (error) {
-      throw new Error(tDriver('profile.messages.errorSaving'));
+      setIsEditModalOpen(false); // Close modal on success
+      router.reload(); // Reload page to show updated data
+    } catch (error: any) {
+      console.error("Error saving profile:", error);
+      toast({
+        title: tDriver("profile.messages.error"),
+        description: error.message || tDriver("profile.messages.errorSaving"),
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 

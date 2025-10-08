@@ -1,0 +1,26 @@
+
+
+    "tracking": {
+      "title": "Rastreamento",
+      "subtitle": "Dados de quilometragem e localização do seu veículo",
+      "vehicle": "Veículo",
+      "plate": "Matrícula",
+      "model": "Modelo",
+      "daily_mileage": "Quilometragem Hoje",
+      "driving_time": "Tempo em Movimento",
+      "last_location": "Última Localização",
+      "last_24h": "Últimas 24h",
+      "speed": "Velocidade",
+      "no_data": "Sem dados",
+      "not_available_title": "Rastreamento não disponível",
+      "not_available_desc": "Como motorista afiliado com veículo próprio, você não tem acesso ao rastreamento Cartrack. Para informações sobre suas viagens, consulte os aplicativos Uber e Bolt.",
+      "no_vehicle_title": "Veículo não atribuído",
+      "no_vehicle_desc": "Você ainda não tem um veículo atribuído. Entre em contato com o administrador.",
+      "loading_error_title": "Erro ao carregar dados",
+      "loading_error_desc": "Não foi possível carregar seus dados. Tente novamente.",
+      "weekly_stats_title": "Estatísticas da Semana Atual",
+      "total_mileage": "Quilometragem Total",
+      "work_days": "Dias Trabalhados",
+      "daily_average": "Média Diária"
+    }
+

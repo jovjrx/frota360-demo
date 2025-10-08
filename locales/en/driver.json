@@ -1,0 +1,26 @@
+
+
+    "tracking": {
+      "title": "Tracking",
+      "subtitle": "Mileage and location data for your vehicle",
+      "vehicle": "Vehicle",
+      "plate": "Plate",
+      "model": "Model",
+      "daily_mileage": "Today's Mileage",
+      "driving_time": "Driving Time",
+      "last_location": "Last Location",
+      "last_24h": "Last 24h",
+      "speed": "Speed",
+      "no_data": "No data",
+      "not_available_title": "Tracking not available",
+      "not_available_desc": "As an affiliate driver with your own vehicle, you do not have access to Cartrack tracking. For information about your trips, please consult the Uber and Bolt apps.",
+      "no_vehicle_title": "Vehicle not assigned",
+      "no_vehicle_desc": "You do not have a vehicle assigned yet. Please contact the administrator.",
+      "loading_error_title": "Error loading data",
+      "loading_error_desc": "Could not load your data. Please try again.",
+      "weekly_stats_title": "Current Week Stats",
+      "total_mileage": "Total Mileage",
+      "work_days": "Work Days",
+      "daily_average": "Daily Average"
+    }
+
