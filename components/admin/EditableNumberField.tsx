@@ -13,6 +13,7 @@ import {
   Flex,
   Text,
   useToast,
+  HStack,
 } from '@chakra-ui/react';
 import { FiCheck, FiX, FiEdit } from 'react-icons/fi';
 
