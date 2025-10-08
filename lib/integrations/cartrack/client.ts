@@ -143,7 +143,19 @@ export class CartrackClient extends BaseIntegrationClient {
         page: '1',
       });
 
-      const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
+      let response: any;
+      try {
+        response = await this.makeRequest('GET', `/trips?${params.toString()}`);
+      } catch (error) {
+        console.warn('[Cartrack] Filter-based trip request failed, retrying with legacy parameters', error);
+        const legacyParams = new URLSearchParams({
+          start_timestamp: startTimestamp,
+          end_timestamp: endTimestamp,
+          limit: '1000',
+          page: '1',
+        });
+        response = await this.makeRequest('GET', `/trips?${legacyParams.toString()}`);
+      }
       const trips = response.data || [];
       
       console.log(`[Cartrack] Received ${trips.length} trips`);
