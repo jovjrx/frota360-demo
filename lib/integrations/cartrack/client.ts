@@ -137,12 +137,12 @@ export class CartrackClient extends BaseIntegrationClient {
       console.log(`[Cartrack] Fetching trips from ${startTimestamp} to ${endTimestamp}`);
       
       const params = new URLSearchParams({
-        start_timestamp: startTimestamp,
-        end_timestamp: endTimestamp,
-        page: '1',
+        'filter[start_timestamp]': startTimestamp,
+        'filter[end_timestamp]': endTimestamp,
         limit: '1000',
+        page: '1',
       });
-      
+
       const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
       const trips = response.data || [];
       
