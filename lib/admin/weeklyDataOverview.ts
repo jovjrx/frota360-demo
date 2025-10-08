@@ -1,36 +1,16 @@
 import { adminDb } from '@/lib/firebaseAdmin';
-import { WeeklyDataSources, createWeeklyDataSources } from '@/schemas/weekly-data-sources';
+import { createWeeklyDataSources } from '@/schemas/weekly-data-sources';
+import type { WeeklyDataSources } from '@/schemas/weekly-data-sources';
 import { RawFileArchiveEntry } from '@/schemas/raw-file-archive';
-
-export type WeeklyPlatform = 'uber' | 'bolt' | 'myprio' | 'viaverde' | 'cartrack';
-
-export interface RawFileSummary {
-  id: string;
-  fileName?: string;
-  importedAt?: string;
-  processed: boolean;
-  importedBy?: string;
-  platform: WeeklyPlatform;
-}
-
-export interface RawFilesByPlatform {
-  total: number;
-  processed: number;
-  pending: number;
-  entries: RawFileSummary[];
-}
-
-export interface WeeklyDataOverview extends WeeklyDataSources {
-  rawFiles: Record<WeeklyPlatform, RawFilesByPlatform>;
-  totalRawFiles: number;
-  pendingRawFiles: number;
-  lastImportAt?: string;
-}
-
-const PLATFORMS: WeeklyPlatform[] = ['uber', 'bolt', 'myprio', 'viaverde', 'cartrack'];
+import {
+  WEEKLY_PLATFORMS,
+  WeeklyDataOverview,
+  WeeklyPlatform,
+  RawFilesByPlatform,
+} from '@/lib/admin/weeklyDataShared';
 
 function createEmptyRawFiles(): Record<WeeklyPlatform, RawFilesByPlatform> {
-  return PLATFORMS.reduce((acc, platform) => {
+  return WEEKLY_PLATFORMS.reduce((acc, platform) => {
     acc[platform] = {
       total: 0,
       processed: 0,
@@ -44,7 +24,7 @@ function createEmptyRawFiles(): Record<WeeklyPlatform, RawFilesByPlatform> {
 function toWeeklyPlatform(value: string | undefined): WeeklyPlatform | null {
   if (!value) return null;
   const normalized = value.toLowerCase() as WeeklyPlatform;
-  return PLATFORMS.includes(normalized) ? normalized : null;
+  return WEEKLY_PLATFORMS.includes(normalized) ? normalized : null;
 }
 
 function mergeRawEntry(
@@ -139,5 +119,3 @@ export async function fetchWeeklyDataOverview(limit = 12): Promise<WeeklyDataOve
 
   return limit > 0 ? weeks.slice(0, limit) : weeks;
 }
-
-export { PLATFORMS as WEEKLY_PLATFORMS };

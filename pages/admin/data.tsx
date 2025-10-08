@@ -33,12 +33,8 @@ import { MdAdd } from 'react-icons/md';
 import { FiRefreshCw } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import {
-  fetchWeeklyDataOverview,
-  WEEKLY_PLATFORMS,
-  WeeklyDataOverview,
-  WeeklyPlatform,
-} from '@/lib/admin/weeklyDataOverview';
+import type { WeeklyDataOverview, WeeklyPlatform } from '@/lib/admin/weeklyDataShared';
+import { WEEKLY_PLATFORMS } from '@/lib/admin/weeklyDataShared';
 
 type DataPageProps = AdminPageProps & {
   initialWeeks: WeeklyDataOverview[];
@@ -414,6 +410,7 @@ export default function DataPage({ initialWeeks, tCommon, tPage }: DataPageProps
 }
 
 export const getServerSideProps = withAdminSSR(async () => {
+  const { fetchWeeklyDataOverview } = await import('@/lib/admin/weeklyDataOverview');
   const initialWeeks = await fetchWeeklyDataOverview();
   return {
     initialWeeks,
