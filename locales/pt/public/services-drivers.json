@@ -212,10 +212,11 @@
     "feature": "SUPORTE"
   },
   "cta": {
-    "title": "Pronto para Começar a Faturar?",
-    "subtitle": "Junte-se aos motoristas que já escolheram a Conduz",
+    "title": "Pronto para Fazer Parte?",
+    "subtitle": "Você conduz, nós cuidamos do resto! Candidate-se agora e comece sua jornada como motorista TVDE.",
     "feature": "PRÓXIMO PASSO",
-    "button": "Quero ser Motorista"
+    "button": "Candidatar-me Agora",
+    "link": "/request"
   }
 }
 

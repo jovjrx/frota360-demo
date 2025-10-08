@@ -11,12 +11,12 @@ let totalItems = 0;
 
 for (const locale of locales) {
   for (const page of pages) {
-    const filePath = path.join(__dirname, '..', 'locales', locale, `${page}.json`);
+  const filePath = path.join(__dirname, '..', 'locales', locale, 'public', `${page}.json`);
     
     if (fs.existsSync(filePath)) {
       try {
         const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        console.log(`📄 Processing ${locale}/${page}.json`);
+  console.log(`📄 Processing ${locale}/public/${page}.json`);
         
         // Flatten the content
         const flattenContent = (obj, prefix = '') => {

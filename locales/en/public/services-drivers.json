@@ -196,10 +196,11 @@
     "feature": "SUPPORT"
   },
   "cta": {
-    "title": "Ready to start earning?",
-    "subtitle": "Join the drivers who already chose Conduz",
+    "title": "Ready to Join?",
+    "subtitle": "You drive, we handle the rest! Apply now and begin your TVDE journey.",
     "feature": "NEXT STEP",
-    "button": "I want to be a Driver"
+    "button": "Apply Now",
+    "link": "/request"
   }
 }
 

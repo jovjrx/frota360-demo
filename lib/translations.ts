@@ -37,24 +37,59 @@ export async function loadTranslations(
 
   for (const namespace of namespaces) {
     try {
-      // Parse namespace to support both "category/file" and "file" formats
-      let category = 'common';
-      let fileName = namespace;
-      
-      if (namespace.includes('/')) {
-        [category, fileName] = namespace.split('/');
-      } else if (namespace === 'admin' || namespace === 'dashboard') {
-        category = namespace;
-        fileName = namespace;
+      const baseLocalePath = path.join(process.cwd(), 'locales', normalizedLocale);
+      const namespaceParts = namespace.split('/').filter(Boolean);
+
+      interface CandidatePath {
+        filePath: string;
+        storeKeys: string[];
       }
-      
-      const filePath = path.join(process.cwd(), 'locales', normalizedLocale, category, `${fileName}.json`);
-      
-      if (fs.existsSync(filePath)) {
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        translations[namespace] = JSON.parse(fileContent);
+
+      const candidates: CandidatePath[] = [];
+
+      if (namespaceParts.length > 1) {
+        const [category, ...segments] = namespaceParts;
+        const normalizedKey = [category, ...segments].join('/');
+        const candidatePath = path.join(baseLocalePath, category, ...segments) + '.json';
+        candidates.push({ filePath: candidatePath, storeKeys: [namespace, normalizedKey] });
       } else {
-        console.warn(`Translation file not found: ${filePath}`);
+        const name = namespaceParts[0] || namespace;
+
+        const preferredCategories = name === 'admin'
+          ? ['admin']
+          : name === 'dashboard'
+          ? ['dashboard']
+          : name === 'common'
+          ? ['common']
+          : ['public', 'common', 'admin', 'dashboard'];
+
+        for (const category of preferredCategories) {
+          const candidatePath = path.join(baseLocalePath, category, `${name}.json`);
+          const normalizedKey = `${category}/${name}`;
+          candidates.push({ filePath: candidatePath, storeKeys: [namespace, normalizedKey] });
+        }
+
+        // Legacy flat-file support (e.g., locales/pt/common.json)
+        const legacyPath = path.join(baseLocalePath, `${name}.json`);
+        candidates.push({ filePath: legacyPath, storeKeys: [namespace] });
+      }
+
+      const resolvedCandidate = candidates.find(({ filePath }) => fs.existsSync(filePath));
+
+      if (resolvedCandidate) {
+        const fileContent = fs.readFileSync(resolvedCandidate.filePath, 'utf8');
+        const parsed = JSON.parse(fileContent);
+
+        const uniqueKeys = new Set(resolvedCandidate.storeKeys);
+        for (const key of uniqueKeys) {
+          translations[key] = parsed;
+        }
+      } else {
+        console.warn(
+          `Translation file not found for namespace "${namespace}" in locale "${normalizedLocale}". Searched paths: ${candidates
+            .map(({ filePath }) => filePath)
+            .join(', ')}`
+        );
         translations[namespace] = {};
       }
     } catch (error) {
