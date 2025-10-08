@@ -1,0 +1,66 @@
+
+
+    "weekly_records": {
+      "messages": {
+        "updateError": "Could not update record.",
+        "updateErrorTitle": "Error updating record",
+        "updateSuccess": "Record updated successfully!",
+        "markPaidSuccess": "Payment marked as completed.",
+        "markPendingSuccess": "Payment marked as pending."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "messages": {
+        "sendEmailErrorTitle": "Error sending email",
+        "sendEmailErrorDesc": "No payslip selected or PDF not generated.",
+        "sendEmailError": "Could not send payslip by email.",
+        "sendEmailSuccessTitle": "Email sent!",
+        "sendEmailSuccessDesc": "Payslip sent successfully to the driver."
+      },
+      "payslipModal": {
+        "title": "Weekly Payslip",
+        "downloadPdf": "Download PDF",
+        "sendEmail": "Send by Email",
+        "noPdfTitle": "No PDF generated",
+        "noPdfDesc": "Generate the payslip to view it here."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "messages": {
+        "exportError": "Could not export payments spreadsheet.",
+        "exportErrorTitle": "Export error",
+        "exportSuccessTitle": "Export completed!",
+        "exportSuccessDesc": "The payments spreadsheet was exported successfully."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "columns": {
+        "platformPrio": "PRIO",
+        "platformViaVerde": "ViaVerde"
+      }
+    }
+
+
+
+    "export_payments_button": "Export Spreadsheet"
+
+
+
+    "weekly_summary_title": "Weekly Summary",
+    "summary_item": "Item",
+    "summary_value": "Value",
+    "iva_label": "VAT",
+    "admin_expenses_label": "Administrative Expenses",
+    "fuel_label": "Fuel",
+    "tolls_label": "Tolls",
+    "rent_label": "Rent"
+

@@ -25,8 +25,8 @@ import {
   FiFileText,
   FiCheckCircle,
   FiClock,
-} from 'react-icons/fi';
-import { useRouter } from 'next/router';
+  FiDownload,
+} from '@chakra-ui/react';mport { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
@@ -68,10 +68,54 @@ export default function PainelDashboard({
 }: PainelDashboardProps) {
   const router = useRouter();
   const toast = useToast();
+  const [downloadingPayslipId, setDownloadingPayslipId] = useState<string | null>(null);
   
   // Calcular último pagamento e semana atual
   const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
   const semanaAtual = contracheques?.find((c: Contracheque) => c.paymentStatus === 'pending') || null;
+
+  const handleDownloadPayslip = async (payslipId: string) => {
+    setDownloadingPayslipId(payslipId);
+    try {
+      const response = await fetch(`/api/painel/contracheques/${payslipId}/pdf`);
+
+      if (!response.ok) {
+        throw new Error(tPainel("dashboard.payslips.downloadError", "Não foi possível baixar o contracheque."));
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const selectedPayslip = contracheques.find(p => p.id === payslipId);
+      const fileName = selectedPayslip 
+        ? `contracheque_${motorista.fullName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslip.weekStart}_a_${selectedPayslip.weekEnd}.pdf`
+        : `contracheque_${payslipId}.pdf`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: tPainel("dashboard.payslips.downloadSuccessTitle", "Download Concluído!"),
+        description: tPainel("dashboard.payslips.downloadSuccessDesc", "Contracheque baixado com sucesso."),
+        status: "success",
+        duration: 3000,
+      });
+
+    } catch (error: any) {
+      console.error("Erro ao baixar contracheque:", error);
+      toast({
+        title: tPainel("dashboard.payslips.downloadErrorTitle", "Erro no Download"),
+        description: error?.message || tPainel("dashboard.payslips.downloadError", "Não foi possível baixar o contracheque."),
+        status: "error",
+        duration: 5000,
+      });
+    } finally {
+      setDownloadingPayslipId(null);
+    }
+  };
   // Funções de tradução com fallbacks
   const t = (key: string, variables?: Record<string, any>) => {
     return getTranslation(translations?.common, key, variables) || key;
@@ -149,7 +193,7 @@ export default function PainelDashboard({
               <HStack justify="space-between">
                 <Text fontSize="sm" color="gray.600">Semana</Text>
                 <Text fontSize="sm" fontWeight="semibold">
-                  {new Date(ultimoPagamento.weekStart).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} - {new Date(ultimoPagamento.weekEnd).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  {ultimoPagamento.weekStart} - {ultimoPagamento.weekEnd}
                 </Text>
               </HStack>
               
@@ -178,16 +222,27 @@ export default function PainelDashboard({
                 </Text>
               </HStack>
               
-              <Button
-                as={Link}
-                href="/dashboard/contracheques"
-                size="sm"
-                colorScheme="green"
-                variant="outline"
-                leftIcon={<Icon as={FiFileText} />}
-              >
-                Ver Contracheque
-              </Button>
+              <HStack spacing={2} mt={4}>
+                <Button
+                  as={Link}
+                  href="/dashboard/payslips"
+                  size="sm"
+                  colorScheme="green"
+                  variant="outline"
+                  leftIcon={<Icon as={FiFileText} />}
+                >
+                  Ver Contracheques
+                </Button>
+                <Button
+                  onClick={() => handleDownloadPayslip(ultimoPagamento.id)}
+                  size="sm"
+                  colorScheme="blue"
+                  leftIcon={<Icon as={FiDownload} />}
+                  isLoading={downloadingPayslipId === ultimoPagamento.id}
+                >
+                  Baixar Holerite
+                </Button>
+              </HStack>
             </VStack>
           ) : (
             <Text color="gray.500" fontSize="sm">
@@ -208,7 +263,7 @@ export default function PainelDashboard({
               <HStack justify="space-between">
                 <Text fontSize="sm" color="gray.600">Período</Text>
                 <Text fontSize="sm" fontWeight="semibold">
-                  {new Date(semanaAtual.weekStart).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} - {new Date(semanaAtual.weekEnd).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  {semanaAtual.weekStart} - {semanaAtual.weekEnd}
                 </Text>
               </HStack>
               

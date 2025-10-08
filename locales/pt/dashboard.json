@@ -1,0 +1,9 @@
+
+
+    "payslips": {
+      "downloadError": "Não foi possível baixar o contracheque.",
+      "downloadErrorTitle": "Erro no Download",
+      "downloadSuccessTitle": "Download Concluído!",
+      "downloadSuccessDesc": "Contracheque baixado com sucesso."
+    }
+

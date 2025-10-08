@@ -42,6 +42,14 @@ import { getTranslation } from '@/lib/translations';
 import { getWeekOptions } from '@/lib/admin/adminQueries';
 import { useRouter } from 'next/router';
 import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
+import EditableNumberField from '@/components/admin/EditableNumberField';
+import StatCard from '@/components/admin/StatCard';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
+import { FiDownload, FiMail } from 'react-icons/fi';
+import EditableNumberField from '@/components/admin/EditableNumberField';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
+import { FiDownload, FiMail } from 'react-icons/fi';
+import EditableNumberField from '@/components/admin/EditableNumberField';
 
 interface WeekOption {
   label: string;
@@ -240,40 +248,41 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
     }
   };
 
-  const handleGeneratePayslip = async (record: DriverRecord) => {
+  const { isOpen: isPayslipModalOpen, onOpen: onOpenPayslipModal, onClose: onClosePayslipModal } = useDisclosure();
+  const [selectedPayslipRecord, setSelectedPayslipRecord] = useState<DriverRecord | null>(null);
+  const [payslipPdfUrl, setPayslipPdfUrl] = useState<string | null>(null);
+
+  const handleViewPayslip = async (record: DriverRecord) => {
     if (!record?.id) {
       return;
     }
 
     setGeneratingRecordId(record.id);
     try {
-      const response = await fetch('/api/admin/weekly/generate-single', {
-        method: 'POST',
+      const response = await fetch("/api/admin/weekly/generate-single", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ record }),
       });
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin('weekly_records.messages.generateError', 'Não foi possível gerar o contracheque.'));
+        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.generateError", "Não foi possível gerar o contracheque."));
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `contracheque_${record.driverName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}_${record.weekStart}_a_${record.weekEnd}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      setPayslipPdfUrl(url);
+      setSelectedPayslipRecord(record);
+      onOpenPayslipModal();
+
     } catch (error: any) {
       toast({
-        title: tAdmin('weekly_records.actions.generatePayslip', 'Gerar contracheque'),
-        description: error?.message || tAdmin('weekly_records.messages.generateError', 'Não foi possível gerar o contracheque.'),
-        status: 'error',
+        title: tAdmin("weekly_records.actions.generatePayslip", "Gerar contracheque"),
+        description: error?.message || tAdmin("weekly_records.messages.generateError", "Não foi possível gerar o contracheque."),
+        status: "error",
         duration: 4000,
       });
     } finally {
@@ -281,7 +290,301 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
     }
   };
 
+  const handleDownloadPayslip = () => {
+    if (payslipPdfUrl && selectedPayslipRecord) {
+      const a = document.createElement("a");
+      a.href = payslipPdfUrl;
+      const fileName = `contracheque_${selectedPayslipRecord.driverName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslipRecord.weekStart}_a_${selectedPayslipRecord.weekEnd}.pdf`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const handleSendPayslipEmail = async () => {
+    if (!selectedPayslipRecord || !payslipPdfUrl) {
+      toast({
+        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
+        description: tAdmin("weekly_records.messages.sendEmailErrorDesc", "Nenhum contracheque selecionado ou PDF não gerado."),
+        status: "error",
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      // Convert blob URL to base64 for sending via API
+      const response = await fetch(payslipPdfUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = reader.result?.toString().split(",")[1];
+
+        const emailRes = await fetch("/api/admin/weekly/send-payslip-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recordId: selectedPayslipRecord.id,
+            driverEmail: selectedPayslipRecord.driverEmail,
+            driverName: selectedPayslipRecord.driverName,
+            weekStart: selectedPayslipRecord.weekStart,
+            weekEnd: selectedPayslipRecord.weekEnd,
+            pdfBase64: base64data,
+          }),
+        });
+
+        if (!emailRes.ok) {
+          const errorPayload = await emailRes.json().catch(() => ({}));
+          throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."));
+        }
+
+        toast({
+          title: tAdmin("weekly_records.messages.sendEmailSuccessTitle", "E-mail enviado!"),
+          description: tAdmin("weekly_records.messages.sendEmailSuccessDesc", "Contracheque enviado com sucesso para o motorista."),
+          status: "success",
+          duration: 4000,
+        });
+      };
+    } catch (error: any) {
+      console.error("Erro ao enviar e-mail:", error);
+      toast({
+        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
+        description: error?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."),
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleExportPayments = async () => {
+    try {
+      const selectedWeek = weekOptions.find(w => w.value === filterWeek);
+      if (!selectedWeek) {
+        toast({
+          title: tAdmin("errors.title", "Erro"),
+          description: tAdmin("select_week_error"),
+          status: "error",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const response = await fetch("/api/admin/weekly/export-payments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          records: records,
+          weekId: selectedWeek.value,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.exportError", "Não foi possível exportar a planilha de pagamentos."));
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `pagamentos_semana_${selectedWeek.value}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: tAdmin("weekly_records.messages.exportSuccessTitle", "Exportação concluída!"),
+        description: tAdmin("weekly_records.messages.exportSuccessDesc", "A planilha de pagamentos foi exportada com sucesso."),
+        status: "success",
+        duration: 4000,
+      });
+    } catch (error: any) {
+      console.error("Erro ao exportar pagamentos:", error);
+      toast({
+        title: tAdmin("weekly_records.messages.exportErrorTitle", "Erro na exportação"),
+        description: error?.message || tAdmin("weekly_records.messages.exportError", "Não foi possível exportar a planilha de pagamentos."),
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleUpdateRecord = async (recordId: string, updates: Partial<DriverWeeklyRecord>) => {
+    if (!selectedPayslipRecord || !payslipPdfUrl) {
+      toast({
+        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
+        description: tAdmin("weekly_records.messages.sendEmailErrorDesc", "Nenhum contracheque selecionado ou PDF não gerado."),
+        status: "error",
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      // Convert blob URL to base64 for sending via API
+      const response = await fetch(payslipPdfUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = reader.result?.toString().split(",")[1];
+
+        const emailRes = await fetch("/api/admin/weekly/send-payslip-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recordId: selectedPayslipRecord.id,
+            driverEmail: selectedPayslipRecord.driverEmail,
+            driverName: selectedPayslipRecord.driverName,
+            weekStart: selectedPayslipRecord.weekStart,
+            weekEnd: selectedPayslipRecord.weekEnd,
+            pdfBase64: base64data,
+          }),
+        });
+
+        if (!emailRes.ok) {
+          const errorPayload = await emailRes.json().catch(() => ({}));
+          throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."));
+        }
+
+        toast({
+          title: tAdmin("weekly_records.messages.sendEmailSuccessTitle", "E-mail enviado!"),
+          description: tAdmin("weekly_records.messages.sendEmailSuccessDesc", "Contracheque enviado com sucesso para o motorista."),
+          status: "success",
+          duration: 4000,
+        });
+      };
+    } catch (error: any) {
+      console.error("Erro ao enviar e-mail:", error);
+      toast({
+        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
+        description: error?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."),
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleUpdateRecord = async (recordId: string, updates: Partial<DriverWeeklyRecord>) => {
+    try {
+      const response = await fetch("/api/admin/weekly/update-record", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ recordId, updates }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o registro."));
+      }
+
+      const payload = await response.json();
+      const updatedRecord: DriverWeeklyRecord = payload?.record;
+
+      setRecords((prev) =>
+        prev.map((item) =>
+          item.id === recordId
+            ? {
+                ...item,
+                ...updatedRecord,
+              }
+            : item
+        )
+      );
+
+      toast({
+        title: tAdmin("weekly_records.messages.updateSuccess", "Registro atualizado com sucesso!"),
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
+      toast({
+        title: tAdmin("weekly_records.messages.updateErrorTitle", "Erro ao atualizar registro"),
+        description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o registro."),
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
   const handleTogglePaymentStatus = async (record: DriverRecord) => {
+    if (!record?.id) {
+      return;
+    }
+
+    const nextStatus = record.paymentStatus === "paid" ? "pending" : "paid";
+    setUpdatingPaymentId(record.id);
+
+    try {
+      const response = await fetch("/api/admin/weekly/update-record", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recordId: record.id,
+          updates: {
+            paymentStatus: nextStatus,
+            paymentDate: nextStatus === "paid" ? new Date().toISOString() : null,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o status do pagamento."));
+      }
+
+      const payload = await response.json();
+      const updated: DriverWeeklyRecord = payload?.record;
+
+      setRecords((prev) =>
+        prev.map((item) =>
+          item.id === record.id
+            ? {
+                ...item,
+                paymentStatus: updated?.paymentStatus ?? nextStatus,
+                paymentDate: updated?.paymentDate ?? item.paymentDate,
+                updatedAt: updated?.updatedAt ?? item.updatedAt,
+              }
+            : item
+        )
+      );
+
+      toast({
+        title:
+          nextStatus === "paid"
+            ? tAdmin("weekly_records.actions.markAsPaid", "Marcar como pago")
+            : tAdmin("weekly_records.actions.markAsPending", "Marcar como pendente"),
+        description:
+          nextStatus === "paid"
+            ? tAdmin("weekly_records.messages.markPaidSuccess", "Pagamento marcado como concluído.")
+            : tAdmin("weekly_records.messages.markPendingSuccess", "Pagamento marcado como pendente."),
+        status: "success",
+        duration: 4000,
+      });
+    } catch (error: any) {
+      toast({
+        title: tAdmin("weekly_records.actions.markAsPaid", "Marcar como pago"),
+        description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o status do pagamento."),
+        status: "error",
+        duration: 4000,
+      });
+    } finally {
+      setUpdatingPaymentId(null);
+    }
+  };
     if (!record?.id) {
       return;
     }
@@ -422,10 +725,19 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                   colorScheme="purple"
                   size="sm"
                   isLoading={isGeneratingResumos}
-                  loadingText={tAdmin('generating_summaries_loading')}
+                  loadingText={tAdmin("generating_summaries_loading")}
                   isDisabled={records.length === 0}
                 >
-                  {tAdmin('generate_summaries_button')}
+                  {tAdmin("generate_summaries_button")}
+                </Button>
+                <Button
+                  leftIcon={<Icon as={FiDownload} />}
+                  onClick={handleExportPayments}
+                  colorScheme="teal"
+                  size="sm"
+                  isDisabled={records.length === 0}
+                >
+                  {tAdmin("export_payments_button", "Exportar Planilha")}
                 </Button>
               </HStack>
             </HStack>
@@ -433,49 +745,57 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         </Card>
 
         {/* Resumo */}
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel fontSize="xs">{tAdmin('total_earnings')}</StatLabel>
-                <StatNumber fontSize="lg" color="green.600">{formatCurrency(totals.ganhosTotal)}</StatNumber>
-                <StatHelpText fontSize="xs">{records.length} {tAdmin('drivers_label')}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel fontSize="xs">{tAdmin('total_discounts')}</StatLabel>
-                <StatNumber fontSize="lg" color="red.600">
-                  {formatCurrency(totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel)}
-                </StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin("iva_adm_fuel_tolls_rent")}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel fontSize="xs">{tAdmin("fuel_label")}</StatLabel>
-                <StatNumber fontSize="lg" color="orange.600">{formatCurrency(totals.combustivel)}</StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin("prio_label")}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel fontSize="xs">{tAdmin("net_value")}</StatLabel>
-                <StatNumber fontSize="lg" color="blue.600">{formatCurrency(totals.repasse)}</StatNumber>
-                <StatHelpText fontSize="xs">{tAdmin("total_to_pay")}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
+        <Card>
+          <CardHeader>
+            <Heading size="md">{tAdmin("weekly_summary_title", "Resumo Semanal")}</Heading>
+          </CardHeader>
+          <CardBody>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+              <StatCard label={tAdmin("total_earnings", "Ganhos Totais")} value={totals.ganhosTotal} color="green.600" helpText={`${records.length} ${tAdmin("drivers_label", "motoristas")}`} />
+              <StatCard label={tAdmin("total_discounts", "Descontos Totais")} value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel} color="red.600" helpText={tAdmin("iva_adm_fuel_tolls_rent", "IVA, Adm, Combustível, Portagens, Aluguel")} />
+              <StatCard label={tAdmin("fuel_label", "Combustível")} value={totals.combustivel} color="orange.600" helpText={tAdmin("prio_label", "PRIO")} />
+              <StatCard label={tAdmin("net_value", "Valor Líquido")} value={totals.repasse} color="blue.600" helpText={tAdmin("total_to_pay", "Total a Pagar")} />
+            </SimpleGrid>
+            <Table variant="simple" size="sm" mt={6}>
+              <Thead>
+                <Tr>
+                  <Th>{tAdmin("summary_item", "Item")}</Th>
+                  <Th isNumeric>{tAdmin("summary_value", "Valor")}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>{tAdmin("total_earnings", "Ganhos Totais")}</Td>
+                  <Td isNumeric>{formatCurrency(totals.ganhosTotal)}</Td>
+                </Tr>
+                <Tr>
+                  <Td>{tAdmin("iva_label", "IVA")}</Td>
+                  <Td isNumeric color="red.600">-{formatCurrency(totals.ivaValor)}</Td>
+                </Tr>
+                <Tr>
+                  <Td>{tAdmin("admin_expenses_label", "Despesas Administrativas")}</Td>
+                  <Td isNumeric color="red.600">-{formatCurrency(totals.despesasAdm)}</Td>
+                </Tr>
+                <Tr>
+                  <Td>{tAdmin("fuel_label", "Combustível")}</Td>
+                  <Td isNumeric color="orange.600">-{formatCurrency(totals.combustivel)}</Td>
+                </Tr>
+                <Tr>
+                  <Td>{tAdmin("tolls_label", "Portagens")}</Td>
+                  <Td isNumeric color="orange.600">-{formatCurrency(totals.viaverde)}</Td>
+                </Tr>
+                <Tr>
+                  <Td>{tAdmin("rent_label", "Aluguel")}</Td>
+                  <Td isNumeric color="purple.600">-{formatCurrency(totals.aluguel)}</Td>
+                </Tr>
+                <Tr>
+                  <Td fontWeight="bold">{tAdmin("net_value", "Valor Líquido")}</Td>
+                  <Td isNumeric fontWeight="bold" color="blue.600">{formatCurrency(totals.repasse)}</Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </CardBody>
+        </Card>
 
         {/* Tabela de Registros */}
         <Card>
@@ -507,8 +827,10 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                     <Tr>
                       <Th>{tAdmin('weekly_records.columns.driver', 'Motorista')}</Th>
                       <Th>{tAdmin('weekly_records.columns.type', 'Tipo')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.platformUber', 'Uber')}</Th>
-                      <Th isNumeric>{tAdmin('weekly_records.columns.platformBolt', 'Bolt')}</Th>
+                      <Th isNumeric>{tAdmin("weekly_records.columns.platformUber", "Uber")}</Th>
+                      <Th isNumeric>{tAdmin("weekly_records.columns.platformBolt", "Bolt")}</Th>
+                      <Th isNumeric>{tAdmin("weekly_records.columns.platformPrio", "PRIO")}</Th>
+                      <Th isNumeric>{tAdmin("weekly_records.columns.platformViaVerde", "ViaVerde")}</Th>
                       <Th isNumeric>{tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}</Th>
                       <Th isNumeric>{tAdmin('weekly_records.columns.iva', 'IVA')}</Th>
                       <Th isNumeric>{tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}</Th>
@@ -523,7 +845,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                   <Tbody>
                     {records.map((record, index) => (
                       <Tr key={index}>
-                        <Td>
+                          <Td>
                           <Text fontWeight="medium">{record.driverName}</Text>
                           <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
                         </Td>
@@ -546,15 +868,67 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                               .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
                           )}
                         </Td>
-                        <Td isNumeric fontWeight="bold">{formatCurrency(record.ganhosTotal)}</Td>
-                        <Td isNumeric color="red.600">-{formatCurrency(record.ivaValor)}</Td>
-                        <Td isNumeric color="red.600">-{formatCurrency(record.despesasAdm)}</Td>
-                        <Td isNumeric color="orange.600">-{formatCurrency(record.combustivel)}</Td>
-                        <Td isNumeric color="orange.600">-{formatCurrency(record.viaverde)}</Td>
-                        <Td isNumeric color="purple.600">-{formatCurrency(record.aluguel)}</Td>
-                        <Td isNumeric fontWeight="bold" color="blue.600">
-                          {formatCurrency(record.repasse)}
+                        <Td isNumeric>
+                          {formatCurrency(
+                            record.platformData
+                              .filter((p) => p.platform === 'prio')
+                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                          )}
                         </Td>
+                        <Td isNumeric>
+                          {formatCurrency(
+                            record.platformData
+                              .filter((p) => p.platform === 'viaverde')
+                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                          )}
+                        </Td>
+                      <EditableNumberField 
+                        value={record.ganhosTotal}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
+                        isPaid={isPaid}
+                      />
+                      <EditableNumberField 
+                        value={record.ivaValor}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
+                        isPaid={isPaid}
+                        color="red.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField 
+                        value={record.despesasAdm}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
+                        isPaid={isPaid}
+                        color="red.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField 
+                        value={record.combustivel}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
+                        isPaid={isPaid}
+                        color="orange.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField 
+                        value={record.viaverde}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
+                        isPaid={isPaid}
+                        color="orange.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField 
+                        value={record.aluguel}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
+                        isPaid={isPaid}
+                        color="purple.600"
+                        prefix="-"
+                      />
+                      <EditableNumberField 
+                        value={record.repasse}
+                        onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
+                        isPaid={isPaid}
+                        color="blue.600"
+                        fontWeight="bold"
+                      />
                         <Td>
                           <VStack align="flex-start" spacing={1}>
                             <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
@@ -587,16 +961,65 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                                 ? tAdmin('weekly_records.actions.markAsPending', 'Marcar como pendente')
                                 : tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago')}
                             </Button>
-                          </ButtonGroup>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-            )}
-          </CardBody>
-        </Card>
+                  </ButtonGroup>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
+    )}
+  </CardBody>
+</Card>
+
+{/* Modal de Visualização do Contracheque */}
+<Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>
+      <VStack align="start" spacing={1}>
+        <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
+        {selectedPayslipRecord && (
+          <Text fontSize="sm" fontWeight="normal" color="gray.600">
+            {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
+          </Text>
+        )}
+      </VStack>
+    </ModalHeader>
+    <ModalCloseButton />
+    <ModalBody pb={6}>
+      <VStack spacing={4} align="stretch" height="100%">
+        <HStack spacing={4} justify="flex-end">
+          <Button
+            leftIcon={<Icon as={FiDownload} />}
+            onClick={handleDownloadPayslip}
+            colorScheme="blue"
+          >
+            {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
+          </Button>
+          <Button
+            leftIcon={<Icon as={FiMail} />}
+            onClick={handleSendPayslipEmail}
+            colorScheme="green"
+          >
+            {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
+          </Button>
+        </HStack>
+        {payslipPdfUrl ? (
+          <Box flex="1" height="calc(100vh - 200px)">
+            <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
+          </Box>
+        ) : (
+          <Alert status="info" borderRadius="lg">
+            <AlertIcon />
+            <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
+            <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
+          </Alert>
+        )}
+      </VStack>
+    </ModalBody>
+  </ModalContent>
+</Modal>
 
         {unassigned.length > 0 && (
           <Card variant="outline">

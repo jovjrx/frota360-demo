@@ -1,0 +1,66 @@
+
+
+    "weekly_records": {
+      "messages": {
+        "updateError": "Não foi possível atualizar o registro.",
+        "updateErrorTitle": "Erro ao atualizar registro",
+        "updateSuccess": "Registro atualizado com sucesso!",
+        "markPaidSuccess": "Pagamento marcado como concluído.",
+        "markPendingSuccess": "Pagamento marcado como pendente."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "messages": {
+        "sendEmailErrorTitle": "Erro ao enviar e-mail",
+        "sendEmailErrorDesc": "Nenhum contracheque selecionado ou PDF não gerado.",
+        "sendEmailError": "Não foi possível enviar o contracheque por e-mail.",
+        "sendEmailSuccessTitle": "E-mail enviado!",
+        "sendEmailSuccessDesc": "Contracheque enviado com sucesso para o motorista."
+      },
+      "payslipModal": {
+        "title": "Contracheque Semanal",
+        "downloadPdf": "Baixar PDF",
+        "sendEmail": "Enviar por E-mail",
+        "noPdfTitle": "Nenhum PDF gerado",
+        "noPdfDesc": "Gere o contracheque para visualizá-lo aqui."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "messages": {
+        "exportError": "Não foi possível exportar a planilha de pagamentos.",
+        "exportErrorTitle": "Erro na exportação",
+        "exportSuccessTitle": "Exportação concluída!",
+        "exportSuccessDesc": "A planilha de pagamentos foi exportada com sucesso."
+      }
+    }
+
+
+
+    "weekly_records": {
+      "columns": {
+        "platformPrio": "PRIO",
+        "platformViaVerde": "ViaVerde"
+      }
+    }
+
+
+
+    "export_payments_button": "Exportar Planilha"
+
+
+
+    "weekly_summary_title": "Resumo Semanal",
+    "summary_item": "Item",
+    "summary_value": "Valor",
+    "iva_label": "IVA",
+    "admin_expenses_label": "Despesas Administrativas",
+    "fuel_label": "Combustível",
+    "tolls_label": "Portagens",
+    "rent_label": "Aluguel"
+
