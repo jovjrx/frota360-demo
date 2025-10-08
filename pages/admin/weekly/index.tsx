@@ -887,7 +887,7 @@ export default function WeeklyPage({
       </Card>
 
       {/* Modal de Visualização do Contracheque */}
-      <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="full">
+      <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="5xl">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -901,7 +901,7 @@ export default function WeeklyPage({
             </VStack>
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6}>
+          <ModalBody>
             <VStack spacing={4} align="stretch" height="100%">
               <HStack spacing={4} justify="flex-end">
                 <Button
@@ -920,7 +920,7 @@ export default function WeeklyPage({
                 </Button>
               </HStack>
               {payslipPdfUrl ? (
-                <Box flex="1" height="calc(100vh - 200px)">
+                <Box flex="1" minH="full" height="60vh">
                   <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
                 </Box>
               ) : (
