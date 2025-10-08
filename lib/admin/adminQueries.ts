@@ -297,6 +297,9 @@ export async function getDashboardStats(): Promise<{
   activeDrivers: number;
   pendingRequests: number;
   totalEarningsThisWeek: number;
+  totalPaymentsPending: number;
+  totalPaymentsPaid: number;
+  averageEarningsPerDriver: number;
 }> {
   const db = getFirestore();
 
@@ -308,18 +311,54 @@ export async function getDashboardStats(): Promise<{
   ).length;
 
   // Contar solicitações pendentes
-  const requestsSnapshot = await db.collection('requests')
+  const requestsSnapshot = await db.collection('driver_requests')
     .where('status', '==', 'pending')
     .get();
   const pendingRequests = requestsSnapshot.size;
 
-  // TODO: Calcular ganhos da semana (quando implementar weekly_records)
-  const totalEarningsThisWeek = 0;
+  // Calcular ganhos da semana atual
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - (today.getDay() || 7) + 1);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const currentWeekId = getWeekId(weekStart);
+
+  // Buscar registros semanais da semana atual
+  const weeklyRecordsSnapshot = await db.collection('driverWeeklyRecords')
+    .where('weekId', '==', currentWeekId)
+    .get();
+
+  let totalEarningsThisWeek = 0;
+  let totalPaymentsPending = 0;
+  let totalPaymentsPaid = 0;
+
+  weeklyRecordsSnapshot.docs.forEach(doc => {
+    const data = doc.data();
+    totalEarningsThisWeek += data.repasse || 0;
+    
+    if (data.paymentStatus === 'pending') {
+      totalPaymentsPending += data.repasse || 0;
+    } else if (data.paymentStatus === 'paid') {
+      totalPaymentsPaid += data.repasse || 0;
+    }
+  });
+
+  const averageEarningsPerDriver = weeklyRecordsSnapshot.size > 0 
+    ? totalEarningsThisWeek / weeklyRecordsSnapshot.size 
+    : 0;
 
   return {
     totalDrivers,
     activeDrivers,
     pendingRequests,
     totalEarningsThisWeek,
+    totalPaymentsPending,
+    totalPaymentsPaid,
+    averageEarningsPerDriver,
   };
 }

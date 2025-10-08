@@ -30,6 +30,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import {
   FiRefreshCw,
@@ -46,6 +47,7 @@ import { useRouter } from 'next/router';
 import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
 import EditableNumberField from '@/components/admin/EditableNumberField';
 import StatCard from '@/components/admin/StatCard';
+import WeeklyRecordCard from '@/components/admin/WeeklyRecordCard';
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 import { FiDownload, FiMail } from 'react-icons/fi';
 
@@ -99,6 +101,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
   const router = useRouter();
   const t = useMemo(() => makeSafeT(translations.common), [translations.common]);
   const tAdmin = useMemo(() => makeSafeT(translations.admin), [translations.admin]);
+  const isMobile = useBreakpointValue({ base: true, md: false });
   const typeLabels = useMemo(
     () => ({
       affiliate: tAdmin('weekly_records.types.affiliate', 'Afiliado'),
@@ -567,25 +570,23 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         {/* Filtros e Ações */}
         <Card>
           <CardBody>
-            <HStack spacing={4} flexWrap="wrap" justify="space-between">
-              <HStack spacing={4}>
-                <Box>
-                  <Text fontSize="sm" mb={2} fontWeight="medium">{tAdmin('week_label')}:</Text>
-                  <Select 
-                    value={filterWeek} 
-                    onChange={(e) => setFilterWeek(e.target.value)} 
-                    w="300px"
-                  >
-                    {weekOptions.map(week => (
-                      <option key={week.value} value={week.value}>
-                        {week.label}
-                      </option>
-                    ))}
-                  </Select>
-                </Box>
-              </HStack>
+            <VStack spacing={4} align="stretch">
+              <Box>
+                <Text fontSize="sm" mb={2} fontWeight="medium">{tAdmin('week_label')}:</Text>
+                <Select 
+                  value={filterWeek} 
+                  onChange={(e) => setFilterWeek(e.target.value)} 
+                  w={{ base: "100%", md: "300px" }}
+                >
+                  {weekOptions.map(week => (
+                    <option key={week.value} value={week.value}>
+                      {week.label}
+                    </option>
+                  ))}
+                </Select>
+              </Box>
 
-              <HStack spacing={2}>
+              <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={2}>
                 <Button
                   leftIcon={<Icon as={FiUpload} />}
                   onClick={() => router.push('/admin/data')}
@@ -622,8 +623,8 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                 >
                   {tAdmin("export_payments_button", "Exportar Planilha")}
                 </Button>
-              </HStack>
-            </HStack>
+              </SimpleGrid>
+            </VStack>
           </CardBody>
         </Card>
 
@@ -703,7 +704,30 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                   {tAdmin("import_data_button")}
                 </Button>
               </Box>
+            ) : isMobile ? (
+              // Mobile: Exibir como cartões
+              <VStack spacing={4} align="stretch">
+                {records.map((record, index) => (
+                  <WeeklyRecordCard
+                    key={index}
+                    record={record}
+                    formatCurrency={formatCurrency}
+                    formatDateLabel={formatDateLabel}
+                    typeLabels={typeLabels}
+                    statusLabels={statusLabels}
+                    statusColor={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}
+                    locale={locale || 'pt-PT'}
+                    onViewPayslip={handleViewPayslip}
+                    onTogglePaymentStatus={handleTogglePaymentStatus}
+                    onUpdateField={handleUpdateRecord}
+                    generatingRecordId={generatingRecordId}
+                    updatingPaymentId={updatingPaymentId}
+                    tAdmin={tAdmin}
+                  />
+                ))}
+              </VStack>
             ) : (
+              // Desktop: Exibir como tabela
               <Box overflowX="auto">
                 <Table variant="simple" size="sm">
                   <Thead>
@@ -830,19 +854,21 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                               leftIcon={<Icon as={FiFileText} />}
                               onClick={() => handleViewPayslip(record)}
                               isLoading={generatingRecordId === record.id}
-                              loadingText={tAdmin('weekly_records.messages.generateInProgress', 'A gerar contracheque...')}
+                              loadingText={tAdmin("weekly_records.messages.generateInProgress", "A gerar...")}
+                              size="xs"
                             >
-                              {tAdmin('weekly_records.actions.generatePayslip', 'Gerar contracheque')}
+                              {tAdmin("weekly_records.actions.generatePayslip", "Contracheque")}
                             </Button>
                             <Button
                               leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
                               colorScheme={record.paymentStatus === 'paid' ? 'yellow' : 'green'}
                               onClick={() => handleTogglePaymentStatus(record)}
                               isLoading={updatingPaymentId === record.id}
+                              size="xs"
                             >
                               {record.paymentStatus === 'paid'
-                                ? tAdmin('weekly_records.actions.markAsPending', 'Marcar como pendente')
-                                : tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago')}
+                                ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
+                                : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
                             </Button>
                   </ButtonGroup>
                 </Td>

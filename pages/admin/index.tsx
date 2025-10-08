@@ -46,6 +46,9 @@ interface DashboardData {
     activeDrivers: number;
     pendingRequests: number;
     totalEarningsThisWeek: number;
+    totalPaymentsPending: number;
+    totalPaymentsPaid: number;
+    averageEarningsPerDriver: number;
   };
   recentDrivers: any[];
   recentRequests: any[];
@@ -75,15 +78,17 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
   const subtitle = subtitleTemplate.replace('{{name}}', user.displayName || user.email || '');
 
   // SWR com fallback dos dados SSR
-  const { data, mutate } = useSWR<DashboardData>(
+  const { data: apiData, mutate } = useSWR<{ success: boolean; data: DashboardData }>(
     '/api/admin/dashboard/stats',
     fetcher,
     {
-      fallbackData: initialData,
+      fallbackData: { success: true, data: initialData },
       refreshInterval: 30000, // Atualizar a cada 30s
       revalidateOnFocus: true,
     }
   );
+
+  const data = apiData?.data || initialData;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -215,6 +220,60 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
                     {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
                   </StatNumber>
                   <StatHelpText>{t('dashboard.helpers.currentWeek', 'Semana atual')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </Box>
+
+        {/* KPIs Financeiros Adicionais */}
+        <Box>
+          <Heading size="md" mb={4}>{t('dashboard.sections.financials', 'Resumo Financeiro')}</Heading>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
+              <CardBody>
+                <Stat>
+                  <StatLabel>
+                    <Text color="orange.700">{t('dashboard.paymentsPending', 'Pagamentos Pendentes')}</Text>
+                  </StatLabel>
+                  <StatNumber color="orange.600">
+                    {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
+                  </StatNumber>
+                  <StatHelpText color="orange.600">
+                    {t('dashboard.helpers.awaitingPayment', 'Aguardando pagamento')}
+                  </StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+
+            <Card bg="green.50" borderColor="green.200" borderWidth="1px">
+              <CardBody>
+                <Stat>
+                  <StatLabel>
+                    <Text color="green.700">{t('dashboard.paymentsPaid', 'Pagamentos Realizados')}</Text>
+                  </StatLabel>
+                  <StatNumber color="green.600">
+                    {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
+                  </StatNumber>
+                  <StatHelpText color="green.600">
+                    {t('dashboard.helpers.paidThisWeek', 'Pagos esta semana')}
+                  </StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+
+            <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
+              <CardBody>
+                <Stat>
+                  <StatLabel>
+                    <Text color="blue.700">{t('dashboard.averageEarnings', 'Média por Motorista')}</Text>
+                  </StatLabel>
+                  <StatNumber color="blue.600">
+                    {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
+                  </StatNumber>
+                  <StatHelpText color="blue.600">
+                    {t('dashboard.helpers.weeklyAverage', 'Média semanal')}
+                  </StatHelpText>
                 </Stat>
               </CardBody>
             </Card>

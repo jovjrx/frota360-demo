@@ -55,9 +55,9 @@
       "noPdfDesc": "Generate the payslip to view it here."
     },
     "actions": {
-      "generatePayslip": "Generate Payslip",
-      "markAsPaid": "Mark as Paid",
-      "markAsPending": "Mark as Pending"
+      "generatePayslip": "Payslip",
+      "markAsPaid": "Paid",
+      "markAsPending": "Pending"
     },
     "types": {
       "affiliate": "Affiliate",
@@ -78,5 +78,42 @@
   "fuel_label": "Fuel",
   "tolls_label": "Tolls",
   "rent_label": "Rent",
-  "select_week_placeholder": "Select Week"
+  "select_week_placeholder": "Select Week",
+  "dashboard": {
+    "sections": {
+      "overview": "Overview",
+      "financials": "Financial Summary",
+      "recentDrivers": "Recent Drivers",
+      "recentRequests": "Recent Requests"
+    },
+    "totalDrivers": "Total Drivers",
+    "activeDrivers": "Active Drivers",
+    "pendingRequests": "Pending Requests",
+    "weeklyEarnings": "This Week's Earnings",
+    "paymentsPending": "Pending Payments",
+    "paymentsPaid": "Completed Payments",
+    "averageEarnings": "Average per Driver",
+    "helpers": {
+      "activeCount": "{{count}} active",
+      "operational": "In operation",
+      "awaitingReview": "Awaiting review",
+      "currentWeek": "Current week",
+      "awaitingPayment": "Awaiting payment",
+      "paidThisWeek": "Paid this week",
+      "weeklyAverage": "Weekly average"
+    },
+    "actions": {
+      "refresh": "Refresh"
+    },
+    "tables": {
+      "drivers": {
+        "type": "Type",
+        "status": "Status"
+      },
+      "requests": {
+        "type": "Type",
+        "status": "Status"
+      }
+    }
+  }
 }

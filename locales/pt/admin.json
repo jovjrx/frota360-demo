@@ -55,9 +55,9 @@
       "noPdfDesc": "Gere o contracheque para visualizá-lo aqui."
     },
     "actions": {
-      "generatePayslip": "Gerar contracheque",
-      "markAsPaid": "Marcar como Pago",
-      "markAsPending": "Marcar como Pendente"
+      "generatePayslip": "Contracheque",
+      "markAsPaid": "Pago",
+      "markAsPending": "Pendente"
     },
     "types": {
       "affiliate": "Afiliado",
@@ -78,5 +78,42 @@
   "fuel_label": "Combustível",
   "tolls_label": "Portagens",
   "rent_label": "Aluguel",
-  "select_week_placeholder": "Selecione a Semana"
+  "select_week_placeholder": "Selecione a Semana",
+  "dashboard": {
+    "sections": {
+      "overview": "Visão Geral",
+      "financials": "Resumo Financeiro",
+      "recentDrivers": "Motoristas Recentes",
+      "recentRequests": "Solicitações Recentes"
+    },
+    "totalDrivers": "Total de Motoristas",
+    "activeDrivers": "Motoristas Ativos",
+    "pendingRequests": "Solicitações Pendentes",
+    "weeklyEarnings": "Ganhos Esta Semana",
+    "paymentsPending": "Pagamentos Pendentes",
+    "paymentsPaid": "Pagamentos Realizados",
+    "averageEarnings": "Média por Motorista",
+    "helpers": {
+      "activeCount": "{{count}} ativos",
+      "operational": "Em operação",
+      "awaitingReview": "Aguardando análise",
+      "currentWeek": "Semana atual",
+      "awaitingPayment": "Aguardando pagamento",
+      "paidThisWeek": "Pagos esta semana",
+      "weeklyAverage": "Média semanal"
+    },
+    "actions": {
+      "refresh": "Atualizar"
+    },
+    "tables": {
+      "drivers": {
+        "type": "Tipo",
+        "status": "Status"
+      },
+      "requests": {
+        "type": "Tipo",
+        "status": "Status"
+      }
+    }
+  }
 }
