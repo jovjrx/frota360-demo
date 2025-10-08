@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import useSWR from 'swr';
 import dynamic from 'next/dynamic';
 import {
   Box,
   Card,
-  CardHeader,
   CardBody,
-  Heading,
   Text,
   VStack,
   HStack,
@@ -33,18 +32,11 @@ import {
   Center,
   Tooltip,
 } from '@chakra-ui/react';
-import {
-  FiRefreshCw,
-  FiMap,
-  FiList,
-  FiNavigation,
-  FiAlertTriangle,
-  FiClock,
-  FiTrendingUp,
-} from 'react-icons/fi';
+import { FiRefreshCw, FiList, FiNavigation, FiAlertTriangle, FiMap } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { fetchCartrackMonitorData, type CartrackMonitorData } from '@/lib/integrations/cartrack/monitor';
 
 // Importação dinâmica do mapa (só carrega no cliente)
 const MapView = dynamic(() => import('@/components/admin/CartrackMap'), {
@@ -56,52 +48,10 @@ const MapView = dynamic(() => import('@/components/admin/CartrackMap'), {
   ),
 });
 
-interface CartracTrip {
-  trip_id: number;
-  vehicle_id: number;
-  registration: string;
-  driver_name: string;
-  driver_surname: string;
-  start_timestamp: string;
-  end_timestamp: string;
-  trip_duration: string;
-  trip_duration_seconds: number;
-  start_location: string;
-  end_location: string;
-  trip_distance: number;
-  max_speed: number;
-  harsh_braking_events: number;
-  harsh_cornering_events: number;
-  harsh_acceleration_events: number;
-  road_speeding_events: number;
-  start_coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  end_coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-}
-
-interface CartrackData {
-  platform: string;
-  lastUpdate: string;
-  count: number;
-  summary: {
-    totalTrips: number;
-    totalVehicles: number;
-    totalDistance: number;
-    period: {
-      start: string;
-      end: string;
-    };
-  };
-  trips: CartracTrip[];
-}
+type CartrackTrip = CartrackMonitorData['trips'][number];
 
 interface MonitorPageProps extends AdminPageProps {
-  initialData: CartrackData | null;
+  initialData: CartrackMonitorData | null;
 }
 
 const MONITOR_FALLBACKS: Record<string, string> = {
@@ -143,10 +93,8 @@ const MONITOR_FALLBACKS: Record<string, string> = {
 };
 
 export default function MonitorPage({ locale, initialData, tPage }: MonitorPageProps) {
-  const [data, setData] = useState<CartrackData | null>(initialData);
-  const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [manualLoading, setManualLoading] = useState(false);
   const toast = useToast();
 
   const tMonitor = useMemo(() => {
@@ -154,80 +102,118 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
     return (key: string, variables?: Record<string, any>) =>
       base(key, MONITOR_FALLBACKS[key] ?? key, variables);
   }, [tPage]);
+  const fetcher = useCallback(async () => {
+    const response = await fetch('/api/admin/integrations/cartrack/data');
+    let payload: any = {};
 
-  // Função para buscar dados da API
-  const fetchCartrackData = async (showToast = false) => {
     try {
-      setLoading(true);
-      const response = await fetch("/api/admin/integrations/cartrack/data");
+      payload = await response.json();
+    } catch (parseError) {
+      payload = {};
+    }
 
-      if (!response.ok) {
-        throw new Error(tMonitor("error_fetching_cartrack_data"));
-      }
+    if (!response.ok) {
+      const message = payload?.error ?? tMonitor('error_fetching_cartrack_data');
+      throw new Error(message);
+    }
 
-      const result = await response.json();
+    return (payload?.data ?? null) as CartrackMonitorData | null;
+  }, [tMonitor]);
 
-      // Ordenar viagens por data mais recente
-      if (result.data?.trips) {
-        result.data.trips.sort((a: CartracTrip, b: CartracTrip) => {
-          const dateA = new Date(a.start_timestamp).getTime();
-          const dateB = new Date(b.start_timestamp).getTime();
-          return dateB - dateA; // Mais recente primeiro
-        });
-      }
+  const { data, error, isValidating, mutate } = useSWR<CartrackMonitorData | null>(
+    '/api/admin/integrations/cartrack/data',
+    fetcher,
+    {
+      fallbackData: initialData ?? undefined,
+      revalidateOnFocus: false,
+      refreshInterval: autoRefresh ? 30000 : 0,
+    }
+  );
 
-      setData(result.data);
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
 
-      if (showToast) {
+    toast({
+      title: tMonitor('error_updating_title'),
+      description: error instanceof Error ? error.message : tMonitor('error_fetching_cartrack_data_generic'),
+      status: 'error',
+      duration: 5000,
+    });
+  }, [error, toast, tMonitor]);
+
+  const handleManualRefresh = useCallback(async () => {
+    setManualLoading(true);
+    try {
+      const updated = await mutate();
+      if (updated) {
         toast({
-          title: tMonitor("data_updated_title"),
-          description: tMonitor("trips_loaded_description", { count: result.data.count }),
-          status: "success",
+          title: tMonitor('data_updated_title'),
+          description: tMonitor('trips_loaded_description', { count: updated.count }),
+          status: 'success',
           duration: 3000,
         });
       }
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
+    } catch (refreshError) {
+      const message = refreshError instanceof Error
+        ? refreshError.message
+        : tMonitor('error_fetching_cartrack_data_generic');
       toast({
-        title: tMonitor("error_updating_title"),
-        description: error instanceof Error ? error.message : tMonitor("error_fetching_cartrack_data_generic"),
-        status: "error",
+        title: tMonitor('error_updating_title'),
+        description: message,
+        status: 'error',
         duration: 5000,
       });
     } finally {
-      setLoading(false);
+      setManualLoading(false);
     }
-  };
+  }, [mutate, tMonitor, toast]);
 
-  // Auto-refresh a cada 30 segundos
-  useEffect(() => {
-    if (autoRefresh) {
-      intervalRef.current = setInterval(() => {
-        fetchCartrackData(false);
-      }, 30000); // 30 segundos
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev;
+      if (next) {
+        void mutate();
+      }
+      return next;
+    });
+  }, [mutate]);
 
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
+  const stats = useMemo(() => {
+    if (!data) {
+      return null;
     }
-  }, [autoRefresh]);
 
-  // Calcular estatísticas
-  const stats = data ? {
-    totalTrips: data.count,
-    totalDistance: (data.summary.totalDistance / 1000).toFixed(2), // Converter para km
-    avgSpeed: data.trips.length > 0
-      ? (data.trips.reduce((sum, t) => sum + t.max_speed, 0) / data.trips.length).toFixed(1)
-      : '0',
-    totalEvents: data.trips.reduce((sum, t) =>
-      sum + t.harsh_braking_events + t.harsh_cornering_events +
-      t.harsh_acceleration_events + t.road_speeding_events, 0
-    ),
-    activeVehicles: new Set(data.trips.map(t => t.vehicle_id)).size,
-    totalDuration: data.trips.reduce((sum, t) => sum + t.trip_duration_seconds, 0),
-  } : null;
+    const totalTrips = data.count;
+    const totalDistanceKm = data.summary.totalDistance / 1000;
+    const totalEvents = data.trips.reduce(
+      (sum, trip) =>
+        sum +
+        trip.harsh_braking_events +
+        trip.harsh_cornering_events +
+        trip.harsh_acceleration_events +
+        trip.road_speeding_events,
+      0
+    );
+    const activeVehicles = new Set(data.trips.map((trip) => trip.vehicle_id)).size;
+    const totalDuration = data.trips.reduce((sum, trip) => sum + trip.trip_duration_seconds, 0);
+    const avgSpeed = data.trips.length > 0
+      ? data.trips.reduce((sum, trip) => sum + trip.max_speed, 0) / data.trips.length
+      : 0;
+
+    return {
+      totalTrips,
+      totalDistance: totalDistanceKm.toFixed(2),
+      avgSpeed: avgSpeed.toFixed(1),
+      totalEvents,
+      activeVehicles,
+      totalDuration,
+    };
+  }, [data]);
+
+  const isInitialLoading = !data && isValidating;
+  const trips = data?.trips ?? [];
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -272,7 +258,7 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
             size="sm"
             variant={autoRefresh ? "solid" : "outline"}
             colorScheme="green"
-            onClick={() => setAutoRefresh(!autoRefresh)}
+            onClick={toggleAutoRefresh}
           >
             {autoRefresh ? tMonitor("disable_auto_refresh") : tMonitor("enable_auto_refresh")}
           </Button>
@@ -280,8 +266,9 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
             leftIcon={<FiRefreshCw />}
             colorScheme="green"
             size="sm"
-            onClick={() => fetchCartrackData(true)}
-            isLoading={loading}
+            onClick={handleManualRefresh}
+            isLoading={manualLoading}
+            isDisabled={manualLoading || isValidating}
           >
             {tMonitor("update_now_button")}
           </Button>
@@ -289,7 +276,11 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
       </HStack>
 
       {/* KPIs */}
-      {stats && (
+      {isInitialLoading ? (
+        <Center py={12}>
+          <Spinner size="lg" color="green.500" />
+        </Center>
+      ) : stats && (
         <SimpleGrid columns={{ base: 2, md: 6 }} spacing={4}>
           <Card>
             <CardBody>
@@ -367,121 +358,133 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
           <TabPanels>
             {/* Tab 1: Lista de Viagens */}
             <TabPanel p={0}>
-              <Box overflowX="auto">
-                <Table variant="simple">
-                  <Thead bg="gray.50">
-                    <Tr>
-                      <Th>{tMonitor("vehicle_column")}</Th>
-                      <Th>{tMonitor("driver_column")}</Th>
-                      <Th>{tMonitor("start_column")}</Th>
-                      <Th>{tMonitor("end_column")}</Th>
-                      <Th isNumeric>{tMonitor("distance_column")}</Th>
-                      <Th isNumeric>{tMonitor("duration_column")}</Th>
-                      <Th isNumeric>{tMonitor("max_speed_column")}</Th>
-                      <Th>{tMonitor("events_column")}</Th>
-                      <Th>{tMonitor("time_column")}</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {data?.trips.map((trip) => {
-                      const totalEvents =
-                        trip.harsh_braking_events +
-                        trip.harsh_cornering_events +
-                        trip.harsh_acceleration_events +
-                        trip.road_speeding_events;
+              {isInitialLoading ? (
+                <Center py={12}>
+                  <Spinner size="lg" color="green.500" />
+                </Center>
+              ) : (
+                <Box overflowX="auto">
+                  <Table variant="simple">
+                    <Thead bg="gray.50">
+                      <Tr>
+                        <Th>{tMonitor("vehicle_column")}</Th>
+                        <Th>{tMonitor("driver_column")}</Th>
+                        <Th>{tMonitor("start_column")}</Th>
+                        <Th>{tMonitor("end_column")}</Th>
+                        <Th isNumeric>{tMonitor("distance_column")}</Th>
+                        <Th isNumeric>{tMonitor("duration_column")}</Th>
+                        <Th isNumeric>{tMonitor("max_speed_column")}</Th>
+                        <Th>{tMonitor("events_column")}</Th>
+                        <Th>{tMonitor("time_column")}</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {trips.map((trip) => {
+                        const totalEvents =
+                          trip.harsh_braking_events +
+                          trip.harsh_cornering_events +
+                          trip.harsh_acceleration_events +
+                          trip.road_speeding_events;
 
-                      return (
-                        <Tr key={trip.trip_id}>
-                          <Td>
-                            <VStack align="start" spacing={0}>
-                              <Text fontWeight="medium">{trip.registration}</Text>
-                              <Text fontSize="xs" color="gray.500">
-                                {tMonitor("id_label")}: {trip.vehicle_id}
+                        return (
+                          <Tr key={trip.trip_id}>
+                            <Td>
+                              <VStack align="start" spacing={0}>
+                                <Text fontWeight="medium">{trip.registration}</Text>
+                                <Text fontSize="xs" color="gray.500">
+                                  {tMonitor("id_label")}: {trip.vehicle_id}
+                                </Text>
+                              </VStack>
+                            </Td>
+                            <Td>
+                              <Text>
+                                {trip.driver_name} {trip.driver_surname}
                               </Text>
-                            </VStack>
-                          </Td>
-                          <Td>
-                            <Text>{trip.driver_name} {trip.driver_surname}</Text>
-                          </Td>
-                          <Td>
-                            <Tooltip label={trip.start_location}>
-                              <Text fontSize="sm" noOfLines={2} maxW="200px">
-                                {trip.start_location}
-                              </Text>
-                            </Tooltip>
-                          </Td>
-                          <Td>
-                            <Tooltip label={trip.end_location}>
-                              <Text fontSize="sm" noOfLines={2} maxW="200px">
-                                {trip.end_location}
-                              </Text>
-                            </Tooltip>
-                          </Td>
-                          <Td isNumeric>
-                            <Text>{formatDistance(trip.trip_distance)}</Text>
-                          </Td>
-                          <Td isNumeric>
-                            <Text>{trip.trip_duration}</Text>
-                          </Td>
-                          <Td isNumeric>
-                            <Text fontWeight="medium">{trip.max_speed} km/h</Text>
-                          </Td>
-                          <Td>
-                            <HStack>
-                              <Badge colorScheme={getEventsBadgeColor(totalEvents)}>
-                                {totalEvents}
-                              </Badge>
-                              {totalEvents > 0 && (
-                                <Tooltip
-                                  label={tMonitor("events_tooltip", {
-                                    braking: trip.harsh_braking_events,
-                                    cornering: trip.harsh_cornering_events,
-                                    acceleration: trip.harsh_acceleration_events,
-                                    speeding: trip.road_speeding_events,
+                            </Td>
+                            <Td>
+                              <Tooltip label={trip.start_location}>
+                                <Text fontSize="sm" noOfLines={2} maxW="200px">
+                                  {trip.start_location}
+                                </Text>
+                              </Tooltip>
+                            </Td>
+                            <Td>
+                              <Tooltip label={trip.end_location}>
+                                <Text fontSize="sm" noOfLines={2} maxW="200px">
+                                  {trip.end_location}
+                                </Text>
+                              </Tooltip>
+                            </Td>
+                            <Td isNumeric>
+                              <Text>{formatDistance(trip.trip_distance)}</Text>
+                            </Td>
+                            <Td isNumeric>
+                              <Text>{trip.trip_duration}</Text>
+                            </Td>
+                            <Td isNumeric>
+                              <Text fontWeight="medium">{trip.max_speed} km/h</Text>
+                            </Td>
+                            <Td>
+                              <HStack>
+                                <Badge colorScheme={getEventsBadgeColor(totalEvents)}>
+                                  {totalEvents}
+                                </Badge>
+                                {totalEvents > 0 && (
+                                  <Tooltip
+                                    label={tMonitor("events_tooltip", {
+                                      braking: trip.harsh_braking_events,
+                                      cornering: trip.harsh_cornering_events,
+                                      acceleration: trip.harsh_acceleration_events,
+                                      speeding: trip.road_speeding_events,
+                                    })}
+                                  >
+                                    <span>
+                                      <Icon as={FiAlertTriangle} color="orange.500" />
+                                    </span>
+                                  </Tooltip>
+                                )}
+                              </HStack>
+                            </Td>
+                            <Td>
+                              <VStack align="start" spacing={0}>
+                                <Text fontSize="sm">
+                                  {new Date(trip.start_timestamp).toLocaleDateString(locale)}
+                                </Text>
+                                <Text fontSize="xs" color="gray.500">
+                                  {new Date(trip.start_timestamp).toLocaleTimeString(locale, {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
                                   })}
-                                >
-                                  <span>
-                                    <Icon as={FiAlertTriangle} color="orange.500" />
-                                  </span>
-                                </Tooltip>
-                              )}
-                            </HStack>
-                          </Td>
-                          <Td>
-                            <VStack align="start" spacing={0}>
-                              <Text fontSize="sm">
-                                {new Date(trip.start_timestamp).toLocaleDateString(locale)}
-                              </Text>
-                              <Text fontSize="xs" color="gray.500">
-                                {new Date(trip.start_timestamp).toLocaleTimeString(locale, {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </Text>
-                            </VStack>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
+                                </Text>
+                              </VStack>
+                            </Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
 
-                {(!data || data.trips.length === 0) && (
-                  <Center py={12}>
-                    <VStack>
-                      <Icon as={FiNavigation} boxSize={12} color="gray.400" />
-                      <Text color="gray.500">{tMonitor("no_trips_recorded")}</Text>
-                    </VStack>
-                  </Center>
-                )}
-              </Box>
+                  {trips.length === 0 && (
+                    <Center py={12}>
+                      <VStack>
+                        <Icon as={FiNavigation} boxSize={12} color="gray.400" />
+                        <Text color="gray.500">{tMonitor("no_trips_recorded")}</Text>
+                      </VStack>
+                    </Center>
+                  )}
+                </Box>
+              )}
             </TabPanel>
 
             {/* Tab 2: Mapa */}
             <TabPanel>
-              {data && data.trips.length > 0 ? (
+              {isInitialLoading ? (
+                <Center h="600px">
+                  <Spinner size="lg" color="green.500" />
+                </Center>
+              ) : trips.length > 0 ? (
                 <Box h="600px">
-                  <MapView trips={data.trips} />
+                  <MapView trips={trips} />
                 </Box>
               ) : (
                 <Center h="600px">
@@ -501,11 +504,17 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
 }
 
 // SSR com autenticação e traduções
-export const getServerSideProps = withAdminSSR(async (context, user) => {
-  // TODO: Adicionar query específica para Cartrack se necessário
-  // Por enquanto, os dados serão buscados via SWR no cliente
-  return {
-    initialData: null,
-  };
+export const getServerSideProps = withAdminSSR(async () => {
+  try {
+    const initialData = await fetchCartrackMonitorData();
+    return {
+      initialData,
+    };
+  } catch (error) {
+    console.error('[Cartrack Monitor] Falha ao buscar dados iniciais:', error);
+    return {
+      initialData: null,
+    };
+  }
 });
 
