@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { useMemo } from "react";
 import { useLocalizedHref } from "@/lib/linkUtils";
 import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
 
@@ -28,16 +29,24 @@ import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { CheckIcon, ArrowRightIcon } from "@chakra-ui/icons";
 import { COMMON, HOME } from "@/translations";
 
-export default function Home({ tPage }: PublicPageProps) {
+const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: any) => {
+  if (!fn) return fallback ?? key;
+  const value = fn(key);
+  return value === undefined || value === null ? fallback ?? key : value;
+};
+
+export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPageProps) {
   const getLocalizedHref = useLocalizedHref();
+  const t = useMemo(() => makeSafeT(rawTPage), [rawTPage]);
+  const tc = useMemo(() => makeSafeT(rawTCommon), [rawTCommon]);
 
   return (
     <>
       <Hero
-        title={tPage(HOME.HERO.TITLE)}
-        subtitle={tPage(HOME.HERO.SUBTITLE)}
+        title={t(HOME.HERO.TITLE)}
+        subtitle={t(HOME.HERO.SUBTITLE)}
         backgroundImage="/img/bg-portugal.jpg"
-        badge={tPage(HOME.HERO.BADGE)}
+        badge={t(HOME.HERO.BADGE)}
         overlay
         actions={
           <VStack spacing={{ base: 3, md: 0 }} w="full">
@@ -58,11 +67,11 @@ export default function Home({ tPage }: PublicPageProps) {
                 colorScheme="green"
                 rightIcon={<ArrowRightIcon />}
               >
-                {tPage(HOME.HERO.CTA_PRIMARY)}
+                {t(HOME.HERO.CTA_PRIMARY)}
               </Button>
               <Button
                 as={NextLink}
-                href={tPage(COMMON.COMPANY.WHATSAPP)}
+                href={tc(COMMON.COMPANY.WHATSAPP)}
                 size={{ base: "md", md: "lg" }}
                 px={{ base: 6, md: 8 }}
                 py={{ base: 3, md: 4 }}
@@ -76,15 +85,15 @@ export default function Home({ tPage }: PublicPageProps) {
                   borderColor: "whiteAlpha.600"
                 }}
               >
-                {tPage(HOME.HERO.CTA_SECONDARY)}
+                {t(HOME.HERO.CTA_SECONDARY)}
               </Button>
             </HStack>
           </VStack>
         }
       >
         <Highlight
-          title={tPage(HOME.HERO.HIGHLIGHT.TITLE)}
-          description={tPage(HOME.HERO.HIGHLIGHT.DESCRIPTION)}
+          title={t(HOME.HERO.HIGHLIGHT.TITLE)}
+          description={t(HOME.HERO.HIGHLIGHT.DESCRIPTION)}
           bgImage="/img/driver-app.jpg"
           delayImage={0.5}
           delayBox={0.8}
@@ -92,13 +101,13 @@ export default function Home({ tPage }: PublicPageProps) {
       </Hero>
       <Container>
         <Title
-          title={tPage(HOME.HOW_IT_WORKS.TITLE)}
-          description={tPage(HOME.HOW_IT_WORKS.SUBTITLE)}
-          feature={tPage(HOME.HOW_IT_WORKS.FEATURE)}
+          title={t(HOME.HOW_IT_WORKS.TITLE)}
+          description={t(HOME.HOW_IT_WORKS.SUBTITLE)}
+          feature={t(HOME.HOW_IT_WORKS.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
           {(() => {
-            const steps = tPage(HOME.HOW_IT_WORKS.STEPS);
+            const steps = t(HOME.HOW_IT_WORKS.STEPS);
             if (!Array.isArray(steps)) return null;
 
             return steps.map((step: any, i: number) => (
@@ -134,18 +143,18 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* Tipos de Motorista */}
       <Container softBg>
         <Title
-          title={tPage(HOME.SERVICES.TITLE)}
-          description={tPage(HOME.SERVICES.SUBTITLE)}
+          title={t(HOME.SERVICES.TITLE)}
+          description={t(HOME.SERVICES.SUBTITLE)}
           feature="Tipos de Motorista"
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           <Card animated borded img="/img/service-drivers.jpg" color='green'>
             <VStack spacing={4} align="start">
               <Text fontSize="xl" fontWeight="bold" color="green.600">
-                {tPage(HOME.SERVICES.AFFILIATE.TITLE)}
+                {t(HOME.SERVICES.AFFILIATE.TITLE)}
               </Text>
               <Text color="gray.600">
-                {tPage(HOME.SERVICES.AFFILIATE.DESCRIPTION)}
+                {t(HOME.SERVICES.AFFILIATE.DESCRIPTION)}
               </Text>
               <Button
                 as={NextLink}
@@ -162,10 +171,10 @@ export default function Home({ tPage }: PublicPageProps) {
           <Card animated borded color='blue' img="/img/driver-app.jpg">
             <VStack spacing={4} align="start">
               <Text fontSize="xl" fontWeight="bold" color="blue.600">
-                {tPage(HOME.SERVICES.RENTER.TITLE)}
+                {t(HOME.SERVICES.RENTER.TITLE)}
               </Text>
               <Text color="gray.600">
-                {tPage(HOME.SERVICES.RENTER.DESCRIPTION)}
+                {t(HOME.SERVICES.RENTER.DESCRIPTION)}
               </Text>
               <Button
                 as={NextLink}
@@ -184,13 +193,13 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* Porquê Escolher a Conduz PT */}
       <Container>
         <Title
-          title={tPage(HOME.FEATURES.TITLE)}
+          title={t(HOME.FEATURES.TITLE)}
           description="Descubra as vantagens de trabalhar connosco"
           feature="VANTAGENS"
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           {(() => {
-            const features = tPage(HOME.FEATURES.ITEMS);
+            const features = t(HOME.FEATURES.ITEMS);
             if (!Array.isArray(features)) return null;
 
             return features.map((feature: any, i: number) => (
@@ -212,13 +221,13 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* Métricas */}
       <Container>
         <Title
-          title={tPage(HOME.METRICS.TITLE)}
-          description={tPage(HOME.METRICS.SUBTITLE)}
-          feature={tPage(HOME.METRICS.FEATURE)}
+          title={t(HOME.METRICS.TITLE)}
+          description={t(HOME.METRICS.SUBTITLE)}
+          feature={t(HOME.METRICS.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
           {(() => {
-            const stats = tPage(HOME.METRICS.STATS);
+            const stats = t(HOME.METRICS.STATS);
 
             if (!Array.isArray(stats)) return null;
 
@@ -243,13 +252,13 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* Depoimentos */}
       <Container softBg>
         <Title
-          title={tPage(COMMON.TESTIMONIALS.TITLE)}
-          description={tPage(COMMON.TESTIMONIALS.SUBTITLE)}
-          feature={tPage(COMMON.TESTIMONIALS.FEATURE)}
+          title={tc(COMMON.TESTIMONIALS.TITLE)}
+          description={tc(COMMON.TESTIMONIALS.SUBTITLE)}
+          feature={tc(COMMON.TESTIMONIALS.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           {(() => {
-            const testimonials = tPage(COMMON.TESTIMONIALS.ITEMS);
+            const testimonials = tc(COMMON.TESTIMONIALS.ITEMS, []);
             if (!Array.isArray(testimonials)) return null;
 
             return testimonials.map((testimonial: any, i: number) => (
@@ -276,14 +285,14 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* FAQ */}
       <Container>
         <Title
-          title={tPage(COMMON.FAQ.TITLE)}
-          description={tPage(COMMON.FAQ.SUBTITLE)}
-          feature={tPage(COMMON.FAQ.FEATURE)}
+          title={tc(COMMON.FAQ.TITLE)}
+          description={tc(COMMON.FAQ.SUBTITLE)}
+          feature={tc(COMMON.FAQ.FEATURE)}
         />
         <Box maxW="4xl" mx="auto">
           <Accordion allowToggle>
             {(() => {
-              const faqItems = tPage(COMMON.FAQ.ITEMS);
+              const faqItems = tc(COMMON.FAQ.ITEMS, []);
               if (!Array.isArray(faqItems)) return null;
 
               return faqItems.map((item: any, i: number) => (
@@ -307,10 +316,10 @@ export default function Home({ tPage }: PublicPageProps) {
       {/* CTA Final */}
       <Container softBg>
         <Title
-          title={tPage(HOME.CTA.TITLE)}
-          description={tPage(HOME.CTA.SUBTITLE)}
-          feature={tPage(HOME.CTA.FEATURE)}
-          ctaText={tPage(HOME.CTA.BUTTON)}
+          title={t(HOME.CTA.TITLE)}
+          description={t(HOME.CTA.SUBTITLE)}
+          feature={t(HOME.CTA.FEATURE)}
+          ctaText={t(HOME.CTA.BUTTON)}
           cta={getLocalizedHref("/request")}
           center
         />
