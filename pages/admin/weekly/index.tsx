@@ -51,10 +51,11 @@ import { getWeekId, getWeekDates } from '@/lib/utils/date-helpers';
 import EditableNumberField from '@/components/admin/EditableNumberField';
 import StatCard from '@/components/admin/StatCard';
 import WeeklyRecordCard from '@/components/admin/WeeklyRecordCard';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
+import { useDisclosure } from '@chakra-ui/react';
 import { FiDownload, FiMail } from 'react-icons/fi';
 import { storage } from '@/lib/firebase';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import StructuredModal from '@/components/admin/StructuredModal';
 
 interface WeekOption {
   label: string;
@@ -1151,162 +1152,19 @@ export default function WeeklyPage({
         </CardBody>
       </Card>
 
-      <Modal isOpen={isPaymentModalOpen} onClose={handleClosePaymentModal} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{t('weekly.control.paymentModal.title', 'Confirmar pagamento')}</ModalHeader>
-          <ModalCloseButton isDisabled={isSavingPayment} />
-          <ModalBody>
-            <VStack spacing={4} align="stretch">
-              {selectedPaymentRecord && (
-                <Box>
-                  <Text fontWeight="semibold" fontSize="lg">
-                    {selectedPaymentRecord.driverName}
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    {t('weekly.control.paymentModal.weekLabel', 'Semana')}: {selectedPaymentRecord.weekStart} → {selectedPaymentRecord.weekEnd}
-                  </Text>
-                </Box>
-              )}
-
-              {selectedPaymentRecord?.iban ? (
-                <FormControl>
-                  <FormLabel>{t('weekly.control.paymentModal.ibanLabel', 'IBAN')}</FormLabel>
-                  <Input value={selectedPaymentRecord.iban} isReadOnly variant="filled" />
-                </FormControl>
-              ) : (
-                <Alert status="warning" borderRadius="md">
-                  <AlertIcon />
-                  <Box>
-                    <Text fontWeight="medium">
-                      {t('weekly.control.paymentModal.missingIbanTitle', 'IBAN não encontrado')}
-                    </Text>
-                    <Text fontSize="sm">
-                      {t('weekly.control.paymentModal.missingIbanDescription', 'Cadastre o IBAN do motorista antes de efetuar o pagamento.')}
-                    </Text>
-                  </Box>
-                </Alert>
-              )}
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.baseAmountLabel', 'Valor base')}</FormLabel>
-                <Input
-                  value={formatCurrency(paymentBaseAmount)}
-                  isReadOnly
-                  variant="filled"
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.bonusLabel', 'Bônus (opcional)')}</FormLabel>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={bonusValue}
-                  onChange={(event) => setBonusValue(event.target.value)}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.discountLabel', 'Desconto (opcional)')}</FormLabel>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={discountValue}
-                  onChange={(event) => setDiscountValue(event.target.value)}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.totalAmountLabel', 'Valor a pagar')}</FormLabel>
-                <Input
-                  value={formatCurrency(paymentTotalAmount)}
-                  isReadOnly
-                  variant="filled"
-                  color={paymentTotalInvalid ? 'red.600' : undefined}
-                />
-              </FormControl>
-
-              {paymentTotalInvalid && (
-                <Alert status="error" borderRadius="md">
-                  <AlertIcon />
-                  <Text fontSize="sm">
-                    {t('weekly.control.paymentModal.totalAmountInvalid', 'O valor final deve ser maior que zero.')}
-                  </Text>
-                </Alert>
-              )}
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.proofLabel', 'Comprovante do pagamento')}</FormLabel>
-                <VStack align="stretch" spacing={2}>
-                  <Button
-                    as="label"
-                    leftIcon={<Icon as={FiPaperclip} />}
-                    variant="outline"
-                    colorScheme="blue"
-                    cursor="pointer"
-                    isDisabled={isSavingPayment}
-                  >
-                    {paymentProofFile
-                      ? t('weekly.control.paymentModal.changeProof', 'Trocar arquivo')
-                      : t('weekly.control.paymentModal.selectProof', 'Selecionar arquivo')}
-                    <Input
-                      type="file"
-                      accept="application/pdf,image/*"
-                      display="none"
-                      ref={fileInputRef}
-                      onChange={handleProofFileChange}
-                    />
-                  </Button>
-                  {paymentProofFile ? (
-                    <HStack spacing={2} justify="space-between" w="full">
-                      <Text fontSize="sm" noOfLines={1}>
-                        {paymentProofFile.name}
-                      </Text>
-                      <Button
-                        variant="link"
-                        size="xs"
-                        colorScheme="red"
-                        onClick={handleRemoveProof}
-                        isDisabled={isSavingPayment}
-                      >
-                        {t('weekly.control.paymentModal.removeProof', 'Remover')}
-                      </Button>
-                    </HStack>
-                  ) : (
-                    <Text fontSize="sm" color="gray.500">
-                      {t('weekly.control.paymentModal.noProofSelected', 'Nenhum arquivo selecionado.')}
-                    </Text>
-                  )}
-                  <FormHelperText>
-                    {t('weekly.control.paymentModal.proofHelp', 'Aceita PDF ou imagem até 10MB.')}
-                  </FormHelperText>
-                </VStack>
-              </FormControl>
-
-              <FormControl isRequired>
-                <FormLabel>{t('weekly.control.paymentModal.dateLabel', 'Data do pagamento')}</FormLabel>
-                <Input
-                  type="datetime-local"
-                  value={paymentDateValue}
-                  onChange={(event) => setPaymentDateValue(event.target.value)}
-                  max={formatDateTimeLocalValue()}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>{t('weekly.control.paymentModal.notesLabel', 'Observações')}</FormLabel>
-                <Textarea
-                  value={paymentNotes}
-                  onChange={(event) => setPaymentNotes(event.target.value)}
-                  placeholder={t('weekly.control.paymentModal.notesPlaceholder', 'Anote informações relevantes sobre o pagamento (opcional).')}
-                  rows={3}
-                />
-              </FormControl>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleClosePaymentModal} isDisabled={isSavingPayment}>
+      <StructuredModal
+        isOpen={isPaymentModalOpen}
+        onClose={handleClosePaymentModal}
+        isCentered
+        size="lg"
+        title={t('weekly.control.paymentModal.title', 'Confirmar pagamento')}
+        showCloseButton
+        isCloseButtonDisabled={isSavingPayment}
+        closeOnOverlayClick={!isSavingPayment}
+        closeOnEsc={!isSavingPayment}
+        footer={(
+          <HStack spacing={3} justify="flex-end" w="full">
+            <Button variant="ghost" onClick={handleClosePaymentModal} isDisabled={isSavingPayment}>
               {t('weekly.control.paymentModal.cancel', 'Cancelar')}
             </Button>
             <Button
@@ -1318,58 +1176,192 @@ export default function WeeklyPage({
             >
               {t('weekly.control.paymentModal.confirm', 'Confirmar pagamento')}
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </HStack>
+        )}
+      >
+        <VStack spacing={4} align="stretch">
+          {selectedPaymentRecord && (
+            <Box>
+              <Text fontWeight="semibold" fontSize="lg">
+                {selectedPaymentRecord.driverName}
+              </Text>
+              <Text fontSize="sm" color="gray.600">
+                {t('weekly.control.paymentModal.weekLabel', 'Semana')}: {selectedPaymentRecord.weekStart} → {selectedPaymentRecord.weekEnd}
+              </Text>
+            </Box>
+          )}
 
-      {/* Modal de Visualização do Contracheque */}
-      <Modal isOpen={isPayslipModalOpen} onClose={onClosePayslipModal} size="5xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            <VStack align="start" spacing={1}>
-              <Text>{t('weekly.control.payslipModal.title', 'Contracheque Semanal')}</Text>
-              {selectedPayslipRecord && (
-                <Text fontSize="sm" fontWeight="normal" color="gray.600">
-                  {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
+          {selectedPaymentRecord?.iban ? (
+            <FormControl>
+              <FormLabel>{t('weekly.control.paymentModal.ibanLabel', 'IBAN')}</FormLabel>
+              <Input value={selectedPaymentRecord.iban} isReadOnly variant="filled" />
+            </FormControl>
+          ) : (
+            <Alert status="warning" borderRadius="md">
+              <AlertIcon />
+              <Box>
+                <Text fontWeight="medium">
+                  {t('weekly.control.paymentModal.missingIbanTitle', 'IBAN não encontrado')}
+                </Text>
+                <Text fontSize="sm">
+                  {t('weekly.control.paymentModal.missingIbanDescription', 'Cadastre o IBAN do motorista antes de efetuar o pagamento.')}
+                </Text>
+              </Box>
+            </Alert>
+          )}
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.baseAmountLabel', 'Valor base')}</FormLabel>
+            <Input value={formatCurrency(paymentBaseAmount)} isReadOnly variant="filled" />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.bonusLabel', 'Bônus (opcional)')}</FormLabel>
+            <Input
+              type="number"
+              step="0.01"
+              value={bonusValue}
+              onChange={(event) => setBonusValue(event.target.value)}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.discountLabel', 'Desconto (opcional)')}</FormLabel>
+            <Input
+              type="number"
+              step="0.01"
+              value={discountValue}
+              onChange={(event) => setDiscountValue(event.target.value)}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.totalAmountLabel', 'Valor a pagar')}</FormLabel>
+            <Input
+              value={formatCurrency(paymentTotalAmount)}
+              isReadOnly
+              variant="filled"
+              color={paymentTotalInvalid ? 'red.600' : undefined}
+            />
+          </FormControl>
+
+          {paymentTotalInvalid && (
+            <Alert status="error" borderRadius="md">
+              <AlertIcon />
+              <Text fontSize="sm">
+                {t('weekly.control.paymentModal.totalAmountInvalid', 'O valor final deve ser maior que zero.')}
+              </Text>
+            </Alert>
+          )}
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.proofLabel', 'Comprovante do pagamento')}</FormLabel>
+            <VStack align="stretch" spacing={2}>
+              <Button
+                as="label"
+                leftIcon={<Icon as={FiPaperclip} />}
+                variant="outline"
+                colorScheme="blue"
+                cursor="pointer"
+                isDisabled={isSavingPayment}
+              >
+                {paymentProofFile
+                  ? t('weekly.control.paymentModal.changeProof', 'Trocar arquivo')
+                  : t('weekly.control.paymentModal.selectProof', 'Selecionar arquivo')}
+                <Input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  display="none"
+                  ref={fileInputRef}
+                  onChange={handleProofFileChange}
+                />
+              </Button>
+              {paymentProofFile ? (
+                <HStack spacing={2} justify="space-between" w="full">
+                  <Text fontSize="sm" noOfLines={1}>
+                    {paymentProofFile.name}
+                  </Text>
+                  <Button
+                    variant="link"
+                    size="xs"
+                    colorScheme="red"
+                    onClick={handleRemoveProof}
+                    isDisabled={isSavingPayment}
+                  >
+                    {t('weekly.control.paymentModal.removeProof', 'Remover')}
+                  </Button>
+                </HStack>
+              ) : (
+                <Text fontSize="sm" color="gray.500">
+                  {t('weekly.control.paymentModal.noProofSelected', 'Nenhum arquivo selecionado.')}
                 </Text>
               )}
+              <FormHelperText>
+                {t('weekly.control.paymentModal.proofHelp', 'Aceita PDF ou imagem até 10MB.')}
+              </FormHelperText>
             </VStack>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <VStack spacing={4} align="stretch" height="100%">
-              <HStack spacing={4} justify="flex-end">
-                <Button
-                  leftIcon={<Icon as={FiDownload} />}
-                  onClick={handleDownloadPayslip}
-                  colorScheme="blue"
-                >
-                  {t('weekly.control.payslipModal.downloadPdf', 'Baixar PDF')}
-                </Button>
-                <Button
-                  leftIcon={<Icon as={FiMail} />}
-                  onClick={handleSendPayslipEmail}
-                  colorScheme="green"
-                >
-                  {t('weekly.control.payslipModal.sendEmail', 'Enviar por e-mail')}
-                </Button>
-              </HStack>
-              {payslipPdfUrl ? (
-                <Box flex="1" minH="full" height="60vh">
-                  <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
-                </Box>
-              ) : (
-                <Alert status="info" borderRadius="lg">
-                  <AlertIcon />
-                  <AlertTitle>{t('weekly.control.payslipModal.noPdfTitle', 'Nenhum PDF gerado')}</AlertTitle>
-                  <AlertDescription>{t('weekly.control.payslipModal.noPdfDesc', 'Gere o contracheque para visualizá-lo aqui.')}</AlertDescription>
-                </Alert>
-              )}
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>{t('weekly.control.paymentModal.dateLabel', 'Data do pagamento')}</FormLabel>
+            <Input
+              type="datetime-local"
+              value={paymentDateValue}
+              onChange={(event) => setPaymentDateValue(event.target.value)}
+              max={formatDateTimeLocalValue()}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>{t('weekly.control.paymentModal.notesLabel', 'Observações')}</FormLabel>
+            <Textarea
+              value={paymentNotes}
+              onChange={(event) => setPaymentNotes(event.target.value)}
+              placeholder={t('weekly.control.paymentModal.notesPlaceholder', 'Anote informações relevantes sobre o pagamento (opcional).')}
+              rows={3}
+            />
+          </FormControl>
+        </VStack>
+      </StructuredModal>
+
+      {/* Modal de Visualização do Contracheque */}
+      <StructuredModal
+        isOpen={isPayslipModalOpen}
+        onClose={onClosePayslipModal}
+        size="5xl"
+        header={(
+          <VStack align="start" spacing={1}>
+            <Text>{t('weekly.control.payslipModal.title', 'Contracheque Semanal')}</Text>
+            {selectedPayslipRecord && (
+              <Text fontSize="sm" fontWeight="normal" color="gray.600">
+                {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
+              </Text>
+            )}
+          </VStack>
+        )}
+        footer={(
+          <HStack spacing={4} justify="flex-end" w="full">
+            <Button leftIcon={<Icon as={FiDownload} />} onClick={handleDownloadPayslip} colorScheme="blue">
+              {t('weekly.control.payslipModal.downloadPdf', 'Baixar PDF')}
+            </Button>
+            <Button leftIcon={<Icon as={FiMail} />} onClick={handleSendPayslipEmail} colorScheme="green">
+              {t('weekly.control.payslipModal.sendEmail', 'Enviar por e-mail')}
+            </Button>
+          </HStack>
+        )}
+      >
+        {payslipPdfUrl ? (
+          <Box flex="1" minH="full" height="60vh">
+            <iframe src={payslipPdfUrl} width="100%" height="100%" style={{ border: 'none' }} />
+          </Box>
+        ) : (
+          <Alert status="info" borderRadius="lg">
+            <AlertIcon />
+            <AlertTitle>{t('weekly.control.payslipModal.noPdfTitle', 'Nenhum PDF gerado')}</AlertTitle>
+            <AlertDescription>{t('weekly.control.payslipModal.noPdfDesc', 'Gere o contracheque para visualizá-lo aqui.')}</AlertDescription>
+          </Alert>
+        )}
+      </StructuredModal>
 
       {unassigned.length > 0 && (
         <Card variant="outline">
