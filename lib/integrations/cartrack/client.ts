@@ -9,6 +9,7 @@ import integrationService from '../integration-service';
 interface CartrackCredentials extends IntegrationCredentials {
   username: string;
   apiKey: string;
+  baseUrl?: string;
 }
 
 interface CartrackAuthResponse {
@@ -28,12 +29,22 @@ interface CartrackVehicle {
   last_service?: string;
 }
 
+interface CartrackVehicleStatus {
+  vehicle_id?: string;
+  registration?: string;
+  latitude?: number;
+  longitude?: number;
+  timestamp?: string;
+  speed?: number;
+  [key: string]: any;
+}
+
 export class CartrackClient extends BaseIntegrationClient {
   private authHeader: string;
 
   constructor(credentials: CartrackCredentials) {
     // Cartrack Portugal usa Basic Auth com API Key
-    super(credentials, 'https://fleetapi-pt.cartrack.com/rest');
+    super(credentials, credentials.baseUrl || 'https://fleetapi-pt.cartrack.com/rest');
     
     // Criar Basic Auth header usando username + API Key
     const auth = `${credentials.username}:${credentials.apiKey}`;
@@ -127,7 +138,11 @@ export class CartrackClient extends BaseIntegrationClient {
     }
   }
 
-  async getTrips(startDate: string, endDate: string): Promise<any[]> {
+  async getTrips(
+    startDate: string,
+    endDate: string,
+    filters: { registration?: string; vehicleId?: string } = {}
+  ): Promise<any[]> {
     try {
       // According to Cartrack API docs: GET /trips with timestamps in format "YYYY-MM-DD HH:MM:SS"
       // Example: "2025-09-28 00:00:00"
@@ -143,6 +158,14 @@ export class CartrackClient extends BaseIntegrationClient {
         page: '1',
       });
 
+      if (filters.registration) {
+        params.set('filter[registration]', filters.registration);
+      }
+
+      if (filters.vehicleId) {
+        params.set('filter[vehicle_id]', filters.vehicleId);
+      }
+
       let response: any;
       try {
         response = await this.makeRequest('GET', `/trips?${params.toString()}`);
@@ -154,6 +177,14 @@ export class CartrackClient extends BaseIntegrationClient {
           limit: '1000',
           page: '1',
         });
+
+        if (filters.registration) {
+          legacyParams.set('registration', filters.registration);
+        }
+
+        if (filters.vehicleId) {
+          legacyParams.set('vehicle_id', filters.vehicleId);
+        }
         response = await this.makeRequest('GET', `/trips?${legacyParams.toString()}`);
       }
       const trips = response.data || [];
@@ -372,6 +403,85 @@ export class CartrackClient extends BaseIntegrationClient {
     };
 
     return super.makeRequest(method, endpoint, data, authHeaders);
+  }
+
+  private normalizePlate(value?: string | null): string {
+    return (value || '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  }
+
+  async getVehicleStatus(identifier: string): Promise<CartrackVehicleStatus | null> {
+    const normalized = this.normalizePlate(identifier);
+
+    try {
+      const params = new URLSearchParams();
+      if (normalized) {
+        params.set('filter[registration]', normalized);
+      }
+
+      let response: any;
+      try {
+        const query = params.toString();
+        const suffix = query ? `?${query}` : '';
+        response = await this.makeRequest('GET', `/vehicles/status${suffix}`);
+      } catch (error) {
+        console.warn('[Cartrack] Filtered vehicle status failed, fetching full list', error);
+        response = await this.makeRequest('GET', '/vehicles/status');
+      }
+
+      const list: CartrackVehicleStatus[] = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response?.vehicles)
+        ? response.vehicles
+        : [];
+
+      if (!normalized) {
+        return list[0] || null;
+      }
+
+      const match = list.find((item) => {
+        const reg = this.normalizePlate(item.registration || (item as any)?.vehicle_registration);
+        const id = this.normalizePlate((item.vehicle_id as string) || '');
+        return reg === normalized || (id && id === normalized);
+      });
+
+      return match || null;
+    } catch (error) {
+      console.error('Error fetching Cartrack vehicle status:', error);
+      return null;
+    }
+  }
+
+  async getLatestVehiclePosition(identifier: string): Promise<{
+    latitude: number | null;
+    longitude: number | null;
+    timestamp: string | null;
+    speed: number | null;
+    raw: CartrackVehicleStatus | null;
+  }> {
+    const status = await this.getVehicleStatus(identifier);
+
+    if (!status) {
+      return {
+        latitude: null,
+        longitude: null,
+        timestamp: null,
+        speed: null,
+        raw: null,
+      };
+    }
+
+    const latitude = (status.latitude ?? (status as any)?.lat ?? (status as any)?.position_latitude ?? null) as number | null;
+    const longitude = (status.longitude ?? (status as any)?.lng ?? (status as any)?.position_longitude ?? null) as number | null;
+    const timestamp = (status.timestamp ?? (status as any)?.last_update ?? (status as any)?.last_seen ?? null) as string | null;
+    const speed = (status.speed ?? (status as any)?.speed_kph ?? (status as any)?.speed ?? null) as number | null;
+
+    return {
+      latitude,
+      longitude,
+      timestamp,
+      speed,
+      raw: status,
+    };
   }
 }
 

@@ -6,6 +6,8 @@ import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { createCartrackClient } from '@/lib/integrations';
 
+const normalizePlate = (value?: string | null) => (value || '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
 export default withIronSessionApiRoute(async function driverCartrackDataRoute(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
@@ -58,15 +60,16 @@ export default withIronSessionApiRoute(async function driverCartrackDataRoute(re
 
     // 5. Get vehicle data for the driver
     // Assuming driver has a vehicle plate associated in their Cartrack integration
-    const vehiclePlate = driverData.integrations.cartrack.key; // Vehicle plate or identifier
+  const vehiclePlate = driverData.integrations.cartrack.key; // Vehicle plate or identifier
     
     if (!vehiclePlate) {
       return res.status(400).json({ success: false, error: 'Vehicle plate not configured for driver' });
     }
 
     // 6. Fetch vehicle information
-    const vehicles = await cartrackClient.getVehicles();
-    const driverVehicle = vehicles.find(v => v.plate === vehiclePlate);
+  const vehicles = await cartrackClient.getVehicles();
+  const normalizedPlate = normalizePlate(vehiclePlate);
+  const driverVehicle = vehicles.find(v => normalizePlate(v.plate) === normalizedPlate || normalizePlate(v.id) === normalizedPlate);
 
     if (!driverVehicle) {
       return res.status(404).json({ success: false, error: 'Vehicle not found in Cartrack' });
@@ -80,10 +83,17 @@ export default withIronSessionApiRoute(async function driverCartrackDataRoute(re
     const startDate = weekAgo.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
-    const trips = await cartrackClient.getTrips(startDate, endDate);
+    const trips = await cartrackClient.getTrips(startDate, endDate, {
+      vehicleId: driverVehicle.id,
+      registration: normalizedPlate,
+    });
 
-    // Filter trips for this specific vehicle
-    const vehicleTrips = trips.filter((trip: any) => trip.vehicle_id === driverVehicle.id);
+    // Filter trips for this specific vehicle (fallback if API ignored filters)
+    const vehicleTrips = trips.filter((trip: any) => {
+      const tripVehicleId = trip.vehicle_id || trip.vehicleId || trip.id || '';
+      const tripRegistration = normalizePlate(trip.registration || trip.vehicle_registration);
+      return normalizePlate(tripVehicleId) === normalizePlate(driverVehicle.id) || tripRegistration === normalizedPlate;
+    });
 
     const weeklyStats = {
       totalKilometers: vehicleTrips.reduce((sum: number, trip: any) => sum + (trip.distance_km || 0), 0),

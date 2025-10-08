@@ -664,6 +664,109 @@
       "myprio": "myprio",
       "viaverde": "ViaVerde",
       "cartrack": "Cartrack"
+    },
+    "integrations": {
+      "title": "Automação via APIs",
+      "subtitle": "Atualize credenciais, ative integrações e teste a conexão sem sair desta página.",
+      "names": {
+        "uber": "Uber Business",
+        "bolt": "Bolt Fleet",
+        "cartrack": "Cartrack",
+        "viaverde": "ViaVerde",
+        "myprio": "myPrio"
+      },
+      "status": {
+        "active": "Ativa",
+        "inactive": "Inativa",
+        "pending": "Pendente",
+        "error": "Erro",
+        "connected": "Conectada",
+        "disconnected": "Desconectada",
+        "expired": "Expirada"
+      },
+      "labels": {
+        "updatedAt": "Atualizado em {{date}}",
+        "neverUpdated": "Nunca atualizado",
+        "enabled": "Ativa",
+        "disabled": "Inativa",
+        "lastSuccess": "Último sucesso",
+        "lastError": "Erro recente",
+        "never": "Nunca"
+      },
+      "actions": {
+        "save": "Guardar credenciais",
+        "test": "Testar conexão",
+        "testing": "Testando..."
+      },
+      "messages": {
+        "toastTitle": "Integração atualizada",
+        "saveError": "Não foi possível atualizar a integração.",
+        "missingFields": "Preencha todos os campos obrigatórios.",
+        "saved": "Credenciais guardadas com sucesso.",
+        "enabled": "Integração ativada com sucesso.",
+        "disabled": "Integração desativada.",
+        "testError": "Não foi possível testar a integração.",
+        "testSuccessTitle": "Conexão verificada",
+        "testSuccess": "Integração conectada com sucesso."
+      },
+      "fields": {
+        "uber": {
+          "clientId": "Client ID",
+          "clientSecret": "Client Secret",
+          "orgUuid": "Organization UUID"
+        },
+        "bolt": {
+          "clientId": "Client ID",
+          "clientSecret": "Client Secret"
+        },
+        "cartrack": {
+          "username": "Utilizador",
+          "apiKey": "API Key"
+        },
+        "viaverde": {
+          "email": "Email",
+          "password": "Password"
+        },
+        "myprio": {
+          "accountId": "ID da conta",
+          "password": "Password"
+        }
+      },
+      "helpers": {
+        "uber": {
+          "clientSecret": "Guarde este segredo num local seguro.",
+          "orgUuid": "UUID da organização disponível no portal Uber Business."
+        },
+        "bolt": {
+          "clientSecret": "Guarde este segredo num local seguro."
+        },
+        "cartrack": {
+          "apiKey": "API Key gerada no portal Cartrack."
+        }
+      },
+      "placeholders": {
+        "uber": {
+          "clientId": "Insira o Client ID",
+          "clientSecret": "Insira o Client Secret",
+          "orgUuid": "Insira o UUID da organização"
+        },
+        "bolt": {
+          "clientId": "Insira o Client ID",
+          "clientSecret": "Insira o Client Secret"
+        },
+        "cartrack": {
+          "username": "Utilizador Cartrack",
+          "apiKey": "API Key fornecida pela Cartrack"
+        },
+        "viaverde": {
+          "email": "Email de acesso",
+          "password": "Password"
+        },
+        "myprio": {
+          "accountId": "ID da conta",
+          "password": "Password"
+        }
+      }
     }
   },
   "weekly_control_title": "Controle semanal",

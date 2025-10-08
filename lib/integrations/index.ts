@@ -65,6 +65,7 @@ export async function createCartrackClient() {
   return new CartrackClientClass({
     username: integration.credentials.username || '',
     apiKey: integration.credentials.apiKey || '',
+    baseUrl: integration.config?.baseUrl,
   });
 }
 

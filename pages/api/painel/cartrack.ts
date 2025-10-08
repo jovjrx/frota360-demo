@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { getCartrackClient } from '@/lib/cartrack';
+import { createCartrackClient } from '@/lib/integrations';
 import { getDriverById } from '@/lib/admin/adminQueries';
+
+const normalizePlate = (value?: string | null) => (value || '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -25,31 +26,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ message: 'Access denied: Only renter drivers with assigned vehicles can access tracking' });
     }
 
-    const cartrackIntegration = await adminDb.collection('integrations').doc('cartrack').get();
-    const cartrackData = cartrackIntegration.data();
+    const cartrackClient = await createCartrackClient();
 
-    if (!cartrackData || !cartrackData.username || !cartrackData.apiKey || !cartrackData.baseUrl) {
-      return res.status(500).json({ message: 'Cartrack integration not configured' });
+    const vehiclePlate = driver.vehicle?.plate;
+    if (!vehiclePlate) {
+      return res.status(400).json({ message: 'Driver vehicle plate not configured' });
     }
 
-    const cartrackClient = await getCartrackClient();
+    const normalizedPlate = normalizePlate(vehiclePlate);
+    const vehicles = await cartrackClient.getVehicles();
+    const cartrackVehicle = vehicles.find((vehicle) => normalizePlate(vehicle.plate) === normalizedPlate);
 
-    const vehicleId = driver.vehicle.plate; // Usar a placa como ID do veículo para o mock
-
-    // Fetch latest position
-    const latestPosition = await cartrackClient.getLatestPosition(vehicleId);
-
-    // Fetch trips for the last 24 hours
     const now = new Date();
-    const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-    const trips = await cartrackClient.getTrips(vehicleId, yesterday.toISOString(), now.toISOString());
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const startDate = yesterday.toISOString().split('T')[0];
+    const endDate = now.toISOString().split('T')[0];
+
+    const trips = await cartrackClient.getTrips(startDate, endDate, {
+      registration: normalizedPlate,
+      vehicleId: cartrackVehicle?.id,
+    });
+
+    const latestPosition = await cartrackClient.getLatestVehiclePosition(normalizedPlate);
 
     res.status(200).json({
       latestPosition,
       trips,
       vehicle: {
-        plate: driver.vehicle.plate,
-        model: driver.vehicle.model,
+        plate: vehiclePlate,
+        model: driver.vehicle?.model ?? null,
+        cartrackId: cartrackVehicle?.id ?? null,
+        status: cartrackVehicle?.status ?? null,
       },
     });
 
