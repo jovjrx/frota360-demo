@@ -31,6 +31,25 @@ interface PaymentRequestBody {
   };
 }
 
+function sanitizeFirestoreData<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeFirestoreData(item)) as unknown as T;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entryValue]) => {
+      if (entryValue === undefined) {
+        return acc;
+      }
+
+      (acc as Record<string, unknown>)[key] = sanitizeFirestoreData(entryValue);
+      return acc;
+    }, Array.isArray(value) ? [] : {}) as T;
+  }
+
+  return value;
+}
+
 function toIsoString(value: string | undefined): string {
   if (!value) {
     return new Date().toISOString();
@@ -114,19 +133,26 @@ async function createDriverPayment(
               weekEnd: (entry as any)?.weekEnd ?? record.weekEnd,
               platform,
               referenceId: (entry as any)?.referenceId ?? '',
-              referenceLabel: (entry as any)?.referenceLabel,
+              referenceLabel:
+                typeof (entry as any)?.referenceLabel === 'string'
+                  ? (entry as any).referenceLabel
+                  : undefined,
               driverId: (entry as any)?.driverId ?? record.driverId ?? null,
               driverName: (entry as any)?.driverName ?? record.driverName ?? null,
               vehiclePlate: (entry as any)?.vehiclePlate ?? null,
               totalValue: Number((entry as any)?.totalValue ?? 0),
               totalTrips: Number((entry as any)?.totalTrips ?? 0),
-              rawDataRef: (entry as any)?.rawDataRef,
+              rawDataRef:
+                typeof (entry as any)?.rawDataRef === 'string'
+                  ? (entry as any).rawDataRef
+                  : undefined,
               createdAt: (entry as any)?.createdAt ?? nowIso,
               updatedAt: (entry as any)?.updatedAt ?? nowIso,
             };
 
             try {
-              return WeeklyNormalizedDataSchema.parse(normalized);
+              const parsed = WeeklyNormalizedDataSchema.parse(normalized);
+              return sanitizeFirestoreData(parsed);
             } catch (error) {
               console.warn('Skipping invalid platform data entry in payment snapshot:', error);
               return null;
@@ -200,7 +226,8 @@ async function createDriverPayment(
       ...basePayment,
     });
 
-    let updatedRecord: DriverWeeklyRecord | null = null;
+  let updatedRecord: DriverWeeklyRecord | null = null;
+  let persistedPayment: DriverPayment | null = null;
 
     await adminDb.runTransaction(async (transaction) => {
       const recordRef = adminDb.collection('driverWeeklyRecords').doc(record.id);
@@ -220,20 +247,27 @@ async function createDriverPayment(
         updatedAt: nowIso,
       } satisfies Partial<DriverWeeklyRecord>;
 
-      const validRecord = DriverWeeklyRecordSchema.parse(mergedRecord);
-      updatedRecord = validRecord;
+  const validRecord = DriverWeeklyRecordSchema.parse(mergedRecord);
+  const sanitizedRecord = sanitizeFirestoreData(validRecord);
+  const sanitizedPayment = sanitizeFirestoreData(validatedPayment);
+  updatedRecord = sanitizedRecord as DriverWeeklyRecord;
 
-      transaction.set(recordRef, validRecord, { merge: true });
-      transaction.set(paymentRef, validatedPayment);
+      transaction.set(recordRef, sanitizedRecord, { merge: true });
+      transaction.set(paymentRef, sanitizedPayment);
+      persistedPayment = sanitizedPayment as DriverPayment;
     });
 
     if (!updatedRecord) {
       throw new Error('Failed to persist weekly record update');
     }
 
+    if (!persistedPayment) {
+      throw new Error('Failed to persist payment record');
+    }
+
     res.status(200).json({
       record: updatedRecord,
-      payment: validatedPayment,
+      payment: persistedPayment,
     });
   } catch (error: any) {
     const statusCode = error?.statusCode === 409 ? 409 : 500;
