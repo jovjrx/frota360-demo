@@ -80,65 +80,7 @@ interface SolicitacoesPageProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-const COMMON_FALLBACKS: Record<string, string> = {
-  total: 'Total',
-  all: 'Todas',
-  name: 'Nome',
-  email: 'Email',
-  phone: 'Telefone',
-  type: 'Tipo',
-  status: 'Status',
-  actions: 'Ações',
-  type_renter: 'Locatário',
-  type_affiliate: 'Afiliado',
-  'common.loading': 'A carregar...',
-};
-
-const ADMIN_FALLBACKS: Record<string, string> = {
-  'requests.title': 'Gestão de Solicitações',
-  'requests.subtitle': 'Analise e gerencie as candidaturas de motoristas',
-  'requests.status.pending': 'Pendente',
-  'requests.status.evaluation': 'Em avaliação',
-  'requests.status.approved': 'Aprovada',
-  'requests.status.rejected': 'Rejeitada',
-  'requests.status.unknown': 'Desconhecido',
-  'requests.search_placeholder': 'Pesquisar por nome, email ou telefone',
-  'requests.no_requests.title': 'Nenhuma solicitação encontrada',
-  'requests.no_requests.desc': 'Não há solicitações com os filtros selecionados.',
-  'requests.action.view_details': 'Ver detalhes',
-  'requests.action.evaluate': 'Avaliar',
-  'requests.action.approve': 'Aprovar',
-  'requests.action.reject': 'Rejeitar',
-  'requests.action.evaluate_success_title': 'Solicitação marcada como em avaliação',
-  'requests.action.evaluate_success_desc': 'A solicitação de {{name}} foi marcada como em avaliação.',
-  'requests.action.evaluate_error_title': 'Erro ao marcar avaliação',
-  'requests.action.evaluate_error_desc': 'Não foi possível marcar a solicitação como em avaliação.',
-  'requests.action.approve_success_title': 'Solicitação aprovada',
-  'requests.action.approve_success_desc': 'A solicitação de {{name}} foi aprovada com sucesso.',
-  'requests.action.approve_error_title': 'Erro ao aprovar',
-  'requests.action.approve_error_desc': 'Não foi possível aprovar a solicitação.',
-  'requests.action.reject_success_title': 'Solicitação rejeitada',
-  'requests.action.reject_success_desc': 'A solicitação de {{name}} foi rejeitada.',
-  'requests.action.reject_error_title': 'Erro ao rejeitar',
-  'requests.action.reject_error_desc': 'Não foi possível rejeitar a solicitação.',
-  'requests.view_modal.title': 'Detalhes da solicitação',
-  'requests.view_modal.created_at': 'Criada em',
-  'requests.view_modal.updated_at': 'Atualizada em',
-  'requests.view_modal.admin_notes': 'Notas administrativas',
-  'requests.view_modal.rejection_reason': 'Motivo da rejeição',
-  'requests.evaluation_modal.title': 'Colocar em avaliação',
-  'requests.evaluation_modal.save_button': 'Salvar avaliação',
-  'requests.evaluation_modal.description': 'Adicione notas para a avaliação de {{name}}.',
-  'requests.evaluation_modal.notes_label': 'Notas de avaliação',
-  'requests.evaluation_modal.notes_placeholder': 'Escreva as observações internas',
-  'requests.reject_modal.title': 'Rejeitar solicitação',
-  'requests.reject_modal.reject_button': 'Confirmar rejeição',
-  'requests.reject_modal.confirmation': 'Tem certeza que deseja rejeitar {{name}}?',
-  'requests.reject_modal.reason_label': 'Motivo da rejeição',
-  'requests.reject_modal.reason_placeholder': 'Descreva o motivo da rejeição',
-};
-
-export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, tAdmin: tAdminProp }: SolicitacoesPageProps) {
+export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }: SolicitacoesPageProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -152,20 +94,8 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
   const { isOpen: isEvaluationModalOpen, onOpen: onEvaluationModalOpen, onClose: onEvaluationModalClose } = useDisclosure();
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
 
-  const tCommonBase = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
-  const tAdminBase = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tAdminProp, tPage]);
-
-  const t = useMemo(
-    () => (key: string, variables?: Record<string, any>) =>
-      tCommonBase(key, COMMON_FALLBACKS[key] ?? key, variables),
-    [tCommonBase]
-  );
-
-  const tAdmin = useMemo(
-    () => (key: string, variables?: Record<string, any>) =>
-      tAdminBase(key, ADMIN_FALLBACKS[key] ?? key, variables),
-    [tAdminBase]
-  );
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
 
   const { data, mutate } = useSWR<RequestsData>(
     `/api/admin/requests?status=${statusFilter}`,
@@ -202,11 +132,16 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
 
   const getStatusLabel = (status: DriverRequest['status']) => {
     switch (status) {
-      case 'pending': return tAdmin('requests.status.pending');
-      case 'evaluation': return tAdmin('requests.status.evaluation');
-      case 'approved': return tAdmin('requests.status.approved');
-      case 'rejected': return tAdmin('requests.status.rejected');
-      default: return tAdmin('requests.status.unknown');
+      case 'pending':
+        return t('requests.status.pending', 'Pendente');
+      case 'evaluation':
+        return t('requests.status.evaluation', 'Em avaliação');
+      case 'approved':
+        return t('requests.status.approved', 'Aprovada');
+      case 'rejected':
+        return t('requests.status.rejected', 'Rejeitada');
+      default:
+        return t('requests.status.unknown', 'Desconhecido');
     }
   };
 
@@ -234,8 +169,10 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
       }
 
       toast({
-        title: tAdmin(`requests.action.${action}_success_title`),
-        description: tAdmin(`requests.action.${action}_success_desc`, { name: request.fullName }),
+        title: t(`requests.toasts.${action}.successTitle`, 'Ação concluída'),
+        description: t(`requests.toasts.${action}.successDescription`, 'Operação realizada com sucesso.', {
+          name: request.fullName,
+        }),
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -246,8 +183,8 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
       onRejectModalClose();
     } catch (error: any) {
       toast({
-        title: tAdmin(`requests.action.${action}_error_title`),
-        description: error.message || tAdmin(`requests.action.${action}_error_desc`),
+        title: t(`requests.toasts.${action}.errorTitle`, 'Erro ao atualizar solicitação'),
+        description: error.message || t(`requests.toasts.${action}.errorDescription`, 'Não foi possível concluir a ação.'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -259,10 +196,10 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
 
   return (
     <AdminLayout
-      title={tAdmin('requests.title')}
-      subtitle={tAdmin('requests.subtitle')}
+      title={t('requests.title', 'Gestão de Solicitações')}
+      subtitle={t('requests.subtitle', 'Analise e gerencie as candidaturas de motoristas')}
       breadcrumbs={[
-        { label: tAdmin('requests.title') }
+        { label: t('requests.title', 'Gestão de Solicitações') }
       ]}
     >
       <VStack spacing={6} align="stretch">
@@ -271,7 +208,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>{t('total')}</StatLabel>
+                <StatLabel>{t('requests.stats.total', 'Total')}</StatLabel>
                 <StatNumber>{stats.total}</StatNumber>
               </Stat>
             </CardBody>
@@ -279,7 +216,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>{tAdmin('requests.status.pending')}</StatLabel>
+                <StatLabel>{t('requests.status.pending', 'Pendente')}</StatLabel>
                 <StatNumber color="orange.600">{stats.pending}</StatNumber>
               </Stat>
             </CardBody>
@@ -287,7 +224,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>{tAdmin('requests.status.evaluation')}</StatLabel>
+                <StatLabel>{t('requests.status.evaluation', 'Em avaliação')}</StatLabel>
                 <StatNumber color="blue.600">{stats.evaluation}</StatNumber>
               </Stat>
             </CardBody>
@@ -295,7 +232,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>{tAdmin('requests.status.approved')}</StatLabel>
+                <StatLabel>{t('requests.status.approved', 'Aprovada')}</StatLabel>
                 <StatNumber color="green.600">{stats.approved}</StatNumber>
               </Stat>
             </CardBody>
@@ -303,7 +240,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel>{tAdmin('requests.status.rejected')}</StatLabel>
+                <StatLabel>{t('requests.status.rejected', 'Rejeitada')}</StatLabel>
                 <StatNumber color="red.600">{stats.rejected}</StatNumber>
               </Stat>
             </CardBody>
@@ -319,7 +256,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                   <FiSearch color="gray.300" />
                 </InputLeftElement>
                 <Input
-                  placeholder={tAdmin('requests.search_placeholder')}
+                  placeholder={t('requests.filters.searchPlaceholder', 'Pesquisar por nome, email ou telefone')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -329,11 +266,11 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                 onChange={(e) => setStatusFilter(e.target.value)}
                 maxW="200px"
               >
-                <option value="all">{t('all')}</option>
-                <option value="pending">{tAdmin('requests.status.pending')}</option>
-                <option value="evaluation">{tAdmin('requests.status.evaluation')}</option>
-                <option value="approved">{tAdmin('requests.status.approved')}</option>
-                <option value="rejected">{tAdmin('requests.status.rejected')}</option>
+                <option value="all">{t('requests.filters.status.all', 'Todas')}</option>
+                <option value="pending">{t('requests.status.pending', 'Pendente')}</option>
+                <option value="evaluation">{t('requests.status.evaluation', 'Em avaliação')}</option>
+                <option value="approved">{t('requests.status.approved', 'Aprovada')}</option>
+                <option value="rejected">{t('requests.status.rejected', 'Rejeitada')}</option>
               </Select>
             </HStack>
           </CardBody>
@@ -345,25 +282,25 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
             {loading ? (
               <Center py={10}>
                 <Spinner size="xl" color="blue.500" />
-                <Text mt={4} color="gray.600">{t('common.loading')}</Text>
+                <Text mt={4} color="gray.600">{tc('messages.loading', 'A carregar...')}</Text>
               </Center>
             ) : filteredRequests.length === 0 ? (
               <Alert status="info">
                 <AlertIcon />
-                <AlertTitle>{tAdmin('requests.no_requests.title')}</AlertTitle>
-                <AlertDescription>{tAdmin('requests.no_requests.desc')}</AlertDescription>
+                <AlertTitle>{t('requests.empty.title', 'Nenhuma solicitação encontrada')}</AlertTitle>
+                <AlertDescription>{t('requests.empty.description', 'Não há solicitações com os filtros selecionados.')}</AlertDescription>
               </Alert>
             ) : (
               <TableContainer>
                 <Table variant="simple">
                   <Thead>
                     <Tr>
-                      <Th>{t('name')}</Th>
-                      <Th>{t('email')}</Th>
-                      <Th>{t('phone')}</Th>
-                      <Th>{t('type')}</Th>
-                      <Th>{t('status')}</Th>
-                      <Th>{t('actions')}</Th>
+                      <Th>{t('requests.table.headers.name', 'Nome')}</Th>
+                      <Th>{t('requests.table.headers.email', 'Email')}</Th>
+                      <Th>{t('requests.table.headers.phone', 'Telefone')}</Th>
+                      <Th>{t('requests.table.headers.type', 'Tipo')}</Th>
+                      <Th>{t('requests.table.headers.status', 'Status')}</Th>
+                      <Th>{t('requests.table.headers.actions', 'Ações')}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -374,7 +311,9 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                         <Td>{request.phone}</Td>
                         <Td>
                           <Badge colorScheme={request.type === 'renter' ? 'purple' : 'blue'}>
-                            {request.type === 'renter' ? t('type_renter') : t('type_affiliate')}
+                            {request.type === 'renter'
+                              ? t('requests.types.renter', 'Locatário')
+                              : t('requests.types.affiliate', 'Afiliado')}
                           </Badge>
                         </Td>
                         <Td>
@@ -390,7 +329,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                                 setSelectedRequest(request);
                                 onViewModalOpen();
                               }}>
-                                {tAdmin('requests.action.view_details')}
+                                {t('requests.actions.viewDetails', 'Ver detalhes')}
                               </MenuItem>
                               {request.status === 'pending' && (
                                 <MenuItem icon={<FiClock />} onClick={() => {
@@ -398,12 +337,12 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                                   setEvaluationNotes(request.adminNotes || '');
                                   onEvaluationModalOpen();
                                 }}>
-                                  {tAdmin('requests.action.evaluate')}
+                                  {t('requests.actions.evaluate', 'Avaliar')}
                                 </MenuItem>
                               )}
                               {(request.status === 'pending' || request.status === 'evaluation') && (
                                 <MenuItem icon={<FiUserPlus />} onClick={() => handleAction('approve', request)}>
-                                  {tAdmin('requests.action.approve')}
+                                  {t('requests.actions.approve', 'Aprovar')}
                                 </MenuItem>
                               )}
                               {(request.status === 'pending' || request.status === 'evaluation') && (
@@ -411,7 +350,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
                                   setSelectedRequest(request);
                                   onRejectModalOpen();
                                 }} color="red.500">
-                                  {tAdmin('requests.action.reject')}
+                                  {t('requests.actions.reject', 'Rejeitar')}
                                 </MenuItem>
                               )}
                             </MenuList>
@@ -431,7 +370,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
       <StandardModal
         isOpen={isViewModalOpen}
         onClose={onViewModalClose}
-        title={tAdmin('requests.view_modal.title')}
+        title={t('requests.modals.view.title', 'Detalhes da solicitação')}
         size="xl"
         showSave={false}
       >
@@ -448,24 +387,24 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
               </VStack>
             </HStack>
             <Box>
-              <Text fontSize="sm" color="gray.500">{tAdmin('requests.view_modal.created_at')}</Text>
+              <Text fontSize="sm" color="gray.500">{t('requests.modals.view.createdAt', 'Criada em')}</Text>
               <Text>{new Date(selectedRequest.createdAt).toLocaleString(locale)}</Text>
             </Box>
             {selectedRequest.updatedAt && (
               <Box>
-                <Text fontSize="sm" color="gray.500">{tAdmin('requests.view_modal.updated_at')}</Text>
+                <Text fontSize="sm" color="gray.500">{t('requests.modals.view.updatedAt', 'Atualizada em')}</Text>
                 <Text>{new Date(selectedRequest.updatedAt).toLocaleString(locale)}</Text>
               </Box>
             )}
             {selectedRequest.adminNotes && (
               <Box>
-                <Text fontSize="sm" color="gray.500">{tAdmin('requests.view_modal.admin_notes')}</Text>
+                <Text fontSize="sm" color="gray.500">{t('requests.modals.view.adminNotes', 'Notas administrativas')}</Text>
                 <Textarea value={selectedRequest.adminNotes} isReadOnly />
               </Box>
             )}
             {selectedRequest.rejectionReason && (
               <Box>
-                <Text fontSize="sm" color="gray.500">{tAdmin('requests.view_modal.rejection_reason')}</Text>
+                <Text fontSize="sm" color="gray.500">{t('requests.modals.view.rejectionReason', 'Motivo da rejeição')}</Text>
                 <Textarea value={selectedRequest.rejectionReason} isReadOnly />
               </Box>
             )}
@@ -477,19 +416,21 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
       <StandardModal
         isOpen={isEvaluationModalOpen}
         onClose={onEvaluationModalClose}
-        title={tAdmin('requests.evaluation_modal.title')}
+        title={t('requests.modals.evaluation.title', 'Colocar em avaliação')}
         onSave={() => selectedRequest && handleAction('evaluate', selectedRequest, evaluationNotes)}
-        saveText={tAdmin('requests.evaluation_modal.save_button')}
+        saveText={t('requests.modals.evaluation.saveButton', 'Salvar avaliação')}
       >
         {selectedRequest && (
           <VStack spacing={4} align="stretch">
-            <Text>{tAdmin('requests.evaluation_modal.description', { name: selectedRequest.fullName })}</Text>
+            <Text>{t('requests.modals.evaluation.description', 'Adicione notas para a avaliação de {{name}}.', {
+              name: selectedRequest.fullName,
+            })}</Text>
             <FormControl>
-              <FormLabel>{tAdmin('requests.evaluation_modal.notes_label')}</FormLabel>
+              <FormLabel>{t('requests.modals.evaluation.notesLabel', 'Notas de avaliação')}</FormLabel>
               <Textarea
                 value={evaluationNotes}
                 onChange={(e) => setEvaluationNotes(e.target.value)}
-                placeholder={tAdmin('requests.evaluation_modal.notes_placeholder')}
+                placeholder={t('requests.modals.evaluation.notesPlaceholder', 'Escreva as observações internas')}
               />
             </FormControl>
           </VStack>
@@ -500,9 +441,9 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
       <StandardModal
         isOpen={isRejectModalOpen}
         onClose={onRejectModalClose}
-        title={tAdmin('requests.reject_modal.title')}
+        title={t('requests.modals.reject.title', 'Rejeitar solicitação')}
         onSave={() => selectedRequest && handleAction('reject', selectedRequest, rejectionReason)}
-        saveText={tAdmin('requests.reject_modal.reject_button')}
+        saveText={t('requests.modals.reject.saveButton', 'Confirmar rejeição')}
         showDelete={false}
       >
         {selectedRequest && (
@@ -510,15 +451,17 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
             <Alert status="warning">
               <AlertIcon />
               <AlertDescription>
-                {tAdmin('requests.reject_modal.confirmation', { name: selectedRequest.fullName })}
+                {t('requests.modals.reject.confirmation', 'Tem certeza que deseja rejeitar {{name}}?', {
+                  name: selectedRequest.fullName,
+                })}
               </AlertDescription>
             </Alert>
             <FormControl>
-              <FormLabel>{tAdmin('requests.reject_modal.reason_label')}</FormLabel>
+              <FormLabel>{t('requests.modals.reject.reasonLabel', 'Motivo da rejeição')}</FormLabel>
               <Textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder={tAdmin('requests.reject_modal.reason_placeholder')}
+                placeholder={t('requests.modals.reject.reasonPlaceholder', 'Descreva o motivo da rejeição')}
               />
             </FormControl>
           </VStack>

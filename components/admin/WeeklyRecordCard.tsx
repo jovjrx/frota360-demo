@@ -38,7 +38,7 @@ interface WeeklyRecordCardProps {
   onUpdateField?: (recordId: string, updates: Partial<DriverWeeklyRecord>) => void;
   generatingRecordId: string | null;
   updatingPaymentId: string | null;
-  tAdmin: (key: string, fallback?: string) => string;
+  t: (key: string, fallback?: string) => string;
 }
 
 const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
@@ -54,7 +54,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
   onUpdateField,
   generatingRecordId,
   updatingPaymentId,
-  tAdmin,
+  t,
 }) => {
   const isPaid = record.paymentStatus === 'paid';
 
@@ -107,7 +107,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
           {/* Plataformas */}
           <Box>
             <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.700">
-              {tAdmin('weekly_records.sections.platforms', 'Plataformas')}
+              {t('weekly.control.records.sections.platforms', 'Plataformas')}
             </Text>
             <Grid templateColumns="repeat(2, 1fr)" gap={2}>
               <GridItem>
@@ -134,12 +134,12 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
           {/* Valores Financeiros */}
           <Box>
             <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.700">
-              {tAdmin('weekly_records.sections.financials', 'Valores Financeiros')}
+              {t('weekly.control.records.sections.financials', 'Valores Financeiros')}
             </Text>
             <VStack align="stretch" spacing={2}>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}
+                  {t('weekly.control.records.columns.grossTotal', 'Ganhos brutos')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium">
                   {formatCurrency(record.ganhosTotal)}
@@ -147,7 +147,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               </Flex>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.iva', 'IVA')}
+                  {t('weekly.control.records.columns.iva', 'IVA')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="red.600">
                   -{formatCurrency(record.ivaValor)}
@@ -155,7 +155,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               </Flex>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}
+                  {t('weekly.control.records.columns.adminExpenses', 'Taxa adm.')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="red.600">
                   -{formatCurrency(record.despesasAdm)}
@@ -163,7 +163,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               </Flex>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.fuel', 'Combustível')}
+                  {t('weekly.control.records.columns.fuel', 'Combustível')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="orange.600">
                   -{formatCurrency(record.combustivel)}
@@ -171,7 +171,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               </Flex>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.tolls', 'Portagens')}
+                  {t('weekly.control.records.columns.tolls', 'Portagens')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="orange.600">
                   -{formatCurrency(record.viaverde)}
@@ -179,7 +179,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               </Flex>
               <Flex justify="space-between">
                 <Text fontSize="sm" color="gray.600">
-                  {tAdmin('weekly_records.columns.rent', 'Aluguel')}
+                  {t('weekly.control.records.columns.rent', 'Aluguel')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="purple.600">
                   -{formatCurrency(record.aluguel)}
@@ -188,7 +188,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               <Divider />
               <Flex justify="space-between">
                 <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                  {tAdmin('weekly_records.columns.net', 'Valor líquido')}
+                  {t('weekly.control.records.columns.net', 'Valor líquido')}
                 </Text>
                 <Text fontSize="md" fontWeight="bold" color="blue.600">
                   {formatCurrency(record.repasse)}
@@ -205,13 +205,13 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               leftIcon={<Icon as={FiFileText} />}
               onClick={() => onViewPayslip(record)}
               isLoading={generatingRecordId === record.id}
-              loadingText={tAdmin("weekly_records.messages.generateInProgress", "A gerar...")}
+              loadingText={t('weekly.control.records.messages.generateInProgress', 'A gerar...')}
               size="sm"
               colorScheme="blue"
               variant="outline"
               width="100%"
             >
-              {tAdmin("weekly_records.actions.generatePayslip", "Contracheque")}
+              {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
             </Button>
             <Button
               leftIcon={<Icon as={isPaid ? FiRotateCcw : FiCheckCircle} />}
@@ -222,8 +222,8 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               width="100%"
             >
               {isPaid
-                ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
-                : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
+                ? t('weekly.control.records.actions.markAsPending', 'Pendente')
+                : t('weekly.control.records.actions.markAsPaid', 'Pago')}
             </Button>
           </VStack>
         </VStack>

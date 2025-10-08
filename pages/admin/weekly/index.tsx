@@ -21,8 +21,6 @@ import {
   ButtonGroup,
   Icon,
   Stat,
-  StatLabel,
-  StatNumber,
   StatHelpText,
   useToast,
   Spinner,
@@ -87,7 +85,6 @@ export default function WeeklyPage({
   initialRecords,
   tCommon,
   tPage,
-  tAdmin: tAdminProp,
 }: WeeklyPageProps) {
   const [filterWeek, setFilterWeek] = useState(currentWeek);
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
@@ -98,24 +95,24 @@ export default function WeeklyPage({
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
   const toast = useToast();
   const router = useRouter();
-  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
-  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
   const isMobile = useBreakpointValue({ base: true, md: false });
   const typeLabels = useMemo(
     () => ({
-      affiliate: tAdmin('weekly_records.types.affiliate', 'Afiliado'),
-      renter: tAdmin('weekly_records.types.renter', 'Locatário'),
+      affiliate: t('weekly.control.records.types.affiliate', 'Afiliado'),
+      renter: t('weekly.control.records.types.renter', 'Locatário'),
     }),
-    [tAdmin]
+    [t]
   );
 
   const statusLabels = useMemo(
     () => ({
-      pending: tAdmin('weekly_records.paymentStatus.pending', 'Pendente'),
-      paid: tAdmin('weekly_records.paymentStatus.paid', 'Pago'),
-      cancelled: tAdmin('weekly_records.paymentStatus.cancelled', 'Cancelado'),
+      pending: t('weekly.control.records.paymentStatus.pending', 'Pendente'),
+      paid: t('weekly.control.records.paymentStatus.paid', 'Pago'),
+      cancelled: t('weekly.control.records.paymentStatus.cancelled', 'Cancelado'),
     }),
-    [tAdmin]
+    [t]
   );
 
   const formatDateLabel = (value: string | undefined, localeValue: string) => {
@@ -155,7 +152,7 @@ export default function WeeklyPage({
       });
 
       if (!response.ok) {
-        throw new Error(tAdmin('error_loading_data'));
+        throw new Error(t('weekly.control.errors.loadData', 'Erro ao carregar dados'));
       }
 
       const data = await response.json();
@@ -172,8 +169,8 @@ export default function WeeklyPage({
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
-        title: tAdmin("error_loading_data_title"),
-        description: error instanceof Error ? error.message : tAdmin("error_loading_data_description"),
+        title: t('weekly.control.toasts.loadData.title', 'Erro ao carregar dados'),
+        description: error instanceof Error ? error.message : t('weekly.control.toasts.loadData.description', 'Não foi possível carregar os dados da semana.'),
         status: "error",
         duration: 3000,
       });
@@ -194,8 +191,8 @@ export default function WeeklyPage({
       const selectedWeek = weekOptions.find(w => w.value === filterWeek);
       if (!selectedWeek) {
         toast({
-          title: tAdmin('errors.title', 'Erro'),
-          description: tAdmin('select_week_error'),
+          title: tc('errors.title', 'Erro'),
+          description: t('weekly.control.errors.selectWeek', 'Selecione uma semana válida para continuar.'),
           status: 'error',
           duration: 3000,
         });
@@ -215,7 +212,7 @@ export default function WeeklyPage({
       });
 
       if (!response.ok) {
-        throw new Error(tAdmin('error_generating_summaries'));
+        throw new Error(t('weekly.control.errors.generateSummaries', 'Não foi possível gerar os resumos.'));
       }
 
       // Download do arquivo ZIP
@@ -223,15 +220,15 @@ export default function WeeklyPage({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${tAdmin('summaries_filename_prefix')}_${selectedWeek.start}_a_${selectedWeek.end}.zip`;
+  a.download = `${t('weekly.control.files.summariesPrefix', 'resumos')}_${selectedWeek.start}_a_${selectedWeek.end}.zip`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
       toast({
-        title: tAdmin("summaries_generated_success_title"),
-        description: tAdmin("summaries_generated_success_description"),
+        title: t('weekly.control.toasts.generateSummaries.successTitle', 'Resumos gerados!'),
+        description: t('weekly.control.toasts.generateSummaries.successDescription', 'Os resumos foram gerados com sucesso e o download começou.'),
         status: "success",
         duration: 4000,
         isClosable: true,
@@ -239,8 +236,8 @@ export default function WeeklyPage({
     } catch (error: any) {
       console.error("Erro ao gerar resumos:", error);
       toast({
-        title: tAdmin("error_generating_summaries_title"),
-        description: error instanceof Error ? error.message : tAdmin("error_generating_summaries_description"),
+        title: t('weekly.control.toasts.generateSummaries.errorTitle', 'Erro ao gerar resumos'),
+        description: error instanceof Error ? error.message : t('weekly.control.toasts.generateSummaries.errorDescription', 'Não foi possível gerar os resumos desta semana.'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -271,7 +268,7 @@ export default function WeeklyPage({
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.generateError", "Não foi possível gerar o contracheque."));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o contracheque.'));
       }
 
       const blob = await response.blob();
@@ -282,8 +279,8 @@ export default function WeeklyPage({
 
     } catch (error: any) {
       toast({
-        title: tAdmin("weekly_records.actions.generatePayslip", "Gerar contracheque"),
-        description: error?.message || tAdmin("weekly_records.messages.generateError", "Não foi possível gerar o contracheque."),
+        title: t('weekly.control.records.actions.generatePayslip', 'Gerar contracheque'),
+        description: error?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o contracheque.'),
         status: "error",
         duration: 4000,
       });
@@ -307,8 +304,8 @@ export default function WeeklyPage({
   const handleSendPayslipEmail = async () => {
     if (!selectedPayslipRecord || !payslipPdfUrl) {
       toast({
-        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
-        description: tAdmin("weekly_records.messages.sendEmailErrorDesc", "Nenhum contracheque selecionado ou PDF não gerado."),
+        title: t('weekly.control.records.messages.sendEmailErrorTitle', 'Erro ao enviar e-mail'),
+        description: t('weekly.control.records.messages.sendEmailErrorDesc', 'Nenhum contracheque selecionado ou PDF não gerado.'),
         status: "error",
         duration: 4000,
       });
@@ -341,12 +338,12 @@ export default function WeeklyPage({
 
         if (!emailRes.ok) {
           const errorPayload = await emailRes.json().catch(() => ({}));
-          throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."));
+          throw new Error(errorPayload?.message || t('weekly.control.records.messages.sendEmailError', 'Não foi possível enviar o contracheque por e-mail.'));
         }
 
         toast({
-          title: tAdmin("weekly_records.messages.sendEmailSuccessTitle", "E-mail enviado!"),
-          description: tAdmin("weekly_records.messages.sendEmailSuccessDesc", "Contracheque enviado com sucesso para o motorista."),
+          title: t('weekly.control.records.messages.sendEmailSuccessTitle', 'E-mail enviado!'),
+          description: t('weekly.control.records.messages.sendEmailSuccessDesc', 'Contracheque enviado com sucesso para o motorista.'),
           status: "success",
           duration: 4000,
         });
@@ -354,8 +351,8 @@ export default function WeeklyPage({
     } catch (error: any) {
       console.error("Erro ao enviar e-mail:", error);
       toast({
-        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
-        description: error?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."),
+        title: t('weekly.control.records.messages.sendEmailErrorTitle', 'Erro ao enviar e-mail'),
+        description: error?.message || t('weekly.control.records.messages.sendEmailError', 'Não foi possível enviar o contracheque por e-mail.'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -370,8 +367,8 @@ export default function WeeklyPage({
       const selectedWeek = weekOptions.find(w => w.value === filterWeek);
       if (!selectedWeek) {
         toast({
-          title: tAdmin("errors.title", "Erro"),
-          description: tAdmin("select_week_error"),
+          title: tc('errors.title', 'Erro'),
+          description: t('weekly.control.errors.selectWeek', 'Selecione uma semana válida para continuar.'),
           status: "error",
           duration: 3000,
         });
@@ -391,7 +388,7 @@ export default function WeeklyPage({
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.exportError", "Não foi possível exportar a planilha de pagamentos."));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.exportError', 'Não foi possível exportar a planilha de pagamentos.'));
       }
 
       const blob = await response.blob();
@@ -405,16 +402,16 @@ export default function WeeklyPage({
       document.body.removeChild(a);
 
       toast({
-        title: tAdmin("weekly_records.messages.exportSuccessTitle", "Exportação concluída!"),
-        description: tAdmin("weekly_records.messages.exportSuccessDesc", "A planilha de pagamentos foi exportada com sucesso."),
+        title: t('weekly.control.records.messages.exportSuccessTitle', 'Exportação concluída!'),
+        description: t('weekly.control.records.messages.exportSuccessDesc', 'A planilha de pagamentos foi exportada com sucesso.'),
         status: "success",
         duration: 4000,
       });
     } catch (error: any) {
       console.error("Erro ao exportar pagamentos:", error);
       toast({
-        title: tAdmin("weekly_records.messages.exportErrorTitle", "Erro na exportação"),
-        description: error?.message || tAdmin("weekly_records.messages.exportError", "Não foi possível exportar a planilha de pagamentos."),
+        title: t('weekly.control.records.messages.exportErrorTitle', 'Erro na exportação'),
+        description: error?.message || t('weekly.control.records.messages.exportError', 'Não foi possível exportar a planilha de pagamentos.'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -437,7 +434,7 @@ export default function WeeklyPage({
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o registro."));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.updateError', 'Não foi possível atualizar o registro.'));
       }
 
       const payload = await response.json();
@@ -455,15 +452,15 @@ export default function WeeklyPage({
       );
 
       toast({
-        title: tAdmin("weekly_records.messages.updateSuccess", "Registro atualizado com sucesso!"),
+        title: t('weekly.control.records.messages.updateSuccess', 'Registro atualizado com sucesso!'),
         status: "success",
         duration: 3000,
         isClosable: true,
       });
     } catch (error: any) {
       toast({
-        title: tAdmin("weekly_records.messages.updateErrorTitle", "Erro ao atualizar registro"),
-        description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o registro."),
+        title: t('weekly.control.records.messages.updateErrorTitle', 'Erro ao atualizar registro'),
+        description: error?.message || t('weekly.control.records.messages.updateError', 'Não foi possível atualizar o registro.'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -496,7 +493,7 @@ export default function WeeklyPage({
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o status do pagamento."));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.updatePaymentStatusError', 'Não foi possível atualizar o status do pagamento.'));
       }
 
       const payload = await response.json();
@@ -516,15 +513,15 @@ export default function WeeklyPage({
       );
 
       toast({
-        title: tAdmin("weekly_records.messages.updateSuccess", "Status de pagamento atualizado com sucesso!"),
+        title: t('weekly.control.records.messages.updatePaymentStatusSuccess', 'Status de pagamento atualizado com sucesso!'),
         status: "success",
         duration: 3000,
         isClosable: true,
       });
     } catch (error: any) {
       toast({
-        title: tAdmin("weekly_records.messages.updateErrorTitle", "Erro ao atualizar status de pagamento"),
-        description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o status do pagamento."),
+        title: t('weekly.control.records.messages.updatePaymentStatusErrorTitle', 'Erro ao atualizar status de pagamento'),
+        description: error?.message || t('weekly.control.records.messages.updatePaymentStatusError', 'Não foi possível atualizar o status do pagamento.'),
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -555,16 +552,16 @@ export default function WeeklyPage({
 
   return (
     <AdminLayout
-      title={tAdmin('weekly_control_title')}
-      subtitle={tAdmin('weekly_control_subtitle')}
-      breadcrumbs={[{ label: tAdmin('weekly_control_title') }]}
+      title={t('weekly.control.title', 'Controle Semanal')}
+      subtitle={t('weekly.control.subtitle', 'Gestão semanal de dados TVDE')}
+      breadcrumbs={[{ label: t('weekly.control.title', 'Controle Semanal') }]}
       side={<Button
         leftIcon={<Icon as={FiUpload} />}
         onClick={() => router.push('/admin/data')}
         colorScheme="blue"
         size="sm"
       >
-        {tAdmin('import_data_button')}
+        {t('weekly.control.actions.importData', 'Importar dados')}
       </Button>}
     >
       {/* Filtros e Ações */}
@@ -589,7 +586,7 @@ export default function WeeklyPage({
                 isLoading={isLoading}
                 size="sm"
               >
-                {tAdmin('dashboard.actions.refresh', 'Atualizar')}
+                {t('weekly.control.actions.refresh', 'Atualizar')}
               </Button>
               <Button
                 leftIcon={<Icon as={FiFileText} />}
@@ -597,10 +594,10 @@ export default function WeeklyPage({
                 colorScheme="purple"
                 size="sm"
                 isLoading={isGeneratingResumos}
-                loadingText={tAdmin("generating_summaries_loading")}
+                loadingText={t('weekly.control.actions.generateSummariesLoading', 'A gerar...')}
                 isDisabled={records.length === 0}
               >
-                {tAdmin("generate_summaries_button")}
+                {t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
               </Button>
               <Button
                 leftIcon={<Icon as={FiDownload} />}
@@ -609,7 +606,7 @@ export default function WeeklyPage({
                 size="sm"
                 isDisabled={records.length === 0}
               >
-                {tAdmin("export_payments_button", "Exportar Planilha")}
+                {t('weekly.control.actions.exportPayments', 'Exportar planilha')}
               </Button>
             </SimpleGrid>
           </VStack>
@@ -619,49 +616,69 @@ export default function WeeklyPage({
       {/* Resumo */}
       <Card>
         <CardHeader>
-          <Heading size="md">{tAdmin("weekly_summary_title", "Resumo Semanal")}</Heading>
+          <Heading size="md">{t('weekly.control.summary.title', 'Resumo Semanal')}</Heading>
         </CardHeader>
         <CardBody>
           <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-            <StatCard label={tAdmin("total_earnings", "Ganhos Totais")} value={totals.ganhosTotal} color="green.600" helpText={`${records.length} ${tAdmin("drivers_label", "motoristas")}`} />
-            <StatCard label={tAdmin("total_discounts", "Descontos Totais")} value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel} color="red.600" helpText={tAdmin("iva_adm_fuel_tolls_rent", "IVA, Adm, Combustível, Portagens, Aluguel")} />
-            <StatCard label={tAdmin("fuel_label", "Combustível")} value={totals.combustivel} color="orange.600" helpText={tAdmin("prio_label", "PRIO")} />
-            <StatCard label={tAdmin("net_value", "Valor Líquido")} value={totals.repasse} color="blue.600" helpText={tAdmin("total_to_pay", "Total a Pagar")} />
+            <StatCard
+              label={t('weekly.control.summary.cards.totalEarnings', 'Ganhos Totais')}
+              value={totals.ganhosTotal}
+              color="green.600"
+              helpText={`${records.length} ${t('weekly.control.summary.cards.driversCountLabel', 'motoristas')}`}
+            />
+            <StatCard
+              label={t('weekly.control.summary.cards.totalDiscounts', 'Descontos Totais')}
+              value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel}
+              color="red.600"
+              helpText={t('weekly.control.summary.cards.discountsHelp', 'IVA, Adm, Combustível, Portagens, Aluguel')}
+            />
+            <StatCard
+              label={t('weekly.control.summary.cards.fuel', 'Combustível')}
+              value={totals.combustivel}
+              color="orange.600"
+              helpText={t('weekly.control.summary.cards.prioLabel', 'PRIO')}
+            />
+            <StatCard
+              label={t('weekly.control.summary.cards.netValue', 'Valor Líquido')}
+              value={totals.repasse}
+              color="blue.600"
+              helpText={t('weekly.control.summary.cards.totalToPay', 'Total a pagar')}
+            />
           </SimpleGrid>
           <Table variant="simple" size="sm" mt={6}>
             <Thead>
               <Tr>
-                <Th>{tAdmin("summary_item", "Item")}</Th>
-                <Th isNumeric>{tAdmin("summary_value", "Valor")}</Th>
+                <Th>{t('weekly.control.summary.table.item', 'Item')}</Th>
+                <Th isNumeric>{t('weekly.control.summary.table.value', 'Valor')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               <Tr>
-                <Td>{tAdmin("total_earnings", "Ganhos Totais")}</Td>
+                <Td>{t('weekly.control.summary.rows.totalEarnings', 'Ganhos Totais')}</Td>
                 <Td isNumeric>{formatCurrency(totals.ganhosTotal)}</Td>
               </Tr>
               <Tr>
-                <Td>{tAdmin("iva_label", "IVA")}</Td>
+                <Td>{t('weekly.control.summary.rows.iva', 'IVA')}</Td>
                 <Td isNumeric color="red.600">-{formatCurrency(totals.ivaValor)}</Td>
               </Tr>
               <Tr>
-                <Td>{tAdmin("admin_expenses_label", "Despesas Administrativas")}</Td>
+                <Td>{t('weekly.control.summary.rows.adminExpenses', 'Despesas Administrativas')}</Td>
                 <Td isNumeric color="red.600">-{formatCurrency(totals.despesasAdm)}</Td>
               </Tr>
               <Tr>
-                <Td>{tAdmin("fuel_label", "Combustível")}</Td>
+                <Td>{t('weekly.control.summary.rows.fuel', 'Combustível')}</Td>
                 <Td isNumeric color="orange.600">-{formatCurrency(totals.combustivel)}</Td>
               </Tr>
               <Tr>
-                <Td>{tAdmin("tolls_label", "Portagens")}</Td>
+                <Td>{t('weekly.control.summary.rows.tolls', 'Portagens')}</Td>
                 <Td isNumeric color="orange.600">-{formatCurrency(totals.viaverde)}</Td>
               </Tr>
               <Tr>
-                <Td>{tAdmin("rent_label", "Aluguel")}</Td>
+                <Td>{t('weekly.control.summary.rows.rent', 'Aluguel')}</Td>
                 <Td isNumeric color="purple.600">-{formatCurrency(totals.aluguel)}</Td>
               </Tr>
               <Tr>
-                <Td fontWeight="bold">{tAdmin("net_value", "Valor Líquido")}</Td>
+                <Td fontWeight="bold">{t('weekly.control.summary.rows.netValue', 'Valor Líquido')}</Td>
                 <Td isNumeric fontWeight="bold" color="blue.600">{formatCurrency(totals.repasse)}</Td>
               </Tr>
             </Tbody>
@@ -672,24 +689,24 @@ export default function WeeklyPage({
       {/* Tabela de Registros */}
       <Card>
         <CardHeader>
-          <Heading size="md">{tAdmin("weekly_records_title")}</Heading>
+          <Heading size="md">{t('weekly.control.records.title', 'Registos Semanais')}</Heading>
         </CardHeader>
         <CardBody>
           {isLoading ? (
             <Box textAlign="center" py={10}>
               <Spinner size="xl" color="blue.500" />
-              <Text mt={4} color="gray.600">{tAdmin("loading_data")}</Text>
+              <Text mt={4} color="gray.600">{t('weekly.control.records.loading', 'A carregar dados...')}</Text>
             </Box>
           ) : records.length === 0 ? (
             <Box textAlign="center" py={10}>
-              <Text color="gray.600">{tAdmin("no_records_found")}</Text>
+              <Text color="gray.600">{t('weekly.control.records.empty', 'Nenhum registo encontrado para esta semana.')}</Text>
               <Button
                 mt={4}
                 leftIcon={<Icon as={FiUpload} />}
                 onClick={() => router.push("/admin/data")}
                 colorScheme="blue"
               >
-                {tAdmin("import_data_button")}
+                {t('weekly.control.actions.importData', 'Importar dados')}
               </Button>
             </Box>
           ) : isMobile ? (
@@ -710,7 +727,7 @@ export default function WeeklyPage({
                   onUpdateField={handleUpdateRecord}
                   generatingRecordId={generatingRecordId}
                   updatingPaymentId={updatingPaymentId}
-                  tAdmin={tAdmin}
+                  t={t}
                 />
               ))}
             </VStack>
@@ -720,21 +737,21 @@ export default function WeeklyPage({
               <Table variant="simple" size="sm">
                 <Thead>
                   <Tr>
-                    <Th>{tAdmin('weekly_records.columns.driver', 'Motorista')}</Th>
-                    <Th>{tAdmin('weekly_records.columns.type', 'Tipo')}</Th>
-                    <Th isNumeric>{tAdmin("weekly_records.columns.platformUber", "Uber")}</Th>
-                    <Th isNumeric>{tAdmin("weekly_records.columns.platformBolt", "Bolt")}</Th>
-                    <Th isNumeric>{tAdmin("weekly_records.columns.platformPrio", "PRIO")}</Th>
-                    <Th isNumeric>{tAdmin("weekly_records.columns.platformViaVerde", "ViaVerde")}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.iva', 'IVA')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.fuel', 'Combustível')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.tolls', 'Portagens')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.rent', 'Aluguel')}</Th>
-                    <Th isNumeric>{tAdmin('weekly_records.columns.net', 'Valor líquido')}</Th>
-                    <Th>{tAdmin('weekly_records.columns.status', 'Status')}</Th>
-                    <Th textAlign="right">{tAdmin('weekly_records.columns.actions', 'Ações')}</Th>
+                    <Th>{t('weekly.control.records.columns.driver', 'Motorista')}</Th>
+                    <Th>{t('weekly.control.records.columns.type', 'Tipo')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.platformUber', 'Uber')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.platformBolt', 'Bolt')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.platformPrio', 'PRIO')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.platformViaVerde', 'ViaVerde')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.grossTotal', 'Ganhos brutos')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.iva', 'IVA')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.adminExpenses', 'Taxa adm.')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.rent', 'Aluguel')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.net', 'Valor líquido')}</Th>
+                    <Th>{t('weekly.control.records.columns.status', 'Status')}</Th>
+                    <Th textAlign="right">{t('weekly.control.records.columns.actions', 'Ações')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -842,10 +859,10 @@ export default function WeeklyPage({
                             leftIcon={<Icon as={FiFileText} />}
                             onClick={() => handleViewPayslip(record)}
                             isLoading={generatingRecordId === record.id}
-                            loadingText={tAdmin("weekly_records.messages.generateInProgress", "A gerar...")}
+                            loadingText={t('weekly.control.records.messages.generateInProgress', 'A gerar...')}
                             size="xs"
                           >
-                            {tAdmin("weekly_records.actions.generatePayslip", "Contracheque")}
+                            {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
                           </Button>
                           <Button
                             leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
@@ -855,8 +872,8 @@ export default function WeeklyPage({
                             size="xs"
                           >
                             {record.paymentStatus === 'paid'
-                              ? tAdmin("weekly_records.actions.markAsPending", "Pendente")
-                              : tAdmin("weekly_records.actions.markAsPaid", "Pago")}
+                              ? t('weekly.control.records.actions.markAsPending', 'Pendente')
+                              : t('weekly.control.records.actions.markAsPaid', 'Pago')}
                           </Button>
                         </ButtonGroup>
                       </Td>
@@ -875,7 +892,7 @@ export default function WeeklyPage({
         <ModalContent>
           <ModalHeader>
             <VStack align="start" spacing={1}>
-              <Text>{tAdmin("weekly_records.payslipModal.title", "Contracheque Semanal")}</Text>
+              <Text>{t('weekly.control.payslipModal.title', 'Contracheque Semanal')}</Text>
               {selectedPayslipRecord && (
                 <Text fontSize="sm" fontWeight="normal" color="gray.600">
                   {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
@@ -892,14 +909,14 @@ export default function WeeklyPage({
                   onClick={handleDownloadPayslip}
                   colorScheme="blue"
                 >
-                  {tAdmin("weekly_records.payslipModal.downloadPdf", "Baixar PDF")}
+                  {t('weekly.control.payslipModal.downloadPdf', 'Baixar PDF')}
                 </Button>
                 <Button
                   leftIcon={<Icon as={FiMail} />}
                   onClick={handleSendPayslipEmail}
                   colorScheme="green"
                 >
-                  {tAdmin("weekly_records.payslipModal.sendEmail", "Enviar por E-mail")}
+                  {t('weekly.control.payslipModal.sendEmail', 'Enviar por e-mail')}
                 </Button>
               </HStack>
               {payslipPdfUrl ? (
@@ -909,8 +926,8 @@ export default function WeeklyPage({
               ) : (
                 <Alert status="info" borderRadius="lg">
                   <AlertIcon />
-                  <AlertTitle>{tAdmin("weekly_records.payslipModal.noPdfTitle", "Nenhum PDF gerado")}</AlertTitle>
-                  <AlertDescription>{tAdmin("weekly_records.payslipModal.noPdfDesc", "Gere o contracheque para visualizá-lo aqui.")}</AlertDescription>
+                  <AlertTitle>{t('weekly.control.payslipModal.noPdfTitle', 'Nenhum PDF gerado')}</AlertTitle>
+                  <AlertDescription>{t('weekly.control.payslipModal.noPdfDesc', 'Gere o contracheque para visualizá-lo aqui.')}</AlertDescription>
                 </Alert>
               )}
             </VStack>
@@ -922,19 +939,19 @@ export default function WeeklyPage({
         <Card variant="outline">
           <CardHeader>
             <Heading size="sm" color="orange.500">
-              {tAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
+              {t('weekly.control.unassigned.title', 'Registos sem motorista associado')}
             </Heading>
           </CardHeader>
           <CardBody>
             <Text fontSize="sm" color="gray.600" mb={3}>
-              {tAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
+              {t('weekly.control.unassigned.description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
             </Text>
             <Table size="sm" variant="simple">
               <Thead>
                 <Tr>
-                  <Th>{tAdmin('platform_label', 'Plataforma')}</Th>
-                  <Th>{tAdmin('reference_label', 'Referência')}</Th>
-                  <Th>{tAdmin('value_label', 'Valor')}</Th>
+                  <Th>{t('weekly.control.unassigned.columns.platform', 'Plataforma')}</Th>
+                  <Th>{t('weekly.control.unassigned.columns.reference', 'Referência')}</Th>
+                  <Th>{t('weekly.control.unassigned.columns.value', 'Valor')}</Th>
                 </Tr>
               </Thead>
               <Tbody>

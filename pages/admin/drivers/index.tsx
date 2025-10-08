@@ -102,7 +102,6 @@ export default function DriversPage({
   initialDrivers,
   tCommon,
   tPage,
-  tAdmin: tAdminProp,
 }: DriversPageProps) {
   const router = useRouter();
   const toast = useToast();
@@ -115,8 +114,8 @@ export default function DriversPage({
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   
-  const t = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
-  const tAdmin = useMemo(() => createSafeTranslator(tPage ?? tAdminProp), [tPage, tAdminProp]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -133,7 +132,7 @@ export default function DriversPage({
       }
     } catch (error) {
       toast({
-        title: t('error_loading_drivers'),
+        title: t('drivers.list.toasts.loadError', 'Erro ao carregar motoristas'),
         status: 'error',
         duration: 3000,
       });
@@ -167,7 +166,7 @@ export default function DriversPage({
 
       if (response.ok) {
         toast({
-          title: t('driver_updated'),
+          title: t('drivers.list.toasts.updateSuccess', 'Motorista atualizado'),
           status: 'success',
           duration: 2000,
         });
@@ -176,15 +175,15 @@ export default function DriversPage({
       } else {
         const error = await response.json();
         toast({
-          title: t('error_updating_driver'),
-          description: error.error,
+          title: t('drivers.list.toasts.updateError', 'Erro ao atualizar motorista'),
+          description: error.error || t('drivers.list.toasts.updateErrorDescription', 'Não foi possível atualizar os dados do motorista.'),
           status: 'error',
           duration: 3000,
         });
       }
     } catch (error) {
       toast({
-        title: t('error_updating_driver'),
+        title: t('drivers.list.toasts.updateError', 'Erro ao atualizar motorista'),
         status: 'error',
         duration: 3000,
       });
@@ -216,34 +215,37 @@ export default function DriversPage({
       suspended: 'red',
     };
     const labelMap: Record<string, string> = {
-      active: t('status_active'),
-      pending: t('status_pending'),
-      inactive: t('status_inactive'),
-      suspended: t('status_suspended'),
+      active: tc('status.active', 'Ativo'),
+      pending: tc('status.pending', 'Pendente'),
+      inactive: tc('status.inactive', 'Inativo'),
+      suspended: tc('status.suspended', 'Suspenso'),
     };
+
+    const currentStatus = status || 'pending';
+
     return (
-      <Badge colorScheme={colorMap[status || 'pending'] || 'gray'}>
-        {labelMap[status || 'pending'] || status || 'N/A'}
+      <Badge colorScheme={colorMap[currentStatus] || 'gray'}>
+        {labelMap[currentStatus] || currentStatus || 'N/A'}
       </Badge>
     );
   };
 
-  const getTypeBadge = (type?: string) => {
-    return (
-      <Badge colorScheme={type === 'renter' ? 'purple' : 'green'}>
-        {type === 'renter' ? t('type_renter') : t('type_affiliate')}
-      </Badge>
-    );
-  };
+  const getTypeBadge = (type?: string) => (
+    <Badge colorScheme={type === 'renter' ? 'purple' : 'green'}>
+      {type === 'renter'
+        ? t('drivers.type.renter', 'Locatário')
+        : t('drivers.type.affiliate', 'Afiliado')}
+    </Badge>
+  );
 
   const filteredDrivers = drivers; // Data is already filtered by fetchDrivers
 
   return (
     <AdminLayout
-      title={tAdmin('drivers_management_title')}
-      subtitle={tAdmin('drivers_management_subtitle')}
+      title={t('drivers.title', 'Controle de Motoristas')}
+      subtitle={t('drivers.subtitle', 'Gestão completa dos motoristas ativos')}
       breadcrumbs={[
-        { label: tAdmin('drivers_management_title') }
+        { label: t('drivers.title', 'Controle de Motoristas') }
       ]}
       side={
         <Button
@@ -251,7 +253,7 @@ export default function DriversPage({
           colorScheme="red"
           onClick={() => router.push('/admin/drivers/add')}
         >
-          {tAdmin('add_driver')}
+          {t('drivers.addDriver', 'Adicionar Motorista')}
         </Button>
       }
     >
@@ -264,7 +266,7 @@ export default function DriversPage({
                 <HStack>
                   <Icon as={FiSearch} color="gray.400" />
                   <Input
-                    placeholder={t('search_drivers_placeholder')}
+                    placeholder={t('drivers.list.filters.searchPlaceholder', 'Pesquisar motoristas...')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -273,19 +275,19 @@ export default function DriversPage({
 
               <Box minW="150px">
                 <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                  <option value="all">{t('all_statuses')}</option>
-                  <option value="active">{t('status_active')}</option>
-                  <option value="pending">{t('status_pending')}</option>
-                  <option value="inactive">{t('status_inactive')}</option>
-                  <option value="suspended">{t('status_suspended')}</option>
+                  <option value="all">{t('drivers.list.filters.status.all', 'Todos os status')}</option>
+                  <option value="active">{tc('status.active', 'Ativo')}</option>
+                  <option value="pending">{tc('status.pending', 'Pendente')}</option>
+                  <option value="inactive">{tc('status.inactive', 'Inativo')}</option>
+                  <option value="suspended">{tc('status.suspended', 'Suspenso')}</option>
                 </Select>
               </Box>
 
               <Box minW="150px">
                 <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                  <option value="all">{t('all_types')}</option>
-                  <option value="affiliate">{t('type_affiliate')}</option>
-                  <option value="renter">{t('type_renter')}</option>
+                  <option value="all">{t('drivers.list.filters.type.all', 'Todos os tipos')}</option>
+                  <option value="affiliate">{t('drivers.type.affiliate', 'Afiliado')}</option>
+                  <option value="renter">{t('drivers.type.renter', 'Locatário')}</option>
                 </Select>
               </Box>
 
@@ -294,7 +296,7 @@ export default function DriversPage({
                 onClick={fetchDrivers}
                 isLoading={isLoading}
               >
-                {t('refresh')}
+                {t('drivers.list.actions.refresh', 'Atualizar')}
               </Button>
             </HStack>
           </CardBody>
@@ -307,16 +309,16 @@ export default function DriversPage({
               <Table variant="simple" size="sm">
                 <Thead>
                   <Tr>
-                    <Th>{t('name')}</Th>
-                    <Th>{t('email')}</Th>
-                    <Th>{t('status')}</Th>
-                    <Th>{t('type')}</Th>
+                    <Th>{t('drivers.table.name', 'Nome')}</Th>
+                    <Th>{t('drivers.table.email', 'Email')}</Th>
+                    <Th>{t('drivers.table.status', 'Status')}</Th>
+                    <Th>{t('drivers.table.type', 'Tipo')}</Th>
                     <Th>Uber</Th>
                     <Th>Bolt</Th>
                     <Th>MyPrio</Th>
                     <Th>ViaVerde</Th>
                     <Th>IBAN</Th>
-                    <Th>{t('actions')}</Th>
+                    <Th>{t('drivers.table.actions', 'Ações')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -324,7 +326,9 @@ export default function DriversPage({
                     <Tr>
                       <Td colSpan={10} textAlign="center" py={8}>
                         <Text color="gray.500">
-                          {isLoading ? t('loading') : t('no_drivers_found')}
+                          {isLoading
+                            ? tc('messages.loading', 'A carregar...')
+                            : t('drivers.list.empty', 'Nenhum motorista encontrado')}
                         </Text>
                       </Td>
                     </Tr>
@@ -347,7 +351,7 @@ export default function DriversPage({
                                 'N/A'}
                             </Text>
                             {driver.integrations?.uber?.enabled && (
-                              <Badge size="xs" colorScheme="green">{t('active')}</Badge>
+                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
                             )}
                           </VStack>
                         </Td>
@@ -357,7 +361,7 @@ export default function DriversPage({
                               {driver.integrations?.bolt?.key || 'N/A'}
                             </Text>
                             {driver.integrations?.bolt?.enabled && (
-                              <Badge size="xs" colorScheme="green">{t('active')}</Badge>
+                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
                             )}
                           </VStack>
                         </Td>
@@ -369,7 +373,7 @@ export default function DriversPage({
                                 'N/A'}
                             </Text>
                             {driver.integrations?.myprio?.enabled && (
-                              <Badge size="xs" colorScheme="green">{t('active')}</Badge>
+                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
                             )}
                           </VStack>
                         </Td>
@@ -379,7 +383,7 @@ export default function DriversPage({
                               {driver.integrations?.viaverde?.key || 'N/A'}
                             </Text>
                             {driver.integrations?.viaverde?.enabled && (
-                              <Badge size="xs" colorScheme="green">{t('active')}</Badge>
+                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
                             )}
                           </VStack>
                         </Td>
@@ -391,9 +395,9 @@ export default function DriversPage({
                           </Text>
                         </Td>
                         <Td>
-                          <Tooltip label={t('edit')}>
+                          <Tooltip label={tc('actions.edit', 'Editar')}>
                             <IconButton
-                              aria-label={t('edit_driver')}
+                              aria-label={t('drivers.editDriver', 'Editar Motorista')}
                               icon={<Icon as={FiEdit} />}
                               size="sm"
                               variant="ghost"
@@ -415,7 +419,7 @@ export default function DriversPage({
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />
         <ModalContent maxH="90vh" overflowY="auto">
-          <ModalHeader>{tAdmin('edit_driver')}</ModalHeader>
+          <ModalHeader>{t('drivers.editDriver', 'Editar Motorista')}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {editingDriver && (
@@ -423,19 +427,19 @@ export default function DriversPage({
                 <TabList>
                   <Tab>
                     <Icon as={FiUser} mr={2} />
-                    {t('basic')}
+                    {t('drivers.tabs.basic', 'Dados básicos')}
                   </Tab>
                   <Tab>
                     <Icon as={FiCreditCard} mr={2} />
-                    {t('integrations')}
+                    {t('drivers.tabs.integrations', 'Integrações')}
                   </Tab>
                   <Tab>
                     <Icon as={FiTruck} mr={2} />
-                    {t('vehicle')}
+                    {t('drivers.tabs.vehicle', 'Veículo')}
                   </Tab>
                   <Tab>
                     <Icon as={FiDollarSign} mr={2} />
-                    {t('banking')}
+                    {t('drivers.tabs.banking', 'Dados bancários')}
                   </Tab>
                 </TabList>
 
@@ -444,31 +448,31 @@ export default function DriversPage({
                   <TabPanel>
                     <VStack spacing={4}>
                       <FormControl>
-                        <FormLabel>{t('status')}</FormLabel>
+                        <FormLabel>{t('drivers.form.status.label', 'Status')}</FormLabel>
                         <Select
                           value={editingDriver.status || 'pending'}
                           onChange={(e) => updateField('status', e.target.value)}
                         >
-                          <option value="pending">{t('status_pending')}</option>
-                          <option value="active">{t('status_active')}</option>
-                          <option value="inactive">{t('status_inactive')}</option>
-                          <option value="suspended">{t('status_suspended')}</option>
+                          <option value="pending">{tc('status.pending', 'Pendente')}</option>
+                          <option value="active">{tc('status.active', 'Ativo')}</option>
+                          <option value="inactive">{tc('status.inactive', 'Inativo')}</option>
+                          <option value="suspended">{tc('status.suspended', 'Suspenso')}</option>
                         </Select>
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('type')}</FormLabel>
+                        <FormLabel>{t('drivers.form.type.label', 'Tipo')}</FormLabel>
                         <Select
                           value={editingDriver.type || 'affiliate'}
                           onChange={(e) => updateField('type', e.target.value)}
                         >
-                          <option value="affiliate">{t('type_affiliate')}</option>
-                          <option value="renter">{t('type_renter')}</option>
+                          <option value="affiliate">{t('drivers.type.affiliate', 'Afiliado')}</option>
+                          <option value="renter">{t('drivers.type.renter', 'Locatário')}</option>
                         </Select>
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('full_name')}</FormLabel>
+                        <FormLabel>{t('drivers.form.fullName.label', 'Nome completo')}</FormLabel>
                         <Input
                           value={editingDriver.fullName || editingDriver.name || ''}
                           onChange={(e) => updateField('fullName', e.target.value)}
@@ -476,7 +480,7 @@ export default function DriversPage({
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('email')}</FormLabel>
+                        <FormLabel>{t('drivers.form.email.label', 'Email')}</FormLabel>
                         <Input
                           type="email"
                           value={editingDriver.email || ''}
@@ -485,7 +489,7 @@ export default function DriversPage({
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('phone')}</FormLabel>
+                        <FormLabel>{t('drivers.form.phone.label', 'Telefone')}</FormLabel>
                         <Input
                           value={editingDriver.phone || ''}
                           onChange={(e) => updateField('phone', e.target.value)}
@@ -500,7 +504,7 @@ export default function DriversPage({
                       {/* Uber */}
                       <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
                         <HStack justify="space-between" mb={3}>
-                          <Heading size="sm">Uber</Heading>
+                          <Heading size="sm">{t('drivers.integrations.uber.title', 'Uber')}</Heading>
                           <Switch
                             isChecked={editingDriver.integrations?.uber?.enabled || false}
                             onChange={(e) => updateField('integrations.uber.enabled', e.target.checked)}
@@ -508,9 +512,9 @@ export default function DriversPage({
                           />
                         </HStack>
                         <FormControl>
-                          <FormLabel fontSize="sm">{t('driver_uuid')}</FormLabel>
+                          <FormLabel fontSize="sm">{t('drivers.integrations.uber.keyLabel', 'UUID do motorista')}</FormLabel>
                           <Input
-                            placeholder="Ex: 12345678-1234-1234-1234-123456789012"
+                            placeholder={t('drivers.integrations.uber.placeholder', 'Ex: 12345678-1234-1234-1234-123456789012')}
                             value={editingDriver.integrations?.uber?.key || ''}
                             onChange={(e) => updateField('integrations.uber.key', e.target.value)}
                             isDisabled={!editingDriver.integrations?.uber?.enabled}
@@ -518,7 +522,7 @@ export default function DriversPage({
                             fontSize="sm"
                           />
                           <Text fontSize="xs" color="gray.600" mt={1}>
-                            {t('uber_uuid_description')}
+                            {t('drivers.integrations.uber.description', 'Identificador do motorista utilizado nas exportações da Uber.')}
                           </Text>
                         </FormControl>
                       </Box>
@@ -526,7 +530,7 @@ export default function DriversPage({
                       {/* Bolt */}
                       <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
                         <HStack justify="space-between" mb={3}>
-                          <Heading size="sm">Bolt</Heading>
+                          <Heading size="sm">{t('drivers.integrations.bolt.title', 'Bolt')}</Heading>
                           <Switch
                             isChecked={editingDriver.integrations?.bolt?.enabled || false}
                             onChange={(e) => updateField('integrations.bolt.enabled', e.target.checked)}
@@ -534,17 +538,17 @@ export default function DriversPage({
                           />
                         </HStack>
                         <FormControl>
-                          <FormLabel fontSize="sm">{t('driver_email')}</FormLabel>
+                          <FormLabel fontSize="sm">{t('drivers.integrations.bolt.keyLabel', 'Email associado')}</FormLabel>
                           <Input
                             type="email"
-                            placeholder="email@exemplo.com"
+                            placeholder={t('drivers.integrations.bolt.placeholder', 'email@exemplo.com')}
                             value={editingDriver.integrations?.bolt?.key || ''}
                             onChange={(e) => updateField('integrations.bolt.key', e.target.value)}
                             isDisabled={!editingDriver.integrations?.bolt?.enabled}
                             fontSize="sm"
                           />
                           <Text fontSize="xs" color="gray.600" mt={1}>
-                            {t('bolt_email_description')}
+                            {t('drivers.integrations.bolt.description', 'Email utilizado para autenticar a integração com a Bolt.')}
                           </Text>
                         </FormControl>
                       </Box>
@@ -552,7 +556,7 @@ export default function DriversPage({
                       {/* MyPrio */}
                       <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
                         <HStack justify="space-between" mb={3}>
-                          <Heading size="sm">MyPrio</Heading>
+                          <Heading size="sm">{t('drivers.integrations.myprio.title', 'MyPrio')}</Heading>
                           <Switch
                             isChecked={editingDriver.integrations?.myprio?.enabled || false}
                             onChange={(e) => updateField('integrations.myprio.enabled', e.target.checked)}
@@ -560,9 +564,9 @@ export default function DriversPage({
                           />
                         </HStack>
                         <FormControl>
-                          <FormLabel fontSize="sm">{t('card_number')}</FormLabel>
+                          <FormLabel fontSize="sm">{t('drivers.integrations.myprio.keyLabel', 'Número do cartão')}</FormLabel>
                           <Input
-                            placeholder="Ex: 1234567890123456"
+                            placeholder={t('drivers.integrations.myprio.placeholder', 'Ex: 1234567890123456')}
                             value={editingDriver.integrations?.myprio?.key || ''}
                             onChange={(e) => updateField('integrations.myprio.key', e.target.value)}
                             isDisabled={!editingDriver.integrations?.myprio?.enabled}
@@ -570,7 +574,7 @@ export default function DriversPage({
                             fontSize="sm"
                           />
                           <Text fontSize="xs" color="gray.600" mt={1}>
-                            {t('myprio_card_description')}
+                            {t('drivers.integrations.myprio.description', 'Número do cartão para abastecimentos PRIO.')}
                           </Text>
                         </FormControl>
                       </Box>
@@ -578,7 +582,7 @@ export default function DriversPage({
                       {/* ViaVerde */}
                       <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
                         <HStack justify="space-between" mb={3}>
-                          <Heading size="sm">ViaVerde</Heading>
+                          <Heading size="sm">{t('drivers.integrations.viaverde.title', 'ViaVerde')}</Heading>
                           <Switch
                             isChecked={editingDriver.integrations?.viaverde?.enabled || false}
                             onChange={(e) => updateField('integrations.viaverde.enabled', e.target.checked)}
@@ -586,9 +590,9 @@ export default function DriversPage({
                           />
                         </HStack>
                         <FormControl>
-                          <FormLabel fontSize="sm">{t('vehicle_plate')}</FormLabel>
+                          <FormLabel fontSize="sm">{t('drivers.integrations.viaverde.keyLabel', 'Matrícula vinculada')}</FormLabel>
                           <Input
-                            placeholder="Ex: AB-12-CD"
+                            placeholder={t('drivers.integrations.viaverde.placeholder', 'Ex: AB-12-CD')}
                             value={editingDriver.integrations?.viaverde?.key || editingDriver.vehicle?.plate || ''}
                             onChange={(e) => updateField('integrations.viaverde.key', e.target.value)}
                             isDisabled={!editingDriver.integrations?.viaverde?.enabled}
@@ -596,7 +600,7 @@ export default function DriversPage({
                             fontSize="sm"
                           />
                           <Text fontSize="xs" color="gray.600" mt={1}>
-                            {t('viaverde_plate_description')}
+                            {t('drivers.integrations.viaverde.description', 'Matrícula utilizada para associar transações de portagens.')}
                           </Text>
                         </FormControl>
                       </Box>
@@ -607,41 +611,41 @@ export default function DriversPage({
                   <TabPanel>
                     <VStack spacing={4}>
                       <FormControl>
-                        <FormLabel>{t('vehicle_plate')}</FormLabel>
+                        <FormLabel>{t('drivers.vehicle.plate.label', 'Matrícula')}</FormLabel>
                         <Input
-                          placeholder="Ex: AB-12-CD"
+                          placeholder={t('drivers.vehicle.plate.placeholder', 'Ex: AB-12-CD')}
                           value={editingDriver.vehicle?.plate || ''}
                           onChange={(e) => updateField('vehicle.plate', e.target.value)}
                           fontFamily="mono"
                         />
                         <Text fontSize="xs" color="gray.600" mt={1}>
-                          {t('vehicle_plate_description')}
+                          {t('drivers.vehicle.plate.description', 'Utilizado para associações com ViaVerde e controle de frota.')}
                         </Text>
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('vehicle_make')}</FormLabel>
+                        <FormLabel>{t('drivers.vehicle.make.label', 'Marca')}</FormLabel>
                         <Input
-                          placeholder="Ex: Toyota"
+                          placeholder={t('drivers.vehicle.make.placeholder', 'Ex: Toyota')}
                           value={editingDriver.vehicle?.make || ''}
                           onChange={(e) => updateField('vehicle.make', e.target.value)}
                         />
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('vehicle_model')}</FormLabel>
+                        <FormLabel>{t('drivers.vehicle.model.label', 'Modelo')}</FormLabel>
                         <Input
-                          placeholder="Ex: Prius"
+                          placeholder={t('drivers.vehicle.model.placeholder', 'Ex: Prius')}
                           value={editingDriver.vehicle?.model || ''}
                           onChange={(e) => updateField('vehicle.model', e.target.value)}
                         />
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('vehicle_year')}</FormLabel>
+                        <FormLabel>{t('drivers.vehicle.year.label', 'Ano')}</FormLabel>
                         <Input
                           type="number"
-                          placeholder="Ex: 2020"
+                          placeholder={t('drivers.vehicle.year.placeholder', 'Ex: 2020')}
                           value={editingDriver.vehicle?.year || ''}
                           onChange={(e) => updateField('vehicle.year', parseInt(e.target.value) || undefined)}
                         />
@@ -653,22 +657,22 @@ export default function DriversPage({
                   <TabPanel>
                     <VStack spacing={4}>
                       <FormControl>
-                        <FormLabel>IBAN</FormLabel>
+                        <FormLabel>{t('drivers.bank.iban.label', 'IBAN')}</FormLabel>
                         <Input
-                          placeholder="PT50 0000 0000 0000 0000 0000 0"
+                          placeholder={t('drivers.bank.iban.placeholder', 'PT50 0000 0000 0000 0000 0000 0')}
                           value={editingDriver.banking?.iban || ''}
                           onChange={(e) => updateField('banking.iban', e.target.value)}
                           fontFamily="mono"
                         />
                         <Text fontSize="xs" color="gray.600" mt={1}>
-                          {t('iban_description')}
+                          {t('drivers.bank.iban.description', 'Utilizado para pagamentos e repasses semanais.')}
                         </Text>
                       </FormControl>
 
                       <FormControl>
-                        <FormLabel>{t('account_holder')}</FormLabel>
+                        <FormLabel>{t('drivers.bank.accountHolder.label', 'Titular da conta')}</FormLabel>
                         <Input
-                          placeholder={t('account_holder_placeholder')}
+                          placeholder={t('drivers.bank.accountHolder.placeholder', 'Nome completo do titular')}
                           value={editingDriver.banking?.accountHolder || ''}
                           onChange={(e) => updateField('banking.accountHolder', e.target.value)}
                         />
@@ -682,10 +686,10 @@ export default function DriversPage({
 
           <ModalFooter>
             <Button variant="ghost" mr={3} onClick={onClose}>
-              {t('cancel')}
+              {tc('actions.cancel', 'Cancelar')}
             </Button>
             <Button colorScheme="blue" onClick={handleSave}>
-              {t('save')}
+              {tc('actions.save', 'Guardar')}
             </Button>
           </ModalFooter>
         </ModalContent>

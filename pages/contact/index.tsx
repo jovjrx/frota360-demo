@@ -148,7 +148,7 @@ export default function ContactPage({ tPage, tCommon }: PublicPageProps) {
                   Endereço
                 </Text>
                 <Text fontSize="sm" color="gray.600">
-                  Lisboa, Portugal<br />
+                  Porto, Portugal<br />
                   Serviços de mobilidade TVDE
                 </Text>
               </Box>
