@@ -13,6 +13,8 @@ export interface PayslipData {
   // Receitas
   uberTotal: number;
   boltTotal: number;
+  prioTotal: number;
+  viaverdeTotal: number;
   ganhosTotal: number;
   
   // IVA e Comissão
@@ -64,205 +66,216 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         doc.fontSize(24).fillColor('#48BB78').text('CONDUZ', { align: 'center' });
       }
       
-      doc.moveDown(3);
+      doc.moveDown(1.5);
       
       // Alvorada Magistral LDA
-      doc.fontSize(10).fillColor('#666666')
-        .text('Alvorada Magistral LDA', { align: 'center' });
+      doc.fontSize(10).fillColor("#666666")
+        .text("Alvorada Magistral LDA", { align: "center" });
       
       // Website
-      doc.fontSize(9).fillColor('#4472C4')
-        .text('conduz.pt', { align: 'center' });
+      doc.fontSize(9).fillColor("#4472C4")
+        .text("conduz.pt", { align: "center" });
       
-      doc.moveDown(2);
+      doc.moveDown(1.5);
       
       // ============================================================================
       // TÍTULO
       // ============================================================================
       
-      doc.fontSize(14).fillColor('#000000').font('Helvetica-Bold')
-        .text('RESUMO SEMANAL', { align: 'center' });
+      doc.fontSize(14).fillColor("#000000").font("Helvetica-Bold")
+        .text("RESUMO SEMANAL", { align: "center" });
       
-      doc.moveDown(1.5);
+      doc.moveDown(1);
       
       // ============================================================================
       // DADOS DO MOTORISTA
       // ============================================================================
       
-      doc.fontSize(11).font('Helvetica-Bold')
-        .text('DADOS DO MOTORISTA');
+      doc.fontSize(11).font("Helvetica-Bold")
+        .text("DADOS DO MOTORISTA");
       
       doc.moveDown(0.5);
       
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10).font("Helvetica");
       
       const leftCol = 50;
       const rightCol = 150;
       let y = doc.y;
       
-      doc.text('Nome:', leftCol, y, { continued: true, width: 100 });
+      doc.text("Nome:", leftCol, y, { continued: true, width: 100 });
       doc.text(data.driverName, rightCol, y);
-      y += 20;
+      y += 18; // Increased spacing
       
-      doc.text('Tipo:', leftCol, y, { continued: true, width: 100 });
-      doc.text(data.driverType === 'renter' ? 'Locatário' : 'Afiliado', rightCol, y);
-      y += 20;
+      doc.text("Tipo:", leftCol, y, { continued: true, width: 100 });
+      doc.text(data.driverType === "renter" ? "Locatário" : "Afiliado", rightCol, y);
+      y += 18; // Increased spacing
       
       if (data.vehiclePlate) {
-        doc.text('Veículo:', leftCol, y, { continued: true, width: 100 });
+        doc.text("Veículo:", leftCol, y, { continued: true, width: 100 });
         doc.text(data.vehiclePlate, rightCol, y);
-        y += 20;
+        y += 18; // Increased spacing
       }
       
-      doc.text('Período:', leftCol, y, { continued: true, width: 100 });
+      doc.text("Período:", leftCol, y, { continued: true, width: 100 });
       doc.text(`${data.weekStart} - ${data.weekEnd}`, rightCol, y);
       
-      doc.moveDown(2);
+      doc.moveDown(1.5);
       
       // ============================================================================
       // RECEITAS
       // ============================================================================
       
-      doc.fontSize(11).font('Helvetica-Bold')
-        .text('RECEITAS');
+      doc.fontSize(11).font("Helvetica-Bold")
+        .text("RECEITAS");
       
       doc.moveDown(0.5);
       
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10).font("Helvetica");
       
       y = doc.y;
-      doc.text('Uber (Total Repassado)', leftCol, y);
-      doc.text(`${data.uberTotal.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-      y += 20;
+      doc.text("Uber (Total Repassado)", leftCol, y);
+      doc.text(`${data.uberTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      y += 18;
       
-      doc.text('Bolt (Total Repassado)', leftCol, y);
-      doc.text(`${data.boltTotal.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-      y += 20;
+      doc.text("Bolt (Total Repassado)", leftCol, y);
+      doc.text(`${data.boltTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      y += 18;
+
+      if (data.prioTotal > 0) {
+        doc.text("PRIO (Total Repassado)", leftCol, y);
+        doc.text(`${data.prioTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+        y += 18;
+      }
+
+      if (data.viaverdeTotal > 0) {
+        doc.text("ViaVerde (Total Repassado)", leftCol, y);
+        doc.text(`${data.viaverdeTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+        y += 18;
+      }
       
-      doc.font('Helvetica-Bold');
-      doc.text('GANHOS TOTAL', leftCol, y);
-      doc.text(`${data.ganhosTotal.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
+      doc.moveDown(0.5);
+      doc.font("Helvetica-Bold");
+      doc.text("GANHOS TOTAL", leftCol, y);
+      doc.text(`${data.ganhosTotal.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
       
       doc.moveDown(1);
       
       // IVA e Comissão
-      doc.font('Helvetica');
+      doc.font("Helvetica");
       y = doc.y;
       
-      doc.text('IVA (6%)', leftCol, y);
-      doc.text(`-${data.ivaValor.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-      y += 20;
+      doc.text("IVA (6%)", leftCol, y);
+      doc.text(`-${data.ivaValor.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      y += 18;
       
-      doc.font('Helvetica-Bold');
-      doc.text('Ganhos - IVA', leftCol, y);
-      doc.text(`${data.ganhosMenosIva.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-      y += 20;
+      doc.font("Helvetica-Bold");
+      doc.text("Ganhos - IVA", leftCol, y);
+      doc.text(`${data.ganhosMenosIva.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      y += 18;
       
-      doc.font('Helvetica');
-      doc.text('Despesas Administrativas (7%)', leftCol, y);
-      doc.text(`-${data.comissao.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
+      doc.font("Helvetica");
+      doc.text("Despesas Administrativas (7%)", leftCol, y);
+      doc.text(`-${data.comissao.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
       
-      doc.moveDown(2);
-      
+      doc.moveDown(1.5);    
       // ============================================================================
       // DESCONTOS
       // ============================================================================
-      
-      doc.fontSize(11).font('Helvetica-Bold')
-        .text('DESCONTOS');
+      doc.fontSize(11).font("Helvetica-Bold")
+        .text("DESCONTOS");
       
       doc.moveDown(0.5);
       
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10).font("Helvetica");
       
       y = doc.y;
       
-      doc.text('Combustível', leftCol, y);
-      doc.text(`-${data.combustivel.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-      y += 20;
+      doc.text("Combustível", leftCol, y);
+      doc.text(`-${data.combustivel.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+      y += 18;
       
       if (data.aluguel > 0) {
-        doc.text('Aluguel Semanal', leftCol, y);
-        doc.text(`-${data.aluguel.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
-        y += 20;
+        doc.text("Aluguel Semanal", leftCol, y);
+        doc.text(`-${data.aluguel.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+        y += 18;
       }
       
       if (data.viaverde > 0) {
-        doc.text('Portagens (ViaVerde)', leftCol, y);
-        doc.text(`-${data.viaverde.toFixed(2)} €`, 500, y, { width: 95, align: 'right' });
+        doc.text("Portagens (ViaVerde)", leftCol, y);
+        doc.text(`-${data.viaverde.toFixed(2)} €`, 500, y, { width: 95, align: "right" });
+        y += 18;
       }
       
-      doc.moveDown(2);
-      
+      doc.moveDown(1.5);   
       // ============================================================================
       // VALOR LÍQUIDO
       // ============================================================================
       
-      doc.fontSize(14).font('Helvetica-Bold');
+      doc.fontSize(14).font("Helvetica-Bold");
       
       // Box com fundo azul claro
       const boxY = doc.y;
       doc.rect(leftCol, boxY, 495, 30)
-        .fillAndStroke('#C8DCFF', '#4472C4');
+        .fillAndStroke("#C8DCFF", "#4472C4");
       
-      doc.fillColor('#000000')
-        .text('VALOR LÍQUIDO A RECEBER', leftCol + 10, boxY + 8);
-      doc.text(`${data.repasse.toFixed(2)} €`, 500, boxY + 8, { width: 85, align: 'right' });
+      doc.fillColor("#000000")
+        .text("VALOR LÍQUIDO A RECEBER", leftCol + 10, boxY + 8);
+      doc.text(`${data.repasse.toFixed(2)} €`, 500, boxY + 8, { width: 85, align: "right" });
       
-      doc.moveDown(2);
+      doc.moveDown(1.5);
       
       // ============================================================================
       // DADOS BANCÁRIOS
       // ============================================================================
       
-      doc.fontSize(11).font('Helvetica-Bold')
-        .text('DADOS BANCÁRIOS');
+      doc.fontSize(11).font("Helvetica-Bold")
+        .text("DADOS BANCÁRIOS");
       
       doc.moveDown(0.5);
       
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10).font("Helvetica");
       
       y = doc.y;
-      doc.text('IBAN:', leftCol, y, { continued: true, width: 100 });
+      doc.text("IBAN:", leftCol, y, { continued: true, width: 100 });
       doc.text(data.iban, rightCol, y);
-      y += 20;
+      y += 18;
       
-      doc.text('Status:', leftCol, y, { continued: true, width: 100 });
-      doc.fillColor(data.status === 'paid' ? '#48BB78' : '#D69E2E')
-        .text(data.status === 'paid' ? 'PAGO' : 'PENDENTE', rightCol, y);
+      doc.text("Status:", leftCol, y, { continued: true, width: 100 });
+      doc.fillColor(data.status === "paid" ? "#48BB78" : "#D69E2E")
+        .text(data.status === "paid" ? "PAGO" : "PENDENTE", rightCol, y);
       
-      doc.fillColor('#000000');
-      doc.moveDown(2);
+      doc.fillColor("#000000");
+      doc.moveDown(1.5);
       
       // ============================================================================
       // OBSERVAÇÕES
       // ============================================================================
       
-      doc.fontSize(9).font('Helvetica-Oblique').fillColor('#666666');
+      doc.fontSize(9).font("Helvetica-Oblique").fillColor("#666666");
       
       const obs = [
-        'OBSERVAÇÕES:',
-        '- Valores Uber e Bolt são os totais repassados pelas plataformas',
-        '- IVA de 6% aplicado sobre ganhos totais',
-        '- Despesas administrativas de 7% aplicadas sobre (Ganhos - IVA)',
-        data.aluguel > 0 ? '- Aluguel semanal incluído (Locatário)' : '- Sem aluguel (Afiliado)',
+        "OBSERVAÇÕES:",
+        "- Valores Uber e Bolt são os totais repassados pelas plataformas",
+        "- IVA de 6% aplicado sobre ganhos totais",
+        "- Despesas administrativas de 7% aplicadas sobre (Ganhos - IVA)",
+        data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
         data.viaverde > 0 
           ? `- Portagens (ViaVerde): ${data.viaverde.toFixed(2)} € - Pago pela empresa (descontado)`
-          : '- Portagens (ViaVerde): Pago pelo motorista (não descontado)'
+          : "- Portagens (ViaVerde): Pago pelo motorista (não descontado)"
       ];
       
-      doc.text(obs.join('\n'), leftCol, doc.y, { width: 495 });
+      doc.text(obs.join("\n"), leftCol, doc.y, { width: 495 });
       
       // ============================================================================
       // FOOTER
       // ============================================================================
       
-      doc.fontSize(8).fillColor('#999999')
+      doc.fontSize(8).fillColor("#999999")
         .text(
-          `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+          `Gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`,
           leftCol,
           doc.page.height - 30,
-          { align: 'center', width: 495 }
+          { align: "center", width: 495 }
         );
       
       doc.end();

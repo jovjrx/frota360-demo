@@ -294,7 +294,9 @@ export default async function handler(
         ganhosMenosIva: record.ganhosMenosIVA,
         comissao: record.despesasAdm,
         combustivel: record.combustivel,
+        prioTotal: record.combustivel, // PRIO é o mesmo que combustivel para o contracheque
         viaverde: record.viaverde,
+        viaverdeTotal: record.viaverde, // ViaVerde é o mesmo que viaverde para o contracheque
         aluguel: record.aluguel,
         repasse: record.repasse,
         iban: record.iban || "N/A",

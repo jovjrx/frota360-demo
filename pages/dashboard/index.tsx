@@ -26,11 +26,13 @@ import {
   FiCheckCircle,
   FiClock,
   FiDownload,
-} from '@chakra-ui/react';mport { useRouter } from 'next/router';
+} from 'react-icons/fi';
+import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
+import { useState } from 'react';
 
 interface Motorista {
   id: string;
@@ -80,7 +82,7 @@ export default function PainelDashboard({
       const response = await fetch(`/api/painel/contracheques/${payslipId}/pdf`);
 
       if (!response.ok) {
-        throw new Error(tPainel("dashboard.payslips.downloadError", "Não foi possível baixar o contracheque."));
+        throw new Error(tPainel("dashboard.payslips.downloadError"));
       }
 
       const blob = await response.blob();
@@ -98,8 +100,8 @@ export default function PainelDashboard({
       document.body.removeChild(a);
 
       toast({
-        title: tPainel("dashboard.payslips.downloadSuccessTitle", "Download Concluído!"),
-        description: tPainel("dashboard.payslips.downloadSuccessDesc", "Contracheque baixado com sucesso."),
+        title: tPainel("dashboard.payslips.downloadSuccessTitle"),
+        description: tPainel("dashboard.payslips.downloadSuccessDesc"),
         status: "success",
         duration: 3000,
       });
@@ -107,8 +109,8 @@ export default function PainelDashboard({
     } catch (error: any) {
       console.error("Erro ao baixar contracheque:", error);
       toast({
-        title: tPainel("dashboard.payslips.downloadErrorTitle", "Erro no Download"),
-        description: error?.message || tPainel("dashboard.payslips.downloadError", "Não foi possível baixar o contracheque."),
+        title: tPainel("dashboard.payslips.downloadErrorTitle"),
+        description: error?.message || tPainel("dashboard.payslips.downloadError"),
         status: "error",
         duration: 5000,
       });

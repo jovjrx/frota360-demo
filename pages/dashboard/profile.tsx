@@ -27,6 +27,7 @@ import { loadTranslations } from '@/lib/translations';
 import DriverLayout from '@/components/layouts/DriverLayout';
 import StandardModal from '@/components/modals/StandardModal';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { formatPortugalTime } from '@/lib/timezone';
 
 interface DriverProfileProps {
@@ -42,6 +43,7 @@ export default function DriverProfile({
 }: DriverProfileProps) {
   const tCommon = (key: string) => translations.common?.[key] || key;
   const tDriver = (key: string) => translations.driver?.[key] || key;
+  const router = useRouter();
   const toast = useToast();
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

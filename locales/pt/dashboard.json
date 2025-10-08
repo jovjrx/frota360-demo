@@ -1,9 +1,16 @@
-
-
-    "payslips": {
-      "downloadError": "Não foi possível baixar o contracheque.",
-      "downloadErrorTitle": "Erro no Download",
-      "downloadSuccessTitle": "Download Concluído!",
-      "downloadSuccessDesc": "Contracheque baixado com sucesso."
-    }
-
+{
+  "payslips": {
+    "downloadError": "Não foi possível baixar o contracheque.",
+    "downloadErrorTitle": "Erro no Download",
+    "downloadSuccessTitle": "Download Concluído!",
+    "downloadSuccessDesc": "Contracheque baixado com sucesso."
+  },
+  "dashboard": {
+    "last_payment": "Último Pagamento",
+    "current_week": "Semana Atual",
+    "view_payslips": "Ver Contracheques",
+    "tracking": "Rastreamento",
+    "my_data": "Meus Dados",
+    "download_payslip": "Baixar Contracheque"
+  }
+}

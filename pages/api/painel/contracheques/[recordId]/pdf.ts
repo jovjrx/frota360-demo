@@ -59,11 +59,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       driverName: driverData.fullName || `${driverData.firstName} ${driverData.lastName}`,
       driverType: driverData.type || 'affiliate',
       vehiclePlate: driverData.vehicle?.plate,
-      weekStart: new Date(recordData.weekStart).toLocaleDateString('pt-BR'),
-      weekEnd: new Date(recordData.weekEnd).toLocaleDateString('pt-BR'),
+      weekStart: recordData.weekStart,
+      weekEnd: recordData.weekEnd,
       
       uberTotal: recordData.uberTotal || 0,
       boltTotal: recordData.boltTotal || 0,
+      prioTotal: recordData.prio || 0, // Adicionado PRIO
+      viaverdeTotal: recordData.viaverde || 0, // Adicionado ViaVerde
       ganhosTotal: recordData.ganhosTotal || 0,
       
       ivaValor: recordData.ivaValor || 0,
@@ -71,9 +73,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       comissao: recordData.comissao || 0,
       
       combustivel: recordData.combustivel || 0,
-      viaverde: recordData.viaverde || 0,
-      aluguel: recordData.aluguel || 0,
-      
+      viaverde: recordData.viaverde || 0, // Adicionado para satisfazer a interface PayslipData
+      aluguel: recordData.aluguel || 0,   
       repasse: recordData.repasse || 0,
       
       iban: driverData.banking?.iban || 'N/A',

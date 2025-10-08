@@ -1,66 +1,82 @@
-
-
-    "weekly_records": {
-      "messages": {
-        "updateError": "Could not update record.",
-        "updateErrorTitle": "Error updating record",
-        "updateSuccess": "Record updated successfully!",
-        "markPaidSuccess": "Payment marked as completed.",
-        "markPendingSuccess": "Payment marked as pending."
-      }
+{
+  "weekly_records": {
+    "columns": {
+      "platformPrio": "PRIO",
+      "platformViaVerde": "ViaVerde",
+      "driverName": "Driver",
+      "driverType": "Type",
+      "vehiclePlate": "License Plate",
+      "uberTotal": "Uber",
+      "boltTotal": "Bolt",
+      "prioTotal": "PRIO",
+      "viaverdeTotal": "ViaVerde",
+      "ganhosTotal": "Total Earnings",
+      "ivaValor": "VAT",
+      "ganhosMenosIva": "Earnings - VAT",
+      "comissao": "Admin Expenses",
+      "combustivel": "Fuel",
+      "aluguel": "Rent",
+      "repasse": "Net Transfer",
+      "paymentStatus": "Payment Status",
+      "actions": "Actions"
+    },
+    "messages": {
+      "updateError": "Could not update record.",
+      "updateErrorTitle": "Error updating record",
+      "updateSuccess": "Record updated successfully!",
+      "markPaidSuccess": "Payment marked as completed.",
+      "markPendingSuccess": "Payment marked as pending.",
+      "sendEmailErrorTitle": "Error sending email",
+      "sendEmailErrorDesc": "No payslip selected or PDF not generated.",
+      "sendEmailError": "Could not send payslip by email.",
+      "sendEmailSuccessTitle": "Email sent!",
+      "sendEmailSuccessDesc": "Payslip sent successfully to the driver.",
+      "exportError": "Could not export payments spreadsheet.",
+      "exportErrorTitle": "Export error",
+      "exportSuccessTitle": "Export completed!",
+      "exportSuccessDesc": "The payments spreadsheet was exported successfully.",
+      "generateError": "Could not generate payslip.",
+      "error_loading_data": "Error loading data.",
+      "error_loading_data_title": "Error loading data",
+      "error_loading_data_description": "Could not load weekly data. Please try again.",
+      "select_week_error": "Please select a valid week to continue.",
+      "error_generating_summaries": "Error generating summaries.",
+      "summaries_filename_prefix": "summaries",
+      "summaries_generated_success_title": "Summaries generated!",
+      "summaries_generated_success_description": "Weekly summaries generated and downloaded successfully.",
+      "error_generating_summaries_title": "Error generating summaries",
+      "error_generating_summaries_description": "Could not generate weekly summaries. Please try again."
+    },
+    "payslipModal": {
+      "title": "Weekly Payslip",
+      "downloadPdf": "Download PDF",
+      "sendEmail": "Send by Email",
+      "noPdfTitle": "No PDF generated",
+      "noPdfDesc": "Generate the payslip to view it here."
+    },
+    "actions": {
+      "generatePayslip": "Generate Payslip",
+      "markAsPaid": "Mark as Paid",
+      "markAsPending": "Mark as Pending"
+    },
+    "types": {
+      "affiliate": "Affiliate",
+      "renter": "Renter"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
     }
-
-
-
-    "weekly_records": {
-      "messages": {
-        "sendEmailErrorTitle": "Error sending email",
-        "sendEmailErrorDesc": "No payslip selected or PDF not generated.",
-        "sendEmailError": "Could not send payslip by email.",
-        "sendEmailSuccessTitle": "Email sent!",
-        "sendEmailSuccessDesc": "Payslip sent successfully to the driver."
-      },
-      "payslipModal": {
-        "title": "Weekly Payslip",
-        "downloadPdf": "Download PDF",
-        "sendEmail": "Send by Email",
-        "noPdfTitle": "No PDF generated",
-        "noPdfDesc": "Generate the payslip to view it here."
-      }
-    }
-
-
-
-    "weekly_records": {
-      "messages": {
-        "exportError": "Could not export payments spreadsheet.",
-        "exportErrorTitle": "Export error",
-        "exportSuccessTitle": "Export completed!",
-        "exportSuccessDesc": "The payments spreadsheet was exported successfully."
-      }
-    }
-
-
-
-    "weekly_records": {
-      "columns": {
-        "platformPrio": "PRIO",
-        "platformViaVerde": "ViaVerde"
-      }
-    }
-
-
-
-    "export_payments_button": "Export Spreadsheet"
-
-
-
-    "weekly_summary_title": "Weekly Summary",
-    "summary_item": "Item",
-    "summary_value": "Value",
-    "iva_label": "VAT",
-    "admin_expenses_label": "Administrative Expenses",
-    "fuel_label": "Fuel",
-    "tolls_label": "Tolls",
-    "rent_label": "Rent"
-
+  },
+  "export_payments_button": "Export Spreadsheet",
+  "weekly_summary_title": "Weekly Summary",
+  "summary_item": "Item",
+  "summary_value": "Value",
+  "iva_label": "VAT",
+  "admin_expenses_label": "Administrative Expenses",
+  "fuel_label": "Fuel",
+  "tolls_label": "Tolls",
+  "rent_label": "Rent",
+  "select_week_placeholder": "Select Week"
+}

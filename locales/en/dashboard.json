@@ -1,9 +1,16 @@
-
-
-    "payslips": {
-      "downloadError": "Could not download payslip.",
-      "downloadErrorTitle": "Download Error",
-      "downloadSuccessTitle": "Download Complete!",
-      "downloadSuccessDesc": "Payslip downloaded successfully."
-    }
-
+{
+  "payslips": {
+    "downloadError": "Could not download payslip.",
+    "downloadErrorTitle": "Download Error",
+    "downloadSuccessTitle": "Download Complete!",
+    "downloadSuccessDesc": "Payslip downloaded successfully."
+  },
+  "dashboard": {
+    "last_payment": "Last Payment",
+    "current_week": "Current Week",
+    "view_payslips": "View Payslips",
+    "tracking": "Tracking",
+    "my_data": "My Data",
+    "download_payslip": "Download Payslip"
+  }
+}

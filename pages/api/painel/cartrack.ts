@@ -32,21 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ message: 'Cartrack integration not configured' });
     }
 
-    const cartrackClient = getCartrackClient(
-      cartrackData.username,
-      cartrackData.apiKey,
-      cartrackData.baseUrl
-    );
+    const cartrackClient = await getCartrackClient();
 
-    // Fetch vehicle ID from Cartrack using plate
-    const vehicles = await cartrackClient.getVehicles();
-    const targetVehicle = vehicles.find(v => v.registrationNumber === driver.vehicle.plate);
-
-    if (!targetVehicle) {
-      return res.status(404).json({ message: 'Vehicle not found in Cartrack for this driver' });
-    }
-
-    const vehicleId = targetVehicle.id;
+    const vehicleId = driver.vehicle.plate; // Usar a placa como ID do veículo para o mock
 
     // Fetch latest position
     const latestPosition = await cartrackClient.getLatestPosition(vehicleId);
@@ -54,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch trips for the last 24 hours
     const now = new Date();
     const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-    const trips = await cartrackClient.getTrips(vehicleId, yesterday, now);
+    const trips = await cartrackClient.getTrips(vehicleId, yesterday.toISOString(), now.toISOString());
 
     res.status(200).json({
       latestPosition,

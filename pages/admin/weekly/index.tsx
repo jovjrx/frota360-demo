@@ -28,6 +28,8 @@ import {
   Spinner,
   Alert,
   AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import {
   FiRefreshCw,
@@ -46,10 +48,6 @@ import EditableNumberField from '@/components/admin/EditableNumberField';
 import StatCard from '@/components/admin/StatCard';
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
 import { FiDownload, FiMail } from 'react-icons/fi';
-import EditableNumberField from '@/components/admin/EditableNumberField';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react';
-import { FiDownload, FiMail } from 'react-icons/fi';
-import EditableNumberField from '@/components/admin/EditableNumberField';
 
 interface WeekOption {
   label: string;
@@ -172,9 +170,9 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
-        title: tAdmin('error_loading_data_title'),
-        description: error instanceof Error ? error.message : tAdmin('error_loading_data_description'),
-        status: 'error',
+        title: tAdmin("error_loading_data_title"),
+        description: error instanceof Error ? error.message : tAdmin("error_loading_data_description"),
+        status: "error",
         duration: 3000,
       });
     } finally {
@@ -230,18 +228,20 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
       document.body.removeChild(a);
 
       toast({
-        title: tAdmin('summaries_generated_success_title'),
-        description: tAdmin('summaries_generated_success_description'),
-        status: 'success',
-        duration: 5000,
+        title: tAdmin("summaries_generated_success_title"),
+        description: tAdmin("summaries_generated_success_description"),
+        status: "success",
+        duration: 4000,
+        isClosable: true,
       });
-    } catch (error) {
-      console.error('Erro ao gerar resumos:', error);
+    } catch (error: any) {
+      console.error("Erro ao gerar resumos:", error);
       toast({
-        title: tAdmin('error_generating_summaries_title'),
-        description: error instanceof Error ? error.message : tAdmin('error_generating_summaries_description'),
-        status: 'error',
+        title: tAdmin("error_generating_summaries_title"),
+        description: error instanceof Error ? error.message : tAdmin("error_generating_summaries_description"),
+        status: "error",
         duration: 5000,
+        isClosable: true,
       });
     } finally {
       setIsGeneratingResumos(false);
@@ -356,7 +356,10 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         description: error?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."),
         status: "error",
         duration: 5000,
+        isClosable: true,
       });
+    } finally {
+      // Any cleanup if needed
     }
   };
 
@@ -412,67 +415,13 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         description: error?.message || tAdmin("weekly_records.messages.exportError", "Não foi possível exportar a planilha de pagamentos."),
         status: "error",
         duration: 5000,
+        isClosable: true,
       });
+    } finally {
+      // Any cleanup if needed
     }
   };
 
-  const handleUpdateRecord = async (recordId: string, updates: Partial<DriverWeeklyRecord>) => {
-    if (!selectedPayslipRecord || !payslipPdfUrl) {
-      toast({
-        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
-        description: tAdmin("weekly_records.messages.sendEmailErrorDesc", "Nenhum contracheque selecionado ou PDF não gerado."),
-        status: "error",
-        duration: 4000,
-      });
-      return;
-    }
-
-    try {
-      // Convert blob URL to base64 for sending via API
-      const response = await fetch(payslipPdfUrl);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = reader.result?.toString().split(",")[1];
-
-        const emailRes = await fetch("/api/admin/weekly/send-payslip-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            recordId: selectedPayslipRecord.id,
-            driverEmail: selectedPayslipRecord.driverEmail,
-            driverName: selectedPayslipRecord.driverName,
-            weekStart: selectedPayslipRecord.weekStart,
-            weekEnd: selectedPayslipRecord.weekEnd,
-            pdfBase64: base64data,
-          }),
-        });
-
-        if (!emailRes.ok) {
-          const errorPayload = await emailRes.json().catch(() => ({}));
-          throw new Error(errorPayload?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."));
-        }
-
-        toast({
-          title: tAdmin("weekly_records.messages.sendEmailSuccessTitle", "E-mail enviado!"),
-          description: tAdmin("weekly_records.messages.sendEmailSuccessDesc", "Contracheque enviado com sucesso para o motorista."),
-          status: "success",
-          duration: 4000,
-        });
-      };
-    } catch (error: any) {
-      console.error("Erro ao enviar e-mail:", error);
-      toast({
-        title: tAdmin("weekly_records.messages.sendEmailErrorTitle", "Erro ao enviar e-mail"),
-        description: error?.message || tAdmin("weekly_records.messages.sendEmailError", "Não foi possível enviar o contracheque por e-mail."),
-        status: "error",
-        duration: 5000,
-      });
-    }
-  };
 
   const handleUpdateRecord = async (recordId: string, updates: Partial<DriverWeeklyRecord>) => {
     try {
@@ -507,6 +456,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         title: tAdmin("weekly_records.messages.updateSuccess", "Registro atualizado com sucesso!"),
         status: "success",
         duration: 3000,
+        isClosable: true,
       });
     } catch (error: any) {
       toast({
@@ -514,6 +464,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
         description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o registro."),
         status: "error",
         duration: 5000,
+        isClosable: true,
       });
     }
   };
@@ -563,86 +514,18 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
       );
 
       toast({
-        title:
-          nextStatus === "paid"
-            ? tAdmin("weekly_records.actions.markAsPaid", "Marcar como pago")
-            : tAdmin("weekly_records.actions.markAsPending", "Marcar como pendente"),
-        description:
-          nextStatus === "paid"
-            ? tAdmin("weekly_records.messages.markPaidSuccess", "Pagamento marcado como concluído.")
-            : tAdmin("weekly_records.messages.markPendingSuccess", "Pagamento marcado como pendente."),
+        title: tAdmin("weekly_records.messages.updateSuccess", "Status de pagamento atualizado com sucesso!"),
         status: "success",
-        duration: 4000,
+        duration: 3000,
+        isClosable: true,
       });
     } catch (error: any) {
       toast({
-        title: tAdmin("weekly_records.actions.markAsPaid", "Marcar como pago"),
+        title: tAdmin("weekly_records.messages.updateErrorTitle", "Erro ao atualizar status de pagamento"),
         description: error?.message || tAdmin("weekly_records.messages.updateError", "Não foi possível atualizar o status do pagamento."),
         status: "error",
-        duration: 4000,
-      });
-    } finally {
-      setUpdatingPaymentId(null);
-    }
-  };
-    if (!record?.id) {
-      return;
-    }
-
-    const nextStatus = record.paymentStatus === 'paid' ? 'pending' : 'paid';
-    setUpdatingPaymentId(record.id);
-
-    try {
-      const response = await fetch('/api/admin/weekly/records', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          record,
-          updates: { paymentStatus: nextStatus },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || tAdmin('weekly_records.messages.updateError', 'Não foi possível atualizar o status do pagamento.'));
-      }
-
-      const payload = await response.json();
-      const updated: DriverWeeklyRecord = payload?.record;
-
-      setRecords((prev) =>
-        prev.map((item) =>
-          item.id === record.id
-            ? {
-                ...item,
-                paymentStatus: updated?.paymentStatus ?? nextStatus,
-                paymentDate: updated?.paymentDate ?? item.paymentDate,
-                updatedAt: updated?.updatedAt ?? item.updatedAt,
-              }
-            : item
-        )
-      );
-
-      toast({
-        title:
-          nextStatus === 'paid'
-            ? tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago')
-            : tAdmin('weekly_records.actions.markAsPending', 'Marcar como pendente'),
-        description:
-          nextStatus === 'paid'
-            ? tAdmin('weekly_records.messages.markPaidSuccess', 'Pagamento marcado como concluído.')
-            : tAdmin('weekly_records.messages.markPendingSuccess', 'Pagamento marcado como pendente.'),
-        status: 'success',
-        duration: 4000,
-      });
-    } catch (error: any) {
-      toast({
-        title: tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago'),
-        description: error?.message || tAdmin('weekly_records.messages.updateError', 'Não foi possível atualizar o status do pagamento.'),
-        status: 'error',
-        duration: 4000,
+        duration: 5000,
+        isClosable: true,
       });
     } finally {
       setUpdatingPaymentId(null);
@@ -871,7 +754,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                         <Td isNumeric>
                           {formatCurrency(
                             record.platformData
-                              .filter((p) => p.platform === 'prio')
+                              .filter((p) => p.platform === 'myprio')
                               .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
                           )}
                         </Td>
@@ -885,47 +768,47 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                       <EditableNumberField 
                         value={record.ganhosTotal}
                         onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                       />
                       <EditableNumberField 
                         value={record.ivaValor}
                         onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="red.600"
                         prefix="-"
                       />
                       <EditableNumberField 
                         value={record.despesasAdm}
                         onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="red.600"
                         prefix="-"
                       />
                       <EditableNumberField 
                         value={record.combustivel}
                         onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="orange.600"
                         prefix="-"
                       />
                       <EditableNumberField 
                         value={record.viaverde}
                         onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="orange.600"
                         prefix="-"
                       />
                       <EditableNumberField 
                         value={record.aluguel}
                         onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="purple.600"
                         prefix="-"
                       />
                       <EditableNumberField 
                         value={record.repasse}
                         onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}
-                        isPaid={isPaid}
+                        isPaid={record.paymentStatus === 'paid'}
                         color="blue.600"
                         fontWeight="bold"
                       />
@@ -945,7 +828,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                           <ButtonGroup size="xs" variant="outline" spacing={2} justifyContent="flex-end">
                             <Button
                               leftIcon={<Icon as={FiFileText} />}
-                              onClick={() => handleGeneratePayslip(record)}
+                              onClick={() => handleViewPayslip(record)}
                               isLoading={generatingRecordId === record.id}
                               loadingText={tAdmin('weekly_records.messages.generateInProgress', 'A gerar contracheque...')}
                             >

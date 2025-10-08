@@ -35,9 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const platformData = record.platformData ?? [];
 
-    const [uberTotal, boltTotal] = [
+    const [uberTotal, boltTotal, prioTotal, viaverdeTotal] = [
       sumPlatform(platformData, 'uber'),
       sumPlatform(platformData, 'bolt'),
+      sumPlatform(platformData, 'myprio'),
+      sumPlatform(platformData, 'viaverde'),
     ];
 
     const driverDoc = record.driverId ? await adminDb.collection('drivers').doc(record.driverId).get() : null;
@@ -51,6 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       weekEnd: formatDate(record.weekEnd),
       uberTotal,
       boltTotal,
+      prioTotal,
+      viaverdeTotal,
       ganhosTotal: record.ganhosTotal,
       ivaValor: record.ivaValor,
       ganhosMenosIva: record.ganhosMenosIVA,

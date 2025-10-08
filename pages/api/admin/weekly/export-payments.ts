@@ -1,6 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import * as XLSX from 'xlsx';
 import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { WeeklyNormalizedData } from '@/schemas/data-weekly';
+
+interface DriverRecord extends DriverWeeklyRecord {
+  driverType: 'affiliate' | 'renter';
+  vehicle: string;
+  platformData: WeeklyNormalizedData[];
+}
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Records and weekId are required' });
     }
 
-    const data = records.map((record: DriverWeeklyRecord) => ({
+    const data = records.map((record: DriverRecord) => ({
       'ID Motorista': record.driverId,
       'Nome Motorista': record.driverName,
       'Tipo Motorista': record.driverType === 'affiliate' ? 'Afiliado' : 'Locatário',
