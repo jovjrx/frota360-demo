@@ -496,8 +496,9 @@ function aggregateMyPrio(rows: any[], driverMaps: DriverMaps): AggregationResult
   const warnings = new Set<string>();
 
   rows.forEach((row, index) => {
-    const cardRaw = extractFirstAvailable(row, ['CARTÃO', 'Cartão', 'Card', 'CARD']);
+    const cardRaw = extractFirstAvailable(row, ['CARTAO', 'CARTÃO', 'Cartão', 'Card', 'CARD']);
     const plateRaw = extractFirstAvailable(row, [
+      'DESC CARTAO',
       'Matrícula',
       'MATRICULA',
       'Matricula',

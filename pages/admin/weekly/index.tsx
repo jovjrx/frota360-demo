@@ -438,8 +438,8 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
 
 // SSR com autenticação, traduções e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  // Gerar opções de semanas
-  const weekOptions = getWeekOptions(12);
+  // Gerar opções de semanas baseado nos dados reais
+  const weekOptions = await getWeekOptions(12);
   const currentWeek = weekOptions.length > 0 ? weekOptions[0].value : '';
 
   return {

@@ -196,30 +196,97 @@ export async function getUsersStats(): Promise<{
 }
 
 /**
- * Gerar opções de semanas
+ * Gerar opções de semanas baseado nos dados reais do Firebase
  */
-export function getWeekOptions(count: number = 12): WeekOption[] {
-  const options: WeekOption[] = [];
-  const today = new Date();
+export async function getWeekOptions(count: number = 12): Promise<WeekOption[]> {
+  const db = getFirestore();
+  
+  try {
+    // Buscar semanas que têm dados no rawFileArchive
+    const rawSnapshot = await db.collection('rawFileArchive')
+      .orderBy('weekStart', 'desc')
+      .limit(count * 4) // 4 plataformas por semana
+      .get();
+    
+    // Agrupar por weekId
+    const weeksMap = new Map<string, { weekStart: string; weekEnd: string }>();
+    
+    rawSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.weekId && data.weekStart && data.weekEnd) {
+        if (!weeksMap.has(data.weekId)) {
+          weeksMap.set(data.weekId, {
+            weekStart: data.weekStart,
+            weekEnd: data.weekEnd,
+          });
+        }
+      }
+    });
+    
+    // Converter para array e ordenar
+    const weeks = Array.from(weeksMap.entries()).map(([weekId, dates]) => {
+      const startDate = new Date(dates.weekStart);
+      const endDate = new Date(dates.weekEnd);
+      
+      return {
+        label: `${startDate.toLocaleDateString('pt-PT')} - ${endDate.toLocaleDateString('pt-PT')}`,
+        value: weekId,
+        start: dates.weekStart,
+        end: dates.weekEnd,
+      };
+    });
+    
+    // Ordenar por data de início (mais recente primeiro)
+    weeks.sort((a, b) => b.start.localeCompare(a.start));
+    
+    // Se não houver semanas, retornar a semana atual
+    if (weeks.length === 0) {
+      const today = new Date();
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - (today.getDay() || 7) + 1);
+      weekStart.setHours(0, 0, 0, 0);
 
-  for (let i = 0; i < count; i++) {
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      return [{
+        label: `${weekStart.toLocaleDateString('pt-PT')} - ${weekEnd.toLocaleDateString('pt-PT')}`,
+        value: getWeekId(weekStart),
+        start: weekStart.toISOString().split('T')[0],
+        end: weekEnd.toISOString().split('T')[0],
+      }];
+    }
+    
+    return weeks.slice(0, count);
+  } catch (error) {
+    console.error('Error fetching week options:', error);
+    // Fallback: retornar semana atual
+    const today = new Date();
     const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - (today.getDay() || 7) + 1 - (i * 7));
+    weekStart.setDate(today.getDate() - (today.getDay() || 7) + 1);
     weekStart.setHours(0, 0, 0, 0);
 
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     weekEnd.setHours(23, 59, 59, 999);
 
-    options.push({
+    return [{
       label: `${weekStart.toLocaleDateString('pt-PT')} - ${weekEnd.toLocaleDateString('pt-PT')}`,
-      value: `${weekStart.toISOString().split('T')[0]}_${weekEnd.toISOString().split('T')[0]}`,
+      value: getWeekId(weekStart),
       start: weekStart.toISOString().split('T')[0],
       end: weekEnd.toISOString().split('T')[0],
-    });
+    }];
   }
+}
 
-  return options;
+// Função auxiliar para gerar weekId
+function getWeekId(date: Date): string {
+  const year = date.getFullYear();
+  const startOfYear = new Date(year, 0, 1);
+  const days = Math.floor((date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+  return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
 }
 
 /**
