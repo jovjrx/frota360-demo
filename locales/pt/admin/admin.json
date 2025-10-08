@@ -405,6 +405,45 @@
   "net_value": "Valor líquido",
   "total_to_pay": "Total a pagar",
   "weekly_records_title": "Registos consolidados",
+  "weekly_records": {
+    "columns": {
+      "driver": "Motorista",
+      "type": "Tipo",
+      "platformUber": "Uber",
+      "platformBolt": "Bolt",
+      "grossTotal": "Ganhos brutos",
+      "iva": "IVA",
+      "adminExpenses": "Taxa adm.",
+      "fuel": "Combustível",
+      "tolls": "Portagens",
+      "rent": "Aluguel",
+      "net": "Valor líquido",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "types": {
+      "affiliate": "Afiliado",
+      "renter": "Locatário"
+    },
+    "paymentStatus": {
+      "pending": "Pendente",
+      "paid": "Pago",
+      "cancelled": "Cancelado"
+    },
+    "actions": {
+      "generatePayslip": "Gerar contracheque",
+      "markAsPaid": "Marcar como pago",
+      "markAsPending": "Marcar como pendente",
+      "viewDetails": "Ver detalhes"
+    },
+    "messages": {
+      "markPaidSuccess": "Pagamento marcado como concluído.",
+      "markPendingSuccess": "Pagamento marcado como pendente.",
+      "updateError": "Não foi possível atualizar o status do pagamento.",
+      "generateError": "Não foi possível gerar o contracheque.",
+      "generateInProgress": "A gerar contracheque..."
+    }
+  },
   "loading_data": "A carregar dados...",
   "no_records_found": "Nenhum registo encontrado para esta semana.",
   "error_loading_data": "Não foi possível carregar os dados.",

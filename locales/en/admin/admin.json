@@ -360,6 +360,45 @@
   "net_value": "Net value",
   "total_to_pay": "Total to pay",
   "weekly_records_title": "Consolidated records",
+  "weekly_records": {
+    "columns": {
+      "driver": "Driver",
+      "type": "Type",
+      "platformUber": "Uber",
+      "platformBolt": "Bolt",
+      "grossTotal": "Gross earnings",
+      "iva": "VAT",
+      "adminExpenses": "Admin fee",
+      "fuel": "Fuel",
+      "tolls": "Tolls",
+      "rent": "Rent",
+      "net": "Net value",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "types": {
+      "affiliate": "Affiliate",
+      "renter": "Renter"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "generatePayslip": "Generate payslip",
+      "markAsPaid": "Mark as paid",
+      "markAsPending": "Mark as pending",
+      "viewDetails": "View details"
+    },
+    "messages": {
+      "markPaidSuccess": "Payment marked as paid.",
+      "markPendingSuccess": "Payment marked as pending.",
+      "updateError": "Couldn't update the payment status.",
+      "generateError": "Couldn't generate the payslip.",
+      "generateInProgress": "Generating payslip..."
+    }
+  },
   "loading_data": "Loading data...",
   "no_records_found": "No records found for this week.",
   "error_loading_data": "Unable to load the data.",

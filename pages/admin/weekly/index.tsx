@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Heading,
@@ -18,6 +18,7 @@ import {
   Badge,
   Button,
   Select,
+  ButtonGroup,
   Icon,
   Stat,
   StatLabel,
@@ -32,6 +33,8 @@ import {
   FiRefreshCw,
   FiUpload,
   FiFileText,
+  FiCheckCircle,
+  FiRotateCcw,
 } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
@@ -62,20 +65,62 @@ interface WeeklyPageProps extends AdminPageProps {
   initialRecords: DriverRecord[];
 }
 
+const PAYMENT_STATUS_COLOR: Record<DriverWeeklyRecord['paymentStatus'], string> = {
+  pending: 'orange',
+  paid: 'green',
+  cancelled: 'red',
+};
+
+const makeSafeT = (dictionary?: Record<string, any>) => (
+  key: string,
+  fallback?: string,
+  variables?: Record<string, any>
+) => {
+  if (!dictionary) return fallback ?? key;
+  const value = getTranslation(dictionary, key, variables);
+  return value === key ? (fallback ?? key) : value;
+};
+
 export default function WeeklyPage({ user, translations, locale, weekOptions, currentWeek, initialRecords }: WeeklyPageProps) {
   const [filterWeek, setFilterWeek] = useState(currentWeek);
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingResumos, setIsGeneratingResumos] = useState(false);
   const [unassigned, setUnassigned] = useState<WeeklyNormalizedData[]>([]);
+  const [generatingRecordId, setGeneratingRecordId] = useState<string | null>(null);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
   const toast = useToast();
   const router = useRouter();
+  const t = useMemo(() => makeSafeT(translations.common), [translations.common]);
+  const tAdmin = useMemo(() => makeSafeT(translations.admin), [translations.admin]);
+  const typeLabels = useMemo(
+    () => ({
+      affiliate: tAdmin('weekly_records.types.affiliate', 'Afiliado'),
+      renter: tAdmin('weekly_records.types.renter', 'Locatário'),
+    }),
+    [tAdmin]
+  );
 
-  const t = (key: string, variables?: Record<string, any>) => getTranslation(translations.common, key, variables) || key;
-  const tAdmin = (key: string, variables?: Record<string, any>) => getTranslation(translations.admin, key, variables) || key;
-  const translateAdmin = (key: string, fallback: string) => {
-    const value = tAdmin(key);
-    return value === key ? fallback : value;
+  const statusLabels = useMemo(
+    () => ({
+      pending: tAdmin('weekly_records.paymentStatus.pending', 'Pendente'),
+      paid: tAdmin('weekly_records.paymentStatus.paid', 'Pago'),
+      cancelled: tAdmin('weekly_records.paymentStatus.cancelled', 'Cancelado'),
+    }),
+    [tAdmin]
+  );
+
+  const formatDateLabel = (value: string | undefined, localeValue: string) => {
+    if (!value) return '—';
+    try {
+      return new Intl.DateTimeFormat(localeValue, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(value));
+    } catch (error) {
+      return value;
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -141,7 +186,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
       const selectedWeek = weekOptions.find(w => w.value === filterWeek);
       if (!selectedWeek) {
         toast({
-          title: t('error_title'),
+          title: tAdmin('errors.title', 'Erro'),
           description: tAdmin('select_week_error'),
           status: 'error',
           duration: 3000,
@@ -192,6 +237,112 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
       });
     } finally {
       setIsGeneratingResumos(false);
+    }
+  };
+
+  const handleGeneratePayslip = async (record: DriverRecord) => {
+    if (!record?.id) {
+      return;
+    }
+
+    setGeneratingRecordId(record.id);
+    try {
+      const response = await fetch('/api/admin/weekly/generate-single', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ record }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload?.message || tAdmin('weekly_records.messages.generateError', 'Não foi possível gerar o contracheque.'));
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contracheque_${record.driverName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}_${record.weekStart}_a_${record.weekEnd}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: tAdmin('weekly_records.actions.generatePayslip', 'Gerar contracheque'),
+        description: error?.message || tAdmin('weekly_records.messages.generateError', 'Não foi possível gerar o contracheque.'),
+        status: 'error',
+        duration: 4000,
+      });
+    } finally {
+      setGeneratingRecordId(null);
+    }
+  };
+
+  const handleTogglePaymentStatus = async (record: DriverRecord) => {
+    if (!record?.id) {
+      return;
+    }
+
+    const nextStatus = record.paymentStatus === 'paid' ? 'pending' : 'paid';
+    setUpdatingPaymentId(record.id);
+
+    try {
+      const response = await fetch('/api/admin/weekly/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          record,
+          updates: { paymentStatus: nextStatus },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload?.message || tAdmin('weekly_records.messages.updateError', 'Não foi possível atualizar o status do pagamento.'));
+      }
+
+      const payload = await response.json();
+      const updated: DriverWeeklyRecord = payload?.record;
+
+      setRecords((prev) =>
+        prev.map((item) =>
+          item.id === record.id
+            ? {
+                ...item,
+                paymentStatus: updated?.paymentStatus ?? nextStatus,
+                paymentDate: updated?.paymentDate ?? item.paymentDate,
+                updatedAt: updated?.updatedAt ?? item.updatedAt,
+              }
+            : item
+        )
+      );
+
+      toast({
+        title:
+          nextStatus === 'paid'
+            ? tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago')
+            : tAdmin('weekly_records.actions.markAsPending', 'Marcar como pendente'),
+        description:
+          nextStatus === 'paid'
+            ? tAdmin('weekly_records.messages.markPaidSuccess', 'Pagamento marcado como concluído.')
+            : tAdmin('weekly_records.messages.markPendingSuccess', 'Pagamento marcado como pendente.'),
+        status: 'success',
+        duration: 4000,
+      });
+    } catch (error: any) {
+      toast({
+        title: tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago'),
+        description: error?.message || tAdmin('weekly_records.messages.updateError', 'Não foi possível atualizar o status do pagamento.'),
+        status: 'error',
+        duration: 4000,
+      });
+    } finally {
+      setUpdatingPaymentId(null);
     }
   };
 
@@ -263,7 +414,7 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                   isLoading={isLoading}
                   size="sm"
                 >
-                  {t('update_button')}
+                  {tAdmin('dashboard.actions.refresh', 'Atualizar')}
                 </Button>
                 <Button
                   leftIcon={<Icon as={FiFileText} />}
@@ -354,17 +505,19 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                 <Table variant="simple" size="sm">
                   <Thead>
                     <Tr>
-                      <Th>{t("driver")}</Th>
-                      <Th>{t("type")}</Th>
-                      <Th isNumeric>Uber</Th>
-                      <Th isNumeric>Bolt</Th>
-                      <Th isNumeric>{tAdmin("total_earnings")}</Th>
-                      <Th isNumeric>{tAdmin("iva_short")}</Th>
-                      <Th isNumeric>{tAdmin("adm_expenses_short")}</Th>
-                      <Th isNumeric>{tAdmin("fuel_label")}</Th>
-                      <Th isNumeric>{tAdmin("tolls_label")}</Th>
-                      <Th isNumeric>{tAdmin("rent_label")}</Th>
-                      <Th isNumeric>{tAdmin("net_value")}</Th>
+                      <Th>{tAdmin('weekly_records.columns.driver', 'Motorista')}</Th>
+                      <Th>{tAdmin('weekly_records.columns.type', 'Tipo')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.platformUber', 'Uber')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.platformBolt', 'Bolt')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.grossTotal', 'Ganhos brutos')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.iva', 'IVA')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.adminExpenses', 'Taxa adm.')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.fuel', 'Combustível')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.tolls', 'Portagens')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.rent', 'Aluguel')}</Th>
+                      <Th isNumeric>{tAdmin('weekly_records.columns.net', 'Valor líquido')}</Th>
+                      <Th>{tAdmin('weekly_records.columns.status', 'Status')}</Th>
+                      <Th textAlign="right">{tAdmin('weekly_records.columns.actions', 'Ações')}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -375,12 +528,24 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                           <Text fontSize="xs" color="gray.600">{record.vehicle}</Text>
                         </Td>
                         <Td>
-                          <Badge colorScheme={record.driverType === "renter" ? "purple" : "green"}>
-                            {record.driverType === "renter" ? t("type_renter") : t("type_affiliate")}
+                          <Badge colorScheme={record.driverType === 'renter' ? 'purple' : 'green'}>
+                            {typeLabels[record.driverType]}
                           </Badge>
                         </Td>
-                        <Td isNumeric>{formatCurrency(record.platformData.filter(p => p.platform === "uber").reduce((acc, curr) => acc + (curr.totalValue || 0), 0))}</Td>
-                        <Td isNumeric>{formatCurrency(record.platformData.filter(p => p.platform === "bolt").reduce((acc, curr) => acc + (curr.totalValue || 0), 0))}</Td>
+                        <Td isNumeric>
+                          {formatCurrency(
+                            record.platformData
+                              .filter((p) => p.platform === 'uber')
+                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                          )}
+                        </Td>
+                        <Td isNumeric>
+                          {formatCurrency(
+                            record.platformData
+                              .filter((p) => p.platform === 'bolt')
+                              .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+                          )}
+                        </Td>
                         <Td isNumeric fontWeight="bold">{formatCurrency(record.ganhosTotal)}</Td>
                         <Td isNumeric color="red.600">-{formatCurrency(record.ivaValor)}</Td>
                         <Td isNumeric color="red.600">-{formatCurrency(record.despesasAdm)}</Td>
@@ -389,6 +554,40 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
                         <Td isNumeric color="purple.600">-{formatCurrency(record.aluguel)}</Td>
                         <Td isNumeric fontWeight="bold" color="blue.600">
                           {formatCurrency(record.repasse)}
+                        </Td>
+                        <Td>
+                          <VStack align="flex-start" spacing={1}>
+                            <Badge colorScheme={PAYMENT_STATUS_COLOR[record.paymentStatus] || 'gray'}>
+                              {statusLabels[record.paymentStatus] || record.paymentStatus}
+                            </Badge>
+                            {record.paymentDate && (
+                              <Text fontSize="xs" color="gray.500">
+                                {formatDateLabel(record.paymentDate, locale || 'pt-PT')}
+                              </Text>
+                            )}
+                          </VStack>
+                        </Td>
+                        <Td>
+                          <ButtonGroup size="xs" variant="outline" spacing={2} justifyContent="flex-end">
+                            <Button
+                              leftIcon={<Icon as={FiFileText} />}
+                              onClick={() => handleGeneratePayslip(record)}
+                              isLoading={generatingRecordId === record.id}
+                              loadingText={tAdmin('weekly_records.messages.generateInProgress', 'A gerar contracheque...')}
+                            >
+                              {tAdmin('weekly_records.actions.generatePayslip', 'Gerar contracheque')}
+                            </Button>
+                            <Button
+                              leftIcon={<Icon as={record.paymentStatus === 'paid' ? FiRotateCcw : FiCheckCircle} />}
+                              colorScheme={record.paymentStatus === 'paid' ? 'yellow' : 'green'}
+                              onClick={() => handleTogglePaymentStatus(record)}
+                              isLoading={updatingPaymentId === record.id}
+                            >
+                              {record.paymentStatus === 'paid'
+                                ? tAdmin('weekly_records.actions.markAsPending', 'Marcar como pendente')
+                                : tAdmin('weekly_records.actions.markAsPaid', 'Marcar como pago')}
+                            </Button>
+                          </ButtonGroup>
                         </Td>
                       </Tr>
                     ))}
@@ -403,19 +602,19 @@ export default function WeeklyPage({ user, translations, locale, weekOptions, cu
           <Card variant="outline">
             <CardHeader>
               <Heading size="sm" color="orange.500">
-                {translateAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
+                {tAdmin('weekly_unassigned_title', 'Registos sem motorista associado')}
               </Heading>
             </CardHeader>
             <CardBody>
               <Text fontSize="sm" color="gray.600" mb={3}>
-                {translateAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
+                {tAdmin('weekly_unassigned_description', 'Revise estes lançamentos e atualize os cadastros para mapear corretamente.')} ({unassigned.length})
               </Text>
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>{translateAdmin('platform_label', 'Plataforma')}</Th>
-                    <Th>{translateAdmin('reference_label', 'Referência')}</Th>
-                    <Th>{translateAdmin('value_label', 'Valor')}</Th>
+                    <Th>{tAdmin('platform_label', 'Plataforma')}</Th>
+                    <Th>{tAdmin('reference_label', 'Referência')}</Th>
+                    <Th>{tAdmin('value_label', 'Valor')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>

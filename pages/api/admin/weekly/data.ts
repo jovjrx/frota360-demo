@@ -55,11 +55,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(doc.data() as WeeklyNormalizedData),
     }));
 
+    const storedRecordsSnapshot = await adminDb
+      .collection('driverWeeklyRecords')
+      .where('weekId', '==', weekId)
+      .get();
+
+    const storedRecords = new Map<string, DriverWeeklyRecord>();
+    storedRecordsSnapshot.forEach((doc) => {
+      storedRecords.set(doc.id, { id: doc.id, ...(doc.data() as DriverWeeklyRecord) });
+    });
+
     const driversSnapshot = await adminDb.collection('drivers').get();
     const drivers = driversSnapshot.docs.map((doc) => buildDriverInfo(doc.id, doc.data() as any));
     const driverMaps = buildDriverMaps(drivers);
 
-    const aggregation = aggregateWeeklyRecords(normalizedData, driverMaps, weekId, weekStart, weekEnd);
+    const aggregation = aggregateWeeklyRecords(
+      normalizedData,
+      driverMaps,
+      weekId,
+      weekStart,
+      weekEnd,
+      storedRecords
+    );
 
     return res.status(200).json(aggregation);
   } catch (error: any) {
@@ -121,7 +138,8 @@ function aggregateWeeklyRecords(
   driverMaps: DriverMaps,
   weekId: string,
   weekStart: string,
-  weekEnd: string
+  weekEnd: string,
+  storedRecords: Map<string, DriverWeeklyRecord>
 ) {
   const totals = new Map<string, {
     driver: DriverInfo;
@@ -191,8 +209,19 @@ function aggregateWeeklyRecords(
       { type: driver.type, rentalFee: driver.rentalFee }
     );
 
-    return {
+    const persisted = storedRecords.get(record.id);
+
+    const mergedRecord: DriverWeeklyRecord = {
       ...record,
+      paymentStatus: persisted?.paymentStatus ?? record.paymentStatus,
+      updatedAt: persisted?.updatedAt ?? record.updatedAt,
+      createdAt: persisted?.createdAt ?? record.createdAt,
+      paymentDate: persisted?.paymentDate ?? record.paymentDate,
+      iban: persisted?.iban ?? record.iban,
+    };
+
+    return {
+      ...mergedRecord,
       driverType: driver.type,
       vehicle: driver.vehiclePlate ?? '',
       platformData: references,
