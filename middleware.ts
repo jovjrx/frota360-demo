@@ -30,7 +30,10 @@ export function middleware(request: NextRequest) {
   const isPublicPage = pathname === '/' || 
                       pathname.startsWith('/about') || 
                       pathname.startsWith('/contact') || 
-                      pathname.startsWith('/drivers');
+                      pathname.startsWith('/drivers') ||
+                      pathname.startsWith('/login') || // Adicionado para considerar /login como página pública
+                      pathname.startsWith('/reset-password') ||
+                      pathname.startsWith('/forgot-password');
   
   // Se não é uma rota pública, permitir acesso normal (português padrão)
   if (!isPublicPage) {
@@ -86,6 +89,6 @@ export const config = {
     '/admin/:path*',
     '/painel/:path*',
     // Excluir arquivos estáticos e APIs
-    '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public|api).*)/',
   ],
 };
