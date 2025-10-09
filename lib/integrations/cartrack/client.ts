@@ -146,47 +146,27 @@ export class CartrackClient extends BaseIntegrationClient {
     try {
       // According to Cartrack API docs: GET /trips with timestamps in format "YYYY-MM-DD HH:MM:SS"
       // Example: "2025-09-28 00:00:00"
-  const startTimestamp = `${startDate}T00:00:00`;
-  const endTimestamp = `${endDate}T23:59:59`;
+      const startTimestamp = `${startDate} 00:00:00`;
+      const endTimestamp = `${endDate} 23:59:59`;
 
       console.log(`[Cartrack] Fetching trips from ${startTimestamp} to ${endTimestamp}`);
 
       const params = new URLSearchParams({
-        'filter[start_timestamp]': startTimestamp,
-        'filter[end_timestamp]': endTimestamp,
+        start_timestamp: startTimestamp,
+        end_timestamp: endTimestamp,
         limit: '1000',
         page: '1',
       });
 
       if (filters.registration) {
-        params.set('filter[registration]', filters.registration);
+        params.set('registration', filters.registration);
       }
 
       if (filters.vehicleId) {
-        params.set('filter[vehicle_id]', filters.vehicleId);
+        params.set('vehicle_id', filters.vehicleId);
       }
 
-      let response: any;
-      try {
-        response = await this.makeRequest('GET', `/trips?${params.toString()}`);
-      } catch (error) {
-        console.warn('[Cartrack] Filter-based trip request failed, retrying with legacy parameters', error);
-        const legacyParams = new URLSearchParams({
-          start_timestamp: `${startDate} 00:00:00`,
-          end_timestamp: `${endDate} 23:59:59`,
-          limit: '1000',
-          page: '1',
-        });
-
-        if (filters.registration) {
-          legacyParams.set('registration', filters.registration);
-        }
-
-        if (filters.vehicleId) {
-          legacyParams.set('vehicle_id', filters.vehicleId);
-        }
-        response = await this.makeRequest('GET', `/trips?${legacyParams.toString()}`);
-      }
+      const response = await this.makeRequest('GET', `/trips?${params.toString()}`);
       const trips = response.data || [];
       
       console.log(`[Cartrack] Received ${trips.length} trips`);
