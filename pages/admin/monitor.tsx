@@ -356,7 +356,7 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
 
         <TabPanels>
           {/* Tab 1: Lista de Viagens */}
-          <TabPanel>
+           <TabPanel px={0}>
             <Card>
               <CardBody>
                 {isInitialLoading ? (
@@ -480,7 +480,7 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
           </TabPanel>
 
           {/* Tab 2: Mapa */}
-          <TabPanel>
+          <TabPanel px={0}>
                  <Card>
               <CardBody>
             {isInitialLoading ? (
