@@ -6,13 +6,14 @@ import { z } from 'zod';
  */
 
 export const DataSourceStatusSchema = z.object({
-  status: z.enum(['complete', 'partial', 'pending']),
+  status: z.enum(['complete', 'partial', 'pending', 'error']),
   origin: z.enum(['auto', 'manual']),
   importedAt: z.string().optional(),
   driversCount: z.number().default(0),
   recordsCount: z.number().default(0),
   lastError: z.string().optional(),
   archiveRef: z.string().optional(),
+  strategy: z.enum(['api', 'upload', 'mixed']).optional(),
 });
 
 export type DataSourceStatus = z.infer<typeof DataSourceStatusSchema>;
@@ -58,6 +59,7 @@ export function createWeeklyDataSources(
     origin: 'manual',
     driversCount: 0,
     recordsCount: 0,
+    strategy: 'upload',
   };
   
   return {
