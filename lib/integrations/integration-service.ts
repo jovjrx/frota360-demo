@@ -166,7 +166,39 @@ export class IntegrationService {
     console.log(`📋 Listando integrações${onlyEnabled ? ' (apenas ativas)' : ''}`);
 
     const snapshot = await this.db.collection(COLLECTION_NAME).get();
-    let integrations = snapshot.docs.map(doc => doc.data() as Integration);
+    let integrations = snapshot.docs.map((doc) => {
+      const data = doc.data() as Integration & { id?: string };
+      const platform = (data.platform ?? data.id ?? doc.id) as IntegrationPlatform;
+
+      const normalized: Integration = {
+        platform,
+        name: data.name ?? platform.toUpperCase(),
+        type: data.type ?? 'api',
+        enabled: data.enabled ?? false,
+        status: data.status ?? 'inactive',
+        credentials: { ...(data.credentials ?? {}) },
+        config: { ...(data.config ?? {}), baseUrl: data.config?.baseUrl ?? '' },
+        oauth: data.oauth,
+        stats: {
+          totalRequests: data.stats?.totalRequests ?? (data as any).totalRequests ?? 0,
+          successfulRequests: data.stats?.successfulRequests ?? (data as any).successfulRequests ?? 0,
+          failedRequests: data.stats?.failedRequests ?? (data as any).failedRequests ?? 0,
+          lastSync: data.stats?.lastSync ?? (data as any).lastSync,
+          lastSuccess: data.stats?.lastSuccess ?? (data as any).lastSuccess,
+          lastError: data.stats?.lastError ?? (data as any).lastError,
+          errorMessage:
+            data.stats?.errorMessage ?? (data as any).errorMessage ?? (data as any).metadata?.errorMessage ?? undefined,
+        },
+        metadata: {
+          createdAt: data.metadata?.createdAt ?? Timestamp.now(),
+          updatedAt: data.metadata?.updatedAt ?? Timestamp.now(),
+          createdBy: data.metadata?.createdBy,
+          updatedBy: data.metadata?.updatedBy,
+        },
+      };
+
+      return normalized;
+    });
 
     if (onlyEnabled) {
       integrations = integrations.filter(i => i.enabled);
