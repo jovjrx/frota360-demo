@@ -20,6 +20,41 @@ export type IntegrationSummaryRecord = {
   updatedAt?: string | null;
 };
 
+function normalizeTimestamp(value: unknown): string | null {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  }
+
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+
+  if (typeof value === 'number') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+
+  if (typeof value === 'object') {
+    const maybeTimestamp = value as { toDate?: () => Date; seconds?: number; nanoseconds?: number };
+
+    if (typeof maybeTimestamp.toDate === 'function') {
+      const parsed = maybeTimestamp.toDate();
+      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    }
+
+    if (typeof maybeTimestamp.seconds === 'number') {
+      const millis = maybeTimestamp.seconds * 1000 + (maybeTimestamp.nanoseconds ?? 0) / 1_000_000;
+      const parsed = new Date(millis);
+      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    }
+  }
+
+  return null;
+}
+
 export function normalizeScopes(scope: ScopeSource): string[] {
   if (!scope) return [];
   if (Array.isArray(scope)) {
@@ -54,6 +89,9 @@ export function buildIntegrationSummary(integration: Integration): IntegrationSu
     failedRequests: 0,
   };
 
+  const rawStats = (integration as any).stats ?? {};
+  const rawErrorMessage = (integration as any).errorMessage;
+
   return {
     platform: integration.platform,
     name: integration.name,
@@ -65,10 +103,10 @@ export function buildIntegrationSummary(integration: Integration): IntegrationSu
     missingScopes,
     totalRequests: stats.totalRequests ?? 0,
     failedRequests: stats.failedRequests ?? 0,
-    lastSync: stats.lastSync ? stats.lastSync.toDate().toISOString() : null,
-    lastSuccess: stats.lastSuccess ? stats.lastSuccess.toDate().toISOString() : null,
-    lastError: stats.lastError ? stats.lastError.toDate().toISOString() : null,
-    errorMessage: stats.errorMessage ?? null,
-    updatedAt: integration.metadata?.updatedAt ? integration.metadata.updatedAt.toDate().toISOString() : null,
+    lastSync: normalizeTimestamp((stats as any).lastSync ?? rawStats.lastSync ?? (integration as any).lastSync),
+    lastSuccess: normalizeTimestamp((stats as any).lastSuccess ?? rawStats.lastSuccess ?? (integration as any).lastSuccess),
+    lastError: normalizeTimestamp((stats as any).lastError ?? rawStats.lastError ?? (integration as any).lastError),
+    errorMessage: (stats as any).errorMessage ?? rawStats.errorMessage ?? rawErrorMessage ?? null,
+    updatedAt: normalizeTimestamp(integration.metadata?.updatedAt ?? (integration as any).updatedAt),
   };
 }
