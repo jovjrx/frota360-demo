@@ -431,7 +431,7 @@ export class SyncService {
         };
       }
       
-      grouped[driverId].earningsBolt += trip.fare || 0;
+      grouped[driverId].earningsBolt += trip.fare?.value || trip.earnings || 0;
       grouped[driverId].tipsBolt += trip.tip || 0;
       grouped[driverId].tripCount += 1;
     }

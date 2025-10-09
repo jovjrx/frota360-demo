@@ -117,13 +117,41 @@ export default async function handler(
       case 'bolt':
         try {
           const boltClient = await createBoltClient();
-          
-          // Buscar dados (placeholder - implementar quando API Bolt estiver completa)
+          const now = new Date();
+          const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+          const startIso = start.toISOString();
+          const endIso = now.toISOString();
+
+          const [trips, drivers] = await Promise.all([
+            boltClient.getTrips(startIso, endIso),
+            boltClient.getDrivers(),
+          ]);
+
+          const totalDistance = trips.reduce((sum, trip) => sum + (trip.distance || 0), 0);
+          const totalEarnings = trips.reduce((sum, trip) => sum + (trip.earnings || 0), 0);
+          const completedTrips = trips.filter((trip) => trip.status === 'completed').length;
+          const cancelledTrips = trips.filter((trip) => trip.status === 'cancelled').length;
+
           data = {
             platform: 'bolt',
-            lastUpdate: new Date().toISOString(),
-            count: 0,
-            message: 'Integração Bolt configurada. Dados serão sincronizados em breve.',
+            lastUpdate: now.toISOString(),
+            count: trips.length,
+            summary: {
+              totalTrips: trips.length,
+              completedTrips,
+              cancelledTrips,
+              activeDrivers: drivers.filter((driver) => driver.status === 'active').length,
+              totalDrivers: drivers.length,
+              totalEarnings,
+              totalDistanceKm: totalDistance,
+              period: {
+                start: startIso,
+                end: endIso,
+              },
+            },
+            trips: trips.slice(0, 100),
+            drivers: drivers,
           };
         } catch (error) {
           console.error('Error fetching Bolt data:', error);
@@ -133,16 +161,53 @@ export default async function handler(
       case 'uber':
         try {
           const uberClient = await createUberClient();
-          
-          // Buscar dados (placeholder - implementar quando API Uber estiver completa)
+          const now = new Date();
+          const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+          const startIso = start.toISOString();
+          const endIso = now.toISOString();
+
+          const [trips, drivers] = await Promise.all([
+            uberClient.getTrips(startIso, endIso),
+            uberClient.getDrivers(),
+          ]);
+
+          const totalDistance = trips.reduce((sum, trip) => sum + (trip.distance || 0), 0);
+          const totalEarnings = trips.reduce((sum, trip) => sum + (trip.earnings || 0), 0);
+          const completedTrips = trips.filter((trip) => trip.status === 'completed').length;
+          const cancelledTrips = trips.filter((trip) => trip.status === 'cancelled').length;
+
+          data = {
+            platform: 'uber',
+            lastUpdate: now.toISOString(),
+            count: trips.length,
+            summary: {
+              totalTrips: trips.length,
+              completedTrips,
+              cancelledTrips,
+              activeDrivers: drivers.filter((driver) => driver.status === 'active').length,
+              totalDrivers: drivers.length,
+              totalEarnings,
+              totalDistanceKm: totalDistance,
+              period: {
+                start: startIso,
+                end: endIso,
+              },
+            },
+            trips: trips.slice(0, 100),
+            drivers,
+          };
+        } catch (error) {
+          console.error('Error fetching Uber data:', error);
           data = {
             platform: 'uber',
             lastUpdate: new Date().toISOString(),
             count: 0,
-            message: 'Integração Uber configurada. Dados serão sincronizados em breve.',
+            message:
+              error instanceof Error
+                ? `Erro ao buscar dados da Uber: ${error.message}`
+                : 'Erro desconhecido ao buscar dados da Uber.',
           };
-        } catch (error) {
-          console.error('Error fetching Uber data:', error);
         }
         break;
 

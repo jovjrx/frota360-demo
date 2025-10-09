@@ -8,11 +8,22 @@ import { UberClient } from '../lib/integrations/uber/client';
 async function testUber() {
   console.log('🔍 Testando Uber API...\n');
 
-  // Criar cliente com credenciais do integration.md
+  const clientId = process.env.UBER_CLIENT_ID || '';
+  const clientSecret = process.env.UBER_CLIENT_SECRET || '';
+  const orgUuid = process.env.UBER_ORG_UUID || '';
+
+  if (!clientId || !clientSecret || !orgUuid) {
+    throw new Error('Defina UBER_CLIENT_ID, UBER_CLIENT_SECRET e UBER_ORG_UUID antes de executar o teste.');
+  }
+
   const client = new UberClient({
-    clientId: '0W89Kw8QMgGdesno5dBdvNdabnMw8KkL',
-    clientSecret: 'mQdZgiooj9SId57DuR5w9t6TSq10HHfG7acVTq1A',
-    orgUuid: '2b203f2d-2fbb-4012-b677-7e2b878850d0',
+    clientId,
+    clientSecret,
+    orgUuid,
+    apiBaseUrl: process.env.UBER_BASE_URL,
+    authUrl: process.env.UBER_TOKEN_URL || process.env.UBER_AUTH_URL,
+    scope: process.env.UBER_SCOPE,
+    redirectUri: process.env.UBER_REDIRECT_URI,
   });
 
   try {
@@ -32,10 +43,10 @@ async function testUber() {
 
     // 3. Buscar viagens (últimos 30 dias)
     console.log('\n3️⃣ Buscando viagens dos últimos 30 dias...');
-    const endDate = Math.floor(Date.now() / 1000); // Unix timestamp
-    const startDate = Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000);
-    
-    const trips = await client.getTrips(startDate.toString(), endDate.toString());
+  const endDate = new Date();
+  const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const trips = await client.getTrips(startDate.toISOString(), endDate.toISOString());
     console.log(`✅ Encontradas ${trips.length} viagens`);
     
     if (trips.length > 0) {
@@ -46,7 +57,7 @@ async function testUber() {
 
     // 4. Calcular ganhos
     console.log('\n4️⃣ Calculando ganhos do período...');
-    const earnings = await client.getEarnings(startDate.toString(), endDate.toString());
+  const earnings = await client.getEarnings(startDate.toISOString(), endDate.toISOString());
     console.log('✅ Ganhos:');
     console.log(`   Total: €${earnings.total.toFixed(2)}`);
     console.log(`   Viagens: ${earnings.trips}`);

@@ -26,6 +26,15 @@ export interface Trip {
   earnings: number;
   driverId: string;
   status: 'completed' | 'cancelled' | 'pending';
+  driver_id?: string;
+  fare?: {
+    value: number;
+    currency?: string;
+  };
+  tip?: number;
+  tolls?: number;
+  currency?: string;
+  raw?: Record<string, unknown>;
 }
 
 export interface Earnings {
