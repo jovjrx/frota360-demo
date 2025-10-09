@@ -23,6 +23,7 @@ import {
   GridItem,
   HStack,
   Heading,
+  type HeadingProps,
   Icon,
   IconButton,
   Input,
@@ -93,19 +94,34 @@ import { REQUIRED_CREDENTIALS } from '@/schemas/integration';
 
 import type { Integration } from '@/schemas/integration';
 
+type FetchError = Error & { status?: number; info?: any };
+
+const SECTION_HEADING_PROPS: HeadingProps = {
+  size: 'sm',
+  fontWeight: 'semibold',
+  textTransform: 'uppercase',
+  letterSpacing: 'wide',
+  color: 'gray.600',
+};
+
 const fetcher = async <T,>(url: string): Promise<T> => {
-  const response = await fetch(url);
+  const response = await fetch(url, { credentials: 'include' });
   if (!response.ok) {
     let message = 'Request failed';
+    let info: any = null;
     try {
       const data = await response.json();
+      info = data;
       if (data?.error) {
         message = data.error;
       }
     } catch (error) {
       // ignore
     }
-    throw new Error(message);
+    const error: FetchError = new Error(message);
+    error.status = response.status;
+    error.info = info;
+    throw error;
   }
   return response.json();
 };
@@ -173,6 +189,8 @@ const STRATEGY_LABELS: Record<StrategyOption | 'empty', string> = {
   empty: 'Vazio',
 };
 
+const MANUAL_ONLY_PLATFORMS: IntegrationPlatform[] = ['cartrack', 'myprio', 'viaverde'];
+
 const SEVERITY_COLORS: Record<IntegrationLogSeverity, string> = {
   debug: 'gray',
   info: 'blue',
@@ -194,7 +212,7 @@ const LOG_TYPE_COLORS: Record<IntegrationLogType, string> = {
 const DEFAULT_STRATEGIES: Record<WeeklyPlatform, StrategyOption> = {
   uber: 'api',
   bolt: 'api',
-  cartrack: 'api',
+  cartrack: 'upload',
   myprio: 'upload',
   viaverde: 'upload',
 };
@@ -559,6 +577,11 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
       fallbackData: { weeks: initialWeeks },
       refreshInterval: 60_000,
       revalidateOnFocus: true,
+      onErrorRetry: (error, _key, _config, _revalidate, _opts) => {
+        if ((error as FetchError).status === 401 || (error as FetchError).status === 403) {
+          return;
+        }
+      },
     }
   );
 
@@ -606,6 +629,11 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
       fallbackData: { integrations: initialIntegrations },
       refreshInterval: 120_000,
       revalidateOnFocus: true,
+      onErrorRetry: (error, _key, _config, _revalidate, _opts) => {
+        if ((error as FetchError).status === 401 || (error as FetchError).status === 403) {
+          return;
+        }
+      },
     });
 
   const integrations = useMemo(() => {
@@ -677,6 +705,11 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
     mutate: mutateLogs,
   } = useSWR<LogsResponse>(logsQuery, fetcher, {
     revalidateOnFocus: false,
+    onErrorRetry: (error, _key, _config, _revalidate, _opts) => {
+      if ((error as FetchError).status === 401 || (error as FetchError).status === 403) {
+        return;
+      }
+    },
   });
 
   const logs = logsResponse?.logs ?? [];
@@ -836,6 +869,19 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
 
   const handleFetchPlatform = useCallback(
     async (platform: IntegrationPlatform) => {
+      if (MANUAL_ONLY_PLATFORMS.includes(platform)) {
+        toast({
+          title: tc('messages.info', 'Informação'),
+          description: t(
+            'weeklyDataSources.actions.fetchNotAvailable',
+            'Esta integração depende de uploads manuais. Utilize o importador em vez de sincronizar via API.'
+          ),
+          status: 'info',
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
       try {
         const response = await fetch(`/api/admin/integrations/${platform}/data`);
         const result = await response.json();
@@ -1002,7 +1048,7 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
         subtitle={t('weeklyDataSources.subtitle', 'Snapshots semanais e integrações contínuas')}
         breadcrumbs={[{ label: t('weeklyDataSources.breadcrumb', 'Fontes de dados') }]}
         side={
-          <HStack spacing={3}>
+          <HStack spacing={3} align="center">
             <Button
               variant="outline"
               leftIcon={<FiRefreshCw />}
@@ -1045,7 +1091,9 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                     <Card h="100%">
                       <CardHeader pb={3}>
                         <Stack spacing={2}>
-                          <Heading size="sm">{t('weeklyDataSources.weeks.list', 'Semanas')}</Heading>
+                          <Heading {...SECTION_HEADING_PROPS}>
+                            {t('weeklyDataSources.weeks.list', 'Semanas')}
+                          </Heading>
                           <InputGroup size="sm">
                             <InputLeftElement pointerEvents="none">
                               <Icon as={FiSearch} color="gray.400" />
@@ -1134,8 +1182,8 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                     <Stack spacing={4} h="100%">
                       <Card>
                         <CardHeader pb={3}>
-                          <HStack>
-                            <Heading size="sm">
+                          <HStack align="center" spacing={3}>
+                            <Heading {...SECTION_HEADING_PROPS}>
                               {t('weeklyDataSources.week.header', 'Snapshot da semana')}
                             </Heading>
                             <Spacer />
@@ -1159,7 +1207,10 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                                     </MenuItem>
                                     <MenuItem
                                       onClick={() => {
-                                        WEEKLY_PLATFORMS.forEach((platform) => handleFetchPlatform(platform));
+                                        WEEKLY_PLATFORMS.filter(
+                                          (platform): platform is IntegrationPlatform =>
+                                            !MANUAL_ONLY_PLATFORMS.includes(platform as IntegrationPlatform)
+                                        ).forEach((platform) => handleFetchPlatform(platform as IntegrationPlatform));
                                       }}
                                     >
                                       <Icon as={FiRefreshCw} mr={2} />
@@ -1235,7 +1286,10 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                                                 <Icon as={FiUpload} mr={2} />
                                                 {t('weeklyDataSources.actions.importFile', 'Importar arquivo')}
                                               </MenuItem>
-                                              <MenuItem onClick={() => handleFetchPlatform(platform)}>
+                                              <MenuItem
+                                                onClick={() => handleFetchPlatform(platform)}
+                                                isDisabled={MANUAL_ONLY_PLATFORMS.includes(platform)}
+                                              >
                                                 <Icon as={FiRefreshCw} mr={2} />
                                                 {t('weeklyDataSources.actions.fetchApi', 'Buscar da API')}
                                               </MenuItem>
@@ -1296,7 +1350,9 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                   <GridItem>
                     <Card h="100%">
                       <CardHeader pb={3}>
-                        <Heading size="sm">{t('weeklyDataSources.summary.title', 'Resumo da semana')}</Heading>
+                        <Heading {...SECTION_HEADING_PROPS}>
+                          {t('weeklyDataSources.summary.title', 'Resumo da semana')}
+                        </Heading>
                       </CardHeader>
                       <CardBody>
                         {selectedWeek ? (
@@ -1539,6 +1595,7 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                               variant="ghost"
                               onClick={() => handleFetchPlatform(integration.platform)}
                               leftIcon={<FiRefreshCw />}
+                              isDisabled={MANUAL_ONLY_PLATFORMS.includes(integration.platform)}
                             >
                               {t('weeklyDataSources.integrations.actions.sync', 'Sincronizar agora')}
                             </Button>
@@ -1565,7 +1622,9 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                 <Card>
                   <CardHeader pb={3}>
                     <Flex align="center" gap={3}>
-                      <Heading size="sm">{t('weeklyDataSources.logs.title', 'Jobs e logs recentes')}</Heading>
+                      <Heading {...SECTION_HEADING_PROPS}>
+                        {t('weeklyDataSources.logs.title', 'Jobs e logs recentes')}
+                      </Heading>
                       {isValidatingLogs && <Spinner size="sm" />}
                     </Flex>
                   </CardHeader>

@@ -60,6 +60,28 @@ function mergeRawEntry(
       overview.lastImportAt = entry.importedAt;
     }
   }
+
+  const source = overview.sources[platform];
+  const rowsCount = Array.isArray(entry.rawData?.rows) ? entry.rawData.rows.length : 0;
+
+  if (rowsCount > 0) {
+    source.recordsCount = (source.recordsCount ?? 0) + rowsCount;
+  }
+
+  source.origin = source.origin ?? 'manual';
+  source.strategy = source.strategy ?? 'upload';
+
+  if (!source.importedAt || (entry.importedAt && entry.importedAt > source.importedAt)) {
+    source.importedAt = entry.importedAt;
+  }
+
+  if (summary.processed > 0 && summary.pending === 0) {
+    source.status = 'complete';
+  } else if (summary.total > 0) {
+    if (source.status !== 'complete') {
+      source.status = summary.processed > 0 ? 'partial' : 'pending';
+    }
+  }
 }
 
 export async function fetchWeeklyDataOverview(limit = 12): Promise<WeeklyDataOverview[]> {
@@ -110,6 +132,13 @@ export async function fetchWeeklyDataOverview(limit = 12): Promise<WeeklyDataOve
   });
 
   const weeks = Array.from(weekMap.values());
+
+  weeks.forEach((week) => {
+    week.isComplete = WEEKLY_PLATFORMS.every((platform) => week.sources[platform].status === 'complete');
+    if (!week.updatedAt || (week.lastImportAt && week.lastImportAt > week.updatedAt)) {
+      week.updatedAt = week.lastImportAt ?? week.updatedAt;
+    }
+  });
 
   weeks.sort((a, b) => {
     const aDate = a.weekStart || '';

@@ -25,12 +25,6 @@ export default withIronSessionApiRoute(async function handler(
     error?: string;
   }>,
 ) {
-  const user = req.session.user;
-
-  if (!user || user.role !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   const db = getFirestore(firebaseAdmin);
   const integrationsRef = db.collection('integrations');
 

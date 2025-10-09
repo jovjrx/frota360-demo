@@ -2,7 +2,6 @@ import { NextApiResponse } from 'next';
 import { withIronSessionApiRoute, SessionRequest } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import integrationService from '@/lib/integrations/integration-service';
-import { IntegrationPlatform } from '@/schemas/integration';
 import { buildIntegrationSummary, IntegrationSummaryRecord } from '@/lib/integrations/integration-summary';
 
 interface SummaryResponse {
@@ -17,11 +16,6 @@ export default withIronSessionApiRoute(async function handler(
 ) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
-
-  const user = req.session.user;
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ success: false, error: 'Unauthorized' });
   }
 
   try {

@@ -11,12 +11,6 @@ export default async function handler(
   }
 
   try {
-    const session = await getSession(req, res);
-
-    if (!session?.isLoggedIn || session.role !== 'admin') {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const db = getFirestore();
 
     // Buscar credenciais da integração Cartrack

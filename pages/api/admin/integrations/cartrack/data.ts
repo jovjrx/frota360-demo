@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/lib/session';
 import { fetchCartrackMonitorData, CartrackMonitorData } from '@/lib/integrations/cartrack/monitor';
 
 export default async function handler(
@@ -14,12 +13,6 @@ export default async function handler(
   }
 
   try {
-    const session = await getSession(req, res);
-
-    if (!session?.isLoggedIn || session.role !== 'admin') {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const data = await fetchCartrackMonitorData();
 
     return res.status(200).json({ data });

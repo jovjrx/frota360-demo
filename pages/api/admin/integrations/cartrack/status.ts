@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getSession } from '@/lib/session';
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,12 +10,6 @@ export default async function handler(
   }
 
   try {
-    const session = await getSession(req, res);
-
-    if (!session?.isLoggedIn || session.role !== 'admin') {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const db = getFirestore();
 
     // Buscar configuração da integração Cartrack

@@ -167,15 +167,23 @@ export class IntegrationService {
 
     const snapshot = await this.db.collection(COLLECTION_NAME).get();
     let integrations = snapshot.docs.map((doc) => {
-      const data = doc.data() as Integration & { id?: string };
+      const data = doc.data() as Integration & { id?: string; status?: IntegrationStatus; errorMessage?: string };
       const platform = (data.platform ?? data.id ?? doc.id) as IntegrationPlatform;
+
+      const derivedStatus: IntegrationStatus =
+        data.status ??
+        ((data as any).errorMessage
+          ? 'error'
+          : data.enabled === false
+          ? 'inactive'
+          : 'active');
 
       const normalized: Integration = {
         platform,
         name: data.name ?? platform.toUpperCase(),
         type: data.type ?? 'api',
         enabled: data.enabled ?? false,
-        status: data.status ?? 'inactive',
+        status: derivedStatus,
         credentials: { ...(data.credentials ?? {}) },
         config: { ...(data.config ?? {}), baseUrl: data.config?.baseUrl ?? '' },
         oauth: data.oauth,

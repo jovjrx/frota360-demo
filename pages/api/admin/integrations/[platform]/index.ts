@@ -9,12 +9,6 @@ export default withIronSessionApiRoute(async function handler(
   req: SessionRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  const user = req.session.user;
-
-  if (!user || user.role !== 'admin') {
-    return res.status(401).json({ success: false, error: 'Unauthorized' });
-  }
-
   const { platform } = req.query;
 
   if (!platform || typeof platform !== 'string') {
