@@ -69,7 +69,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
   };
 
   return (
-    <Card mb={4} shadow="md" borderWidth="1px">
+    <Card shadow="md" borderWidth="1px">
       <CardBody>
         <VStack align="stretch" spacing={4}>
           {/* Cabeçalho - Motorista e Status */}

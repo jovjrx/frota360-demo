@@ -146,11 +146,11 @@ export class CartrackClient extends BaseIntegrationClient {
     try {
       // According to Cartrack API docs: GET /trips with timestamps in format "YYYY-MM-DD HH:MM:SS"
       // Example: "2025-09-28 00:00:00"
-      const startTimestamp = `${startDate} 00:00:00`;
-      const endTimestamp = `${endDate} 23:59:59`;
-      
+      const startTimestamp = `${startDate}T00:00:00Z`;
+      const endTimestamp = `${endDate}T23:59:59Z`;
+
       console.log(`[Cartrack] Fetching trips from ${startTimestamp} to ${endTimestamp}`);
-      
+
       const params = new URLSearchParams({
         'filter[start_timestamp]': startTimestamp,
         'filter[end_timestamp]': endTimestamp,
@@ -172,8 +172,8 @@ export class CartrackClient extends BaseIntegrationClient {
       } catch (error) {
         console.warn('[Cartrack] Filter-based trip request failed, retrying with legacy parameters', error);
         const legacyParams = new URLSearchParams({
-          start_timestamp: startTimestamp,
-          end_timestamp: endTimestamp,
+          start_timestamp: `${startDate} 00:00:00`,
+          end_timestamp: `${endDate} 23:59:59`,
           limit: '1000',
           page: '1',
         });

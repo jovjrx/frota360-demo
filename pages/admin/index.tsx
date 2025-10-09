@@ -71,13 +71,12 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
   const subtitleTemplate = t('dashboard.welcome', 'Bem-vindo, {{name}}');
   const subtitle = subtitleTemplate.replace('{{name}}', user.displayName || user.email || '');
 
-  // SWR com fallback dos dados SSR
   const { data: apiData, mutate } = useSWR<{ success: boolean; data: DashboardData }>(
     '/api/admin/dashboard/stats',
     fetcher,
     {
       fallbackData: { success: true, data: initialData },
-      refreshInterval: 30000, // Atualizar a cada 30s
+      refreshInterval: 30000,
       revalidateOnFocus: true,
     }
   );
@@ -126,7 +125,7 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
 
   return (
     <AdminLayout
-  title={t('dashboard.title', 'Dashboard')}
+      title={t('dashboard.title', 'Dashboard')}
       subtitle={subtitle}
       side={
         <Button
@@ -143,230 +142,221 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
         { label: t('dashboard.title', 'Dashboard') }
       ]}
     >
-      <VStack spacing={8} align="stretch">
-        {/* KPIs */}
-        <Box>
-          <Heading size="md" mb={4}>{t('dashboard.sections.overview', t('dashboard.kpiTitle', 'Visão Geral'))}</Heading>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <HStack>
-                      <Icon as={FiUsers} />
-                      <Text>{t('dashboard.totalDrivers', 'Total de Motoristas')}</Text>
-                    </HStack>
-                  </StatLabel>
-                  <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
-                  <StatHelpText>
-                    {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
-                      '{{count}}',
-                      String(data?.stats?.activeDrivers || 0)
-                    )}
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
 
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <HStack>
-                      <Icon as={FiTruck} />
-                      <Text>{t('dashboard.activeDrivers', 'Motoristas Ativos')}</Text>
-                    </HStack>
-                  </StatLabel>
-                  <StatNumber>{data?.stats?.activeDrivers || 0}</StatNumber>
-                  <StatHelpText>
-                    <StatArrow type="increase" />
-                    {t('dashboard.helpers.operational', 'Em operação')}
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
+      <Box>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack>
+                    <Icon as={FiUsers} />
+                    <Text>{t('dashboard.totalDrivers', 'Total de Motoristas')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
+                <StatHelpText>
+                  {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
+                    '{{count}}',
+                    String(data?.stats?.activeDrivers || 0)
+                  )}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <HStack>
-                      <Icon as={FiFileText} />
-                      <Text>{t('dashboard.pendingRequests', 'Solicitações Pendentes')}</Text>
-                    </HStack>
-                  </StatLabel>
-                  <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
-                  <StatHelpText>{t('dashboard.helpers.awaitingReview', 'Aguardando análise')}</StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack>
+                    <Icon as={FiTruck} />
+                    <Text>{t('dashboard.activeDrivers', 'Motoristas Ativos')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber>{data?.stats?.activeDrivers || 0}</StatNumber>
+                <StatHelpText>
+                  <StatArrow type="increase" />
+                  {t('dashboard.helpers.operational', 'Em operação')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Card>
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <HStack>
-                      <Icon as={FiDollarSign} />
-                      <Text>{t('dashboard.weeklyEarnings', 'Ganhos Esta Semana')}</Text>
-                    </HStack>
-                  </StatLabel>
-                  <StatNumber>
-                    {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
-                  </StatNumber>
-                  <StatHelpText>{t('dashboard.helpers.currentWeek', 'Semana atual')}</StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-        </Box>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack>
+                    <Icon as={FiFileText} />
+                    <Text>{t('dashboard.pendingRequests', 'Solicitações Pendentes')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
+                <StatHelpText>{t('dashboard.helpers.awaitingReview', 'Aguardando análise')}</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-        {/* KPIs Financeiros Adicionais */}
-        <Box>
-          <Heading size="md" mb={4}>{t('dashboard.sections.financials', 'Resumo Financeiro')}</Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-            <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <Text color="orange.700">{t('dashboard.paymentsPending', 'Pagamentos Pendentes')}</Text>
-                  </StatLabel>
-                  <StatNumber color="orange.600">
-                    {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
-                  </StatNumber>
-                  <StatHelpText color="orange.600">
-                    {t('dashboard.helpers.awaitingPayment', 'Aguardando pagamento')}
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack>
+                    <Icon as={FiDollarSign} />
+                    <Text>{t('dashboard.weeklyEarnings', 'Ganhos Esta Semana')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber>
+                  {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
+                </StatNumber>
+                <StatHelpText>{t('dashboard.helpers.currentWeek', 'Semana atual')}</StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      </Box>
 
-            <Card bg="green.50" borderColor="green.200" borderWidth="1px">
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <Text color="green.700">{t('dashboard.paymentsPaid', 'Pagamentos Realizados')}</Text>
-                  </StatLabel>
-                  <StatNumber color="green.600">
-                    {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
-                  </StatNumber>
-                  <StatHelpText color="green.600">
-                    {t('dashboard.helpers.paidThisWeek', 'Pagos esta semana')}
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
+      <Box>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+          <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <Text color="orange.700">{t('dashboard.paymentsPending', 'Pagamentos Pendentes')}</Text>
+                </StatLabel>
+                <StatNumber color="orange.600">
+                  {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
+                </StatNumber>
+                <StatHelpText color="orange.600">
+                  {t('dashboard.helpers.awaitingPayment', 'Aguardando pagamento')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-            <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
-              <CardBody>
-                <Stat>
-                  <StatLabel>
-                    <Text color="blue.700">{t('dashboard.averageEarnings', 'Média por Motorista')}</Text>
-                  </StatLabel>
-                  <StatNumber color="blue.600">
-                    {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
-                  </StatNumber>
-                  <StatHelpText color="blue.600">
-                    {t('dashboard.helpers.weeklyAverage', 'Média semanal')}
-                  </StatHelpText>
-                </Stat>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-        </Box>
+          <Card bg="green.50" borderColor="green.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <Text color="green.700">{t('dashboard.paymentsPaid', 'Pagamentos Realizados')}</Text>
+                </StatLabel>
+                <StatNumber color="green.600">
+                  {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
+                </StatNumber>
+                <StatHelpText color="green.600">
+                  {t('dashboard.helpers.paidThisWeek', 'Pagos esta semana')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
 
-        {/* Motoristas Recentes */}
-        <Card>
-          <CardBody>
-            <Heading size="sm" mb={4}>{t('dashboard.sections.recentDrivers', 'Motoristas Recentes')}</Heading>
-            <Box overflowX="auto">
-              <Table size="sm">
-                <Thead>
-                  <Tr>
-                    <Th>{tc('user.name')}</Th>
-                    <Th>{tc('user.email')}</Th>
-                    <Th>{t('dashboard.tables.drivers.type', 'Tipo')}</Th>
-                    <Th>{t('dashboard.tables.drivers.status', 'Status')}</Th>
+          <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <Text color="blue.700">{t('dashboard.averageEarnings', 'Média por Motorista')}</Text>
+                </StatLabel>
+                <StatNumber color="blue.600">
+                  {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
+                </StatNumber>
+                <StatHelpText color="blue.600">
+                  {t('dashboard.helpers.weeklyAverage', 'Média semanal')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      </Box>
+
+      <Card>
+        <CardBody>
+          <Heading size="sm" mb={4}>{t('dashboard.sections.recentDrivers', 'Motoristas Recentes')}</Heading>
+          <Box overflowX="auto">
+            <Table size="sm">
+              <Thead>
+                <Tr>
+                  <Th>{tc('user.name')}</Th>
+                  <Th>{tc('user.email')}</Th>
+                  <Th>{t('dashboard.tables.drivers.type', 'Tipo')}</Th>
+                  <Th>{t('dashboard.tables.drivers.status', 'Status')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data?.recentDrivers?.map((driver) => (
+                  <Tr key={driver.id}>
+                    <Td>{driver.fullName}</Td>
+                    <Td>{driver.email}</Td>
+                    <Td>
+                      <Badge colorScheme={driver.type === 'renter' ? 'purple' : 'blue'}>
+                        {driver.type === 'renter'
+                          ? t('drivers.type.renter', 'Locatário')
+                          : t('drivers.type.affiliate', 'Afiliado')}
+                      </Badge>
+                    </Td>
+                    <Td>
+                      <Badge colorScheme={getStatusColor(driver.status)}>
+                        {driver.status === 'active'
+                          ? tc('status.active')
+                          : tc('status.inactive')}
+                      </Badge>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {data?.recentDrivers?.map((driver) => (
-                    <Tr key={driver.id}>
-                      <Td>{driver.fullName}</Td>
-                      <Td>{driver.email}</Td>
-                      <Td>
-                        <Badge colorScheme={driver.type === 'renter' ? 'purple' : 'blue'}>
-                          {driver.type === 'renter'
-                            ? t('drivers.type.renter', 'Locatário')
-                            : t('drivers.type.affiliate', 'Afiliado')}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        <Badge colorScheme={getStatusColor(driver.status)}>
-                          {driver.status === 'active'
-                            ? tc('status.active')
-                            : tc('status.inactive')}
-                        </Badge>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Box>
-          </CardBody>
-        </Card>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </CardBody>
+      </Card>
 
-        {/* Solicitações Recentes */}
-        <Card>
-          <CardBody>
-            <Heading size="sm" mb={4}>{t('dashboard.sections.recentRequests', 'Solicitações Recentes')}</Heading>
-            <Box overflowX="auto">
-              <Table size="sm">
-                <Thead>
-                  <Tr>
-                    <Th>{tc('user.name')}</Th>
-                    <Th>{tc('user.email')}</Th>
-                    <Th>{t('dashboard.tables.requests.type', 'Tipo')}</Th>
-                    <Th>{t('dashboard.tables.requests.status', 'Status')}</Th>
+      <Card>
+        <CardBody>
+          <Heading size="sm" mb={4}>{t('dashboard.sections.recentRequests', 'Solicitações Recentes')}</Heading>
+          <Box overflowX="auto">
+            <Table size="sm">
+              <Thead>
+                <Tr>
+                  <Th>{tc('user.name')}</Th>
+                  <Th>{tc('user.email')}</Th>
+                  <Th>{t('dashboard.tables.requests.type', 'Tipo')}</Th>
+                  <Th>{t('dashboard.tables.requests.status', 'Status')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data?.recentRequests?.map((request) => (
+                  <Tr key={request.id}>
+                    <Td>{request.fullName}</Td>
+                    <Td>{request.email}</Td>
+                    <Td>
+                      <Badge colorScheme={request.type === 'renter' ? 'purple' : 'blue'}>
+                        {request.type === 'renter'
+                          ? t('drivers.type.renter', 'Locatário')
+                          : t('drivers.type.affiliate', 'Afiliado')}
+                      </Badge>
+                    </Td>
+                    <Td>
+                      <Badge colorScheme={getStatusColor(request.status)}>
+                        {request.status === 'pending'
+                          ? tc('status.pending')
+                          : request.status === 'approved'
+                            ? tc('status.approved')
+                            : request.status === 'rejected'
+                              ? tc('status.rejected')
+                              : request.status}
+                      </Badge>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {data?.recentRequests?.map((request) => (
-                    <Tr key={request.id}>
-                      <Td>{request.fullName}</Td>
-                      <Td>{request.email}</Td>
-                      <Td>
-                        <Badge colorScheme={request.type === 'renter' ? 'purple' : 'blue'}>
-                          {request.type === 'renter'
-                            ? t('drivers.type.renter', 'Locatário')
-                            : t('drivers.type.affiliate', 'Afiliado')}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        <Badge colorScheme={getStatusColor(request.status)}>
-                          {request.status === 'pending'
-                            ? tc('status.pending')
-                            : request.status === 'approved'
-                              ? tc('status.approved')
-                              : request.status === 'rejected'
-                                ? tc('status.rejected')
-                                : request.status}
-                        </Badge>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Box>
-          </CardBody>
-        </Card>
-      </VStack>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </CardBody>
+      </Card>
     </AdminLayout>
   );
 }
 
-// SSR com autenticação, traduções e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  // Carregar dados iniciais
   const [stats, recentDrivers, recentRequests] = await Promise.all([
     getDashboardStats(),
     getDrivers({ limit: 5 }),

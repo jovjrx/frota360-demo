@@ -104,10 +104,10 @@ export default function DriversPage({
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
 
@@ -189,14 +189,14 @@ export default function DriversPage({
 
     const pathParts = path.split('.');
     const updated = JSON.parse(JSON.stringify(editingDriver));
-    
+
     let current: any = updated;
     for (let i = 0; i < pathParts.length - 1; i++) {
       const key = pathParts[i];
       if (!current[key]) current[key] = {};
       current = current[key];
     }
-    
+
     current[pathParts[pathParts.length - 1]] = value;
     setEditingDriver(updated);
   };
@@ -245,171 +245,171 @@ export default function DriversPage({
         <Button
           leftIcon={<Icon as={FiPlus} />}
           colorScheme="red"
+          size={'sm'}
           onClick={() => router.push('/admin/drivers/add')}
         >
           {t('drivers.addDriver', 'Adicionar Motorista')}
         </Button>
       }
     >
-      <VStack spacing={6} align="stretch">
-        {/* Filtros */}
-        <Card>
-          <CardBody>
-            <HStack spacing={4} flexWrap="wrap">
-              <Box flex={1} minW="250px">
-                <HStack>
-                  <Icon as={FiSearch} color="gray.400" />
-                  <Input
-                    placeholder={t('drivers.list.filters.searchPlaceholder', 'Pesquisar motoristas...')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </HStack>
-              </Box>
 
-              <Box minW="150px">
-                <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                  <option value="all">{t('drivers.list.filters.status.all', 'Todos os status')}</option>
-                  <option value="active">{tc('status.active', 'Ativo')}</option>
-                  <option value="pending">{tc('status.pending', 'Pendente')}</option>
-                  <option value="inactive">{tc('status.inactive', 'Inativo')}</option>
-                  <option value="suspended">{tc('status.suspended', 'Suspenso')}</option>
-                </Select>
-              </Box>
 
-              <Box minW="150px">
-                <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                  <option value="all">{t('drivers.list.filters.type.all', 'Todos os tipos')}</option>
-                  <option value="affiliate">{t('drivers.type.affiliate', 'Afiliado')}</option>
-                  <option value="renter">{t('drivers.type.renter', 'Locatário')}</option>
-                </Select>
-              </Box>
+      <Card>
+        <CardBody>
+          <HStack spacing={4} flexWrap="wrap">
+            <Box flex={1} minW="250px">
+              <HStack>
+                <Icon as={FiSearch} color="gray.400" />
+                <Input
+                  size={'sm'}
+                  placeholder={t('drivers.list.filters.searchPlaceholder', 'Pesquisar motoristas...')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </HStack>
+            </Box>
 
-              <Button
-                leftIcon={<Icon as={FiRefreshCw} />}
-                onClick={fetchDrivers}
-                isLoading={isLoading}
-              >
-                {t('drivers.list.actions.refresh', 'Atualizar')}
-              </Button>
-            </HStack>
-          </CardBody>
-        </Card>
+            <Box minW="150px">
+              <Select size={'sm'} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                <option value="all">{t('drivers.list.filters.status.all', 'Todos os status')}</option>
+                <option value="active">{tc('status.active', 'Ativo')}</option>
+                <option value="pending">{tc('status.pending', 'Pendente')}</option>
+                <option value="inactive">{tc('status.inactive', 'Inativo')}</option>
+                <option value="suspended">{tc('status.suspended', 'Suspenso')}</option>
+              </Select>
+            </Box>
 
-        {/* Tabela de Motoristas */}
-        <Card>
-          <CardBody>
-            <Box overflowX="auto">
-              <Table variant="simple" size="sm">
-                <Thead>
+            <Box minW="150px">
+              <Select size={'sm'} value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                <option value="all">{t('drivers.list.filters.type.all', 'Todos os tipos')}</option>
+                <option value="affiliate">{t('drivers.type.affiliate', 'Afiliado')}</option>
+                <option value="renter">{t('drivers.type.renter', 'Locatário')}</option>
+              </Select>
+            </Box>
+
+            <Button
+              size={'sm'}
+              leftIcon={<Icon as={FiRefreshCw} />}
+              onClick={fetchDrivers}
+              isLoading={isLoading}
+            >
+              {t('drivers.list.actions.refresh', 'Atualizar')}
+            </Button>
+          </HStack>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Box overflowX="auto">
+            <Table variant="simple" size="sm">
+              <Thead>
+                <Tr>
+                  <Th>{t('drivers.table.name', 'Nome')}</Th>
+                  <Th>{t('drivers.table.email', 'Email')}</Th>
+                  <Th>{t('drivers.table.status', 'Status')}</Th>
+                  <Th>{t('drivers.table.type', 'Tipo')}</Th>
+                  <Th>Uber</Th>
+                  <Th>Bolt</Th>
+                  <Th>MyPrio</Th>
+                  <Th>ViaVerde</Th>
+                  <Th>IBAN</Th>
+                  <Th>{t('drivers.table.actions', 'Ações')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filteredDrivers?.length === 0 ? (
                   <Tr>
-                    <Th>{t('drivers.table.name', 'Nome')}</Th>
-                    <Th>{t('drivers.table.email', 'Email')}</Th>
-                    <Th>{t('drivers.table.status', 'Status')}</Th>
-                    <Th>{t('drivers.table.type', 'Tipo')}</Th>
-                    <Th>Uber</Th>
-                    <Th>Bolt</Th>
-                    <Th>MyPrio</Th>
-                    <Th>ViaVerde</Th>
-                    <Th>IBAN</Th>
-                    <Th>{t('drivers.table.actions', 'Ações')}</Th>
+                    <Td colSpan={10} textAlign="center" py={8}>
+                      <Text color="gray.500">
+                        {isLoading
+                          ? tc('messages.loading', 'A carregar...')
+                          : t('drivers.list.empty', 'Nenhum motorista encontrado')}
+                      </Text>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {filteredDrivers?.length === 0 ? (
-                    <Tr>
-                      <Td colSpan={10} textAlign="center" py={8}>
-                        <Text color="gray.500">
-                          {isLoading
-                            ? tc('messages.loading', 'A carregar...')
-                            : t('drivers.list.empty', 'Nenhum motorista encontrado')}
-                        </Text>
+                ) : (
+                  filteredDrivers?.map((driver) => (
+                    <Tr key={driver.id}>
+                      <Td>
+                        <Text fontWeight="medium">{driver.fullName || driver.name || 'N/A'}</Text>
                       </Td>
-                    </Tr>
-                  ) : (
-                    filteredDrivers?.map((driver) => (
-                      <Tr key={driver.id}>
-                        <Td>
-                          <Text fontWeight="medium">{driver.fullName || driver.name || 'N/A'}</Text>
-                        </Td>
-                        <Td>
-                          <Text fontSize="sm">{driver.email || 'N/A'}</Text>
-                        </Td>
-                        <Td>{getStatusBadge(driver.status)}</Td>
-                        <Td>{getTypeBadge(driver.type)}</Td>
-                        <Td>
-                          <VStack spacing={1} align="start">
-                            <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.uber?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.uber?.key ? 
-                                `${driver.integrations.uber.key.slice(0, 8)}...` : 
-                                'N/A'}
-                            </Text>
-                            {driver.integrations?.uber?.enabled && (
-                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
-                            )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <VStack spacing={1} align="start">
-                            <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.bolt?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.bolt?.key || 'N/A'}
-                            </Text>
-                            {driver.integrations?.bolt?.enabled && (
-                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
-                            )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <VStack spacing={1} align="start">
-                            <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.myprio?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.myprio?.key ? 
-                                `...${driver.integrations.myprio.key.slice(-4)}` : 
-                                'N/A'}
-                            </Text>
-                            {driver.integrations?.myprio?.enabled && (
-                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
-                            )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <VStack spacing={1} align="start">
-                            <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.viaverde?.enabled ? 'green.600' : 'gray.400'}>
-                              {driver.integrations?.viaverde?.key || 'N/A'}
-                            </Text>
-                            {driver.integrations?.viaverde?.enabled && (
-                                <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
-                            )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <Text fontSize="xs" fontFamily="mono">
-                            {driver.banking?.iban ? 
-                              `${driver.banking.iban.slice(0, 8)}...${driver.banking.iban.slice(-4)}` : 
+                      <Td>
+                        <Text fontSize="sm">{driver.email || 'N/A'}</Text>
+                      </Td>
+                      <Td>{getStatusBadge(driver.status)}</Td>
+                      <Td>{getTypeBadge(driver.type)}</Td>
+                      <Td>
+                        <VStack spacing={1} align="start">
+                          <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.uber?.enabled ? 'green.600' : 'gray.400'}>
+                            {driver.integrations?.uber?.key ?
+                              `${driver.integrations.uber.key.slice(0, 8)}...` :
                               'N/A'}
                           </Text>
-                        </Td>
-                        <Td>
-                          <Tooltip label={tc('actions.edit', 'Editar')}>
-                            <IconButton
-                              aria-label={t('drivers.editDriver', 'Editar Motorista')}
-                              icon={<Icon as={FiEdit} />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleEdit(driver)}
-                            />
-                          </Tooltip>
-                        </Td>
-                      </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
-            </Box>
-          </CardBody>
-        </Card>
-      </VStack>
+                          {driver.integrations?.uber?.enabled && (
+                            <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
+                          )}
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <VStack spacing={1} align="start">
+                          <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.bolt?.enabled ? 'green.600' : 'gray.400'}>
+                            {driver.integrations?.bolt?.key || 'N/A'}
+                          </Text>
+                          {driver.integrations?.bolt?.enabled && (
+                            <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
+                          )}
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <VStack spacing={1} align="start">
+                          <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.myprio?.enabled ? 'green.600' : 'gray.400'}>
+                            {driver.integrations?.myprio?.key ?
+                              `...${driver.integrations.myprio.key.slice(-4)}` :
+                              'N/A'}
+                          </Text>
+                          {driver.integrations?.myprio?.enabled && (
+                            <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
+                          )}
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <VStack spacing={1} align="start">
+                          <Text fontSize="xs" fontFamily="mono" color={driver.integrations?.viaverde?.enabled ? 'green.600' : 'gray.400'}>
+                            {driver.integrations?.viaverde?.key || 'N/A'}
+                          </Text>
+                          {driver.integrations?.viaverde?.enabled && (
+                            <Badge size="xs" colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
+                          )}
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <Text fontSize="xs" fontFamily="mono">
+                          {driver.banking?.iban ?
+                            `${driver.banking.iban.slice(0, 8)}...${driver.banking.iban.slice(-4)}` :
+                            'N/A'}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <Tooltip label={tc('actions.edit', 'Editar')}>
+                          <IconButton
+                            aria-label={t('drivers.editDriver', 'Editar Motorista')}
+                            icon={<Icon as={FiEdit} />}
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEdit(driver)}
+                          />
+                        </Tooltip>
+                      </Td>
+                    </Tr>
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </Box>
+        </CardBody>
+      </Card>
 
-      {/* Modal de Edição */}
       <StructuredModal
         isOpen={isOpen}
         onClose={onClose}

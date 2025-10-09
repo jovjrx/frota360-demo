@@ -33,6 +33,7 @@ import {
   FormHelperText,
   Input,
   Textarea,
+  Stack,
 } from '@chakra-ui/react';
 import {
   FiRefreshCw,
@@ -304,7 +305,7 @@ export default function WeeklyPage({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-  a.download = `${t('weekly.control.files.summariesPrefix', 'resumos')}_${selectedWeek.start}_a_${selectedWeek.end}.zip`;
+      a.download = `${t('weekly.control.files.summariesPrefix', 'resumos')}_${selectedWeek.start}_a_${selectedWeek.end}.zip`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -632,13 +633,13 @@ export default function WeeklyPage({
 
     let proofPayload:
       | {
-          url: string;
-          storagePath: string;
-          fileName: string;
-          size: number;
-          contentType?: string;
-          uploadedAt: string;
-        }
+        url: string;
+        storagePath: string;
+        fileName: string;
+        size: number;
+        contentType?: string;
+        uploadedAt: string;
+      }
       | undefined;
     let uploadedProofPath: string | null = null;
 
@@ -697,12 +698,12 @@ export default function WeeklyPage({
         prev.map((item) =>
           item.id === selectedPaymentRecord.id
             ? {
-                ...item,
-                paymentStatus: updated?.paymentStatus ?? 'paid',
-                paymentDate: updated?.paymentDate ?? paymentDateIso,
-                updatedAt: updated?.updatedAt ?? item.updatedAt,
-                paymentInfo: paymentInfo ?? item.paymentInfo ?? null,
-              }
+              ...item,
+              paymentStatus: updated?.paymentStatus ?? 'paid',
+              paymentDate: updated?.paymentDate ?? paymentDateIso,
+              updatedAt: updated?.updatedAt ?? item.updatedAt,
+              paymentInfo: paymentInfo ?? item.paymentInfo ?? null,
+            }
             : item
         )
       );
@@ -782,20 +783,21 @@ export default function WeeklyPage({
     >
       {/* Filtros e Ações */}
       <Card>
-        <CardBody>
-          <VStack spacing={4} align="stretch">
-              <Select
-                value={filterWeek}
-                onChange={(e) => setFilterWeek(e.target.value)}
-                w={{ base: "100%", md: "300px" }}
-              >
-                {weekOptions.map(week => (
-                  <option key={week.value} value={week.value}>
-                    {week.label}
-                  </option>
-                ))}
-              </Select>
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={2}>
+        <CardBody p={4}>
+          <Stack flexDirection={{ base: 'column', md: 'row' }} spacing={4} align="center" justify={'space-between'}>
+            <Select
+              size={'sm'}
+              value={filterWeek}
+              onChange={(e) => setFilterWeek(e.target.value)}
+              w={{ base: "100%", md: "300px" }}
+            >
+              {weekOptions.map(week => (
+                <option key={week.value} value={week.value}>
+                  {week.label}
+                </option>
+              ))}
+            </Select>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               <Button
                 leftIcon={<Icon as={FiRefreshCw} />}
                 onClick={() => loadWeekData(filterWeek)}
@@ -825,43 +827,44 @@ export default function WeeklyPage({
                 {t('weekly.control.actions.exportPayments', 'Exportar planilha')}
               </Button>
             </SimpleGrid>
-          </VStack>
+          </Stack>
         </CardBody>
       </Card>
 
       {/* Resumo */}
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+        <StatCard
+          label={t('weekly.control.summary.cards.totalEarnings', 'Ganhos Totais')}
+          value={totals.ganhosTotal}
+          color="green.600"
+          helpText={`${records.length} ${t('weekly.control.summary.cards.driversCountLabel', 'motoristas')}`}
+        />
+        <StatCard
+          label={t('weekly.control.summary.cards.totalDiscounts', 'Descontos Totais')}
+          value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel}
+          color="red.600"
+          helpText={t('weekly.control.summary.cards.discountsHelp', 'IVA, Adm, Combustível, Portagens, Aluguel')}
+        />
+        <StatCard
+          label={t('weekly.control.summary.cards.fuel', 'Combustível')}
+          value={totals.combustivel}
+          color="orange.600"
+          helpText={t('weekly.control.summary.cards.prioLabel', 'PRIO')}
+        />
+        <StatCard
+          label={t('weekly.control.summary.cards.netValue', 'Valor Líquido')}
+          value={totals.repasse}
+          color="blue.600"
+          helpText={t('weekly.control.summary.cards.totalToPay', 'Total a pagar')}
+        />
+      </SimpleGrid>
+
       <Card>
-        <CardHeader>
+        <CardHeader mb={0}>
           <Heading size="md">{t('weekly.control.summary.title', 'Resumo Semanal')}</Heading>
         </CardHeader>
-        <CardBody>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-            <StatCard
-              label={t('weekly.control.summary.cards.totalEarnings', 'Ganhos Totais')}
-              value={totals.ganhosTotal}
-              color="green.600"
-              helpText={`${records.length} ${t('weekly.control.summary.cards.driversCountLabel', 'motoristas')}`}
-            />
-            <StatCard
-              label={t('weekly.control.summary.cards.totalDiscounts', 'Descontos Totais')}
-              value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel}
-              color="red.600"
-              helpText={t('weekly.control.summary.cards.discountsHelp', 'IVA, Adm, Combustível, Portagens, Aluguel')}
-            />
-            <StatCard
-              label={t('weekly.control.summary.cards.fuel', 'Combustível')}
-              value={totals.combustivel}
-              color="orange.600"
-              helpText={t('weekly.control.summary.cards.prioLabel', 'PRIO')}
-            />
-            <StatCard
-              label={t('weekly.control.summary.cards.netValue', 'Valor Líquido')}
-              value={totals.repasse}
-              color="blue.600"
-              helpText={t('weekly.control.summary.cards.totalToPay', 'Total a pagar')}
-            />
-          </SimpleGrid>
-          <Table variant="simple" size="sm" mt={6}>
+        <CardBody mt={0}>
+          <Table variant="simple" size="sm">
             <Thead>
               <Tr>
                 <Th>{t('weekly.control.summary.table.item', 'Item')}</Th>
@@ -1366,7 +1369,7 @@ export default function WeeklyPage({
       {unassigned.length > 0 && (
         <Card variant="outline">
           <CardHeader>
-            <Heading size="sm" color="orange.500">
+            <Heading size="sm" color="orange.500" mb={0}>
               {t('weekly.control.unassigned.title', 'Registos sem motorista associado')}
             </Heading>
           </CardHeader>
@@ -1379,7 +1382,7 @@ export default function WeeklyPage({
                 <Tr>
                   <Th>{t('weekly.control.unassigned.columns.platform', 'Plataforma')}</Th>
                   <Th>{t('weekly.control.unassigned.columns.reference', 'Referência')}</Th>
-                  <Th>{t('weekly.control.unassigned.columns.value', 'Valor')}</Th>
+                  <Th isNumeric>{t('weekly.control.unassigned.columns.value', 'Valor')}</Th>
                 </Tr>
               </Thead>
               <Tbody>

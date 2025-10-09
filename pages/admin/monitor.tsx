@@ -285,9 +285,8 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
           <Card>
             <CardBody>
               <Stat>
-                <StatLabel fontSize="xs">{tMonitor("total_trips")}</StatLabel>
+                <StatLabel fontSize="xs">{tMonitor("total_trips")} ({tMonitor("last_week")})</StatLabel>
                 <StatNumber fontSize="2xl">{stats.totalTrips}</StatNumber>
-                <StatHelpText>{tMonitor("last_week")}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
@@ -342,162 +341,170 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
       )}
 
       {/* Tabs: Lista e Mapa */}
-      <Card>
-        <Tabs colorScheme="green" variant="enclosed">
-          <TabList>
-            <Tab>
-              <Icon as={FiList} mr={2} />
-              {tMonitor("trip_list_tab")}
-            </Tab>
-            <Tab>
-              <Icon as={FiMap} mr={2} />
-              {tMonitor("map_tab")}
-            </Tab>
-          </TabList>
 
-          <TabPanels>
-            {/* Tab 1: Lista de Viagens */}
-            <TabPanel p={0}>
-              {isInitialLoading ? (
-                <Center py={12}>
-                  <Spinner size="lg" color="green.500" />
-                </Center>
-              ) : (
-                <Box overflowX="auto">
-                  <Table variant="simple">
-                    <Thead bg="gray.50">
-                      <Tr>
-                        <Th>{tMonitor("vehicle_column")}</Th>
-                        <Th>{tMonitor("driver_column")}</Th>
-                        <Th>{tMonitor("start_column")}</Th>
-                        <Th>{tMonitor("end_column")}</Th>
-                        <Th isNumeric>{tMonitor("distance_column")}</Th>
-                        <Th isNumeric>{tMonitor("duration_column")}</Th>
-                        <Th isNumeric>{tMonitor("max_speed_column")}</Th>
-                        <Th>{tMonitor("events_column")}</Th>
-                        <Th>{tMonitor("time_column")}</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {trips.map((trip) => {
-                        const totalEvents =
-                          trip.harsh_braking_events +
-                          trip.harsh_cornering_events +
-                          trip.harsh_acceleration_events +
-                          trip.road_speeding_events;
+      <Tabs colorScheme="green" variant="solid-rounded">
+        <TabList>
+          <Tab>
+            <Icon as={FiList} mr={2} />
+            {tMonitor("trip_list_tab")}
+          </Tab>
+          <Tab>
+            <Icon as={FiMap} mr={2} />
+            {tMonitor("map_tab")}
+          </Tab>
+        </TabList>
 
-                        return (
-                          <Tr key={trip.trip_id}>
-                            <Td>
-                              <VStack align="start" spacing={0}>
-                                <Text fontWeight="medium">{trip.registration}</Text>
-                                <Text fontSize="xs" color="gray.500">
-                                  {tMonitor("id_label")}: {trip.vehicle_id}
+        <TabPanels>
+          {/* Tab 1: Lista de Viagens */}
+          <TabPanel>
+            <Card>
+              <CardBody>
+                {isInitialLoading ? (
+                  <Center py={12}>
+                    <Spinner size="lg" color="green.500" />
+                  </Center>
+                ) : (
+                  <Box overflowX="auto">
+                    <Table variant="simple">
+                      <Thead bg="gray.50">
+                        <Tr>
+                          <Th>{tMonitor("vehicle_column")}</Th>
+                          <Th>{tMonitor("driver_column")}</Th>
+                          <Th>{tMonitor("start_column")}</Th>
+                          <Th>{tMonitor("end_column")}</Th>
+                          <Th isNumeric>{tMonitor("distance_column")}</Th>
+                          <Th isNumeric>{tMonitor("duration_column")}</Th>
+                          <Th isNumeric>{tMonitor("max_speed_column")}</Th>
+                          <Th>{tMonitor("events_column")}</Th>
+                          <Th>{tMonitor("time_column")}</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {trips.map((trip) => {
+                          const totalEvents =
+                            trip.harsh_braking_events +
+                            trip.harsh_cornering_events +
+                            trip.harsh_acceleration_events +
+                            trip.road_speeding_events;
+
+                          return (
+                            <Tr key={trip.trip_id}>
+                              <Td>
+                                <VStack align="start" spacing={0}>
+                                  <Text fontWeight="medium">{trip.registration}</Text>
+                                  <Text fontSize="xs" color="gray.500">
+                                    {tMonitor("id_label")}: {trip.vehicle_id}
+                                  </Text>
+                                </VStack>
+                              </Td>
+                              <Td>
+                                <Text>
+                                  {trip.driver_name} {trip.driver_surname}
                                 </Text>
-                              </VStack>
-                            </Td>
-                            <Td>
-                              <Text>
-                                {trip.driver_name} {trip.driver_surname}
-                              </Text>
-                            </Td>
-                            <Td>
-                              <Tooltip label={trip.start_location}>
-                                <Text fontSize="sm" noOfLines={2} maxW="200px">
-                                  {trip.start_location}
-                                </Text>
-                              </Tooltip>
-                            </Td>
-                            <Td>
-                              <Tooltip label={trip.end_location}>
-                                <Text fontSize="sm" noOfLines={2} maxW="200px">
-                                  {trip.end_location}
-                                </Text>
-                              </Tooltip>
-                            </Td>
-                            <Td isNumeric>
-                              <Text>{formatDistance(trip.trip_distance)}</Text>
-                            </Td>
-                            <Td isNumeric>
-                              <Text>{trip.trip_duration}</Text>
-                            </Td>
-                            <Td isNumeric>
-                              <Text fontWeight="medium">{trip.max_speed} km/h</Text>
-                            </Td>
-                            <Td>
-                              <HStack>
-                                <Badge colorScheme={getEventsBadgeColor(totalEvents)}>
-                                  {totalEvents}
-                                </Badge>
-                                {totalEvents > 0 && (
-                                  <Tooltip
-                                    label={tMonitor("events_tooltip", {
-                                      braking: trip.harsh_braking_events,
-                                      cornering: trip.harsh_cornering_events,
-                                      acceleration: trip.harsh_acceleration_events,
-                                      speeding: trip.road_speeding_events,
+                              </Td>
+                              <Td>
+                                <Tooltip label={trip.start_location}>
+                                  <Text fontSize="sm" noOfLines={2} maxW="200px">
+                                    {trip.start_location}
+                                  </Text>
+                                </Tooltip>
+                              </Td>
+                              <Td>
+                                <Tooltip label={trip.end_location}>
+                                  <Text fontSize="sm" noOfLines={2} maxW="200px">
+                                    {trip.end_location}
+                                  </Text>
+                                </Tooltip>
+                              </Td>
+                              <Td isNumeric>
+                                <Text>{formatDistance(trip.trip_distance)}</Text>
+                              </Td>
+                              <Td isNumeric>
+                                <Text>{trip.trip_duration}</Text>
+                              </Td>
+                              <Td isNumeric>
+                                <Text fontWeight="medium">{trip.max_speed} km/h</Text>
+                              </Td>
+                              <Td>
+                                <HStack>
+                                  <Badge colorScheme={getEventsBadgeColor(totalEvents)}>
+                                    {totalEvents}
+                                  </Badge>
+                                  {totalEvents > 0 && (
+                                    <Tooltip
+                                      label={tMonitor("events_tooltip", {
+                                        braking: trip.harsh_braking_events,
+                                        cornering: trip.harsh_cornering_events,
+                                        acceleration: trip.harsh_acceleration_events,
+                                        speeding: trip.road_speeding_events,
+                                      })}
+                                    >
+                                      <span>
+                                        <Icon as={FiAlertTriangle} color="orange.500" />
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                                </HStack>
+                              </Td>
+                              <Td>
+                                <VStack align="start" spacing={0}>
+                                  <Text fontSize="sm">
+                                    {new Date(trip.start_timestamp).toLocaleDateString(locale)}
+                                  </Text>
+                                  <Text fontSize="xs" color="gray.500">
+                                    {new Date(trip.start_timestamp).toLocaleTimeString(locale, {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
                                     })}
-                                  >
-                                    <span>
-                                      <Icon as={FiAlertTriangle} color="orange.500" />
-                                    </span>
-                                  </Tooltip>
-                                )}
-                              </HStack>
-                            </Td>
-                            <Td>
-                              <VStack align="start" spacing={0}>
-                                <Text fontSize="sm">
-                                  {new Date(trip.start_timestamp).toLocaleDateString(locale)}
-                                </Text>
-                                <Text fontSize="xs" color="gray.500">
-                                  {new Date(trip.start_timestamp).toLocaleTimeString(locale, {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </Text>
-                              </VStack>
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  </Table>
+                                  </Text>
+                                </VStack>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </Tbody>
+                    </Table>
 
-                  {trips.length === 0 && (
-                    <Center py={12}>
-                      <VStack>
-                        <Icon as={FiNavigation} boxSize={12} color="gray.400" />
-                        <Text color="gray.500">{tMonitor("no_trips_recorded")}</Text>
-                      </VStack>
-                    </Center>
-                  )}
-                </Box>
-              )}
-            </TabPanel>
+                    {trips.length === 0 && (
+                      <Center py={12}>
+                        <VStack>
+                          <Icon as={FiNavigation} boxSize={12} color="gray.400" />
+                          <Text color="gray.500">{tMonitor("no_trips_recorded")}</Text>
+                        </VStack>
+                      </Center>
+                    )}
+                  </Box>
+                )}
+              </CardBody>
+            </Card>
+          </TabPanel>
 
-            {/* Tab 2: Mapa */}
-            <TabPanel>
-              {isInitialLoading ? (
-                <Center h="600px">
-                  <Spinner size="lg" color="green.500" />
-                </Center>
-              ) : trips.length > 0 ? (
-                <Box h="600px">
-                  <MapView trips={trips} />
-                </Box>
-              ) : (
-                <Center h="600px">
-                  <VStack>
-                    <Icon as={FiMap} boxSize={12} color="gray.400" />
-                    <Text color="gray.500">{tMonitor("no_data_for_map")}</Text>
-                  </VStack>
-                </Center>
-              )}
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Card>
+          {/* Tab 2: Mapa */}
+          <TabPanel>
+                 <Card>
+              <CardBody>
+            {isInitialLoading ? (
+              <Center h="600px">
+                <Spinner size="lg" color="green.500" />
+              </Center>
+            ) : trips.length > 0 ? (
+              <Box h="600px">
+                <MapView trips={trips} />
+              </Box>
+            ) : (
+              <Center h="600px">
+                <VStack>
+                  <Icon as={FiMap} boxSize={12} color="gray.400" />
+                  <Text color="gray.500">{tMonitor("no_data_for_map")}</Text>
+                </VStack>
+              </Center>
+            )}
+            </CardBody>
+            </Card>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+
 
     </AdminLayout>
   );
