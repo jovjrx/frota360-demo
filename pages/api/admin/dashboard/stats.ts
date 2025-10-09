@@ -1,17 +1,8 @@
-import type { NextApiResponse } from 'next';
-import { SessionRequest } from '@/lib/session/ironSession';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
-import { withIronSessionApiRoute } from '@/lib/session/ironSession';
-import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 
-export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
-  const user = req.session.user;
-
-  if (!user || user.role !== 'admin') {
-    return res.status(401).json({ success: false, error: 'Unauthorized' });
-  }
-
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
@@ -100,5 +91,5 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
     console.error('Error fetching dashboard stats:', error);
     return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
   }
-}, sessionOptions);
+}
 

@@ -146,8 +146,8 @@ export class CartrackClient extends BaseIntegrationClient {
     try {
       // According to Cartrack API docs: GET /trips with timestamps in format "YYYY-MM-DD HH:MM:SS"
       // Example: "2025-09-28 00:00:00"
-      const startTimestamp = `${startDate}T00:00:00Z`;
-      const endTimestamp = `${endDate}T23:59:59Z`;
+  const startTimestamp = `${startDate}T00:00:00`;
+  const endTimestamp = `${endDate}T23:59:59`;
 
       console.log(`[Cartrack] Fetching trips from ${startTimestamp} to ${endTimestamp}`);
 
