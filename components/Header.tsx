@@ -33,10 +33,12 @@ import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FiUser, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiMail, FiPhone, FiUserCheck, FiFileText, FiTrendingUp, FiUpload, FiEdit, FiTruck, FiActivity, FiWifi, FiBarChart2 } from "react-icons/fi";
 import { getAllMenuItems } from "@/config/adminMenu";
 import { getPublicMenuItems } from "@/config/publicMenu";
+import { getDashboardMenuItems } from "@/config/dashboardMenu";
 import { WrapperLayout } from "./layouts/WrapperLayout";
 
 interface HeaderProps {
   t: (key: string) => string;
+  tPage?: (key: string) => string;
   panel: boolean;
   serverUser?: {
     uid: string;
@@ -46,7 +48,7 @@ interface HeaderProps {
   } | null;
 }
 
-export default function Header({ t, panel = false, serverUser }: HeaderProps) {
+export default function Header({ t, tPage, panel = false, serverUser }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { user: clientUser, signOut, isAdmin: clientIsAdmin, userData: clientUserData } = useAuth();
   const router = useRouter();
@@ -60,6 +62,16 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
     email: serverUser.email,
     role: serverUser.role,
   } : clientUserData;
+
+  // Função helper para traduzir menu items
+  // Tenta usar tPage (admin/dashboard) primeiro, depois fallback para t (common)
+  const translateMenu = (key: string, fallback?: string) => {
+    if (tPage) {
+      const translated = tPage(key);
+      if (translated && translated !== key) return translated;
+    }
+    return t(key) || fallback || key;
+  };
 
   const isActive = (path: string) => router.pathname === path;
 
@@ -85,6 +97,8 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
     [t, getLocalizedHref]
   );
 
+  const allMenuItems = getAllMenuItems();
+  const dashboardMenuItems = getDashboardMenuItems();
 
   const NavLink = ({ href, label, external, activePath }: { href: string; label: string; external?: boolean; activePath?: string }) => (
     <Button
@@ -102,9 +116,6 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
       {label}
     </Button>
   );
-
-
-  const allMenuItems = getAllMenuItems();
 
   return (
     <Box as="header" borderBottomWidth="0" shadow="sm" position={'relative'} top={0} zIndex={900} bg="white" >
@@ -191,70 +202,27 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
                               h="48px"
                               px={4}
                             >
-                              <Text fontWeight="medium">{item.label}</Text>
+                              <Text fontWeight="medium">{translateMenu(`menu.${item.id}`, item.label)}</Text>
                             </Button>
                           ))}
 
-                          {!isAdmin && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiUser />}
-                                onClick={() => router.push('/drivers/profile')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Meu Perfil</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiFileText />}
-                                onClick={() => router.push('/drivers/documents')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Documentos</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiDollarSign />}
-                                onClick={() => router.push('/drivers/payments')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Pagamentos</Text>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="md"
-                                justifyContent="flex-start"
-                                leftIcon={<FiTrendingUp />}
-                                onClick={() => router.push('/drivers/analytics')}
-                                borderRadius="lg"
-                                _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
-                                transition="all 0.2s"
-                                h="48px"
-                                px={4}
-                              >
-                                <Text fontWeight="medium">Relatórios</Text>
-                              </Button>
-                            </>
-                          )}
+                          {!isAdmin && dashboardMenuItems?.map((item) => (
+                            <Button
+                              key={item.id}
+                              variant="ghost"
+                              size="md"
+                              justifyContent="flex-start"
+                              leftIcon={<Icon as={item.icon} />}
+                              onClick={() => router.push(item.href)}
+                              borderRadius="lg"
+                              _hover={{ bg: "gray.100", transform: "translateX(4px)" }}
+                              transition="all 0.2s"
+                              h="48px"
+                              px={4}
+                            >
+                              <Text fontWeight="medium">{translateMenu(`menu.${item.id}`, item.label)}</Text>
+                            </Button>
+                          ))}
                         </VStack>
 
                         <Divider />
@@ -351,64 +319,28 @@ export default function Header({ t, panel = false, serverUser }: HeaderProps) {
                             }}
                             w="full"
                           >
-                            {item.label}
+                            {translateMenu(`menu.${item.id}`, item.label)}
                           </Button>
                         ))}
                       </>
                     ) : (
                       <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          justifyContent="flex-start"
-                          leftIcon={<FiUser />}
-                          onClick={() => {
-                            router.push('/dashboard');
-                            setOpen(false);
-                          }}
-                          w="full"
-                        >
-                          Dashboard
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          justifyContent="flex-start"
-                          leftIcon={<FiFileText />}
-                          onClick={() => {
-                            router.push('/dashboard/payslips');
-                            setOpen(false);
-                          }}
-                          w="full"
-                        >
-                          Recibos
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          justifyContent="flex-start"
-                          leftIcon={<FiBarChart2 />}
-                          onClick={() => {
-                            router.push('/dashboard/analytics');
-                            setOpen(false);
-                          }}
-                          w="full"
-                        >
-                          Análises
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          justifyContent="flex-start"
-                          leftIcon={<FiUser />}
-                          onClick={() => {
-                            router.push('/dashboard/profile');
-                            setOpen(false);
-                          }}
-                          w="full"
-                        >
-                          Perfil
-                        </Button>
+                        {dashboardMenuItems?.map((item) => (
+                          <Button
+                            key={item.id}
+                            variant="ghost"
+                            size="sm"
+                            justifyContent="flex-start"
+                            leftIcon={<Icon as={item.icon} />}
+                            onClick={() => {
+                              router.push(item.href);
+                              setOpen(false);
+                            }}
+                            w="full"
+                          >
+                            {translateMenu(`menu.${item.id}`, item.label)}
+                          </Button>
+                        ))}
                       </>
                     )}
 

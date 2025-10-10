@@ -80,7 +80,7 @@ interface SolicitacoesPageProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }: SolicitacoesPageProps) {
+export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, translations }: SolicitacoesPageProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -201,6 +201,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage }
       breadcrumbs={[
         { label: t('requests.title', 'Gestão de Solicitações') }
       ]}
+      translations={translations}
     >
       <VStack spacing={6} align="stretch">
         {/* Stats */}

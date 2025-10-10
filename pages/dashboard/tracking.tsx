@@ -27,6 +27,8 @@ import {
 import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import dynamic from 'next/dynamic';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
+import { getTranslation } from '@/lib/translations';
 
 // Importar o componente do mapa dinamicamente para evitar problemas de SSR
 const DriverCartrackMap = dynamic(() => import('@/components/admin/DriverCartrackMap'), { ssr: false });
@@ -64,37 +66,37 @@ interface CartrackData {
   };
 }
 
-export default function PainelRastreamento() {
+interface PainelRastreamentoProps extends DashboardPageProps {
+  motorista: any;
+}
+
+export default function PainelRastreamento({ motorista, translations, locale }: PainelRastreamentoProps) {
   const router = useRouter();
   const toast = useToast();
   
-  const [loading, setLoading] = useState(true);
-  const [motorista, setMotorista] = useState<Motorista | null>(null);
+  const [loading, setLoading] = useState(false);
   const [cartrackData, setCartrackData] = useState<CartrackData | null>(null);
+
+  const t = (key: string, fallback?: string) => {
+    if (!translations?.common) return fallback || key;
+    return getTranslation(translations.common, key) || fallback || key;
+  };
+
+  const tDashboard = (key: string, fallback?: string) => {
+    if (!translations?.dashboard) return fallback || key;
+    return getTranslation(translations.dashboard, key) || fallback || key;
+  };
 
   useEffect(() => {
     carregarDados();
-  }, []);
+  }, [motorista?.id]);
 
   async function carregarDados() {
     try {
       setLoading(true);
 
-      const res = await fetch('/api/painel/me');
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push('/login');
-          return;
-        }
-        const error = await res.json();
-        throw new Error(error.error || 'Erro ao carregar dados do motorista');
-      }
-
-      const dadosMotorista = await res.json();
-      setMotorista(dadosMotorista);
-
-      if (dadosMotorista.type === 'renter' && dadosMotorista.vehicle?.plate) {
-        const cartrackRes = await fetch(`/api/painel/cartrack?driverId=${dadosMotorista.id}`);
+      if (motorista?.type === 'renter' && motorista?.vehicle?.plate) {
+        const cartrackRes = await fetch(`/api/painel/cartrack?driverId=${motorista.id}`);
         if (!cartrackRes.ok) {
           const error = await cartrackRes.json();
           throw new Error(error.message || 'Erro ao carregar dados do Cartrack');
@@ -106,8 +108,8 @@ export default function PainelRastreamento() {
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       toast({
-        title: 'Erro',
-        description: error.message || 'Erro ao carregar dados',
+        title: t('error', 'Erro'),
+        description: error.message || t('error.loading', 'Erro ao carregar dados'),
         status: 'error',
         duration: 5000,
       });
@@ -148,12 +150,13 @@ export default function PainelRastreamento() {
   if (loading) {
     return (
       <PainelLayout 
-        title="Rastreamento"
-        breadcrumbs={[{ label: 'Rastreamento' }]}
+        title={tDashboard('tracking.title', 'Rastreamento')}
+        breadcrumbs={[{ label: tDashboard('tracking.breadcrumb', 'Rastreamento') }]}
+        translations={translations}
       >
         <Box textAlign="center" py={10}>
           <Spinner size="xl" color="green.500" />
-          <Text mt={4} color="gray.600">Carregando...</Text>
+          <Text mt={4} color="gray.600">{t('loading', 'Carregando...')}</Text>
         </Box>
       </PainelLayout>
     );
@@ -162,14 +165,15 @@ export default function PainelRastreamento() {
   if (!motorista) {
     return (
       <PainelLayout 
-        title="Rastreamento"
-        breadcrumbs={[{ label: 'Rastreamento' }]}
+        title={tDashboard('tracking.title', 'Rastreamento')}
+        breadcrumbs={[{ label: tDashboard('tracking.breadcrumb', 'Rastreamento') }]}
+        translations={translations}
       >
         <Alert status="error">
           <AlertIcon />
-          <AlertTitle>Erro ao carregar dados</AlertTitle>
+          <AlertTitle>{t('error', 'Erro ao carregar dados')}</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar seus dados. Tente novamente.
+            {t('error.try_again', 'Não foi possível carregar seus dados. Tente novamente.')}
           </AlertDescription>
         </Alert>
       </PainelLayout>
@@ -180,9 +184,10 @@ export default function PainelRastreamento() {
   if (motorista.type === 'affiliate') {
     return (
       <PainelLayout 
-        title="Rastreamento"
-        subtitle="Dados de quilometragem e localização"
-        breadcrumbs={[{ label: 'Rastreamento' }]}
+        title={tDashboard('tracking.title', 'Rastreamento')}
+        subtitle={tDashboard('tracking.subtitle', 'Dados de quilometragem e localização')}
+        breadcrumbs={[{ label: tDashboard('tracking.breadcrumb', 'Rastreamento') }]}
+        translations={translations}
       >
         <Alert 
           status="info" 
@@ -196,12 +201,14 @@ export default function PainelRastreamento() {
         >
           <Icon as={FiAlertCircle} boxSize={12} mb={4} color="blue.500" />
           <AlertTitle fontSize="xl" mb={2}>
-            Rastreamento não disponível
+            Rastreamento Disponível Apenas para Locatários
           </AlertTitle>
           <AlertDescription maxW="md" fontSize="md">
-            Como motorista afiliado com veículo próprio, você não tem acesso ao rastreamento Cartrack.
+            Esta funcionalidade está disponível apenas para motoristas <strong>locatários</strong> que utilizam veículos da frota com sistema Cartrack instalado.
             <br /><br />
-            Para informações sobre suas viagens, consulte os aplicativos Uber e Bolt.
+            Como <strong>afiliado com veículo próprio</strong>, você não tem acesso ao rastreamento.
+            <br /><br />
+            Para informações sobre suas viagens, consulte os aplicativos <strong>Uber</strong> e <strong>Bolt</strong>.
           </AlertDescription>
         </Alert>
       </PainelLayout>
@@ -209,18 +216,34 @@ export default function PainelRastreamento() {
   }
 
   // Se for locatário mas não tem veículo atribuído
-  if (!motorista.vehicle) {
+  if (!motorista.vehicle || !motorista.vehicle.plate) {
     return (
       <PainelLayout 
-        title="Rastreamento"
-        subtitle="Dados de quilometragem e localização"
-        breadcrumbs={[{ label: 'Rastreamento' }]}
+        title={tDashboard('tracking.title', 'Rastreamento')}
+        subtitle={tDashboard('tracking.subtitle', 'Dados de quilometragem e localização')}
+        breadcrumbs={[{ label: tDashboard('tracking.breadcrumb', 'Rastreamento') }]}
+        translations={translations}
       >
-        <Alert status="warning" borderRadius="lg">
-          <AlertIcon />
-          <AlertTitle>Veículo não atribuído</AlertTitle>
-          <AlertDescription>
-            Você ainda não tem um veículo atribuído. Entre em contato com o administrador.
+        <Alert 
+          status="warning"
+          variant="left-accent"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          textAlign="center"
+          py={8}
+          borderRadius="lg"
+        >
+          <Icon as={FiTruck} boxSize={12} mb={4} color="orange.500" />
+          <AlertTitle fontSize="xl" mb={2}>
+            Veículo Não Atribuído
+          </AlertTitle>
+          <AlertDescription maxW="md" fontSize="md">
+            Você está cadastrado como <strong>locatário</strong>, mas ainda não tem um veículo atribuído.
+            <br /><br />
+            Entre em contato com o administrador para solicitar a atribuição de um veículo da frota.
+            <br /><br />
+            Após a atribuição, você poderá acompanhar a quilometragem e localização do veículo por esta página.
           </AlertDescription>
         </Alert>
       </PainelLayout>
@@ -233,26 +256,27 @@ export default function PainelRastreamento() {
 
   return (
     <PainelLayout 
-      title="Rastreamento"
-      subtitle="Dados de quilometragem e localização do seu veículo"
-      breadcrumbs={[{ label: 'Rastreamento' }]}
+      title={tDashboard('tracking.title', 'Rastreamento')}
+      subtitle={tDashboard('tracking.subtitle', 'Dados de quilometragem e localização do seu veículo')}
+      breadcrumbs={[{ label: tDashboard('tracking.breadcrumb', 'Rastreamento') }]}
+      translations={translations}
     >
       {/* Informações do Veículo */}
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
         <HStack mb={4}>
           <Icon as={FiTruck} boxSize={5} color="green.500" />
-          <Text fontSize="lg" fontWeight="bold">Veículo</Text>
+          <Text fontSize="lg" fontWeight="bold">{tDashboard('tracking.vehicle', 'Veículo')}</Text>
         </HStack>
         
         <HStack spacing={8}>
           <Box>
-            <Text fontSize="sm" color="gray.600" mb={1}>Matrícula</Text>
+            <Text fontSize="sm" color="gray.600" mb={1}>{tDashboard('tracking.plate', 'Matrícula')}</Text>
             <Text fontSize="xl" fontWeight="bold" fontFamily="mono">
               {motorista.vehicle.plate}
             </Text>
           </Box>
           <Box>
-            <Text fontSize="sm" color="gray.600" mb={1}>Modelo</Text>
+            <Text fontSize="sm" color="gray.600" mb={1}>{tDashboard('tracking.model', 'Modelo')}</Text>
             <Text fontSize="xl" fontWeight="bold">
               {motorista.vehicle.model}
             </Text>
@@ -332,19 +356,19 @@ export default function PainelRastreamento() {
       {/* Estatísticas da Semana (mockup) - Manter por enquanto, pois a API de trips só retorna 24h */}
       <Box bg="gray.100" p={6} borderRadius="lg" borderWidth="1px" borderColor="gray.300">
         <Text fontSize="lg" fontWeight="bold" mb={4} color="gray.600">
-          Estatísticas da Semana Atual
+          {tDashboard('tracking.weekly_stats', 'Estatísticas da Semana Atual')}
         </Text>
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
           <Box>
-            <Text fontSize="sm" color="gray.600" mb={1}>Quilometragem Total</Text>
+            <Text fontSize="sm" color="gray.600" mb={1}>{tDashboard('tracking.total_km', 'Quilometragem Total')}</Text>
             <Text fontSize="2xl" fontWeight="bold" color="gray.400">--- km</Text>
           </Box>
           <Box>
-            <Text fontSize="sm" color="gray.600" mb={1}>Dias Trabalhados</Text>
+            <Text fontSize="sm" color="gray.600" mb={1}>{tDashboard('tracking.days_worked', 'Dias Trabalhados')}</Text>
             <Text fontSize="2xl" fontWeight="bold" color="gray.400">-</Text>
           </Box>
           <Box>
-            <Text fontSize="sm" color="gray.600" mb={1}>Média Diária</Text>
+            <Text fontSize="sm" color="gray.600" mb={1}>{tDashboard('tracking.daily_avg', 'Média Diária')}</Text>
             <Text fontSize="2xl" fontWeight="bold" color="gray.400">--- km</Text>
           </Box>
         </SimpleGrid>
@@ -352,4 +376,11 @@ export default function PainelRastreamento() {
     </PainelLayout>
   );
 }
+
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: true },
+  async (context, user, driverId) => {
+    return {};
+  }
+);
 

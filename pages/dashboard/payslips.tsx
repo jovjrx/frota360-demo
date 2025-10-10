@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   SimpleGrid,
@@ -8,7 +8,6 @@ import {
   Badge,
   Button,
   useToast,
-  Spinner,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -30,9 +29,12 @@ import {
   FiEye,
   FiCheckCircle,
   FiClock,
+  FiExternalLink,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
+import { getTranslation } from '@/lib/translations';
 
 interface Contracheque {
   id: string;
@@ -53,56 +55,44 @@ interface Contracheque {
   iban: string | null;
   paymentStatus: string;
   paymentDate: string | null;
+  paymentInfo?: {
+    proofUrl?: string;
+    proofFileName?: string;
+  };
 }
 
-export default function PainelContracheques() {
+interface PainelContrachequesProps extends DashboardPageProps {
+  contracheques: Contracheque[];
+}
+
+export default function PainelContracheques({ 
+  contracheques: initialContracheques,
+  translations,
+  locale 
+}: PainelContrachequesProps) {
   const router = useRouter();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   
-  const [loading, setLoading] = useState(true);
-  const [contracheques, setContracheques] = useState<Contracheque[]>([]);
+  const [contracheques] = useState<Contracheque[]>(initialContracheques || []);
   const [contraqueSelecionado, setContraqueSelecionado] = useState<Contracheque | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<string>('all');
 
-  useEffect(() => {
-    carregarContracheques();
-  }, [filtroStatus]);
+  // Funções de tradução
+  const t = (key: string, fallback?: string) => {
+    if (!translations?.common) return fallback || key;
+    return getTranslation(translations.common, key) || fallback || key;
+  };
 
-  async function carregarContracheques() {
-    try {
-      setLoading(true);
+  const tPainel = (key: string, fallback?: string) => {
+    if (!translations?.dashboard) return fallback || key;
+    return getTranslation(translations.dashboard, key) || fallback || key;
+  };
 
-      const params = new URLSearchParams();
-      if (filtroStatus !== 'all') {
-        params.append('status', filtroStatus);
-      }
-
-      const res = await fetch(`/api/painel/contracheques?${params.toString()}`);
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push('/login');
-          return;
-        }
-        const error = await res.json();
-        throw new Error(error.error || 'Erro ao carregar contracheques');
-      }
-
-      const { contracheques: dados } = await res.json();
-      setContracheques(dados);
-
-    } catch (error: any) {
-      console.error('Erro ao carregar contracheques:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Erro ao carregar contracheques',
-        status: 'error',
-        duration: 5000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Filtrar contracheques no lado do cliente
+  const contrachequesFiltrados = filtroStatus === 'all' 
+    ? contracheques 
+    : contracheques.filter(c => c.paymentStatus === filtroStatus);
 
   function abrirDetalhes(contracheque: Contracheque) {
     setContraqueSelecionado(contracheque);
@@ -144,6 +134,41 @@ export default function PainelContracheques() {
     }
   }
 
+  async function baixarComprovante(recordId: string, weekStart: string, weekEnd: string) {
+    try {
+      const response = await fetch(`/api/painel/contracheques/${recordId}/proof`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao baixar comprovante');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `Comprovante_${formatarDataCurta(weekStart)}_a_${formatarDataCurta(weekEnd)}.pdf`;
+      a.download = fileName.replace(/\//g, '-');
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'Comprovante baixado!',
+        status: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Erro ao baixar comprovante:', error);
+      toast({
+        title: 'Erro ao baixar comprovante',
+        description: 'Tente novamente mais tarde',
+        status: 'error',
+        duration: 5000,
+      });
+    }
+  }
+
   function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -159,48 +184,43 @@ export default function PainelContracheques() {
     });
   }
 
-  if (loading) {
-    return (
-      <PainelLayout 
-        title="Contracheques"
-        breadcrumbs={[{ label: 'Contracheques' }]}
-      >
-        <Box textAlign="center" py={10}>
-          <Spinner size="xl" color="green.500" />
-          <Text mt={4} color="gray.600">Carregando...</Text>
-        </Box>
-      </PainelLayout>
-    );
-  }
-
   return (
     <PainelLayout 
-      title="Contracheques"
-      subtitle="Histórico de pagamentos e repasses"
-      breadcrumbs={[{ label: 'Contracheques' }]}
+      title={tPainel('payslips.title', 'Contracheques')}
+      subtitle={tPainel('payslips.subtitle', 'Histórico de pagamentos e repasses')}
+      breadcrumbs={[{ label: tPainel('payslips.breadcrumb', 'Contracheques') }]}
+      translations={translations}
       side={
         <Select 
           value={filtroStatus} 
           onChange={(e) => setFiltroStatus(e.target.value)}
           maxW="200px"
         >
-          <option value="all">Todos</option>
-          <option value="paid">Pagos</option>
-          <option value="pending">Pendentes</option>
+          <option value="all">{tPainel('payslips.filter.all', 'Todos')}</option>
+          <option value="paid">{tPainel('payslips.filter.paid', 'Pagos')}</option>
+          <option value="pending">{tPainel('payslips.filter.pending', 'Pendentes')}</option>
         </Select>
       }
     >
-      {contracheques.length === 0 ? (
+      {contrachequesFiltrados.length === 0 ? (
         <Alert status="info" borderRadius="lg">
           <AlertIcon />
-          <AlertTitle>Nenhum contracheque encontrado</AlertTitle>
+          <AlertTitle>
+            {filtroStatus === 'all' 
+              ? 'Nenhum contracheque encontrado' 
+              : `Nenhum contracheque ${filtroStatus === 'paid' ? 'pago' : 'pendente'}`
+            }
+          </AlertTitle>
           <AlertDescription>
-            Você ainda não possui contracheques registrados.
+            {filtroStatus === 'all'
+              ? 'Você ainda não possui contracheques registrados.'
+              : 'Não há contracheques com este status.'
+            }
           </AlertDescription>
         </Alert>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-          {contracheques.map((contracheque) => {
+          {contrachequesFiltrados.map((contracheque) => {
             const isPago = contracheque.paymentStatus === 'paid';
             const statusColor = isPago ? 'green' : 'orange';
             const statusLabel = isPago ? 'PAGO' : 'PENDENTE';
@@ -273,27 +293,47 @@ export default function PainelContracheques() {
                   )}
 
                   {/* Ações */}
-                  <HStack spacing={2}>
-                    <Button
-                      size="sm"
-                      colorScheme={statusColor}
-                      variant="outline"
-                      leftIcon={<Icon as={FiEye} />}
-                      onClick={() => abrirDetalhes(contracheque)}
-                      flex={1}
-                    >
-                      Ver Detalhes
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorScheme={statusColor}
-                      leftIcon={<Icon as={FiDownload} />}
-                      onClick={() => baixarPDF(contracheque)}
-                      flex={1}
-                    >
-                      Baixar PDF
-                    </Button>
-                  </HStack>
+                  <VStack spacing={2} width="full">
+                    <HStack spacing={2} width="full">
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        variant="outline"
+                        leftIcon={<Icon as={FiEye} />}
+                        onClick={() => abrirDetalhes(contracheque)}
+                        flex={1}
+                      >
+                        Ver Detalhes
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorScheme="green"
+                        leftIcon={<Icon as={FiDownload} />}
+                        onClick={() => baixarPDF(contracheque)}
+                        flex={1}
+                      >
+                        Baixar Contracheque
+                      </Button>
+                    </HStack>
+                    
+                    {/* Botão de comprovante (se houver) */}
+                    {isPago && contracheque.paymentInfo?.proofUrl && (
+                      <Button
+                        size="sm"
+                        width="full"
+                        colorScheme="purple"
+                        variant="outline"
+                        leftIcon={<Icon as={FiDownload} />}
+                        onClick={() => baixarComprovante(
+                          contracheque.id,
+                          contracheque.weekStart,
+                          contracheque.weekEnd
+                        )}
+                      >
+                        Baixar Comprovante
+                      </Button>
+                    )}
+                  </VStack>
                 </VStack>
               </Box>
             );
@@ -457,15 +497,34 @@ export default function PainelContracheques() {
                 </Box>
 
                 {/* Botões */}
-                {contraqueSelecionado.paymentStatus === 'paid' && (
+                <VStack spacing={3} width="full">
                   <Button
+                    width="full"
                     colorScheme="green"
                     leftIcon={<Icon as={FiDownload} />}
+                    onClick={() => baixarPDF(contraqueSelecionado)}
                     size="lg"
                   >
-                    Baixar PDF
+                    Baixar Contracheque (PDF)
                   </Button>
-                )}
+                  
+                  {contraqueSelecionado.paymentStatus === 'paid' && contraqueSelecionado.paymentInfo?.proofUrl && (
+                    <Button
+                      width="full"
+                      colorScheme="purple"
+                      variant="outline"
+                      leftIcon={<Icon as={FiDownload} />}
+                      onClick={() => baixarComprovante(
+                        contraqueSelecionado.id,
+                        contraqueSelecionado.weekStart,
+                        contraqueSelecionado.weekEnd
+                      )}
+                      size="lg"
+                    >
+                      Baixar Comprovante
+                    </Button>
+                  )}
+                </VStack>
               </VStack>
             )}
           </ModalBody>
@@ -474,3 +533,11 @@ export default function PainelContracheques() {
     </PainelLayout>
   );
 }
+
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: false, loadContracheques: true, contrachequeLimit: 50 },
+  async (context, user, driverId) => {
+    // contracheques já vêm automaticamente nas props base
+    return {};
+  }
+);

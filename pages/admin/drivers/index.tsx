@@ -96,6 +96,7 @@ export default function DriversPage({
   initialDrivers,
   tCommon,
   tPage,
+  translations,
 }: DriversPageProps) {
   const router = useRouter();
   const toast = useToast();
@@ -241,6 +242,7 @@ export default function DriversPage({
       breadcrumbs={[
         { label: t('drivers.title', 'Controle de Motoristas') }
       ]}
+      translations={translations}
       side={
         <Button
           leftIcon={<Icon as={FiPlus} />}

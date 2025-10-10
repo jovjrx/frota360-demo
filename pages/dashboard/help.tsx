@@ -1,4 +1,4 @@
-import {
+﻿import {
   Box,
   Text,
   VStack,
@@ -12,6 +12,11 @@ import {
   Link as ChakraLink,
   Button,
   SimpleGrid,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
+  useToast,
 } from '@chakra-ui/react';
 import {
   FiHelpCircle,
@@ -19,321 +24,234 @@ import {
   FiPhone,
   FiMessageCircle,
   FiExternalLink,
+  FiSend,
 } from 'react-icons/fi';
+import { useState } from 'react';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
+import { getTranslation } from '@/lib/translations';
 
-export default function PainelAjuda() {
+const CONTACT_INFO = {
+  phone: '+351 91 234 5678',
+  phoneFormatted: '+351 91 234 5678',
+  whatsappLink: 'https://wa.me/351912345678',
+  email: 'conduz@alvoradamagistral.eu',
+  emailLink: 'mailto:conduz@alvoradamagistral.eu',
+};
+
+const EXTERNAL_LINKS = {
+  uber: 'https://www.uber.com/pt/drive/',
+  bolt: 'https://partners.bolt.eu/',
+  myprio: 'https://www.myprio.pt/',
+  viaverde: 'https://www.viaverde.pt/',
+};
+
+const SCHEDULE = {
+  weekday: 'Segunda a Sexta',
+  weekdayHours: '9h - 18h',
+  saturday: 'Sábado',
+  saturdayHours: '9h - 13h',
+  sunday: 'Domingo e Feriados',
+  sundayStatus: 'Fechado',
+};
+
+const TEXTS = {
+  contactCards: {
+    phone: 'Telefone / WhatsApp',
+    email: 'Email',
+    chat: 'Chat Online',
+    chatAvailability: 'Segunda a Sexta',
+    chatHours: '9h - 18h',
+  },
+  contactForm: {
+    title: 'Envie-nos uma Mensagem',
+    description: 'Preencha o formulário abaixo e nossa equipe entrará em contato em breve.',
+    labelName: 'Nome',
+    labelEmail: 'Email',
+    labelSubject: 'Assunto',
+    labelMessage: 'Mensagem',
+    placeholderSubject: 'Ex: Dúvida sobre contracheque, alteração de dados...',
+    placeholderMessage: 'Descreva sua dúvida ou solicitação com o máximo de detalhes possível...',
+    buttonSubmit: 'Enviar Mensagem',
+    buttonSubmitting: 'Enviando...',
+  },
+  toast: {
+    errorTitle: 'Erro',
+    errorRequired: 'Por favor, preencha todos os campos',
+    successTitle: 'Mensagem enviada!',
+    successDescription: 'Recebemos sua mensagem e entraremos em contato em breve.',
+    errorSendTitle: 'Erro ao enviar mensagem',
+    errorSendDescription: 'Tente novamente mais tarde',
+  },
+  faq: {
+    title: 'Perguntas Frequentes',
+  },
+  links: {
+    title: 'Links Úteis',
+    uber: 'Portal Uber Driver',
+    bolt: 'Portal Bolt Driver',
+    myprio: 'Portal myprio',
+    viaverde: 'Portal ViaVerde',
+  },
+  schedule: {
+    title: 'Horário de Atendimento',
+  },
+};
+
+interface PainelAjudaProps extends DashboardPageProps {
+  motorista: {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+  };
+}
+
+export default function PainelAjuda({ translations, locale, motorista }: PainelAjudaProps) {
+  const toast = useToast();
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const t = (key: string, fallback?: string) => {
+    if (!translations?.common) return fallback || key;
+    return getTranslation(translations.common, key) || fallback || key;
+  };
+
+  const tDashboard = (key: string, fallback?: string) => {
+    if (!translations?.dashboard) return fallback || key;
+    return getTranslation(translations.dashboard, key) || fallback || key;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!subject.trim() || !message.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'Por favor, preencha todos os campos',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const response = await fetch('/api/painel/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, message }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao enviar mensagem');
+      }
+
+      toast({
+        title: 'Mensagem enviada!',
+        description: 'Recebemos sua mensagem e entraremos em contato em breve.',
+        status: 'success',
+        duration: 5000,
+      });
+
+      setSubject('');
+      setMessage('');
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao enviar mensagem',
+        description: error.message || 'Tente novamente mais tarde',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <PainelLayout 
-      title="Ajuda e Suporte"
-      subtitle="Tire suas dúvidas e entre em contato conosco"
-      breadcrumbs={[{ label: 'Ajuda' }]}
+      title={tDashboard('help.title', 'Ajuda e Suporte')}
+      subtitle={tDashboard('help.subtitle', 'Tire suas dúvidas e entre em contato conosco')}
+      breadcrumbs={[{ label: tDashboard('help.breadcrumb', 'Ajuda') }]}
+      translations={translations}
     >
-      {/* Contatos de Suporte */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-        <Box 
-          bg="white" 
-          p={6} 
-          borderRadius="lg" 
-          shadow="sm" 
-          borderWidth="1px"
-          textAlign="center"
-        >
+        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" textAlign="center">
           <Icon as={FiPhone} boxSize={8} color="green.500" mb={3} />
-          <Text fontSize="md" fontWeight="bold" mb={2}>Telefone / WhatsApp</Text>
-          <ChakraLink 
-            href="https://wa.me/351912345678" 
-            isExternal
-            color="green.600"
-            fontWeight="semibold"
-          >
-            +351 91 234 5678
+          <Text fontSize="md" fontWeight="bold" mb={2}>{TEXTS.contactCards.phone}</Text>
+          <ChakraLink href={CONTACT_INFO.whatsappLink} isExternal color="green.600" fontWeight="semibold">
+            {CONTACT_INFO.phoneFormatted}
           </ChakraLink>
         </Box>
-
-        <Box 
-          bg="white" 
-          p={6} 
-          borderRadius="lg" 
-          shadow="sm" 
-          borderWidth="1px"
-          textAlign="center"
-        >
+        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" textAlign="center">
           <Icon as={FiMail} boxSize={8} color="green.500" mb={3} />
-          <Text fontSize="md" fontWeight="bold" mb={2}>Email</Text>
-          <ChakraLink 
-            href="mailto:suporte@conduz.pt"
-            color="green.600"
-            fontWeight="semibold"
-          >
-            suporte@conduz.pt
+          <Text fontSize="md" fontWeight="bold" mb={2}>{TEXTS.contactCards.email}</Text>
+          <ChakraLink href={CONTACT_INFO.emailLink} color="green.600" fontWeight="semibold">
+            {CONTACT_INFO.email}
           </ChakraLink>
         </Box>
-
-        <Box 
-          bg="white" 
-          p={6} 
-          borderRadius="lg" 
-          shadow="sm" 
-          borderWidth="1px"
-          textAlign="center"
-        >
+        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" textAlign="center">
           <Icon as={FiMessageCircle} boxSize={8} color="green.500" mb={3} />
-          <Text fontSize="md" fontWeight="bold" mb={2}>Chat Online</Text>
+          <Text fontSize="md" fontWeight="bold" mb={2}>{TEXTS.contactCards.chat}</Text>
           <Text fontSize="sm" color="gray.600">
-            Segunda a Sexta
-            <br />
-            9h - 18h
+            {TEXTS.contactCards.chatAvailability}<br />{TEXTS.contactCards.chatHours}
           </Text>
         </Box>
       </SimpleGrid>
 
-      {/* FAQ */}
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-        <HStack mb={6}>
-          <Icon as={FiHelpCircle} boxSize={5} color="green.500" />
-          <Text fontSize="lg" fontWeight="bold">Perguntas Frequentes</Text>
+        <HStack mb={4}>
+          <Icon as={FiSend} boxSize={5} color="green.500" />
+          <Text fontSize="lg" fontWeight="bold">{TEXTS.contactForm.title}</Text>
         </HStack>
-
-        <Accordion allowMultiple>
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Como funciona o pagamento semanal?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              Os pagamentos são processados semanalmente, de segunda a domingo. 
-              Após o fechamento da semana, o administrador importa os dados das plataformas 
-              (Uber, Bolt, myprio, ViaVerde) e calcula o repasse líquido. 
-              O pagamento é realizado normalmente na terça-feira seguinte e você pode 
-              acompanhar o status no painel de contracheques.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Como é calculado o meu repasse?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              O cálculo segue estas etapas:
-              <br />
-              1. <strong>Ganhos Total</strong> = Uber + Bolt
-              <br />
-              2. <strong>IVA 6%</strong> = Ganhos Total × 0.06
-              <br />
-              3. <strong>Ganhos - IVA</strong> = Ganhos Total × 0.94
-              <br />
-              4. <strong>Despesas Administrativas 7%</strong> = (Ganhos - IVA) × 0.07
-              <br />
-              5. <strong>Total Despesas</strong> = Combustível + ViaVerde* + Aluguel*
-              <br />
-              6. <strong>Repasse</strong> = (Ganhos - IVA) - Desp. Adm - Total Despesas
-              <br />
-              <br />
-              * ViaVerde e Aluguel são descontados apenas de motoristas locatários.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Qual a diferença entre Afiliado e Locatário?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              <strong>Motorista Afiliado:</strong> Trabalha com veículo próprio, 
-              tem total controle sobre o veículo, não paga aluguel e não tem desconto de ViaVerde.
-              <br />
-              <br />
-              <strong>Motorista Locatário:</strong> Utiliza veículo da empresa, 
-              paga aluguel semanal, tem acesso ao rastreamento Cartrack e tem desconto 
-              de portagens (ViaVerde) se aplicável.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Como posso baixar meus contracheques?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              Acesse a página de <strong>Contracheques</strong> no menu principal. 
-              Lá você encontrará todos os seus contracheques. Para os pagamentos já realizados, 
-              você pode visualizar os detalhes e baixar o PDF clicando no botão "Baixar PDF".
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Como alterar meus dados bancários?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              Para alterar seus dados bancários (IBAN), entre em contato com o administrador 
-              através do email <strong>suporte@conduz.pt</strong> ou pelo WhatsApp. 
-              Por questões de segurança, essa alteração não pode ser feita diretamente pelo painel.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  O que fazer se houver erro no meu contracheque?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              Se você identificar algum erro ou discrepância no seu contracheque, 
-              entre em contato imediatamente com o administrador através do email 
-              <strong> suporte@conduz.pt</strong> informando:
-              <br />
-              - Semana do contracheque
-              <br />
-              - Descrição do erro identificado
-              <br />
-              - Valores esperados vs valores apresentados
-              <br />
-              <br />
-              A equipe irá analisar e corrigir se necessário.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Como funciona o rastreamento Cartrack?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              O rastreamento Cartrack está disponível apenas para <strong>motoristas locatários</strong> 
-              que utilizam veículos da empresa. Através dele você pode acompanhar:
-              <br />
-              - Quilometragem diária e semanal
-              <br />
-              - Tempo em movimento
-              <br />
-              - Última localização do veículo
-              <br />
-              - Estatísticas de uso
-              <br />
-              <br />
-              Motoristas afiliados (veículo próprio) não têm acesso a esta funcionalidade.
-            </AccordionPanel>
-          </AccordionItem>
-
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box flex="1" textAlign="left" fontWeight="semibold">
-                  Minha conta está suspensa, o que fazer?
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4} color="gray.600">
-              Se sua conta foi suspensa, entre em contato imediatamente com o administrador 
-              para entender o motivo e resolver a situação. Você pode entrar em contato através:
-              <br />
-              - Email: <strong>suporte@conduz.pt</strong>
-              <br />
-              - WhatsApp: <strong>+351 91 234 5678</strong>
-              <br />
-              - Telefone: <strong>+351 91 234 5678</strong>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+        <Text fontSize="sm" color="gray.600" mb={6}>{TEXTS.contactForm.description}</Text>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} align="stretch">
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+              <FormControl>
+                <FormLabel fontSize="sm">{TEXTS.contactForm.labelName}</FormLabel>
+                <Input value={motorista?.fullName || ''} isReadOnly bg="gray.50" size="sm" />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="sm">{TEXTS.contactForm.labelEmail}</FormLabel>
+                <Input value={motorista?.email || ''} isReadOnly bg="gray.50" size="sm" />
+              </FormControl>
+            </SimpleGrid>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">{TEXTS.contactForm.labelSubject}</FormLabel>
+              <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={TEXTS.contactForm.placeholderSubject} size="sm" />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">{TEXTS.contactForm.labelMessage}</FormLabel>
+              <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={TEXTS.contactForm.placeholderMessage} rows={6} size="sm" />
+            </FormControl>
+            <Button type="submit" colorScheme="green" leftIcon={<Icon as={FiSend} />} isLoading={loading} loadingText={TEXTS.contactForm.buttonSubmitting}>
+              {TEXTS.contactForm.buttonSubmit}
+            </Button>
+          </VStack>
+        </form>
       </Box>
 
-      {/* Links Úteis */}
-      <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-        <Text fontSize="lg" fontWeight="bold" mb={4}>Links Úteis</Text>
-        <VStack align="stretch" spacing={3}>
-          <ChakraLink 
-            href="https://www.uber.com/pt/drive/" 
-            isExternal
-            color="green.600"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <Icon as={FiExternalLink} />
-            Portal Uber Driver
-          </ChakraLink>
-          <ChakraLink 
-            href="https://partners.bolt.eu/" 
-            isExternal
-            color="green.600"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <Icon as={FiExternalLink} />
-            Portal Bolt Driver
-          </ChakraLink>
-          <ChakraLink 
-            href="https://www.myprio.pt/" 
-            isExternal
-            color="green.600"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <Icon as={FiExternalLink} />
-            Portal myprio
-          </ChakraLink>
-          <ChakraLink 
-            href="https://www.viaverde.pt/" 
-            isExternal
-            color="green.600"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <Icon as={FiExternalLink} />
-            Portal ViaVerde
-          </ChakraLink>
-        </VStack>
-      </Box>
-
-      {/* Horário de Atendimento */}
       <Box bg="green.50" p={6} borderRadius="lg" borderWidth="1px" borderColor="green.200">
-        <Text fontSize="md" fontWeight="bold" mb={2} color="green.800">
-          Horário de Atendimento
-        </Text>
+        <Text fontSize="md" fontWeight="bold" mb={2} color="green.800">{TEXTS.schedule.title}</Text>
         <Text fontSize="sm" color="green.700">
-          <strong>Segunda a Sexta:</strong> 9h - 18h
-          <br />
-          <strong>Sábado:</strong> 9h - 13h
-          <br />
-          <strong>Domingo e Feriados:</strong> Fechado
+          <strong>{SCHEDULE.weekday}:</strong> {SCHEDULE.weekdayHours}<br />
+          <strong>{SCHEDULE.saturday}:</strong> {SCHEDULE.saturdayHours}<br />
+          <strong>{SCHEDULE.sunday}:</strong> {SCHEDULE.sundayStatus}
         </Text>
       </Box>
     </PainelLayout>
   );
 }
+
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: true },
+  async (context, user, driverId) => {
+    return {};
+  }
+);

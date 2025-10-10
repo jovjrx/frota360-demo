@@ -21,6 +21,8 @@ export interface AdminMenuItem {
 
 /**
  * Configuração centralizada do menu admin
+ * Os labels são chaves de tradução que serão traduzidas no componente
+ * usando: t(`menu.${item.id}`)
  * - MainMenu: Botões no topo (desktop)
  * - Dropdown "Mais": Itens secundários
  * - Mobile: Todos aparecem no dropdown do usuário
@@ -28,58 +30,58 @@ export interface AdminMenuItem {
 export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     {
         id: 'dashboard',
-        label: 'Administração',
+        label: 'dashboard', // Traduzido via t('menu.dashboard')
         href: '/admin',
         icon: FiHome,
-        description: 'Visão geral',
+        description: 'overview', // Traduzido via t('menu.overview')
         showInMainMenu: true,
     },
     {
         id: 'requests',
-        label: 'Solicitações',
+        label: 'requests', // Traduzido via t('menu.requests')
         href: '/admin/requests',
         icon: FiFileText,
-        description: 'Solicitações',
+        description: 'requests', // Traduzido via t('menu.requests')
         showInMainMenu: true,
     },
     {
         id: 'drivers',
-        label: 'Motoristas',
+        label: 'drivers', // Traduzido via t('menu.drivers')
         href: '/admin/drivers',
         icon: FiUsers,
-        description: 'Gestão de motoristas',
+        description: 'drivers_management', // Traduzido via t('menu.drivers_management')
         showInMainMenu: true,
     },
     {
         id: 'control',
-        label: 'Controle & Pagamentos',
+        label: 'control', // Traduzido via t('menu.control')
         href: '/admin/weekly',
         icon: FiCalendar,
-        description: 'Controle semanal',
+        description: 'weekly_control', // Traduzido via t('menu.weekly_control')
         showInMainMenu: true,
     },
     {
         id: 'monitor',
-        label: 'Monitoramento',
+        label: 'monitor', // Traduzido via t('menu.monitor')
         href: '/admin/monitor',
         icon: FiTruck,
-        description: 'Rastreamento',
+        description: 'tracking', // Traduzido via t('menu.tracking')
         showInMainMenu: false, // Movido para "Mais"
     },
     {
-        id: 'dados',
-        label: 'Dados',
+        id: 'data',
+        label: 'data', // Traduzido via t('menu.data')
         href: '/admin/data',
         icon: FiBarChart2,
-        description: 'Dados semanais',
+        description: 'weekly_data', // Traduzido via t('menu.weekly_data')
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
     {
         id: 'users',
-        label: 'Usuários',
+        label: 'users', // Traduzido via t('menu.users')
         href: '/admin/users',
         icon: FiUsers,
-        description: 'Gerenciamento de usuários',
+        description: 'user_management', // Traduzido via t('menu.user_management')
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
 ];

@@ -26,6 +26,7 @@ import {
   FiCheckCircle,
   FiClock,
   FiDownload,
+  FiExternalLink,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
@@ -56,6 +57,10 @@ interface Contracheque {
   repasse: number;
   paymentStatus: string;
   paymentDate: string | null;
+  paymentInfo?: {
+    proofUrl?: string;
+    proofFileName?: string;
+  };
 }
 
 interface CartrackData {
@@ -92,32 +97,33 @@ export default function PainelDashboard({
   const [cartrackData, setCartrackData] = useState<CartrackData | null>(null);
   const [loadingCartrack, setLoadingCartrack] = useState(false);
   
-  // Calcular último pagamento e semana atual
-  const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
-  const semanaAtual = contracheques?.find((c: Contracheque) => c.paymentStatus === 'pending') || null;
-
-  // Buscar dados do Cartrack
+  // Buscar dados do Cartrack para motoristas renter
   useEffect(() => {
-    const fetchCartrackData = async () => {
+    if (motorista.type === 'renter') {
       setLoadingCartrack(true);
-      try {
-        const response = await fetch(`/api/driver/cartrack-data?driverId=${motorista.id}`);
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          setCartrackData(result.data);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados do Cartrack:', error);
-      } finally {
-        setLoadingCartrack(false);
-      }
-    };
-
-    if (motorista?.id) {
-      fetchCartrackData();
+      fetch('/api/driver/cartrack-data')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setCartrackData(data.data);
+          }
+        })
+        .catch(err => console.error('Erro ao carregar dados do Cartrack:', err))
+        .finally(() => setLoadingCartrack(false));
     }
-  }, [motorista?.id]);
+  }, [motorista.type]);
+  
+  // Calcular último pagamento
+  const ultimoPagamento = contracheques?.find((c: Contracheque) => c.paymentStatus === 'paid') || null;
+  
+  // Calcular estatísticas de pagamentos
+  const paymentStats = {
+    total: contracheques?.length || 0,
+    paid: contracheques?.filter(c => c.paymentStatus === 'paid').length || 0,
+    pending: contracheques?.filter(c => c.paymentStatus === 'pending').length || 0,
+    totalEarnings: contracheques?.reduce((sum, c) => sum + (c.ganhosTotal || 0), 0) || 0,
+    totalReceived: contracheques?.filter(c => c.paymentStatus === 'paid').reduce((sum, c) => sum + (c.repasse || 0), 0) || 0,
+  };
 
   const handleDownloadPayslip = async (payslipId: string) => {
     setDownloadingPayslipId(payslipId);
@@ -161,6 +167,42 @@ export default function PainelDashboard({
       setDownloadingPayslipId(null);
     }
   };
+
+  const handleDownloadProof = async (recordId: string, weekStart: string, weekEnd: string) => {
+    try {
+      const response = await fetch(`/api/painel/contracheques/${recordId}/proof`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao baixar comprovante');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `Comprovante_${motorista.fullName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${weekStart}_a_${weekEnd}.pdf`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'Comprovante baixado!',
+        status: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Erro ao baixar comprovante:', error);
+      toast({
+        title: 'Erro ao baixar comprovante',
+        description: 'Tente novamente mais tarde',
+        status: 'error',
+        duration: 5000,
+      });
+    }
+  };
+  
   // Funções de tradução com fallbacks
   const t = (key: string, variables?: Record<string, any>) => {
     return getTranslation(translations?.common, key, variables) || key;
@@ -184,48 +226,91 @@ export default function PainelDashboard({
     <PainelLayout 
       title={`Bem-vindo, ${motorista.fullName.split(' ')[0]}!`}
       subtitle="Acompanhe seus ganhos e pagamentos"
+      translations={translations}
     >
-      {/* Status da Conta */}
-      <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-        <HStack justify="space-between" mb={4}>
-          <HStack spacing={4}>
-            <Icon as={FiUser} boxSize={6} color="green.500" />
-            <VStack align="start" spacing={0}>
-              <Text fontSize="lg" fontWeight="bold">Status da Conta</Text>
-              <Text fontSize="sm" color="gray.600">{motorista.email}</Text>
-            </VStack>
-          </HStack>
-          <Badge colorScheme={statusColor} fontSize="md" px={3} py={1}>
-            {statusLabel}
-          </Badge>
-        </HStack>
-        
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-          <Box>
-            <Text fontSize="sm" color="gray.600">Tipo</Text>
-            <Text fontSize="md" fontWeight="semibold">{tipoLabel}</Text>
-          </Box>
-          
-          {motorista.vehicle && (
-            <Box>
-              <Text fontSize="sm" color="gray.600">Veículo</Text>
-              <Text fontSize="md" fontWeight="semibold">
-                {motorista.vehicle.model} - {motorista.vehicle.plate}
-              </Text>
-            </Box>
-          )}
-          
-          <Box>
-            <Text fontSize="sm" color="gray.600">Cadastro</Text>
-            <Text fontSize="md" fontWeight="semibold">
-              {new Date(motorista.createdAt).toLocaleDateString('pt-BR')}
-            </Text>
-          </Box>
-        </SimpleGrid>
-      </Box>
-
       {/* Resumo Financeiro */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+      <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={6}>
+        {/* Dados do Motorista */}
+        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
+          <HStack mb={4} justify="space-between">
+            <HStack>
+              <Icon as={FiUser} boxSize={5} color="blue.500" />
+              <Text fontSize="lg" fontWeight="bold">Meus Dados</Text>
+            </HStack>
+            <Badge colorScheme={statusColor} fontSize="sm">
+              {statusLabel}
+            </Badge>
+          </HStack>
+          
+          <VStack align="stretch" spacing={3}>
+            <HStack justify="space-between">
+              <Text fontSize="sm" color="gray.600">Nome</Text>
+              <Text fontSize="sm" fontWeight="semibold">
+                {motorista.fullName}
+              </Text>
+            </HStack>
+            
+            <HStack justify="space-between">
+              <Text fontSize="sm" color="gray.600">Email</Text>
+              <Text fontSize="sm" fontWeight="semibold">
+                {motorista.email}
+              </Text>
+            </HStack>
+            
+            <HStack justify="space-between">
+              <Text fontSize="sm" color="gray.600">Tipo</Text>
+              <Text fontSize="sm" fontWeight="semibold">
+                {tipoLabel}
+              </Text>
+            </HStack>
+            
+            {motorista.vehicle && (
+              <>
+                <HStack justify="space-between">
+                  <Text fontSize="sm" color="gray.600">Veículo</Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {motorista.vehicle.model}
+                  </Text>
+                </HStack>
+                
+                <HStack justify="space-between">
+                  <Text fontSize="sm" color="gray.600">Matrícula</Text>
+                  <Text fontSize="sm" fontWeight="semibold">
+                    {motorista.vehicle.plate}
+                  </Text>
+                </HStack>
+              </>
+            )}
+            
+            <Divider />
+            
+            <VStack spacing={2}>
+              <Button
+                as={Link}
+                href="/dashboard/data"
+                size="sm"
+                width="full"
+                colorScheme="blue"
+                variant="outline"
+                leftIcon={<Icon as={FiUser} />}
+              >
+                Ver Todos os Dados
+              </Button>
+              <Button
+                as={Link}
+                href="/dashboard/profile"
+                size="sm"
+                width="full"
+                colorScheme="gray"
+                variant="outline"
+                leftIcon={<Icon as={FiUser} />}
+              >
+                Editar Perfil
+              </Button>
+            </VStack>
+          </VStack>
+        </Box>
+
         {/* Último Pagamento */}
         <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
           <HStack mb={4}>
@@ -238,7 +323,7 @@ export default function PainelDashboard({
               <HStack justify="space-between">
                 <Text fontSize="sm" color="gray.600">Semana</Text>
                 <Text fontSize="sm" fontWeight="semibold">
-                  {ultimoPagamento.weekStart} - {ultimoPagamento.weekEnd}
+                  {new Date(ultimoPagamento.weekStart).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })} - {new Date(ultimoPagamento.weekEnd).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })}
                 </Text>
               </HStack>
               
@@ -262,226 +347,223 @@ export default function PainelDashboard({
                 <Text fontSize="xs" color="gray.500">Pago em</Text>
                 <Text fontSize="xs" color="gray.500">
                   {ultimoPagamento.paymentDate 
-                    ? new Date(ultimoPagamento.paymentDate).toLocaleDateString('pt-BR')
+                    ? new Date(ultimoPagamento.paymentDate).toLocaleDateString('pt-PT')
                     : '-'}
                 </Text>
               </HStack>
               
-              <HStack spacing={2} mt={4}>
+              <VStack spacing={2} mt={4}>
+                <Button
+                  onClick={() => handleDownloadPayslip(ultimoPagamento.id)}
+                  size="sm"
+                  width="full"
+                  colorScheme="green"
+                  leftIcon={<Icon as={FiDownload} />}
+                  isLoading={downloadingPayslipId === ultimoPagamento.id}
+                >
+                  Baixar Contracheque
+                </Button>
+                
+                {ultimoPagamento.paymentInfo?.proofUrl && (
+                  <Button
+                    onClick={() => handleDownloadProof(
+                      ultimoPagamento.id,
+                      ultimoPagamento.weekStart,
+                      ultimoPagamento.weekEnd
+                    )}
+                    size="sm"
+                    width="full"
+                    colorScheme="purple"
+                    variant="outline"
+                    leftIcon={<Icon as={FiDownload} />}
+                  >
+                    Baixar Comprovante
+                  </Button>
+                )}
+                
                 <Button
                   as={Link}
                   href="/dashboard/payslips"
                   size="sm"
-                  colorScheme="green"
+                  width="full"
+                  colorScheme="blue"
                   variant="outline"
                   leftIcon={<Icon as={FiFileText} />}
                 >
-                  Ver Contracheques
+                  Ver Todos os Contracheques
                 </Button>
-                <Button
-                  onClick={() => handleDownloadPayslip(ultimoPagamento.id)}
-                  size="sm"
-                  colorScheme="blue"
-                  leftIcon={<Icon as={FiDownload} />}
-                  isLoading={downloadingPayslipId === ultimoPagamento.id}
-                >
-                  Baixar Holerite
-                </Button>
-              </HStack>
+              </VStack>
             </VStack>
           ) : (
-            <Text color="gray.500" fontSize="sm">
-              Nenhum pagamento realizado ainda
-            </Text>
+            <VStack align="stretch" spacing={3} h="full" justify="center">
+              <Text color="gray.500" fontSize="sm" textAlign="center">
+                Nenhum pagamento realizado ainda
+              </Text>
+              <Button
+                as={Link}
+                href="/dashboard/payslips"
+                size="sm"
+                width="full"
+                colorScheme="green"
+                variant="outline"
+                leftIcon={<Icon as={FiFileText} />}
+              >
+                Ver Contracheques
+              </Button>
+            </VStack>
           )}
         </Box>
 
-        {/* Semana Atual */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-          <HStack mb={4}>
-            <Icon as={FiClock} boxSize={5} color="orange.500" />
-            <Text fontSize="lg" fontWeight="bold">Semana Atual</Text>
-          </HStack>
-          
-          {semanaAtual ? (
-            <VStack align="stretch" spacing={3}>
-              <HStack justify="space-between">
-                <Text fontSize="sm" color="gray.600">Período</Text>
-                <Text fontSize="sm" fontWeight="semibold">
-                  {semanaAtual.weekStart} - {semanaAtual.weekEnd}
+        {/* Rastreamento ou Ajuda & Suporte */}
+        {motorista.type === 'renter' && cartrackData ? (
+          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
+            <HStack mb={4}>
+              <Icon as={FiNavigation} boxSize={5} color="purple.500" />
+              <Text fontSize="lg" fontWeight="bold">Rastreamento</Text>
+            </HStack>
+            
+            <VStack align="stretch" spacing={4}>
+              <Box>
+                <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
+                  Veículo
                 </Text>
-              </HStack>
-              
-              <HStack justify="space-between">
-                <Text fontSize="sm" color="gray.600">Ganhos Total</Text>
-                <Text fontSize="sm" fontWeight="semibold">
-                  €{semanaAtual.ganhosTotal.toFixed(2)}
+                <Text fontSize="md" fontWeight="bold">
+                  {cartrackData.vehicle.make} {cartrackData.vehicle.model}
                 </Text>
-              </HStack>
-              
+                <Text fontSize="sm" color="gray.500">
+                  {cartrackData.vehicle.plate}
+                </Text>
+              </Box>
+
               <Divider />
-              
-              <HStack justify="space-between">
-                <Text fontSize="md" fontWeight="bold">Repasse Estimado</Text>
-                <Text fontSize="xl" fontWeight="bold" color="orange.500">
-                  €{semanaAtual.repasse.toFixed(2)}
-                </Text>
-              </HStack>
-              
-              <Badge colorScheme="orange" fontSize="xs" textAlign="center">
-                Aguardando Processamento
-              </Badge>
-              
+
+              <SimpleGrid columns={2} spacing={3}>
+                <Box>
+                  <Text fontSize="xs" color="gray.600" mb={1}>Viagens (semana)</Text>
+                  <Text fontSize="lg" fontWeight="bold">{cartrackData.weeklyStats.totalTrips}</Text>
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="gray.600" mb={1}>Km (semana)</Text>
+                  <Text fontSize="lg" fontWeight="bold">{cartrackData.weeklyStats.totalKilometers.toFixed(0)} km</Text>
+                </Box>
+              </SimpleGrid>
+
               <Button
                 as={Link}
-                href="/dashboard/contracheques"
+                href="/dashboard/tracking"
                 size="sm"
-                colorScheme="orange"
-                variant="outline"
-                leftIcon={<Icon as={FiFileText} />}
+                width="full"
+                colorScheme="purple"
+                leftIcon={<Icon as={FiNavigation} />}
               >
                 Ver Detalhes
               </Button>
             </VStack>
-          ) : (
-            <Text color="gray.500" fontSize="sm">
-              Nenhum registro para a semana atual
-            </Text>
-          )}
-        </Box>
+          </Box>
+        ) : (
+          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
+            <HStack mb={4}>
+              <Icon as={FiFileText} boxSize={5} color="orange.500" />
+              <Text fontSize="lg" fontWeight="bold">Ajuda & Suporte</Text>
+            </HStack>
+            
+            <VStack align="stretch" spacing={3}>
+              <Text fontSize="sm" color="gray.600">
+                Precisa de ajuda ou tem alguma dúvida? Acesse nossa página de ajuda ou entre em contato conosco.
+              </Text>
+              
+              <Divider />
+              
+              <VStack spacing={2}>
+                <Button
+                  as={Link}
+                  href="/dashboard/help"
+                  size="sm"
+                  width="full"
+                  colorScheme="orange"
+                  leftIcon={<Icon as={FiFileText} />}
+                >
+                  Central de Ajuda
+                </Button>
+                {motorista.type === 'renter' && (
+                  <Button
+                    as={Link}
+                    href="/dashboard/tracking"
+                    size="sm"
+                    width="full"
+                    colorScheme="gray"
+                    variant="outline"
+                    leftIcon={<Icon as={FiNavigation} />}
+                  >
+                    Rastreamento
+                  </Button>
+                )}
+              </VStack>
+            </VStack>
+          </Box>
+        )}
       </SimpleGrid>
 
-      {/* Rastreamento Cartrack */}
-      {cartrackData && (
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-          <HStack mb={4} justify="space-between">
-            <HStack>
-              <Icon as={FiNavigation} boxSize={5} color="blue.500" />
-              <Text fontSize="lg" fontWeight="bold">Rastreamento Cartrack</Text>
-            </HStack>
-            <Badge colorScheme="blue" fontSize="sm">
-              Últimos 7 dias
-            </Badge>
-          </HStack>
+      {/* Estatísticas de Pagamentos */}
+      <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" mt={6}>
+        <HStack mb={4}>
+          <Icon as={FiTrendingUp} boxSize={5} color="blue.500" />
+          <Text fontSize="lg" fontWeight="bold">Resumo de Contracheques</Text>
+        </HStack>
+        
+        <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
+          <Box>
+            <Text fontSize="xs" color="gray.600" mb={1}>Total</Text>
+            <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+              {paymentStats.total}
+            </Text>
+            <Text fontSize="xs" color="gray.500">contracheques</Text>
+          </Box>
           
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={4}>
-            <Box>
-              <Text fontSize="xs" color="gray.600">Viagens</Text>
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                {cartrackData.weeklyStats.totalTrips}
-              </Text>
-            </Box>
-            
-            <Box>
-              <Text fontSize="xs" color="gray.600">Distância</Text>
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                {cartrackData.weeklyStats.totalKilometers.toFixed(1)} km
-              </Text>
-            </Box>
-            
-            <Box>
-              <Text fontSize="xs" color="gray.600">Velocidade Média</Text>
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                {cartrackData.weeklyStats.averageSpeed.toFixed(0)} km/h
-              </Text>
-            </Box>
-            
-            <Box>
-              <Text fontSize="xs" color="gray.600">Tempo Total</Text>
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                {Math.floor(cartrackData.weeklyStats.totalDuration / 60)}h {cartrackData.weeklyStats.totalDuration % 60}m
-              </Text>
-            </Box>
-          </SimpleGrid>
+          <Box>
+            <Text fontSize="xs" color="gray.600" mb={1}>Pagos</Text>
+            <Text fontSize="2xl" fontWeight="bold" color="green.600">
+              {paymentStats.paid}
+            </Text>
+            <Text fontSize="xs" color="gray.500">recebidos</Text>
+          </Box>
           
-          <Divider my={4} />
+          <Box>
+            <Text fontSize="xs" color="gray.600" mb={1}>Pendentes</Text>
+            <Text fontSize="2xl" fontWeight="bold" color="orange.600">
+              {paymentStats.pending}
+            </Text>
+            <Text fontSize="xs" color="gray.500">aguardando</Text>
+          </Box>
           
-          <HStack justify="space-between">
-            <VStack align="start" spacing={0}>
-              <Text fontSize="sm" color="gray.600">Veículo</Text>
-              <Text fontSize="md" fontWeight="semibold">
-                {cartrackData.vehicle.make} {cartrackData.vehicle.model} ({cartrackData.vehicle.year})
-              </Text>
-              <Text fontSize="xs" color="gray.500">
-                {cartrackData.vehicle.plate} • {cartrackData.vehicle.kilometers.toLocaleString()} km
-              </Text>
-            </VStack>
-            
-            <Button
-              as={Link}
-              href="/dashboard/tracking"
-              size="sm"
-              colorScheme="blue"
-              leftIcon={<Icon as={FiTrendingUp} />}
-            >
-              Ver Detalhes
-            </Button>
-          </HStack>
-        </Box>
-      )}
-
-      {/* Acesso Rápido */}
-      <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px">
-        <Text fontSize="lg" fontWeight="bold" mb={4}>Acesso Rápido</Text>
-        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
-          <Button
-            as={Link}
-            href="/dashboard/dados"
-            variant="outline"
-            colorScheme="green"
-            leftIcon={<Icon as={FiUser} />}
-            size="lg"
-            height="auto"
-            py={4}
-            flexDirection="column"
-          >
-            <Text fontSize="sm">Meus Dados</Text>
-          </Button>
+          <Box>
+            <Text fontSize="xs" color="gray.600" mb={1}>Total Ganho</Text>
+            <Text fontSize="2xl" fontWeight="bold" color="purple.600">
+              €{paymentStats.totalEarnings.toFixed(0)}
+            </Text>
+            <Text fontSize="xs" color="gray.500">em ganhos</Text>
+          </Box>
           
-          <Button
-            as={Link}
-            href="/dashboard/contracheques"
-            variant="outline"
-            colorScheme="green"
-            leftIcon={<Icon as={FiFileText} />}
-            size="lg"
-            height="auto"
-            py={4}
-            flexDirection="column"
-          >
-            <Text fontSize="sm">Contracheques</Text>
-          </Button>
-          
-          {motorista.type === 'renter' && (
-            <Button
-              as={Link}
-              href="/dashboard/rastreamento"
-              variant="outline"
-              colorScheme="green"
-              leftIcon={<Icon as={FiCalendar} />}
-              size="lg"
-              height="auto"
-              py={4}
-              flexDirection="column"
-            >
-              <Text fontSize="sm">Rastreamento</Text>
-            </Button>
-          )}
-          
-          <Button
-            as={Link}
-            href="/dashboard/ajuda"
-            variant="outline"
-            colorScheme="green"
-            leftIcon={<Icon as={FiFileText} />}
-            size="lg"
-            height="auto"
-            py={4}
-            flexDirection="column"
-          >
-            <Text fontSize="sm">Ajuda</Text>
-          </Button>
+          <Box>
+            <Text fontSize="xs" color="gray.600" mb={1}>Total Recebido</Text>
+            <Text fontSize="2xl" fontWeight="bold" color="green.600">
+              €{paymentStats.totalReceived.toFixed(0)}
+            </Text>
+            <Text fontSize="xs" color="gray.500">líquido</Text>
+          </Box>
         </SimpleGrid>
+        
+        <Button
+          as={Link}
+          href="/dashboard/payslips"
+          size="sm"
+          mt={4}
+          colorScheme="blue"
+          variant="outline"
+          leftIcon={<Icon as={FiFileText} />}
+        >
+          Ver Todos os Contracheques
+        </Button>
       </Box>
     </PainelLayout>
   );

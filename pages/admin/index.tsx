@@ -34,7 +34,7 @@ import {
   Icon,
   useToast,
 } from '@chakra-ui/react';
-import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers, FiFileText } from 'react-icons/fi';
+import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers, FiFileText, FiClock, FiCheckCircle } from 'react-icons/fi';
 import useSWR from 'swr';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
@@ -47,6 +47,7 @@ interface DashboardData {
     activeDrivers: number;
     pendingRequests: number;
     totalEarningsThisWeek: number;
+    totalGrossEarningsThisWeek: number; // Ganhos brutos da semana
     totalPaymentsPending: number;
     totalPaymentsPaid: number;
     averageEarningsPerDriver: number;
@@ -61,7 +62,7 @@ interface AdminDashboardProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function AdminDashboard({ user, locale, initialData, tCommon, tPage }: AdminDashboardProps) {
+export default function AdminDashboard({ user, locale, initialData, tCommon, tPage, translations }: AdminDashboardProps) {
   const toast = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -141,21 +142,130 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
       breadcrumbs={[
         { label: t('dashboard.title', 'Dashboard') }
       ]}
+      translations={translations}
     >
 
+      {/* 3 Blocos Financeiros Principais + Lucro */}
       <Box>
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+        {/* Primeira linha - 3 blocos */}
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={4}>
+          {/* Ganhos Brutos (Total que entrou) */}
+          <Card bg="purple.50" borderColor="purple.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack spacing={1}>
+                    <Icon as={FiTruck} color="purple.600" />
+                    <Text fontSize="sm" color="purple.700">{t('dashboard.grossEarnings', 'Ganhos')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber color="purple.600" fontSize="2xl">
+                  {formatCurrency(data?.stats?.totalGrossEarningsThisWeek || 0)}
+                </StatNumber>
+                <StatHelpText color="purple.500" fontSize="xs">
+                  {t('dashboard.helpers.grossEarnings', 'Total entrou')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+
+          {/* Pagamentos Pendentes (A Pagar) */}
+          <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack spacing={1}>
+                    <Icon as={FiClock} color="orange.600" />
+                    <Text fontSize="sm" color="orange.700">{t('dashboard.paymentsPending', 'A Pagar')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber color="orange.600" fontSize="2xl">
+                  {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
+                </StatNumber>
+                <StatHelpText color="orange.500" fontSize="xs">
+                  {t('dashboard.helpers.awaitingPayment', 'Pendente')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+
+          {/* Pagamentos Realizados (Pagos) */}
+          <Card bg="green.50" borderColor="green.200" borderWidth="1px">
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack spacing={1}>
+                    <Icon as={FiCheckCircle} color="green.600" />
+                    <Text fontSize="sm" color="green.700">{t('dashboard.paymentsPaid', 'Pagos')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber color="green.600" fontSize="2xl">
+                  {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
+                </StatNumber>
+                <StatHelpText color="green.500" fontSize="xs">
+                  {t('dashboard.helpers.totalPaid', 'Total realizado')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+
+        {/* Segunda linha - Lucro Semanal (destaque) */}
+        <Card bg="blue.50" borderColor="blue.200" borderWidth="2px">
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={2}>
+                  <Icon as={FiDollarSign} color="blue.600" boxSize={5} />
+                  <Text fontSize="md" fontWeight="bold" color="blue.700">
+                    {t('dashboard.weeklyProfit', 'Lucro Semanal')}
+                  </Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber color="blue.600" fontSize="3xl" mt={2}>
+                {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
+              </StatNumber>
+              <StatHelpText color="blue.600" fontSize="sm" mt={1}>
+                {t('dashboard.helpers.weeklyProfitDetail', 'Comissões + Aluguéis + Descontos aplicados')}
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+      </Box>
+
+      {/* Estatísticas Secundárias */}
+      <Box mt={4}>
+        <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
+          {/* Solicitações Pendentes */}
           <Card>
             <CardBody>
               <Stat>
                 <StatLabel>
-                  <HStack>
+                  <HStack spacing={1}>
+                    <Icon as={FiFileText} />
+                    <Text fontSize="sm">{t('dashboard.pendingRequests', 'Solicitações')}</Text>
+                  </HStack>
+                </StatLabel>
+                <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
+                <StatHelpText fontSize="xs">
+                  {t('dashboard.helpers.awaitingReview', 'Aguardando análise')}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
+
+          {/* Total de Motoristas */}
+          <Card>
+            <CardBody>
+              <Stat>
+                <StatLabel>
+                  <HStack spacing={1}>
                     <Icon as={FiUsers} />
-                    <Text>{t('dashboard.totalDrivers', 'Total de Motoristas')}</Text>
+                    <Text fontSize="sm">{t('dashboard.totalDrivers', 'Motoristas')}</Text>
                   </HStack>
                 </StatLabel>
                 <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
-                <StatHelpText>
+                <StatHelpText fontSize="xs">
                   {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
                     '{{count}}',
                     String(data?.stats?.activeDrivers || 0)
@@ -165,103 +275,21 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
             </CardBody>
           </Card>
 
+          {/* Média por Motorista */}
           <Card>
             <CardBody>
               <Stat>
                 <StatLabel>
-                  <HStack>
-                    <Icon as={FiTruck} />
-                    <Text>{t('dashboard.activeDrivers', 'Motoristas Ativos')}</Text>
+                  <HStack spacing={1}>
+                    <Icon as={FiUsers} />
+                    <Text fontSize="sm">{t('dashboard.averageEarnings', 'Média/Motorista')}</Text>
                   </HStack>
                 </StatLabel>
-                <StatNumber>{data?.stats?.activeDrivers || 0}</StatNumber>
-                <StatHelpText>
-                  <StatArrow type="increase" />
-                  {t('dashboard.helpers.operational', 'Em operação')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack>
-                    <Icon as={FiFileText} />
-                    <Text>{t('dashboard.pendingRequests', 'Solicitações Pendentes')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
-                <StatHelpText>{t('dashboard.helpers.awaitingReview', 'Aguardando análise')}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack>
-                    <Icon as={FiDollarSign} />
-                    <Text>{t('dashboard.weeklyEarnings', 'Ganhos Esta Semana')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber>
-                  {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
-                </StatNumber>
-                <StatHelpText>{t('dashboard.helpers.currentWeek', 'Semana atual')}</StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-      </Box>
-
-      <Box>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-          <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <Text color="orange.700">{t('dashboard.paymentsPending', 'Pagamentos Pendentes')}</Text>
-                </StatLabel>
-                <StatNumber color="orange.600">
-                  {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
-                </StatNumber>
-                <StatHelpText color="orange.600">
-                  {t('dashboard.helpers.awaitingPayment', 'Aguardando pagamento')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="green.50" borderColor="green.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <Text color="green.700">{t('dashboard.paymentsPaid', 'Pagamentos Realizados')}</Text>
-                </StatLabel>
-                <StatNumber color="green.600">
-                  {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
-                </StatNumber>
-                <StatHelpText color="green.600">
-                  {t('dashboard.helpers.paidThisWeek', 'Pagos esta semana')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          <Card bg="blue.50" borderColor="blue.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <Text color="blue.700">{t('dashboard.averageEarnings', 'Média por Motorista')}</Text>
-                </StatLabel>
-                <StatNumber color="blue.600">
+                <StatNumber fontSize="lg">
                   {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
                 </StatNumber>
-                <StatHelpText color="blue.600">
-                  {t('dashboard.helpers.weeklyAverage', 'Média semanal')}
+                <StatHelpText fontSize="xs">
+                  {t('dashboard.helpers.weeklyAverage', 'Média paga')}
                 </StatHelpText>
               </Stat>
             </CardBody>

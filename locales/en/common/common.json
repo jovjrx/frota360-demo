@@ -8,6 +8,27 @@
     "logout": "Logout",
     "signup": "Sign Up"
   },
+  "menu": {
+    "dashboard": "Dashboard",
+    "data": "My Data",
+    "payslips": "Payslips",
+    "analytics": "Analytics",
+    "tracking": "Tracking",
+    "profile": "Profile",
+    "help": "Help",
+    "requests": "Requests",
+    "drivers": "Drivers",
+    "control": "Control & Payments",
+    "monitor": "Monitoring",
+    "users": "Users",
+    "overview": "Overview",
+    "requests_desc": "Requests",
+    "drivers_management": "Driver management",
+    "weekly_control": "Weekly control",
+    "tracking_desc": "Tracking",
+    "weekly_data": "Weekly data",
+    "user_management": "User management"
+  },
   "user": {
     "email": "Email",
     "password": "Password",

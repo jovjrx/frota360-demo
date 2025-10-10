@@ -112,12 +112,15 @@ export function withDashboardSSR<P extends Record<string, any> = {}>(
         };
       }
 
-      // 3. Verificar se tem ID do motorista
-      const driverId = session.user?.id || session.userId;
+      // 3. Verificar se tem email do motorista
+      // ✅ IMPORTANTE: driverId é o EMAIL do motorista (não UID)
+      const driverId = session.user?.email || session.email || session.driverId;
+      
       if (!driverId) {
+        console.error('❌ Email do motorista não encontrado na sessão:', session);
         return {
           redirect: {
-            destination: '/login',
+            destination: '/login?error=no_email',
             permanent: false,
           },
         };

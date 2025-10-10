@@ -297,6 +297,7 @@ export async function getDashboardStats(): Promise<{
   activeDrivers: number;
   pendingRequests: number;
   totalEarningsThisWeek: number;
+  totalGrossEarningsThisWeek: number; // Ganhos brutos da semana
   totalPaymentsPending: number;
   totalPaymentsPaid: number;
   averageEarningsPerDriver: number;
@@ -316,47 +317,87 @@ export async function getDashboardStats(): Promise<{
     .get();
   const pendingRequests = requestsSnapshot.size;
 
-  // Calcular ganhos da semana atual
-  const today = new Date();
-  const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - (today.getDay() || 7) + 1);
-  weekStart.setHours(0, 0, 0, 0);
+  // Buscar TODOS os registros semanais para descobrir a última semana disponível
+  const allWeeklyRecordsSnapshot = await db.collection('driverWeeklyRecords').orderBy('weekId', 'desc').get();
 
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
+  // Descobrir qual é a última semana disponível nos dados
+  let latestWeekId = '';
+  if (allWeeklyRecordsSnapshot.size > 0) {
+    latestWeekId = allWeeklyRecordsSnapshot.docs[0].data().weekId;
+  }
 
-  const currentWeekId = getWeekId(weekStart);
+  let totalGrossEarningsThisWeek = 0; // Ganhos brutos da última semana (ganhosTotal)
+  let totalPaymentsPending = 0; // A Pagar (pending do driverWeeklyRecords)
+  let totalPaymentsPaid = 0; // Pagos (do driverPayments)
+  let companyProfitThisWeek = 0; // Lucro da empresa (despesasAdm + aluguel)
+  
+  // Agrupar por motorista para calcular média
+  const driverPaymentsMap = new Map<string, { total: number; count: number }>();
 
-  // Buscar registros semanais da semana atual
-  const weeklyRecordsSnapshot = await db.collection('driverWeeklyRecords')
-    .where('weekId', '==', currentWeekId)
-    .get();
-
-  let totalEarningsThisWeek = 0;
-  let totalPaymentsPending = 0;
-  let totalPaymentsPaid = 0;
-
-  weeklyRecordsSnapshot.docs.forEach(doc => {
+  allWeeklyRecordsSnapshot.docs.forEach(doc => {
     const data = doc.data();
-    totalEarningsThisWeek += data.repasse || 0;
+    const repasse = data.repasse || 0;
+    const ganhosTotal = data.ganhosTotal || 0;
+    const despesasAdm = data.despesasAdm || data.despesaAdministrativa || 0;
+    const aluguel = data.aluguel || 0;
     
+    // Ganhos brutos da última semana disponível
+    if (data.weekId === latestWeekId) {
+      totalGrossEarningsThisWeek += ganhosTotal;
+      // Lucro = despesasAdm (comissão) + aluguel (carros locatários)
+      companyProfitThisWeek += despesasAdm + aluguel;
+    }
+    
+    // A Pagar - Pagamentos pendentes (driverWeeklyRecords)
     if (data.paymentStatus === 'pending') {
-      totalPaymentsPending += data.repasse || 0;
-    } else if (data.paymentStatus === 'paid') {
-      totalPaymentsPaid += data.repasse || 0;
+      totalPaymentsPending += repasse;
     }
   });
 
-  const averageEarningsPerDriver = weeklyRecordsSnapshot.size > 0 
-    ? totalEarningsThisWeek / weeklyRecordsSnapshot.size 
+  // Buscar driverPayments para obter os valores PAGOS e descontos (outras despesas)
+  const allPaymentsSnapshot = await db.collection('driverPayments').get();
+  
+  allPaymentsSnapshot.docs.forEach(doc => {
+    const data = doc.data();
+    const totalAmount = data.totalAmount || 0;
+    const discountAmount = data.discountAmount || 0; // Descontos = outras despesas/lucro
+    const driverId = data.driverId;
+    
+    // Pagos - Todos os pagamentos registrados (driverPayments sempre são pagos)
+    totalPaymentsPaid += totalAmount;
+    
+    // Adicionar descontos ao lucro (outras despesas da empresa)
+    companyProfitThisWeek += discountAmount;
+    
+    // Agrupar por motorista para média
+    if (driverId) {
+      const current = driverPaymentsMap.get(driverId) || { total: 0, count: 0 };
+      driverPaymentsMap.set(driverId, {
+        total: current.total + totalAmount,
+        count: current.count + 1
+      });
+    }
+  });
+
+  // Calcular média por motorista (apenas motoristas que receberam pagamentos)
+  let totalPaidAmount = 0;
+  let driversWithPayments = 0;
+  
+  driverPaymentsMap.forEach(({ total }) => {
+    totalPaidAmount += total;
+    driversWithPayments++;
+  });
+  
+  const averageEarningsPerDriver = driversWithPayments > 0 
+    ? totalPaidAmount / driversWithPayments
     : 0;
 
   return {
     totalDrivers,
     activeDrivers,
     pendingRequests,
-    totalEarningsThisWeek,
+    totalEarningsThisWeek: companyProfitThisWeek, // Lucro da empresa esta semana
+    totalGrossEarningsThisWeek, // Ganhos brutos da semana
     totalPaymentsPending,
     totalPaymentsPaid,
     averageEarningsPerDriver,

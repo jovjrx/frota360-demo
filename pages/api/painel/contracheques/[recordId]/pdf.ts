@@ -37,9 +37,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const recordData = recordDoc.data();
 
-    // Verificar se o motorista é o dono do registro (se não for admin)
-    if (session.role !== 'admin' && recordData.driverId !== session.userId) {
-      return res.status(403).json({ error: 'Acesso negado' });
+    if (!recordData) {
+      return res.status(404).json({ error: 'Dados do contracheque não encontrados' });
     }
 
     // Buscar dados do motorista
@@ -54,38 +53,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const driverData = driverDoc.data();
 
+    // Formatar datas para o formato DD/MM/YYYY se necessário
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      // Se já está no formato correto, retorna
+      if (dateStr.includes('/')) return dateStr;
+      // Se está no formato ISO, converte
+      const date = new Date(dateStr);
+      return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    };
+
     // Preparar dados para o PDF
     const payslipData: PayslipData = {
       driverName: driverData.fullName || `${driverData.firstName} ${driverData.lastName}`,
       driverType: driverData.type || 'affiliate',
       vehiclePlate: driverData.vehicle?.plate,
-      weekStart: recordData.weekStart,
-      weekEnd: recordData.weekEnd,
+      weekStart: formatDate(recordData.weekStart),
+      weekEnd: formatDate(recordData.weekEnd),
       
       uberTotal: recordData.uberTotal || 0,
       boltTotal: recordData.boltTotal || 0,
-      prioTotal: recordData.prio || 0, // Adicionado PRIO
-      viaverdeTotal: recordData.viaverde || 0, // Adicionado ViaVerde
+      prioTotal: recordData.prio || 0,
+      viaverdeTotal: recordData.viaverde || 0,
       ganhosTotal: recordData.ganhosTotal || 0,
       
       ivaValor: recordData.ivaValor || 0,
-      ganhosMenosIva: recordData.ganhosMenosIva || 0,
-      comissao: recordData.comissao || 0,
+      ganhosMenosIva: recordData.ganhosMenosIVA || recordData.ganhosMenosIva || 0,
+      comissao: recordData.despesasAdm || recordData.comissao || 0,
       
       combustivel: recordData.combustivel || 0,
-      viaverde: recordData.viaverde || 0, // Adicionado para satisfazer a interface PayslipData
+      viaverde: recordData.viaverde || 0,
       aluguel: recordData.aluguel || 0,   
       repasse: recordData.repasse || 0,
       
       iban: driverData.banking?.iban || 'N/A',
-      status: recordData.status || 'pending',
+      status: recordData.paymentStatus || 'pending',
     };
 
     // Gerar PDF
+    console.log('[PDF] Gerando PDF com dados:', payslipData);
     const pdfBuffer = await generatePayslipPDF(payslipData);
 
     // Definir headers para download
     const fileName = `Contracheque_${driverData.fullName?.replace(/\s+/g, '_')}_${payslipData.weekStart.replace(/\//g, '-')}_a_${payslipData.weekEnd.replace(/\//g, '-')}.pdf`;
+    
+    console.log('[PDF] PDF gerado com sucesso:', fileName);
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -94,10 +106,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.send(pdfBuffer);
 
   } catch (error: any) {
-    console.error('Erro ao gerar PDF:', error);
+    console.error('[PDF] Erro ao gerar PDF:', error);
+    console.error('[PDF] Stack trace:', error.stack);
     return res.status(500).json({ 
       error: 'Erro ao gerar PDF',
-      details: error.message 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }

@@ -15,6 +15,10 @@ interface AdminLayoutProps {
     label: string;
     href?: string;
   }>;
+  translations?: {
+    common?: any;
+    admin?: any;
+  };
 }
 export default function AdminLayout({
   children,
@@ -22,13 +26,34 @@ export default function AdminLayout({
   subtitle,
   side,
   breadcrumbs,
+  translations
 }: AdminLayoutProps) {
   const router = useRouter();
+
+  // Função de tradução com fallback (usa common para menus)
+  const t = (key: string, fallback?: string) => {
+    if (!translations?.common) return fallback || key;
+
+    // Navegar pelo objeto de traduções usando o path da chave
+    const keys = key.split('.');
+    let value: any = translations.common;
+
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        return fallback || key;
+      }
+    }
+
+    return typeof value === 'string' ? value : (fallback || key);
+  };
+
   return (
     <Box minH="100vh" bg="gray.50" position="relative">
-         <Box bg="red.900" display={{ base: 'none', lg: 'flex' }} borderBottom="1px" borderColor="red.800" shadow="sm">
+      <Box bg="red.900" borderBottom="1px" borderColor="red.800" shadow="sm">
         <WrapperLayout panel>
-          <HStack spacing={1} flex={1} justify="space-between" gap={4} p={1}>
+          <HStack spacing={1} flex={1} justify="flex-start" gap={4} p={2}>
             {getAllMenuItems()?.map((item) => (
               <Button
                 key={item.id}
@@ -38,9 +63,10 @@ export default function AdminLayout({
                 colorScheme={'whiteAlpha'}
                 size="xs"
                 textColor={'white'}
+                iconSpacing={{ base: 0, md: 2 }}
                 leftIcon={<Icon as={item.icon} />}
               >
-                {item.label}
+                <Text display={{ base: 'none', md: 'block' }}>{t(`menu.${item.id}`, item.label)}</Text>
               </Button>
             ))}
           </HStack>

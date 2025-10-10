@@ -1,7 +1,4 @@
-import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { withDriver } from '@/lib/auth/withDriver';
-import { adminDb } from '@/lib/firebaseAdmin';
 import {
   Box,
   VStack,
@@ -16,364 +13,508 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
-  Textarea,
   useToast,
   Divider,
-  Badge,
+  Icon,
+  InputGroup,
+  InputRightElement,
+  IconButton,
 } from '@chakra-ui/react';
-import { FiSave, FiEdit, FiUser, FiMail, FiPhone, FiCalendar, FiMapPin } from 'react-icons/fi';
-import { loadTranslations } from '@/lib/translations';
-import DriverLayout from '@/components/layouts/DriverLayout';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import PainelLayout from '@/components/layouts/DashboardLayout';
 import StandardModal from '@/components/modals/StandardModal';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { formatPortugalTime } from '@/lib/timezone';
+import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
+import { getTranslation } from '@/lib/translations';
 
-interface DriverProfileProps {
-  driver: any;
-  translations: Record<string, any>;
-  userData: any;
+interface DriverProfileProps extends DashboardPageProps {
+  motorista: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
 }
 
 export default function DriverProfile({ 
-  driver, 
+  motorista, 
   translations,
-  userData
 }: DriverProfileProps) {
-  const tCommon = (key: string) => translations.common?.[key] || key;
-  const tDriver = (key: string) => translations.driver?.[key] || key;
+  const t = (key: string, fallback?: string) => {
+    if (!translations?.common) return fallback || key;
+    return getTranslation(translations.common, key) || fallback || key;
+  };
+
+  const tDashboard = (key: string, fallback?: string) => {
+    if (!translations?.dashboard) return fallback || key;
+    return getTranslation(translations.dashboard, key) || fallback || key;
+  };
+
   const router = useRouter();
   const toast = useToast();
   
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: driver?.firstName || '',
-    lastName: driver?.lastName || '',
-    email: driver?.email || '',
-    phone: driver?.phone || '',
-    birthDate: driver?.birthDate || '',
-    city: driver?.city || '',
-    licenseNumber: driver?.licenseNumber || '',
-    licenseExpiry: driver?.licenseExpiry || '',
-    vehicleType: driver?.vehicleType || '',
-  });
+  // Estados para modais
+  const [isEditNameOpen, setIsEditNameOpen] = useState(false);
+  const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  
+  // Estados para formulários
+  const [newName, setNewName] = useState(motorista?.fullName || '');
+  const [newEmail, setNewEmail] = useState(motorista?.email || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Estados para mostrar/esconder senha
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  // Atualizar nome
+  const handleUpdateName = async () => {
+    if (!newName.trim()) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'Nome não pode estar vazio',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
 
-  const handleSave = async () => {
+    setIsSaving(true);
     try {
-      const response = await fetch("/api/painel/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await fetch('/api/painel/update-name', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || tDriver("profile.messages.errorSaving"));
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao atualizar nome');
       }
 
       toast({
-        title: tDriver("profile.messages.profileUpdated"),
-        description: tDriver("profile.messages.profileUpdatedDesc"),
-        status: "success",
+        title: 'Nome atualizado!',
+        status: 'success',
         duration: 3000,
-        isClosable: true,
       });
-      setIsEditModalOpen(false); // Close modal on success
-      router.reload(); // Reload page to show updated data
+      setIsEditNameOpen(false);
+      router.reload();
     } catch (error: any) {
-      console.error("Error saving profile:", error);
       toast({
-        title: tDriver("profile.messages.error"),
-        description: error.message || tDriver("profile.messages.errorSaving"),
-        status: "error",
+        title: t('error', 'Erro'),
+        description: error.message,
+        status: 'error',
         duration: 5000,
-        isClosable: true,
       });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Atualizar email
+  const handleUpdateEmail = async () => {
+    if (!newEmail.trim() || !newEmail.includes('@')) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'Email inválido',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!currentPassword) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'Senha atual é obrigatória',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/painel/update-email', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          newEmail,
+          currentPassword 
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao atualizar email');
+      }
+
+      toast({
+        title: 'Email atualizado!',
+        description: 'Você será desconectado. Faça login com o novo email.',
+        status: 'success',
+        duration: 5000,
+      });
+      
+      // Logout após 2 segundos
+      setTimeout(() => {
+        window.location.href = '/api/auth/logout';
+      }, 2000);
+    } catch (error: any) {
+      toast({
+        title: t('error', 'Erro'),
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Alterar senha
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'Preencha todos os campos',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'As senhas não coincidem',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: t('error', 'Erro'),
+        description: 'A senha deve ter no mínimo 6 caracteres',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/painel/change-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          currentPassword,
+          newPassword 
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao alterar senha');
+      }
+
+      toast({
+        title: 'Senha alterada!',
+        description: 'Sua senha foi atualizada com sucesso.',
+        status: 'success',
+        duration: 3000,
+      });
+      
+      setIsChangePasswordOpen(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      toast({
+        title: t('error', 'Erro'),
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <>
       <Head>
-        <title>{`${tDriver('profile.title')} - Conduz.pt`}</title>
+        <title>Perfil - Conduz.pt</title>
       </Head>
       
-      <DriverLayout
-        title={tDriver('profile.title')}
-        subtitle={tDriver('profile.subtitle')}
-        user={{
-          name: driver?.name || 'Motorista',
-          avatar: driver?.avatar,
-          role: 'driver',
-          status: driver?.status
-        }}
-        notifications={0}
-        breadcrumbs={[
-          { label: 'Dashboard', href: '/drivers' },
-          { label: tDriver('profile.title') }
-        ]}
-        actions={
-          <Button 
-            leftIcon={<FiEdit />} 
-            colorScheme="blue"
-            onClick={() => setIsEditModalOpen(true)}
-          >
-            {tDriver('profile.editProfile')}
-          </Button>
-        }
+      <PainelLayout
+        title="Perfil"
+        subtitle="Gerencie suas credenciais de acesso"
+        breadcrumbs={[{ label: 'Perfil' }]}
+        translations={translations}
       >
-        {/* Profile Overview */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">{tDriver('profile.personalInfo')}</Heading>
-          </CardHeader>
-          <CardBody>
-            <HStack spacing={6} align="flex-start">
-              <Avatar 
-                size="2xl" 
-                name={driver?.name || 'Motorista'} 
-                src={driver?.avatar}
-                bg="green.500"
-              />
-              <VStack align="flex-start" spacing={4} flex={1}>
-                <Box>
-                  <Text fontSize="lg" fontWeight="bold">
-                    {driver?.firstName} {driver?.lastName}
+        <VStack spacing={6} align="stretch">
+          {/* Avatar e Nome */}
+          <Card>
+            <CardBody>
+              <VStack spacing={4}>
+                <Avatar 
+                  size="2xl" 
+                  name={motorista?.fullName || 'Motorista'} 
+                  bg="green.500"
+                />
+                <Box textAlign="center">
+                  <Text fontSize="2xl" fontWeight="bold">
+                    {motorista?.fullName}
                   </Text>
-                  <Text color="gray.600">{driver?.email}</Text>
-                  <HStack mt={2}>
-                    <Badge colorScheme="green">{tDriver('profile.activeDriver')}</Badge>
-                    <Badge colorScheme="blue">{driver?.vehicleType || tDriver('profile.vehicleNotInformed')}</Badge>
-                  </HStack>
+                  <Text color="gray.600">{motorista?.email}</Text>
                 </Box>
-                
-                <VStack align="flex-start" spacing={2}>
-                  <HStack>
-                    <FiPhone size={16} />
-                    <Text fontSize="sm">{driver?.phone || tDriver('profile.phoneNotInformed')}</Text>
-                  </HStack>
-                  <HStack>
-                    <FiMapPin size={16} />
-                    <Text fontSize="sm">{driver?.city || tDriver('profile.cityNotInformed')}</Text>
-                  </HStack>
-                  <HStack>
-                    <FiCalendar size={16} />
-                    <Text fontSize="sm">
-                      {tDriver('profile.birthDate')}: {driver?.birthDate || tDriver('profile.birthNotInformed')}
-                    </Text>
-                  </HStack>
-                </VStack>
               </VStack>
-            </HStack>
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
 
-        {/* Driver Information */}
-        <Card bg="white" borderColor="gray.200">
-          <CardHeader>
-            <Heading size="md">{tDriver('profile.drivingInfo')}</Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={4} align="stretch">
-              <HStack justify="space-between">
-                <Text fontWeight="medium">{tDriver('profile.licenseNumber')}:</Text>
-                <Text>{driver?.licenseNumber || tDriver('profile.notInformed')}</Text>
-              </HStack>
-              <Divider />
-              <HStack justify="space-between">
-                <Text fontWeight="medium">{tDriver('profile.licenseValidity')}:</Text>
-                <Text>{driver?.licenseExpiry || tDriver('profile.notInformed')}</Text>
-              </HStack>
-              <Divider />
-              <HStack justify="space-between">
-                <Text fontWeight="medium">{tDriver('profile.vehicleType')}:</Text>
-                <Text>{driver?.vehicleType || tDriver('profile.notInformed')}</Text>
-              </HStack>
-            </VStack>
-          </CardBody>
-        </Card>
+          {/* Informações de Conta */}
+          <Card>
+            <CardHeader>
+              <Heading size="md">Informações de Conta</Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                {/* Nome */}
+                <HStack justify="space-between" p={4} bg="gray.50" borderRadius="md">
+                  <HStack>
+                    <Icon as={FiUser} color="green.500" />
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">Nome Completo</Text>
+                      <Text fontWeight="medium">{motorista?.fullName}</Text>
+                    </Box>
+                  </HStack>
+                  <Button
+                    size="sm"
+                    colorScheme="blue"
+                    variant="ghost"
+                    onClick={() => {
+                      setNewName(motorista?.fullName || '');
+                      setIsEditNameOpen(true);
+                    }}
+                  >
+                    Editar
+                  </Button>
+                </HStack>
 
-        {/* Edit Profile Modal */}
+                <Divider />
+
+                {/* Email */}
+                <HStack justify="space-between" p={4} bg="gray.50" borderRadius="md">
+                  <HStack>
+                    <Icon as={FiMail} color="green.500" />
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">Email de Login</Text>
+                      <Text fontWeight="medium">{motorista?.email}</Text>
+                    </Box>
+                  </HStack>
+                  <Button
+                    size="sm"
+                    colorScheme="blue"
+                    variant="ghost"
+                    onClick={() => {
+                      setNewEmail(motorista?.email || '');
+                      setCurrentPassword('');
+                      setIsEditEmailOpen(true);
+                    }}
+                  >
+                    Editar
+                  </Button>
+                </HStack>
+
+                <Divider />
+
+                {/* Senha */}
+                <HStack justify="space-between" p={4} bg="gray.50" borderRadius="md">
+                  <HStack>
+                    <Icon as={FiLock} color="green.500" />
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">Senha</Text>
+                      <Text fontWeight="medium">••••••••</Text>
+                    </Box>
+                  </HStack>
+                  <Button
+                    size="sm"
+                    colorScheme="blue"
+                    variant="ghost"
+                    onClick={() => {
+                      setCurrentPassword('');
+                      setNewPassword('');
+                      setConfirmPassword('');
+                      setIsChangePasswordOpen(true);
+                    }}
+                  >
+                    Alterar
+                  </Button>
+                </HStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        </VStack>
+
+        {/* Modal: Editar Nome */}
         <StandardModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          title={tDriver('profile.editProfile')}
-          onSave={handleSave}
-          saveText={tDriver('profile.saveChanges')}
+          isOpen={isEditNameOpen}
+          onClose={() => setIsEditNameOpen(false)}
+          title="Editar Nome"
+          size="md"
+          onSave={handleUpdateName}
+          saveText="Salvar"
+          isLoading={isSaving}
         >
-          <VStack spacing={4} align="stretch">
-            <FormControl>
-              <FormLabel>{tDriver('profile.firstName')}</FormLabel>
-              <Input 
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-              />
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.lastName')}</FormLabel>
-              <Input 
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-              />
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.email')}</FormLabel>
-              <Input 
+          <FormControl>
+            <FormLabel>Nome Completo</FormLabel>
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Digite seu nome completo"
+            />
+          </FormControl>
+        </StandardModal>
+
+        {/* Modal: Editar Email */}
+        <StandardModal
+          isOpen={isEditEmailOpen}
+          onClose={() => setIsEditEmailOpen(false)}
+          title="Alterar Email"
+          size="md"
+          onSave={handleUpdateEmail}
+          saveText="Salvar"
+          isLoading={isSaving}
+        >
+          <VStack spacing={4}>
+            <FormControl isRequired>
+              <FormLabel>Novo Email</FormLabel>
+              <Input
                 type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="Digite o novo email"
               />
             </FormControl>
             
-            <FormControl>
-              <FormLabel>{tDriver('profile.phone')}</FormLabel>
-              <Input 
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-              />
+            <FormControl isRequired>
+              <FormLabel>Senha Atual</FormLabel>
+              <InputGroup>
+                <Input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Digite sua senha atual"
+                />
+                <InputRightElement>
+                  <IconButton
+                    aria-label="Toggle password"
+                    icon={showCurrentPassword ? <FiEyeOff /> : <FiEye />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  />
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
+
+            <Text fontSize="sm" color="orange.600">
+              ⚠️ Após alterar o email, você será desconectado e precisará fazer login novamente.
+            </Text>
+          </VStack>
+        </StandardModal>
+
+        {/* Modal: Alterar Senha */}
+        <StandardModal
+          isOpen={isChangePasswordOpen}
+          onClose={() => setIsChangePasswordOpen(false)}
+          title="Alterar Senha"
+          size="md"
+          onSave={handleChangePassword}
+          saveText="Alterar Senha"
+          isLoading={isSaving}
+        >
+          <VStack spacing={4}>
+            <FormControl isRequired>
+              <FormLabel>Senha Atual</FormLabel>
+              <InputGroup>
+                <Input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Digite sua senha atual"
+                />
+                <InputRightElement>
+                  <IconButton
+                    aria-label="Toggle password"
+                    icon={showCurrentPassword ? <FiEyeOff /> : <FiEye />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
             
-            <FormControl>
-              <FormLabel>{tDriver('profile.birthDate')}</FormLabel>
-              <Input 
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
-              />
+            <FormControl isRequired>
+              <FormLabel>Nova Senha</FormLabel>
+              <InputGroup>
+                <Input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Digite a nova senha (mín. 6 caracteres)"
+                />
+                <InputRightElement>
+                  <IconButton
+                    aria-label="Toggle password"
+                    icon={showNewPassword ? <FiEyeOff /> : <FiEye />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.city')}</FormLabel>
-              <Input 
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-              />
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.licenseNumberField')}</FormLabel>
-              <Input 
-                value={formData.licenseNumber}
-                onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
-              />
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.licenseExpiry')}</FormLabel>
-              <Input 
-                type="date"
-                value={formData.licenseExpiry}
-                onChange={(e) => handleInputChange('licenseExpiry', e.target.value)}
-              />
-            </FormControl>
-            
-            <FormControl>
-              <FormLabel>{tDriver('profile.vehicleType')}</FormLabel>
-              <Select 
-                value={formData.vehicleType}
-                onChange={(e) => handleInputChange('vehicleType', e.target.value)}
-              >
-                <option value="">{tDriver('profile.selectType')}</option>
-                <option value="carro">{tDriver('profile.car')}</option>
-                <option value="moto">{tDriver('profile.motorcycle')}</option>
-                <option value="van">{tDriver('profile.van')}</option>
-                <option value="outro">{tDriver('profile.other')}</option>
-              </Select>
+
+            <FormControl isRequired>
+              <FormLabel>Confirmar Nova Senha</FormLabel>
+              <InputGroup>
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Digite a nova senha novamente"
+                />
+                <InputRightElement>
+                  <IconButton
+                    aria-label="Toggle password"
+                    icon={showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
           </VStack>
         </StandardModal>
-      </DriverLayout>
+      </PainelLayout>
     </>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    // Extract locale from middleware header
-    const locale = Array.isArray(context.req.headers['x-locale']) 
-      ? context.req.headers['x-locale'][0] 
-      : context.req.headers['x-locale'] || 'pt';
-    
-    const translations = await loadTranslations(locale, ['common', 'driver']);
-
-    // Get session from Iron Session
-    const { getSession } = await import('@/lib/session/ironSession');
-    const session = await getSession(context.req, context.res);
-    
-    if (!session.userId) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get user data from Firestore
-    const userDoc = await adminDb.collection('users').doc(session.userId).get();
-    const userData = userDoc.exists ? userDoc.data() : null;
-    
-    if (!userData || userData.role !== 'driver') {
-      return {
-        redirect: {
-          destination: '/admin',
-          permanent: false,
-        },
-      };
-    }
-
-    // Get driver data from Firestore
-    const driverSnap = await adminDb.collection('drivers').where('uid', '==', userData.uid).limit(1).get();
-    
-    if (driverSnap.empty) {
-      throw new Error('Driver not found');
-    }
-
-    const driverDoc = driverSnap.docs[0];
-    const driver = {
-      id: driverDoc.id,
-      ...driverDoc.data(),
-    } as any;
-
-    // Verificar se o motorista completou o onboarding
-    const hasSelectedPlan = driver.selectedPlan && driver.selectedPlan !== null;
-    const documentsUploaded = driver.documents ? 
-      Object.values(driver.documents).filter((doc: any) => doc.uploaded).length : 0;
-    
-    // Se não completou o onboarding, redirecionar
-    if (!hasSelectedPlan || documentsUploaded === 0) {
-      return {
-        redirect: {
-          destination: '/drivers/onboarding',
-          permanent: false,
-        },
-      };
-    }
-
-    return {
-      props: {
-        driver,
-        translations,
-        userData: driver,
-      },
-    };
-  } catch (error) {
-    console.error('Error loading driver profile:', error);
-    return {
-      props: {
-        driver: null,
-        translations: { common: {}, driver: {} },
-        userData: null,
-      },
-    };
+export const getServerSideProps = withDashboardSSR(
+  { loadDriverData: true },
+  async (context, user, driverId) => {
+    return {};
   }
-};
+);

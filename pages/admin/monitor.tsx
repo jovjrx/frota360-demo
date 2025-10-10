@@ -92,7 +92,7 @@ const MONITOR_FALLBACKS: Record<string, string> = {
   no_data_for_map: 'Sem dados suficientes para exibir o mapa.',
 };
 
-export default function MonitorPage({ locale, initialData, tPage }: MonitorPageProps) {
+export default function MonitorPage({ locale, initialData, tPage, translations }: MonitorPageProps) {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [manualLoading, setManualLoading] = useState(false);
   const toast = useToast();
@@ -239,6 +239,7 @@ export default function MonitorPage({ locale, initialData, tPage }: MonitorPageP
       title={tMonitor("monitor_title")}
       subtitle={tMonitor("monitor_subtitle")}
       breadcrumbs={[{ label: tMonitor("monitor_title") }]}
+      translations={translations}
     >
 
       <HStack justify="space-between">

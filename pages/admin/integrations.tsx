@@ -39,7 +39,7 @@ interface IntegrationStatus {
   };
 }
 
-function IntegrationsPage({ tCommon, tPage }: AdminPageProps) {
+function IntegrationsPage({ tCommon, tPage, translations }: AdminPageProps) {
   const [cartrackStatus, setCartrackStatus] = useState<IntegrationStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
@@ -139,6 +139,7 @@ function IntegrationsPage({ tCommon, tPage }: AdminPageProps) {
       title={tAdmin('integrations.title', 'Integrações')}
       subtitle={tAdmin('integrations.subtitle', 'Gerencie suas integrações com serviços externos')}
       breadcrumbs={[{ label: tAdmin('integrations.breadcrumb', 'Integrações') }]}
+      translations={translations}
     >
       {loading ? (
         <Box textAlign="center" py={10}>

@@ -83,7 +83,6 @@ export async function getDriverContracheques(driverId: string, limit: number = 1
       .get();
 
     if (driversSnapshot.empty) {
-      console.warn('Motorista não encontrado para contracheques:', driverId);
       return [];
     }
 
@@ -91,17 +90,63 @@ export async function getDriverContracheques(driverId: string, limit: number = 1
     const realDriverId = driverDoc.id; // Usar o ID do documento
 
     // Buscar registros semanais usando o ID do documento
+    // NOTA: where + orderBy requer índice composto no Firestore
+    // Solução temporária: buscar tudo e ordenar em memória
     const query = adminDb
       .collection('driverWeeklyRecords')
-      .where('driverId', '==', realDriverId)
-      .orderBy('weekStart', 'desc')
-      .limit(limit);
+      .where('driverId', '==', realDriverId);
 
     const recordsSnapshot = await query.get();
+    
+    // Ordenar em memória e limitar
+    const allRecords = recordsSnapshot.docs
+      .map(doc => ({ doc, data: doc.data() }))
+      .sort((a, b) => {
+        const dateA = new Date(a.data.weekStart || '');
+        const dateB = new Date(b.data.weekStart || '');
+        return dateB.getTime() - dateA.getTime(); // desc
+      })
+      .slice(0, limit);
+    
+    // Buscar informações de pagamento da collection driverPayments
+    const recordIds = allRecords.map(({ doc }) => doc.id);
+    const paymentsMap = new Map();
+    
+    if (recordIds.length > 0) {
+      try {
+        const paymentsSnapshot = await adminDb
+          .collection('driverPayments')
+          .where('recordId', 'in', recordIds)
+          .get();
+        
+        paymentsSnapshot.docs.forEach(doc => {
+          const paymentData = doc.data();
+          paymentsMap.set(paymentData.recordId, {
+            proofUrl: paymentData.proofUrl || null,
+            proofFileName: paymentData.proofFileName || null,
+            proofStoragePath: paymentData.proofStoragePath || null,
+          });
+        });
+        
+      } catch (error) {
+        console.error('[getDriverContracheques] Erro ao buscar pagamentos:', error);
+      }
+    }
 
-    // Mapear registros
-    const contracheques = recordsSnapshot.docs.map(doc => {
-      const data = doc.data();
+    // Mapear registros com informações de pagamento
+    const contracheques = allRecords.map(({ doc, data }) => {
+      // Buscar paymentInfo em driverPayments primeiro, depois fallback para driverWeeklyRecords
+      let paymentInfo = paymentsMap.get(doc.id);
+      
+      // Se não encontrou em driverPayments, tentar pegar do próprio record
+      if (!paymentInfo && data.paymentInfo) {
+        paymentInfo = {
+          proofUrl: data.paymentInfo.proofUrl || null,
+          proofFileName: data.paymentInfo.proofFileName || null,
+          proofStoragePath: data.paymentInfo.proofStoragePath || null,
+        };
+      }
+      
       return {
         id: doc.id,
         weekId: data.weekId,
@@ -131,6 +176,7 @@ export async function getDriverContracheques(driverId: string, limit: number = 1
         iban: data.iban || null,
         paymentStatus: data.paymentStatus || 'pending',
         paymentDate: data.paymentDate || null,
+        paymentInfo: paymentInfo || null,
         
         // Metadados
         createdAt: data.createdAt || null,
@@ -141,7 +187,7 @@ export async function getDriverContracheques(driverId: string, limit: number = 1
     return contracheques;
 
   } catch (error) {
-    console.error('Erro ao buscar contracheques:', error);
+    console.error('[getDriverContracheques] Erro ao buscar contracheques:', error);
     return [];
   }
 }

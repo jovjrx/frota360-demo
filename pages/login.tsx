@@ -73,7 +73,7 @@ export default function LoginPage({ tPage }: PublicPageProps) {
       if (redirectPath) {
         router.push(redirectPath);
       } else {
-        router.push(sessionData.role === 'admin' ? '/admin' : '/drivers');
+        router.push(sessionData.role === 'admin' ? '/admin' : '/dashboard');
       }
     } catch (err: any) {
       console.error('Erro de login:', err);

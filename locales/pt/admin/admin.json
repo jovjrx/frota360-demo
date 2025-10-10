@@ -1,4 +1,20 @@
 {
+  "menu": {
+    "dashboard": "Administração",
+    "requests": "Solicitações",
+    "drivers": "Motoristas",
+    "control": "Controle & Pagamentos",
+    "monitor": "Monitoramento",
+    "data": "Dados",
+    "users": "Usuários",
+    "overview": "Visão geral",
+    "requests_desc": "Solicitações",
+    "drivers_management": "Gestão de motoristas",
+    "weekly_control": "Controle semanal",
+    "tracking": "Rastreamento",
+    "weekly_data": "Dados semanais",
+    "user_management": "Gerenciamento de usuários"
+  },
   "dashboard": {
     "title": "Dashboard de Gestão TVDE",
     "subtitle": "Visão geral do negócio - Últimos 30 dias",

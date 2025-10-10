@@ -1,4 +1,28 @@
 {
+    "menu": {
+      "dashboard": "Dashboard",
+      "data": "Meus Dados",
+      "payslips": "Contracheques",
+      "analytics": "Análises",
+      "tracking": "Rastreamento",
+      "profile": "Perfil",
+      "help": "Ajuda",
+      "requests": "Solicitações",
+      "drivers": "Motoristas",
+      "control": "Controle & Pagamentos",
+      "monitor": "Monitoramento",
+      "users": "Usuários",
+      "overview": "Visão geral",
+      "requests_desc": "Solicitações",
+      "drivers_management": "Gestão de motoristas",
+      "weekly_control": "Controle semanal",
+      "tracking_desc": "Rastreamento",
+      "weekly_data": "Dados semanais",
+      "user_management": "Gerenciamento de usuários"
+    },
+    "breadcrumb": {
+      "home": "Início"
+    },
     "dashboard": {
       "title": "Painel do Motorista",
       "welcome": "Bem-vindo",
@@ -198,7 +222,8 @@
       "pending": "Pendente",
       "rejected": "Rejeitado",
       "notUploaded": "Não enviado"
-    },
+    }
+  },
   "earnings": {
     "title": "Ganhos",
     "subtitle": "Acompanhe os seus ganhos e pagamentos",
@@ -416,5 +441,54 @@
     "support": "Suporte",
     "settings": "Configurações",
     "logout": "Sair"
+  },
+  "data": {
+    "title": "Meus Dados",
+    "subtitle": "Visualize suas informações cadastrais",
+    "breadcrumb": "Meus Dados"
+  },
+  "payslips": {
+    "title": "Contracheques",
+    "subtitle": "Histórico de pagamentos e repasses",
+    "breadcrumb": "Contracheques",
+    "filter": {
+      "all": "Todos",
+      "paid": "Pagos",
+      "pending": "Pendentes"
+    }
+  },
+  "help": {
+    "title": "Ajuda e Suporte",
+    "subtitle": "Tire suas dúvidas e entre em contato conosco",
+    "breadcrumb": "Ajuda",
+    "schedule": {
+      "title": "Horário de Atendimento",
+      "weekday": "Segunda a Sexta",
+      "saturday": "Sábado",
+      "sunday": "Domingo e Feriados",
+      "closed": "Fechado"
+    }
+  },
+  "tracking": {
+    "title": "Rastreamento",
+    "subtitle": "Dados de quilometragem e localização do seu veículo",
+    "breadcrumb": "Rastreamento",
+    "vehicle": "Veículo",
+    "plate": "Matrícula",
+    "model": "Modelo",
+    "not_available": "Rastreamento não disponível",
+    "affiliate_message": "Como motorista afiliado com veículo próprio, você não tem acesso ao rastreamento Cartrack.",
+    "check_apps": "Para informações sobre suas viagens, consulte os aplicativos Uber e Bolt.",
+    "no_vehicle": "Veículo não atribuído",
+    "contact_admin": "Você ainda não tem um veículo atribuído. Entre em contato com o administrador.",
+    "weekly_stats": "Estatísticas da Semana Atual",
+    "total_km": "Quilometragem Total",
+    "days_worked": "Dias Trabalhados",
+    "daily_avg": "Média Diária"
+  },
+  "analytics": {
+    "title": "Análises",
+    "subtitle": "Análise detalhada dos seus ganhos e performance",
+    "breadcrumb": "Análises"
   }
 }

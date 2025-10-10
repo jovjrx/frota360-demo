@@ -1,4 +1,25 @@
 {
+  "menu": {
+    "dashboard": "Dashboard",
+    "data": "My Data",
+    "payslips": "Payslips",
+    "analytics": "Analytics",
+    "tracking": "Tracking",
+    "profile": "Profile",
+    "help": "Help",
+    "requests": "Requests",
+    "drivers": "Drivers",
+    "control": "Control & Payments",
+    "monitor": "Monitoring",
+    "users": "Users",
+    "overview": "Overview",
+    "requests_desc": "Requests",
+    "drivers_management": "Driver management",
+    "weekly_control": "Weekly control",
+    "tracking_desc": "Tracking",
+    "weekly_data": "Weekly data",
+    "user_management": "User management"
+  },
   "dashboard": {
     "title": "Driver Dashboard",
     "welcome": "Welcome, {{name}}!",
@@ -25,5 +46,35 @@
     "dashboard": "Dashboard",
     "profile": "Profile",
     "logout": "Logout"
+  },
+  "data": {
+    "title": "My Data",
+    "subtitle": "View your registration information",
+    "breadcrumb": "My Data"
+  },
+  "payslips": {
+    "title": "Payslips",
+    "subtitle": "Payment and transfer history",
+    "breadcrumb": "Payslips",
+    "filter": {
+      "all": "All",
+      "paid": "Paid",
+      "pending": "Pending"
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Get help and contact us",
+    "breadcrumb": "Help"
+  },
+  "tracking": {
+    "title": "Tracking",
+    "subtitle": "Vehicle mileage and location data",
+    "breadcrumb": "Tracking"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Detailed analysis of your earnings and performance",
+    "breadcrumb": "Analytics"
   }
 }

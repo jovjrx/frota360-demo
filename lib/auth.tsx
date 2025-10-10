@@ -41,81 +41,37 @@ export function AuthProvider({ children, initialUserData }: AuthProviderProps) {
   const [userData, setUserData] = useState<UserData | null>(initialUserData || null);
   const [loading, setLoading] = useState(!initialUserData);
 
-  // Sincronizar userData quando initialUserData mudar (navegação entre páginas)
+  // Flag para indicar que viemos do SSR
+  const [hasSSRData] = useState(!!initialUserData);
+
+  // Sincronizar userData quando initialUserData mudar (navegação entre páginas SSR)
   useEffect(() => {
     if (initialUserData) {
-      const currentDataStr = JSON.stringify(userData);
-      const newDataStr = JSON.stringify(initialUserData);
-      if (currentDataStr !== newDataStr) {
-        console.log('🔄 Atualizando userData do SSR:', initialUserData);
-        setUserData(initialUserData);
-        setLoading(false);
-      }
+      console.log('✅ SSR: Dados recebidos do servidor, usando sem fetch');
+      setUserData(initialUserData);
+      setLoading(false);
     }
-  }, [initialUserData]); // Não incluir userData nas dependências para evitar loop
-
-  // Buscar dados completos do usuário e criar sessão se necessário
-  const fetchUserData = async (firebaseUser: User) => {
-    try {
-      const idToken = await firebaseUser.getIdToken();
-      
-      const response = await fetch('/api/auth/user-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data.user);
-        
-        // Verificar se precisa criar sessão Iron Session
-        const sessionResponse = await fetch('/api/auth/session-status');
-        if (sessionResponse.ok) {
-          const sessionData = await sessionResponse.json();
-          if (!sessionData.authenticated) {
-            console.log('🔄 Criando sessão Iron Session...');
-            // Criar sessão Iron Session
-            const syncResponse = await fetch('/api/auth/sync-session', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ idToken }),
-            });
-            
-            if (syncResponse.ok) {
-              console.log('✅ Sessão Iron Session criada com sucesso');
-            } else {
-              console.error('❌ Erro ao criar sessão Iron Session');
-            }
-          }
-        }
-      } else {
-        console.error('Erro ao buscar dados do usuário:', await response.text());
-        setUserData(null);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados do usuário:', error);
-      setUserData(null);
-    }
-  };
+  }, [initialUserData]);
 
   useEffect(() => {
+    // 🚀 SSR FIRST: Se já temos dados do SSR, não fazer nenhuma requisição
+    if (hasSSRData) {
+      console.log('🎯 SSR MODE: Usando dados do servidor, pulando client-side auth checks');
+      setLoading(false);
+      return;
+    }
+
+    // ⚠️ FALLBACK: Apenas para páginas públicas sem SSR (raro)
+    console.log('⚠️ Client-side auth: Sem dados SSR, iniciando listener Firebase');
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // Se já temos userData (do SSR ou de fetch anterior), não buscar novamente
-        if (!userData) {
-          console.log('🔍 Buscando dados do usuário (não tem userData)');
-          await fetchUserData(firebaseUser);
-        } else {
-          console.log('✅ Já temos userData, pulando fetch');
-          setLoading(false);
-        }
+        // Páginas públicas com usuário logado - apenas setar loading false
+        // As páginas protegidas devem usar SSR (withAdminSSR/withDashboardSSR)
+        console.log('ℹ️ Usuário detectado no Firebase Auth (client-side)');
+        setLoading(false);
       } else {
         // Usuário não está logado
         setUserData(null);
@@ -124,11 +80,25 @@ export function AuthProvider({ children, initialUserData }: AuthProviderProps) {
     });
     
     return unsubscribe;
-  }, []); // Lista de dependências vazia - só executa na montagem
+  }, [hasSSRData]); // Só depende da flag hasSSRData
 
   const signOut = async () => {
-    await fbSignOut(auth);
-    setUserData(null);
+    try {
+      // 1. Chamar API para destruir sessão iron-session
+      await fetch('/api/auth/logout', { method: 'POST' });
+      
+      // 2. Logout do Firebase
+      await fbSignOut(auth);
+      
+      // 3. Limpar estado local
+      setUserData(null);
+      setUser(null);
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      // Mesmo com erro, limpar estado local
+      setUserData(null);
+      setUser(null);
+    }
   };
 
   const isAdmin = userData?.role === 'admin';

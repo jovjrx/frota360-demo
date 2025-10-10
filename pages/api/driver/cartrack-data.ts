@@ -21,18 +21,29 @@ export default withIronSessionApiRoute(async function driverCartrackDataRoute(re
 
   const { driverId } = req.query;
 
-  if (user.id !== driverId) {
-    return res.status(403).json({ success: false, error: 'Forbidden: You can only view your own data' });
-  }
-
   try {
     const db = getFirestore(firebaseAdmin);
 
     // 1. Get driver details to check Cartrack integration
-    const driverDoc = await db.collection('drivers').doc(user.id).get();
-    if (!driverDoc.exists) {
+    // Buscar pelo email (user.id) para obter o document ID
+    const driversSnapshot = await db
+      .collection('drivers')
+      .where('email', '==', user.id)
+      .limit(1)
+      .get();
+
+    if (driversSnapshot.empty) {
       return res.status(404).json({ success: false, error: 'Driver not found' });
     }
+
+    const driverDoc = driversSnapshot.docs[0];
+    const realDriverId = driverDoc.id;
+
+    // Verificar se o driverId da query corresponde ao do usuário logado
+    if (driverId && driverId !== realDriverId) {
+      return res.status(403).json({ success: false, error: 'Forbidden: You can only view your own data' });
+    }
+
     const driverData = driverDoc.data() as any;
 
     // 2. Check if Cartrack integration is enabled

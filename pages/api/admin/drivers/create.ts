@@ -116,8 +116,6 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         role: 'driver',
       });
 
-      console.log(`✅ Conta Firebase Auth criada para ${email} (UID: ${firebaseUid})`);
-
     } catch (authError: any) {
       console.error('Erro ao criar conta Firebase Auth:', authError);
       
@@ -234,7 +232,6 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         fullName,
         temporaryPassword
       );
-      console.log(`✅ Email com credenciais enviado para ${email}`);
     } catch (emailError) {
       console.error('❌ Erro ao enviar email:', emailError);
       // Não falhar a operação se o email falhar

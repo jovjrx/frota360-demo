@@ -1,11 +1,5 @@
 import { useRouter } from 'next/router';
 
-/**
- * Utility function to generate localized links
- * @param href - The base href (without locale prefix)
- * @param locale - The current locale (optional, will be detected from router if not provided)
- * @returns The localized href with appropriate prefix
- */
 export function getLocalizedHref(href: string, locale?: string): string {
   // If locale is not provided, try to detect from current URL
   if (!locale && typeof window !== 'undefined') {

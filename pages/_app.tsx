@@ -79,6 +79,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <Header
               t={tCommon}
+              tPage={tPage}
               panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")}
               serverUser={serverUser}
             />

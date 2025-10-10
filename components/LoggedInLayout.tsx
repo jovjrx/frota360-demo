@@ -69,8 +69,14 @@ export default function LoggedInLayout({
   const allMenuItems = getAllMenuItems();
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      // Mesmo com erro, redirecionar
+      router.push('/login');
+    }
   };
 
   return (

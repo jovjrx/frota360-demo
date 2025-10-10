@@ -78,7 +78,7 @@ interface UsersPageProps extends AdminPageProps {
   };
 }
 
-export default function UsersManagement({ tPage, tAdmin, initialUsers, initialStats }: UsersPageProps) {
+export default function UsersManagement({ tPage, tAdmin, initialUsers, initialStats, translations }: UsersPageProps) {
   const toast = useToast();
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [loading, setLoading] = useState(false);
@@ -271,6 +271,7 @@ export default function UsersManagement({ tPage, tAdmin, initialUsers, initialSt
       breadcrumbs={[
         { label: t('users.breadcrumb', 'Usuários') }
       ]}
+      translations={translations}
     >
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
         <Card>

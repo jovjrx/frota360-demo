@@ -564,7 +564,7 @@ type DataPageProps = AdminPageProps & {
   initialIntegrations: IntegrationSummary[];
 };
 
-export default function DataPage({ initialWeeks, initialIntegrations, tCommon, tPage }: DataPageProps) {
+export default function DataPage({ initialWeeks, initialIntegrations, tCommon, tPage, translations }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
@@ -1047,6 +1047,7 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
         title={t('weeklyDataSources.title', 'Fontes de dados')}
         subtitle={t('weeklyDataSources.subtitle', 'Snapshots semanais e integrações contínuas')}
         breadcrumbs={[{ label: t('weeklyDataSources.breadcrumb', 'Fontes de dados') }]}
+        translations={translations}
         side={
           <HStack spacing={4} align="center">
             <Button

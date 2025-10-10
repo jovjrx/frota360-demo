@@ -15,46 +15,45 @@ export interface DashboardMenuItem {
   icon: IconType;
 }
 
+/**
+ * Menu items do dashboard do motorista
+ * Os labels são chaves de tradução que serão traduzidas no componente
+ * usando: t(`menu.${item.id}`)
+ */
 export const dashboardMenuItems: DashboardMenuItem[] = [
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'dashboard', // Traduzido via t('menu.dashboard')
     href: '/dashboard',
     icon: FiHome,
   },
   {
     id: 'data',
-    label: 'My Data',
+    label: 'data', // Traduzido via t('menu.data')
     href: '/dashboard/data',
     icon: FiUser,
   },
   {
     id: 'payslips',
-    label: 'Payslips',
+    label: 'payslips', // Traduzido via t('menu.payslips')
     href: '/dashboard/payslips',
     icon: FiFileText,
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
-    href: '/dashboard/analytics',
-    icon: FiBarChart,
-  },
-  {
     id: 'tracking',
-    label: 'Tracking',
+    label: 'tracking', // Traduzido via t('menu.tracking')
     href: '/dashboard/tracking',
     icon: FiMapPin,
   },
   {
     id: 'profile',
-    label: 'Profile',
+    label: 'profile', // Traduzido via t('menu.profile')
     href: '/dashboard/profile',
     icon: FiUser,
   },
   {
     id: 'help',
-    label: 'Help',
+    label: 'help', // Traduzido via t('menu.help')
     href: '/dashboard/help',
     icon: FiHelpCircle,
   },

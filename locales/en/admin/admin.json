@@ -1,4 +1,20 @@
 {
+  "menu": {
+    "dashboard": "Administration",
+    "requests": "Requests",
+    "drivers": "Drivers",
+    "control": "Control & Payments",
+    "monitor": "Monitoring",
+    "data": "Data",
+    "users": "Users",
+    "overview": "Overview",
+    "requests_desc": "Requests",
+    "drivers_management": "Driver management",
+    "weekly_control": "Weekly control",
+    "tracking": "Tracking",
+    "weekly_data": "Weekly data",
+    "user_management": "User management"
+  },
   "dashboard": {
     "title": "TVDE Management Dashboard",
     "subtitle": "Business overview - Last 30 days",

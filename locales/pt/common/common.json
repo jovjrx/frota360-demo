@@ -8,6 +8,27 @@
     "logout": "Sair",
     "signup": "Criar Conta"
   },
+  "menu": {
+    "dashboard": "Dashboard",
+    "data": "Meus Dados",
+    "payslips": "Contracheques",
+    "analytics": "Análises",
+    "tracking": "Rastreamento",
+    "profile": "Perfil",
+    "help": "Ajuda",
+    "requests": "Solicitações",
+    "drivers": "Motoristas",
+    "control": "Controle & Pagamentos",
+    "monitor": "Monitoramento",
+    "users": "Usuários",
+    "overview": "Visão geral",
+    "requests_desc": "Solicitações",
+    "drivers_management": "Gestão de motoristas",
+    "weekly_control": "Controle semanal",
+    "tracking_desc": "Rastreamento",
+    "weekly_data": "Dados semanais",
+    "user_management": "Gerenciamento de usuários"
+  },
   "user": {
     "email": "Email",
     "password": "Senha",

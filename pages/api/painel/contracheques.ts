@@ -38,16 +38,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       query = query.where('paymentStatus', '==', status);
     }
 
-    // Ordenar por data mais recente e limitar
-    query = query
-      .orderBy('weekStart', 'desc')
-      .limit(limitNum);
-
+    // NOTA: orderBy requer índice composto. Solução: ordenar em memória
     const recordsSnapshot = await query.get();
+    
+    // Ordenar em memória e limitar
+    const sortedDocs = recordsSnapshot.docs
+      .map(doc => ({ doc, data: doc.data() }))
+      .sort((a, b) => {
+        const dateA = new Date(a.data.weekStart || '');
+        const dateB = new Date(b.data.weekStart || '');
+        return dateB.getTime() - dateA.getTime(); // desc
+      })
+      .slice(0, limitNum);
 
     // Mapear registros
-    const contracheques = recordsSnapshot.docs.map(doc => {
-      const data = doc.data();
+    const contracheques = sortedDocs.map(({ doc, data }) => {
       return {
         id: doc.id,
         weekId: data.weekId,
