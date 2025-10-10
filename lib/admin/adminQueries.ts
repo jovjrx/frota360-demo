@@ -301,6 +301,9 @@ export async function getDashboardStats(): Promise<{
   totalPaymentsPending: number;
   totalPaymentsPaid: number;
   averageEarningsPerDriver: number;
+  profitCommissions: number;
+  profitRentals: number;
+  profitDiscounts: number;
 }> {
   const db = getFirestore();
 
@@ -330,6 +333,9 @@ export async function getDashboardStats(): Promise<{
   let totalPaymentsPending = 0; // A Pagar (pending do driverWeeklyRecords)
   let totalPaymentsPaid = 0; // Pagos (do driverPayments)
   let companyProfitThisWeek = 0; // Lucro da empresa (despesasAdm + aluguel)
+  let profitCommissions = 0; // Comissões (despesasAdm)
+  let profitRentals = 0; // Aluguéis
+  let profitDiscounts = 0; // Descontos aplicados
   
   // Agrupar por motorista para calcular média
   const driverPaymentsMap = new Map<string, { total: number; count: number }>();
@@ -345,7 +351,8 @@ export async function getDashboardStats(): Promise<{
     if (data.weekId === latestWeekId) {
       totalGrossEarningsThisWeek += ganhosTotal;
       // Lucro = despesasAdm (comissão) + aluguel (carros locatários)
-      companyProfitThisWeek += despesasAdm + aluguel;
+      profitCommissions += despesasAdm;
+      profitRentals += aluguel;
     }
     
     // A Pagar - Pagamentos pendentes (driverWeeklyRecords)
@@ -367,7 +374,7 @@ export async function getDashboardStats(): Promise<{
     totalPaymentsPaid += totalAmount;
     
     // Adicionar descontos ao lucro (outras despesas da empresa)
-    companyProfitThisWeek += discountAmount;
+    profitDiscounts += discountAmount;
     
     // Agrupar por motorista para média
     if (driverId) {
@@ -378,6 +385,9 @@ export async function getDashboardStats(): Promise<{
       });
     }
   });
+
+  // Calcular lucro total
+  companyProfitThisWeek = profitCommissions + profitRentals + profitDiscounts;
 
   // Calcular média por motorista (apenas motoristas que receberam pagamentos)
   let totalPaidAmount = 0;
@@ -396,10 +406,14 @@ export async function getDashboardStats(): Promise<{
     totalDrivers,
     activeDrivers,
     pendingRequests,
-    totalEarningsThisWeek: companyProfitThisWeek, // Lucro da empresa esta semana
+    totalEarningsThisWeek: companyProfitThisWeek, // Lucro total da empresa esta semana
     totalGrossEarningsThisWeek, // Ganhos brutos da semana
     totalPaymentsPending,
     totalPaymentsPaid,
     averageEarningsPerDriver,
+    // Breakdown do lucro
+    profitCommissions,
+    profitRentals,
+    profitDiscounts,
   };
 }

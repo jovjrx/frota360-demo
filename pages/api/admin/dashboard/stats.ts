@@ -34,6 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let totalPaymentsPending = 0; // A Pagar (pending)
     let totalPaymentsPaid = 0; // Pagos (driverPayments)
     let companyProfitThisWeek = 0; // Lucro da empresa (despesasAdm + aluguel)
+    let profitCommissions = 0; // Comissões (despesasAdm)
+    let profitRentals = 0; // Aluguéis
+    let profitDiscounts = 0; // Descontos aplicados
     
     // Agrupar por motorista para calcular média
     const driverPaymentsMap = new Map<string, { total: number; count: number }>();
@@ -49,7 +52,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (data.weekId === latestWeekId) {
         totalGrossEarningsThisWeek += ganhosTotal;
         // Lucro = despesasAdm (comissão) + aluguel (carros locatários)
-        companyProfitThisWeek += despesasAdm + aluguel;
+        profitCommissions += despesasAdm;
+        profitRentals += aluguel;
       }
       
       // A Pagar - Pagamentos pendentes
@@ -71,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalPaymentsPaid += totalAmount;
       
       // Adicionar descontos ao lucro (outras despesas da empresa)
-      companyProfitThisWeek += discountAmount;
+      profitDiscounts += discountAmount;
       
       // Agrupar por motorista para média
       if (driverId) {
@@ -82,6 +86,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
     });
+
+    // Calcular lucro total
+    companyProfitThisWeek = profitCommissions + profitRentals + profitDiscounts;
 
     // Calcular média por motorista
     let totalPaidAmount = 0;
@@ -113,11 +120,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           totalRequests,
           pendingRequests,
           evaluationRequests,
-          totalEarningsThisWeek: companyProfitThisWeek, // Lucro da empresa
+          totalEarningsThisWeek: companyProfitThisWeek, // Lucro total da empresa
           totalGrossEarningsThisWeek, // Ganhos brutos da última semana
           totalPaymentsPending,
           totalPaymentsPaid,
           averageEarningsPerDriver,
+          // Breakdown do lucro
+          profitCommissions,
+          profitRentals,
+          profitDiscounts,
         },
         recentDrivers,
         recentRequests,

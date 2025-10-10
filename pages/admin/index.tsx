@@ -51,6 +51,9 @@ interface DashboardData {
     totalPaymentsPending: number;
     totalPaymentsPaid: number;
     averageEarningsPerDriver: number;
+    profitCommissions: number;
+    profitRentals: number;
+    profitDiscounts: number;
   };
   recentDrivers: any[];
   recentRequests: any[];
@@ -210,7 +213,7 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
           </Card>
         </SimpleGrid>
 
-        {/* Segunda linha - Lucro Semanal (destaque) */}
+        {/* Segunda linha - Lucro Semanal (destaque com breakdown) */}
         <Card bg="blue.50" borderColor="blue.200" borderWidth="2px">
           <CardBody>
             <Stat>
@@ -225,9 +228,24 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
               <StatNumber color="blue.600" fontSize="3xl" mt={2}>
                 {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
               </StatNumber>
-              <StatHelpText color="blue.600" fontSize="sm" mt={1}>
-                {t('dashboard.helpers.weeklyProfitDetail', 'Comissões + Aluguéis + Descontos aplicados')}
-              </StatHelpText>
+              
+              {/* Breakdown do Lucro */}
+              <Box mt={3} pt={3} borderTopWidth="1px" borderColor="blue.200">
+                <VStack align="stretch" spacing={1}>
+                  <HStack justify="space-between" fontSize="sm" color="blue.600">
+                    <Text>Comissões</Text>
+                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitCommissions || 0)}</Text>
+                  </HStack>
+                  <HStack justify="space-between" fontSize="sm" color="blue.600">
+                    <Text>Aluguéis</Text>
+                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitRentals || 0)}</Text>
+                  </HStack>
+                  <HStack justify="space-between" fontSize="sm" color="blue.600">
+                    <Text>Descontos aplicados</Text>
+                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitDiscounts || 0)}</Text>
+                  </HStack>
+                </VStack>
+              </Box>
             </Stat>
           </CardBody>
         </Card>
