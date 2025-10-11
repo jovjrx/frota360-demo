@@ -77,7 +77,6 @@ export default function FinancingModal({
     weeks: null as number | null,
     weeklyInterest: 0,
     startDate: '',
-    endDate: null as string | null,
     status: 'active' as 'active' | 'completed',
     notes: '',
   });
@@ -93,7 +92,6 @@ export default function FinancingModal({
           weeks: financing.weeks || null,
           weeklyInterest: financing.weeklyInterest || 0,
           startDate: financing.startDate || '',
-          endDate: financing.endDate || null,
           status: financing.status || 'active',
           notes: financing.notes || '',
         });
@@ -106,7 +104,6 @@ export default function FinancingModal({
           weeks: null,
           weeklyInterest: 0,
           startDate: new Date().toISOString().split('T')[0], // Data atual
-          endDate: null,
           status: 'active',
           notes: '',
         });
@@ -144,7 +141,6 @@ export default function FinancingModal({
         ...formData,
         // Converter semanas para null se não especificado
         weeks: formData.weeks || null,
-        endDate: formData.endDate || null,
       };
 
       await onSave(payload);
@@ -237,9 +233,6 @@ export default function FinancingModal({
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <Text fontSize="xs" color="gray.600" mt={1}>
-                  {t('financing.form.weeks.description', 'Número de semanas para pagamento (opcional)')}
-                </Text>
               </FormControl>
             </HStack>
 
@@ -265,31 +258,15 @@ export default function FinancingModal({
               </Text>
             </FormControl>
 
-            <HStack spacing={4} w="full">
-              {/* Data de início */}
-              <FormControl isRequired flex="1">
-                <FormLabel>{t('financing.form.startDate.label', 'Data de início')}</FormLabel>
-                <Input
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => handleChange('startDate', e.target.value)}
-                />
-              </FormControl>
-
-              {/* Data de fim */}
-              <FormControl flex="1">
-                <FormLabel>{t('financing.form.endDate.label', 'Data de fim')}</FormLabel>
-                <Input
-                  type="date"
-                  value={formData.endDate || ''}
-                  onChange={(e) => handleChange('endDate', e.target.value || null)}
-                  placeholder={t('financing.form.endDate.placeholder', 'Opcional')}
-                />
-                <Text fontSize="xs" color="gray.600" mt={1}>
-                  {t('financing.form.endDate.description', 'Data de fim do financiamento (opcional)')}
-                </Text>
-              </FormControl>
-            </HStack>
+            {/* Data de início */}
+            <FormControl isRequired>
+              <FormLabel>{t('financing.form.startDate.label', 'Data de início')}</FormLabel>
+              <Input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => handleChange('startDate', e.target.value)}
+              />
+            </FormControl>
 
             {/* Status */}
             <FormControl isRequired>

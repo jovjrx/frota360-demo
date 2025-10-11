@@ -7,10 +7,11 @@ import { z } from 'zod';
  *        'discount' para um desconto vitalício (sem prazo definido).
  * amount: valor total do financiamento ou do desconto semanal.
  * weeks: quantidade de semanas para amortização do financiamento (null em discounts).
- * weeklyInterest: valor fixo de juros adicionado a despesas administrativas a cada semana.
+ * weeklyInterest: PERCENTUAL adicional de juros (%) somado à taxa administrativa (7%). Ex: 4% = taxa total de 11%.
  * startDate: data de início do financiamento (ISO string).
- * endDate: data prevista de término (pode ser null em discounts ou enquanto ativo).
+ * endDate: data calculada automaticamente ao finalizar (quando remainingWeeks chega a 0).
  * status: 'active' enquanto em vigor, 'completed' quando finalizado/reembolsado.
+ * remainingWeeks: contador regressivo de semanas restantes, decrementado automaticamente.
  */
 export const FinancingSchema = z.object({
   id: z.string().optional(),

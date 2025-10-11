@@ -144,15 +144,31 @@ export default async function handler(
         aluguel: driver.type === 'renter' ? (driver.rentalFee || 0) : 0,
         iban: driver.banking?.iban || null,
       }, incomeTotals, { type: driver.type, rentalFee: driver.rentalFee });
-      // Ajustar record para incluir juros de financiamentos ativos
+      
+      // Ajustar record para incluir descontos de financiamentos ativos
       const activeFinancings = financingByDriver[driver.id] || [];
-      let totalWeeklyInterest = 0;
+      let totalFinancingInterestPercent = 0; // Percentual adicional de juros
+      let totalWeeklyInstallment = 0;
+      
       for (const fin of activeFinancings) {
-        const interest = fin.weeklyInterest || 0;
-        if (interest > 0) {
-          totalWeeklyInterest += interest;
+        // 1. Acumular percentual de juros (será somado à taxa administrativa)
+        const interestPercent = fin.weeklyInterest || 0;
+        if (interestPercent > 0) {
+          totalFinancingInterestPercent += interestPercent;
         }
-        // Se houver contagem de semanas, decrementa e finaliza quando chegar a zero
+        
+        // 2. Calcular parcela semanal (para empréstimos com prazo)
+        if (fin.type === 'loan' && fin.weeks && fin.weeks > 0) {
+          const weeklyInstallment = fin.amount / fin.weeks;
+          totalWeeklyInstallment += weeklyInstallment;
+        }
+        
+        // 3. Para descontos sem prazo, descontar o valor total a cada semana
+        if (fin.type === 'discount') {
+          totalWeeklyInstallment += fin.amount;
+        }
+        
+        // 4. Se houver contagem de semanas, decrementa e finaliza quando chegar a zero
         if (typeof fin.remainingWeeks === 'number') {
           const newRemaining = fin.remainingWeeks - 1;
           const updates: any = { updatedAt: new Date().toISOString(), remainingWeeks: newRemaining };
@@ -163,9 +179,19 @@ export default async function handler(
           await adminDb.collection('financing').doc(fin.id as string).update(updates);
         }
       }
-      if (totalWeeklyInterest > 0) {
-        record.despesasAdm += totalWeeklyInterest;
-        record.repasse -= totalWeeklyInterest;
+      
+      // Aplicar taxa de juros adicional sobre (ganhos - IVA)
+      // Taxa base: 7% + juros de financiamento
+      if (totalFinancingInterestPercent > 0) {
+        const additionalInterest = record.ganhosMenosIVA * (totalFinancingInterestPercent / 100);
+        record.despesasAdm += additionalInterest;
+        record.repasse -= additionalInterest;
+      }
+      
+      // Aplicar parcela do financiamento
+      if (totalWeeklyInstallment > 0) {
+        record.despesasAdm += totalWeeklyInstallment;
+        record.repasse -= totalWeeklyInstallment;
       }
       records.push(record);
     }

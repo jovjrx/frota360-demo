@@ -378,7 +378,6 @@ function AdminFinancingPageContent({
                       <Th>{t('financing.table.interest', 'Juros/sem (€)')}</Th>
                       <Th>{t('financing.table.remaining', 'Restante')}</Th>
                       <Th>{t('financing.table.start', 'Início')}</Th>
-                      <Th>{t('financing.table.end', 'Fim')}</Th>
                       <Th>{t('financing.table.status', 'Status')}</Th>
                       <Th>{t('financing.table.proof', 'Comprovante')}</Th>
                 </Tr>
@@ -395,7 +394,6 @@ function AdminFinancingPageContent({
                       <Td>{(fin.weeklyInterest ?? 0).toFixed(2)}</Td>
                       <Td>{typeof fin.remainingWeeks === 'number' ? fin.remainingWeeks : '-'}</Td>
                           <Td>{fin.startDate ? new Date(fin.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
-                          <Td>{fin.endDate ? new Date(fin.endDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
                           <Td>{getStatusBadge(fin.status)}</Td>
                           <Td>
                             <HStack spacing={2}>

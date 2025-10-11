@@ -105,32 +105,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       paymentsByRecordId
     );
 
-    // Ajustar registros para incluir juros de financiamentos ativos
+    // Ajustar registros para incluir descontos de financiamentos ativos
     try {
       const financingSnapshot = await adminDb.collection('financing').where('status', '==', 'active').get();
-      const financingByDriver: Record<string, Array<{ weeklyInterest?: number; remainingWeeks?: number }>> = {};
+      const financingByDriver: Record<string, Array<{ type?: string; amount?: number; weeks?: number; weeklyInterest?: number; remainingWeeks?: number }>> = {};
       financingSnapshot.docs.forEach((doc) => {
         const data = doc.data() as any;
         const driverId = data.driverId;
         if (!driverId) return;
         if (!financingByDriver[driverId]) financingByDriver[driverId] = [];
-        financingByDriver[driverId].push({ weeklyInterest: data.weeklyInterest, remainingWeeks: data.remainingWeeks });
+        financingByDriver[driverId].push({ 
+          type: data.type,
+          amount: data.amount,
+          weeks: data.weeks,
+          weeklyInterest: data.weeklyInterest, 
+          remainingWeeks: data.remainingWeeks 
+        });
       });
       aggregation.records.forEach((rec: any) => {
         const fins = financingByDriver[rec.driverId] || [];
-        let totalInterest = 0;
+        let totalFinancingInterestPercent = 0; // Percentual adicional de juros
+        let totalInstallment = 0;
+        
         fins.forEach((f) => {
           if (typeof f.remainingWeeks === 'number' && f.remainingWeeks <= 0) return;
-          const interest = f.weeklyInterest || 0;
-          if (interest > 0) totalInterest += interest;
+          
+          // 1. Acumular percentual de juros (será somado à taxa administrativa)
+          const interestPercent = f.weeklyInterest || 0;
+          if (interestPercent > 0) totalFinancingInterestPercent += interestPercent;
+          
+          // 2. Calcular parcela semanal (para empréstimos com prazo)
+          if (f.type === 'loan' && f.weeks && f.weeks > 0 && f.amount) {
+            const weeklyInstallment = f.amount / f.weeks;
+            totalInstallment += weeklyInstallment;
+          }
+          
+          // 3. Para descontos sem prazo, descontar o valor total a cada semana
+          if (f.type === 'discount' && f.amount) {
+            totalInstallment += f.amount;
+          }
         });
-        if (totalInterest > 0) {
-          rec.despesasAdm += totalInterest;
-          rec.repasse -= totalInterest;
+        
+        // Aplicar taxa de juros adicional sobre (ganhos - IVA)
+        // Taxa base: 7% + juros de financiamento
+        if (totalFinancingInterestPercent > 0) {
+          const additionalInterest = rec.ganhosMenosIVA * (totalFinancingInterestPercent / 100);
+          rec.despesasAdm += additionalInterest;
+          rec.repasse -= additionalInterest;
+        }
+        
+        // Aplicar parcela do financiamento
+        if (totalInstallment > 0) {
+          rec.despesasAdm += totalInstallment;
+          rec.repasse -= totalInstallment;
         }
       });
     } catch (e) {
-      console.error('Erro ao ajustar registros com juros de financiamento:', e);
+      console.error('Erro ao ajustar registros com descontos de financiamento:', e);
     }
 
     return res.status(200).json(aggregation);
