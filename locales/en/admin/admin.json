@@ -4,6 +4,7 @@
     "requests": "Requests",
     "drivers": "Drivers",
     "control": "Control & Payments",
+    "financing": "Financing",
     "monitor": "Monitoring",
     "data": "Data",
     "users": "Users",
@@ -11,6 +12,7 @@
     "requests_desc": "Requests",
     "drivers_management": "Driver management",
     "weekly_control": "Weekly control",
+    "financing_management": "Financing management",
     "tracking": "Tracking",
     "weekly_data": "Weekly data",
     "user_management": "User management"

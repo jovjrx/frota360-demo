@@ -4,6 +4,7 @@
     "requests": "Solicitações",
     "drivers": "Motoristas",
     "control": "Controle & Pagamentos",
+    "financing": "Financiamentos",
     "monitor": "Monitoramento",
     "data": "Dados",
     "users": "Usuários",
@@ -11,6 +12,7 @@
     "requests_desc": "Solicitações",
     "drivers_management": "Gestão de motoristas",
     "weekly_control": "Controle semanal",
+    "financing_management": "Gestão de financiamentos",
     "tracking": "Rastreamento",
     "weekly_data": "Dados semanais",
     "user_management": "Gerenciamento de usuários"

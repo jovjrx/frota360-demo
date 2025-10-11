@@ -26,8 +26,15 @@ import {
   Tooltip,
   Textarea,
   useDisclosure,
+  Grid,
+  GridItem,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Divider,
 } from '@chakra-ui/react';
-import { FiDollarSign, FiPlus, FiUpload, FiDownload, FiFileText } from 'react-icons/fi';
+import { FiDollarSign, FiPlus, FiUpload, FiDownload, FiFileText, FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle } from 'react-icons/fi';
 import FinancingProofUpload from '@/components/admin/FinancingProofUpload';
 import useSWR, { SWRConfig } from 'swr';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
@@ -78,17 +85,46 @@ function AdminFinancingPageContent({
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
 
+  // ✅ Calcular estatísticas
+  const stats = useMemo(() => {
+    const total = financing.length;
+    const active = financing.filter(f => f.status === 'active').length;
+    const completed = financing.filter(f => f.status === 'completed').length;
+    const withProof = financing.filter(f => f.proofUrl).length;
+    const withoutProof = total - withProof;
+    
+    const totalAmount = financing.reduce((sum, f) => sum + (f.amount || 0), 0);
+    const activeAmount = financing
+      .filter(f => f.status === 'active')
+      .reduce((sum, f) => sum + (f.amount || 0), 0);
+    
+    const loans = financing.filter(f => f.type === 'loan').length;
+    const discounts = financing.filter(f => f.type === 'discount').length;
+
+    return {
+      total,
+      active,
+      completed,
+      withProof,
+      withoutProof,
+      totalAmount,
+      activeAmount,
+      loans,
+      discounts,
+    };
+  }, [financing]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!driverId) {
-      toast({ title: tc('error', 'Erro'), description: 'Selecione o motorista', status: 'error' });
+      toast({ title: tc('error', 'Erro'), description: t('financing.errors.selectDriver', 'Selecione o motorista'), status: 'error' });
       return;
     }
     const parsedAmount = parseFloat(amount) || 0;
     const parsedWeeks = weeks ? parseInt(weeks, 10) : null;
     const parsedInterest = weeklyInterest ? parseFloat(weeklyInterest) : 0;
     if (type === 'loan' && (!parsedWeeks || parsedWeeks <= 0)) {
-      toast({ title: tc('error', 'Erro'), description: 'Informe o número de semanas', status: 'error' });
+      toast({ title: tc('error', 'Erro'), description: t('financing.errors.weeksRequired', 'Informe o número de semanas'), status: 'error' });
       return;
     }
     setLoading(true);
@@ -110,7 +146,7 @@ function AdminFinancingPageContent({
       
       toast({ 
         title: tc('success', 'Sucesso'), 
-        description: 'Financiamento criado com sucesso!', 
+        description: t('financing.success.created', 'Financiamento criado com sucesso!'), 
         status: 'success',
         duration: 3000,
       });
@@ -126,7 +162,7 @@ function AdminFinancingPageContent({
       // Perguntar se quer anexar comprovante (opcional)
       if (json.id) {
         setTimeout(() => {
-          if (window.confirm('Deseja anexar o comprovante de pagamento agora?')) {
+          if (window.confirm(t('financing.confirm.attachProof', 'Deseja anexar o comprovante de pagamento agora?'))) {
             setSelectedFinancingId(json.id);
             onUploadOpen();
           }
@@ -141,17 +177,17 @@ function AdminFinancingPageContent({
 
   const getTypeBadge = (type: string) => {
     return type === 'loan' ? (
-      <Badge colorScheme="blue">Empréstimo</Badge>
+      <Badge colorScheme="blue">{t('financing.type.loan', 'Empréstimo')}</Badge>
     ) : (
-      <Badge colorScheme="purple">Desconto</Badge>
+      <Badge colorScheme="purple">{t('financing.type.discount', 'Desconto')}</Badge>
     );
   };
 
   const getStatusBadge = (status: string) => {
     return status === 'active' ? (
-      <Badge colorScheme="green">Ativo</Badge>
+      <Badge colorScheme="green">{tc('status.active', 'Ativo')}</Badge>
     ) : (
-      <Badge colorScheme="gray">Completo</Badge>
+      <Badge colorScheme="gray">{tc('status.completed', 'Completo')}</Badge>
     );
   };
 
@@ -164,74 +200,208 @@ function AdminFinancingPageContent({
       ]}
       translations={translations}
       side={
-        <Button
-          leftIcon={<Icon as={FiPlus} />}
-          colorScheme="blue"
-          size="sm"
-          onClick={() => router.push('/admin/financing/requests')}
-        >
-          {t('financing.viewRequests', 'Ver Solicitações')}
-        </Button>
+        <HStack spacing={3}>
+          <Button
+            leftIcon={<Icon as={FiPlus} />}
+            colorScheme="blue"
+            size="sm"
+            onClick={() => {
+              // Scroll para o formulário
+              document.getElementById('create-financing-form')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            {t('financing.create.new', 'Novo Financiamento')}
+          </Button>
+          <Button
+            leftIcon={<Icon as={FiAlertCircle} />}
+            colorScheme="orange"
+            size="sm"
+            variant="outline"
+            onClick={() => router.push('/admin/financing/requests')}
+          >
+            {t('financing.viewRequests', 'Ver Solicitações')}
+          </Button>
+        </HStack>
       }
     >
       <VStack spacing={6} align="stretch">
-        <Card>
-          <CardBody>
-            <Box as="form" onSubmit={handleSubmit}>
-              <Heading size="sm" mb={4}>
-                <Icon as={FiDollarSign} mr={2} />
-                {t('financing.create.title', 'Criar Financiamento/Desconto')}
-              </Heading>
-              <HStack spacing={4} align="flex-end" wrap="wrap">
-                <FormControl isRequired flex="1" minW="200px">
-                  <FormLabel>{t('financing.form.driver', 'Motorista')}</FormLabel>
-                  <Select placeholder={tc('select', 'Selecione')} value={driverId} onChange={(e) => setDriverId(e.target.value)}>
-                    {initialDrivers.map((d) => (
-                      <option key={d.id} value={d.id}>{d.fullName || d.name}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl isRequired minW="150px">
-                  <FormLabel>{t('financing.form.type', 'Tipo')}</FormLabel>
-                  <Select value={type} onChange={(e) => setType(e.target.value)}>
-                    <option value="loan">{t('financing.type.loan', 'Empréstimo')}</option>
-                    <option value="discount">{t('financing.type.discount', 'Desconto')}</option>
-                  </Select>
-                </FormControl>
-                <FormControl isRequired minW="150px">
-                  <FormLabel>{t('financing.form.amount', 'Valor (€)')}</FormLabel>
-                  <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                </FormControl>
-                {type === 'loan' && (
-                  <FormControl isRequired minW="120px">
-                    <FormLabel>{t('financing.form.weeks', 'Semanas')}</FormLabel>
-                    <Input type="number" value={weeks} onChange={(e) => setWeeks(e.target.value)} />
-                  </FormControl>
-                )}
-                <FormControl minW="150px">
-                  <FormLabel>{t('financing.form.interest', 'Juros/semana (€)')}</FormLabel>
-                  <Input type="number" step="0.01" value={weeklyInterest} onChange={(e) => setWeeklyInterest(e.target.value)} />
-                </FormControl>
-              </HStack>
-              <FormControl mt={4}>
-                <FormLabel>{t('financing.form.notes', 'Observações (opcional)')}</FormLabel>
-                <Textarea 
-                  value={notes} 
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Informações adicionais sobre o financiamento..."
-                  rows={2}
-                />
-              </FormControl>
-              <Button type="submit" colorScheme="blue" isLoading={loading} mt={4}>
-                {tc('create', 'Criar')}
-              </Button>
-            </Box>
-          </CardBody>
-        </Card>
+        {/* ✅ Estatísticas */}
+        <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap={4}>
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiTrendingUp} mr={2} />
+                    {t('financing.stats.total', 'Total')}
+                  </StatLabel>
+                  <StatNumber>{stats.total}</StatNumber>
+                  <StatHelpText>{t('financing.stats.totalDesc', 'Financiamentos')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiClock} mr={2} />
+                    {t('financing.stats.active', 'Ativos')}
+                  </StatLabel>
+                  <StatNumber color="blue.500">{stats.active}</StatNumber>
+                  <StatHelpText>€{stats.activeAmount.toFixed(2)}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiCheckCircle} mr={2} />
+                    {t('financing.stats.completed', 'Completos')}
+                  </StatLabel>
+                  <StatNumber color="green.500">{stats.completed}</StatNumber>
+                  <StatHelpText>{t('financing.stats.completedDesc', 'Finalizados')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiFileText} mr={2} />
+                    {t('financing.stats.withProof', 'Com Comprovante')}
+                  </StatLabel>
+                  <StatNumber color="purple.500">{stats.withProof}</StatNumber>
+                  <StatHelpText>{t('financing.stats.withoutProof', 'Sem:')} {stats.withoutProof}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
 
+        <Divider />
+
+        {/* ✅ Layout em duas colunas */}
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+          {/* Coluna Esquerda: Criar Financiamento */}
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Box as="form" onSubmit={handleSubmit} id="create-financing-form">
+                  <Heading size="sm" mb={4} display="flex" alignItems="center">
+                    <Icon as={FiPlus} mr={2} />
+                    {t('financing.create.title', 'Criar Financiamento')}
+                  </Heading>
+                  
+                  <VStack spacing={4} align="stretch">
+                    <FormControl isRequired>
+                      <FormLabel>{t('financing.form.driver', 'Motorista')}</FormLabel>
+                      <Select placeholder={tc('select', 'Selecione')} value={driverId} onChange={(e) => setDriverId(e.target.value)}>
+                        {initialDrivers.map((d) => (
+                          <option key={d.id} value={d.id}>{d.fullName || d.name}</option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <HStack spacing={4}>
+                      <FormControl isRequired flex="1">
+                        <FormLabel>{t('financing.form.type', 'Tipo')}</FormLabel>
+                        <Select value={type} onChange={(e) => setType(e.target.value)}>
+                          <option value="loan">{t('financing.type.loan', 'Empréstimo')}</option>
+                          <option value="discount">{t('financing.type.discount', 'Desconto')}</option>
+                        </Select>
+                      </FormControl>
+                      
+                      <FormControl isRequired flex="1">
+                        <FormLabel>{t('financing.form.amount', 'Valor (€)')}</FormLabel>
+                        <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                      </FormControl>
+                    </HStack>
+                    
+                    {type === 'loan' && (
+                      <HStack spacing={4}>
+                        <FormControl isRequired flex="1">
+                          <FormLabel>{t('financing.form.weeks', 'Semanas')}</FormLabel>
+                          <Input type="number" value={weeks} onChange={(e) => setWeeks(e.target.value)} />
+                        </FormControl>
+                        
+                        <FormControl flex="1">
+                          <FormLabel>{t('financing.form.interest', 'Juros/sem (€)')}</FormLabel>
+                          <Input type="number" step="0.01" value={weeklyInterest} onChange={(e) => setWeeklyInterest(e.target.value)} />
+                        </FormControl>
+                      </HStack>
+                    )}
+                    
+                    <FormControl>
+                      <FormLabel>{t('financing.form.notes', 'Observações (opcional)')}</FormLabel>
+                      <Textarea 
+                        value={notes} 
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder={t('financing.form.notesPlaceholder', 'Informações adicionais...')}
+                        rows={3}
+                      />
+                    </FormControl>
+                    
+                    <Button type="submit" colorScheme="blue" isLoading={loading} size="lg">
+                      {tc('create', 'Criar')}
+                    </Button>
+                  </VStack>
+                </Box>
+              </CardBody>
+            </Card>
+          </GridItem>
+
+          {/* Coluna Direita: Solicitações Pendentes */}
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Heading size="sm" mb={4} display="flex" alignItems="center">
+                  <Icon as={FiAlertCircle} mr={2} />
+                  {t('financing.requests.title', 'Solicitações Pendentes')}
+                </Heading>
+                
+                <VStack spacing={3} align="stretch">
+                  <Text color="gray.600" fontSize="sm">
+                    {t('financing.requests.description', 'Motoristas que solicitaram financiamento e aguardam aprovação.')}
+                  </Text>
+                  
+                  <Button
+                    leftIcon={<Icon as={FiAlertCircle} />}
+                    colorScheme="orange"
+                    variant="outline"
+                    onClick={() => router.push('/admin/financing/requests')}
+                  >
+                    {t('financing.requests.viewAll', 'Ver Todas as Solicitações')}
+                  </Button>
+                  
+                  <Box p={4} bg="orange.50" borderRadius="md" borderLeft="4px" borderLeftColor="orange.400">
+                    <Text fontSize="sm" color="orange.700">
+                      {t('financing.requests.reminder', 'Lembre-se de revisar e aprovar/rejeitar as solicitações pendentes para manter o fluxo ativo.')}
+                    </Text>
+                  </Box>
+                </VStack>
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
+
+        {/* ✅ Financiamentos Existentes - Tabela Completa */}
         <Card>
           <CardBody>
-            <Heading size="sm" mb={4}>{t('financing.list.title', 'Financiamentos Existentes')}</Heading>
+            <Heading size="sm" mb={4} display="flex" alignItems="center">
+              <Icon as={FiDollarSign} mr={2} />
+              {t('financing.list.title', 'Financiamentos Existentes')}
+            </Heading>
+            
             {financing.length === 0 ? (
               <Text color="gray.500">{t('financing.list.empty', 'Nenhum financiamento encontrado.')}</Text>
             ) : (
@@ -269,9 +439,9 @@ function AdminFinancingPageContent({
                             <HStack spacing={2}>
                               {fin.proofUrl ? (
                                 <>
-                                  <Tooltip label="Baixar comprovante">
+                                  <Tooltip label={t('financing.actions.downloadProof', 'Baixar comprovante')}>
                                     <IconButton
-                                      aria-label="Baixar comprovante"
+                                      aria-label={t('financing.actions.downloadProof', 'Baixar comprovante')}
                                       icon={<Icon as={FiDownload} />}
                                       size="sm"
                                       colorScheme="green"
@@ -283,11 +453,11 @@ function AdminFinancingPageContent({
                                   </Tooltip>
                                   <Badge colorScheme="green" fontSize="xs">
                                     <Icon as={FiFileText} mr={1} />
-                                    Anexado
+                                    {t('financing.status.attached', 'Anexado')}
                                   </Badge>
                                 </>
                               ) : (
-                                <Tooltip label="Anexar comprovante">
+                                <Tooltip label={t('financing.actions.attachProof', 'Anexar comprovante')}>
                                   <Button
                                     size="sm"
                                     leftIcon={<Icon as={FiUpload} />}
@@ -298,7 +468,7 @@ function AdminFinancingPageContent({
                                       onUploadOpen();
                                     }}
                                   >
-                                    Anexar
+                                    {t('financing.actions.attach', 'Anexar')}
                                   </Button>
                                 </Tooltip>
                               )}
@@ -324,7 +494,7 @@ function AdminFinancingPageContent({
           onUploadSuccess={() => {
             mutate();
             toast({
-              title: 'Comprovante anexado!',
+              title: t('financing.success.proofAttached', 'Comprovante anexado!'),
               status: 'success',
             });
           }}
