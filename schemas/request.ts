@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 export const requestSchema = z.object({
-  firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  lastName: z.string().min(2, 'Apelido deve ter pelo menos 2 caracteres'),
+  fullName: z.string().min(3, 'Nome completo deve ter pelo menos 3 caracteres'),
+  birthDate: z.string().min(1, 'Data de nascimento é obrigatória'),
   email: z.string().email('Email inválido'),
   phone: z.string().min(9, 'Telefone deve ter pelo menos 9 dígitos'),
   city: z.string().min(2, 'Cidade deve ter pelo menos 2 caracteres'),
+  nif: z.string().length(9, 'NIF deve ter 9 dígitos'),
+  licenseNumber: z.string().optional(),
   driverType: z.enum(['affiliate', 'renter'], {
     message: 'Tipo de motorista é obrigatório',
   }),

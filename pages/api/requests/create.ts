@@ -20,10 +20,13 @@ export default async function handler(
 
     // Converter para formato do admin (driver_requests)
     const requestData = {
-      fullName: `${validatedData.firstName} ${validatedData.lastName}`,
+      fullName: validatedData.fullName,
+      birthDate: validatedData.birthDate,
       email: validatedData.email,
       phone: validatedData.phone,
       city: validatedData.city,
+      nif: validatedData.nif,
+      licenseNumber: validatedData.licenseNumber || null,
       type: validatedData.driverType, // Converter driverType → type
       vehicle: validatedData.vehicle || null,
       status: 'pending',
@@ -52,9 +55,12 @@ export default async function handler(
 🚗 Nova Candidatura de Motorista
 
 Nome: ${requestData.fullName}
+Data de Nascimento: ${new Date(requestData.birthDate).toLocaleDateString('pt-PT')}
 Email: ${requestData.email}
 Telefone: ${requestData.phone}
 Cidade: ${requestData.city}
+NIF: ${requestData.nif}
+${requestData.licenseNumber ? `Carta de Condução: ${requestData.licenseNumber}` : ''}
 Tipo: ${requestData.type === 'affiliate' ? 'Afiliado (veículo próprio)' : 'Locatário (aluguer de veículo)'}
 
 ${validatedData.vehicle ? `
