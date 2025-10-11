@@ -99,7 +99,37 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
           delayBox={0.8}
         />
       </Hero>
+
+      {/* Seção de Benefícios */}
       <Container>
+        <Title
+          title={t(HOME.BENEFITS.TITLE)}
+          description={t(HOME.BENEFITS.SUBTITLE)}
+          feature={t(HOME.BENEFITS.FEATURE)}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
+          {(() => {
+            const benefits = t(HOME.BENEFITS.ITEMS);
+            if (!Array.isArray(benefits)) return null;
+
+            return benefits.map((benefit: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <Text fontSize="xl" fontWeight="bold" color="green.600">
+                    {benefit.title}
+                  </Text>
+                  <Text color="gray.600" flex="1">
+                    {benefit.description}
+                  </Text>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Como Funciona */}
+      <Container softBg>
         <Title
           title={t(HOME.HOW_IT_WORKS.TITLE)}
           description={t(HOME.HOW_IT_WORKS.SUBTITLE)}

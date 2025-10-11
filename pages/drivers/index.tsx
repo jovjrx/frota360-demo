@@ -134,7 +134,192 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
         </ContainerDivisions>
       </Container>
 
+      {/* Seção de Explicação de Ganhos */}
       <Container softBg>
+        <Title
+          title={pageT(SERVICES.EARNINGS.TITLE) as string}
+          description={pageT(SERVICES.EARNINGS.SUBTITLE) as string}
+          feature={pageT(SERVICES.EARNINGS.FEATURE) as string}
+        />
+        <Card
+          title={pageT(SERVICES.EARNINGS.CARD.TITLE) as string}
+          description={pageT(SERVICES.EARNINGS.CARD.DESCRIPTION) as string}
+          animated
+          borded
+        >
+          <VStack spacing={3} align="stretch">
+            {(() => {
+              const items = pageT(SERVICES.EARNINGS.CARD.ITEMS);
+              if (!Array.isArray(items)) return null;
+
+              return items.map((item: any, index: number) => (
+                <HStack key={index} spacing={3} align="start" p={3} bg={index % 2 === 0 ? 'gray.50' : 'white'} borderRadius="md">
+                  <Box w="2px" h="full" bg={item.label.startsWith('-') ? 'red.400' : item.label.startsWith('=') ? 'green.500' : 'blue.400'} />
+                  <VStack align="start" spacing={1} flex="1">
+                    <Text fontWeight="bold" color={item.label.startsWith('=') ? 'green.600' : 'gray.800'}>
+                      {item.label}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {item.description}
+                    </Text>
+                  </VStack>
+                </HStack>
+              ));
+            })()}
+          </VStack>
+        </Card>
+      </Container>
+
+      {/* Seção de Financiamento */}
+      <Container>
+        <Title
+          title={pageT(SERVICES.FINANCING.TITLE) as string}
+          description={pageT(SERVICES.FINANCING.SUBTITLE) as string}
+          feature={pageT(SERVICES.FINANCING.FEATURE) as string}
+        />
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
+          <Card
+            title={pageT(SERVICES.FINANCING.CARD.TITLE) as string}
+            description={pageT(SERVICES.FINANCING.CARD.DESCRIPTION) as string}
+            animated
+            borded
+          >
+            <VStack spacing={4} align="stretch">
+              <Box p={4} bg="orange.50" borderRadius="md" borderLeft="4px" borderLeftColor="orange.400">
+                <Text fontSize="sm" color="orange.800" fontWeight="semibold">
+                  {pageT(SERVICES.FINANCING.CARD.ALERT) as string}
+                </Text>
+              </Box>
+
+              <Box>
+                <Text fontWeight="semibold" color="green.600" mb={3}>
+                  Benefícios:
+                </Text>
+                <VStack spacing={2} align="stretch">
+                  {(() => {
+                    const benefits = pageT(SERVICES.FINANCING.CARD.BENEFITS);
+                    if (!Array.isArray(benefits)) return null;
+
+                    return benefits.map((benefit, index) => (
+                      <HStack key={index} spacing={3}>
+                        <Icon as={FaCheckCircle} color="green.500" />
+                        <Text fontSize="sm">{benefit}</Text>
+                      </HStack>
+                    ));
+                  })()}
+                </VStack>
+              </Box>
+            </VStack>
+          </Card>
+
+          <Card animated borded>
+            <VStack spacing={4} align="stretch">
+              <Text fontSize="lg" fontWeight="bold" color="blue.600">
+                {pageT(SERVICES.FINANCING.CARD.EXAMPLE.TITLE) as string}
+              </Text>
+              <Text fontSize="sm" color="gray.700" fontStyle="italic">
+                {pageT(SERVICES.FINANCING.CARD.EXAMPLE.SCENARIO) as string}
+              </Text>
+              
+              <VStack spacing={2} align="stretch" mt={2}>
+                {(() => {
+                  const details = pageT(SERVICES.FINANCING.CARD.EXAMPLE.DETAILS);
+                  if (!Array.isArray(details)) return null;
+
+                  return details.map((detail, index) => (
+                    <HStack key={index} spacing={2}>
+                      <Box w={2} h={2} bg="blue.400" borderRadius="full" />
+                      <Text fontSize="sm" color="gray.700">{detail}</Text>
+                    </HStack>
+                  ));
+                })()}
+              </VStack>
+            </VStack>
+          </Card>
+        </ContainerDivisions>
+      </Container>
+
+      {/* Seção de Requisitos e Documentos */}
+      <Container softBg>
+        <Title
+          title={pageT(SERVICES.REQUIREMENTS.TITLE) as string}
+          description={pageT(SERVICES.REQUIREMENTS.SUBTITLE) as string}
+          feature={pageT(SERVICES.REQUIREMENTS.FEATURE) as string}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
+          {/* Documentos Necessários */}
+          <Card
+            title={pageT(SERVICES.REQUIREMENTS.DOCUMENTS.TITLE) as string}
+            animated
+            borded
+          >
+            <VStack spacing={2} align="stretch">
+              {(() => {
+                const documents = pageT(SERVICES.REQUIREMENTS.DOCUMENTS.ITEMS);
+                if (!Array.isArray(documents)) return null;
+
+                return documents.map((doc, index) => (
+                  <HStack key={index} spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" />
+                    <Text fontSize="sm">{doc}</Text>
+                  </HStack>
+                ));
+              })()}
+            </VStack>
+          </Card>
+
+          {/* Conexão com Plataformas */}
+          <Card
+            title={pageT(SERVICES.REQUIREMENTS.INTEGRATIONS.TITLE) as string}
+            description={pageT(SERVICES.REQUIREMENTS.INTEGRATIONS.DESCRIPTION) as string}
+            animated
+            borded
+          >
+            <VStack spacing={3} align="stretch">
+              {(() => {
+                const integrations = pageT(SERVICES.REQUIREMENTS.INTEGRATIONS.ITEMS);
+                if (!Array.isArray(integrations)) return null;
+
+                return integrations.map((integration: any, index) => (
+                  <Box key={index} p={3} bg="blue.50" borderRadius="md">
+                    <Text fontSize="sm" fontWeight="bold" color="blue.700">
+                      {integration.platform}
+                    </Text>
+                    <Text fontSize="xs" color="gray.600">
+                      {integration.requirement}
+                    </Text>
+                  </Box>
+                ));
+              })()}
+            </VStack>
+          </Card>
+
+          {/* Dados Bancários */}
+          <Card
+            title={pageT(SERVICES.REQUIREMENTS.BANKING.TITLE) as string}
+            description={pageT(SERVICES.REQUIREMENTS.BANKING.DESCRIPTION) as string}
+            animated
+            borded
+          >
+            <VStack spacing={2} align="stretch">
+              {(() => {
+                const banking = pageT(SERVICES.REQUIREMENTS.BANKING.ITEMS);
+                if (!Array.isArray(banking)) return null;
+
+                return banking.map((item, index) => (
+                  <HStack key={index} spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" />
+                    <Text fontSize="sm">{item}</Text>
+                  </HStack>
+                ));
+              })()}
+            </VStack>
+          </Card>
+        </ContainerDivisions>
+      </Container>
+
+      {/* Suporte */}
+      <Container>
         <Title
           title={pageT(SERVICES.SUPPORT.TITLE) as string}
           description={pageT(SERVICES.SUPPORT.SUBTITLE) as string}

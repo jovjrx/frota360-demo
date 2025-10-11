@@ -11,6 +11,12 @@ export const HOME = {
       DESCRIPTION: 'hero.highlight.description',
     },
   },
+  BENEFITS: {
+    TITLE: 'benefits.title',
+    SUBTITLE: 'benefits.subtitle',
+    FEATURE: 'benefits.feature',
+    ITEMS: 'benefits.items',
+  },
   HOW_IT_WORKS: {
     TITLE: 'howItWorks.title',
     SUBTITLE: 'howItWorks.subtitle',

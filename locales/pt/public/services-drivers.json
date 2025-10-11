@@ -25,6 +25,7 @@
           "Portal do motorista intuitivo",
           "Compliance TVDE garantido",
           "Pagamentos semanais pontuais",
+          "Empréstimos para capital de giro",
           "Formação contínua gratuita",
           "Seguro e proteção incluídos"
         ]
@@ -210,6 +211,121 @@
     "title": "Suporte Sempre Disponível",
     "subtitle": "Equipa dedicada para o seu sucesso",
     "feature": "SUPORTE"
+  },
+  "earnings": {
+    "title": "Como Funciona o Pagamento Semanal",
+    "subtitle": "Transparência total nos seus ganhos",
+    "feature": "CÁLCULO",
+    "card": {
+      "title": "Cálculo do Repasse Semanal",
+      "description": "Entenda exatamente como calculamos o seu pagamento",
+      "items": [
+        {
+          "label": "Ganhos Brutos",
+          "description": "Soma de todos os ganhos da semana (Uber + Bolt + outras plataformas)"
+        },
+        {
+          "label": "- IVA (6%)",
+          "description": "Imposto sobre valor acrescentado retido para declaração fiscal"
+        },
+        {
+          "label": "- Taxa Administrativa (7%)",
+          "description": "Gestão, suporte, compliance e tecnologia"
+        },
+        {
+          "label": "- Combustível",
+          "description": "Abastecimentos registados no MyPrio (apenas locatários)"
+        },
+        {
+          "label": "- Portagens",
+          "description": "Custos de ViaVerde (apenas locatários)"
+        },
+        {
+          "label": "- Aluguel",
+          "description": "Valor semanal do aluguel do veículo (apenas locatários)"
+        },
+        {
+          "label": "- Parcela de Empréstimo",
+          "description": "Se tiver empréstimo ativo, parcela semanal + juros são descontados"
+        },
+        {
+          "label": "= Repasse Líquido",
+          "description": "Valor transferido para a sua conta bancária toda sexta-feira"
+        }
+      ]
+    }
+  },
+  "financing": {
+    "title": "Empréstimos para Capital de Giro",
+    "subtitle": "Dinheiro rápido para suas necessidades operacionais ou pessoais",
+    "feature": "FINANCIAMENTO",
+    "card": {
+      "title": "Como Funciona o Empréstimo",
+      "description": "Solicite empréstimos diretamente pela plataforma sem burocracia",
+      "alert": "⚠️ Este empréstimo é exclusivo para despesas operacionais ou pessoais, NÃO para compra de veículos.",
+      "benefits": [
+        "Aprovação em até 24 horas",
+        "Sem consulta ao Serasa ou bureaus de crédito",
+        "Parcelas descontadas automaticamente do repasse semanal",
+        "Taxa de juros competitiva e transparente",
+        "Sem taxas ocultas ou surpresas"
+      ],
+      "example": {
+        "title": "Exemplo Prático:",
+        "scenario": "Empréstimo de €600 em 5 semanas com 4% de juros",
+        "details": [
+          "Parcela semanal: €120",
+          "Juros semanal: 4% adicional sobre ganhos",
+          "Total a pagar: €600 + juros calculados sobre ganhos",
+          "Após 5 semanas: empréstimo quitado automaticamente"
+        ]
+      }
+    }
+  },
+  "requirements": {
+    "title": "Requisitos e Documentos",
+    "subtitle": "Tudo o que precisa para começar",
+    "feature": "REQUISITOS",
+    "documents": {
+      "title": "Documentos Necessários",
+      "items": [
+        "Cartão de Cidadão (CC) válido",
+        "Número de Identificação Fiscal (NIF)",
+        "Carta de Condução válida",
+        "Certificado TVDE (ajudamos a obter se não tiver)",
+        "IBAN para recebimento de pagamentos"
+      ]
+    },
+    "integrations": {
+      "title": "Conexão com Plataformas",
+      "description": "Como conectar suas contas para importação automática de dados",
+      "items": [
+        {
+          "platform": "Uber",
+          "requirement": "UUID do motorista (fornecido pela Uber)"
+        },
+        {
+          "platform": "Bolt",
+          "requirement": "Email associado à conta Bolt"
+        },
+        {
+          "platform": "MyPrio",
+          "requirement": "Número do cartão de abastecimento"
+        },
+        {
+          "platform": "ViaVerde",
+          "requirement": "Matrícula do veículo vinculada"
+        }
+      ]
+    },
+    "banking": {
+      "title": "Dados Bancários",
+      "description": "Para receber seus pagamentos semanais",
+      "items": [
+        "IBAN da conta bancária em seu nome",
+        "Nome completo do titular (deve coincidir com documentos)"
+      ]
+    }
   },
   "cta": {
     "title": "Pronto para Fazer Parte?",

@@ -25,6 +25,7 @@
           "Intuitive driver portal",
           "TVDE compliance guaranteed",
           "On‑time weekly payouts",
+          "Working capital loans available",
           "Free ongoing training",
           "Insurance and protection included"
         ]
@@ -194,6 +195,121 @@
     "title": "Support Always Available",
     "subtitle": "A dedicated team for your success",
     "feature": "SUPPORT"
+  },
+  "earnings": {
+    "title": "How Weekly Payment Works",
+    "subtitle": "Total transparency in your earnings",
+    "feature": "CALCULATION",
+    "card": {
+      "title": "Weekly Payout Calculation",
+      "description": "Understand exactly how we calculate your payment",
+      "items": [
+        {
+          "label": "Gross Earnings",
+          "description": "Sum of all week's earnings (Uber + Bolt + other platforms)"
+        },
+        {
+          "label": "- VAT (6%)",
+          "description": "Value added tax withheld for tax declaration"
+        },
+        {
+          "label": "- Administrative Fee (7%)",
+          "description": "Management, support, compliance and technology"
+        },
+        {
+          "label": "- Fuel",
+          "description": "MyPrio refueling costs (renters only)"
+        },
+        {
+          "label": "- Tolls",
+          "description": "ViaVerde costs (renters only)"
+        },
+        {
+          "label": "- Rental",
+          "description": "Weekly vehicle rental fee (renters only)"
+        },
+        {
+          "label": "- Loan Installment",
+          "description": "If you have an active loan, weekly installment + interest are deducted"
+        },
+        {
+          "label": "= Net Payout",
+          "description": "Amount transferred to your bank account every Friday"
+        }
+      ]
+    }
+  },
+  "financing": {
+    "title": "Working Capital Loans",
+    "subtitle": "Fast money for your operational or personal needs",
+    "feature": "FINANCING",
+    "card": {
+      "title": "How the Loan Works",
+      "description": "Request loans directly through the platform without bureaucracy",
+      "alert": "⚠️ This loan is exclusively for operational or personal expenses, NOT for vehicle purchase.",
+      "benefits": [
+        "Approval in up to 24 hours",
+        "No credit bureau checks",
+        "Installments automatically deducted from weekly payout",
+        "Competitive and transparent interest rate",
+        "No hidden fees or surprises"
+      ],
+      "example": {
+        "title": "Practical Example:",
+        "scenario": "€600 loan in 5 weeks with 4% interest",
+        "details": [
+          "Weekly installment: €120",
+          "Weekly interest: 4% additional on earnings",
+          "Total to pay: €600 + interest calculated on earnings",
+          "After 5 weeks: loan automatically paid off"
+        ]
+      }
+    }
+  },
+  "requirements": {
+    "title": "Requirements and Documents",
+    "subtitle": "Everything you need to get started",
+    "feature": "REQUIREMENTS",
+    "documents": {
+      "title": "Required Documents",
+      "items": [
+        "Valid Citizen Card (CC)",
+        "Tax Identification Number (NIF)",
+        "Valid Driver's License",
+        "TVDE Certificate (we help you get it if you don't have it)",
+        "IBAN for payment receipt"
+      ]
+    },
+    "integrations": {
+      "title": "Platform Connection",
+      "description": "How to connect your accounts for automatic data import",
+      "items": [
+        {
+          "platform": "Uber",
+          "requirement": "Driver UUID (provided by Uber)"
+        },
+        {
+          "platform": "Bolt",
+          "requirement": "Email associated with Bolt account"
+        },
+        {
+          "platform": "MyPrio",
+          "requirement": "Fuel card number"
+        },
+        {
+          "platform": "ViaVerde",
+          "requirement": "Vehicle license plate linked"
+        }
+      ]
+    },
+    "banking": {
+      "title": "Banking Details",
+      "description": "To receive your weekly payments",
+      "items": [
+        "Bank account IBAN in your name",
+        "Full name of account holder (must match documents)"
+      ]
+    }
   },
   "cta": {
     "title": "Ready to Join?",

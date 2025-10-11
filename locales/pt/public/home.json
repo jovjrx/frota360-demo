@@ -11,6 +11,29 @@
         "description": "Onboarding em dias, não semanas. Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
       }
     },
+    "benefits": {
+      "title": "O que oferecemos aos nossos motoristas",
+      "subtitle": "Ferramentas e suporte para maximizar os seus ganhos",
+      "feature": "BENEFÍCIOS",
+      "items": [
+        {
+          "title": "Gestão Financeira Completa",
+          "description": "Dashboard intuitivo com relatórios semanais detalhados dos seus ganhos, despesas e repasses"
+        },
+        {
+          "title": "Empréstimos para Capital de Giro",
+          "description": "Precisa de dinheiro para despesas operacionais ou pessoais? Solicite empréstimos rápidos diretamente pela plataforma"
+        },
+        {
+          "title": "Pagamentos Semanais Garantidos",
+          "description": "Receba os seus repasses todas as semanas com total transparência e pontualidade"
+        },
+        {
+          "title": "Suporte Especializado TVDE",
+          "description": "Equipe dedicada que conhece a realidade do setor e está sempre disponível para ajudar"
+        }
+      ]
+    },
     "services": {
       "title": "Tipos de Motorista",
       "subtitle": "Escolha o modelo que melhor se adapta à sua situação",
@@ -53,7 +76,7 @@
         {
           "number": "3",
           "title": "Comece a faturar",
-          "description": "Monitorização em tempo real e pagamentos claros"
+          "description": "Pagamentos semanais, monitorização em tempo real e acesso a empréstimos para capital de giro"
         }
       ]
     },
@@ -75,6 +98,10 @@
         {
           "title": "Crescimento Garantido",
           "description": "Ajudamos a maximizar os seus ganhos"
+        },
+        {
+          "title": "Financiamento Rápido",
+          "description": "Empréstimos aprovados em até 24h para suas despesas operacionais"
         }
       ]
     },
