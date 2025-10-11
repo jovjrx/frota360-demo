@@ -230,9 +230,8 @@ export default function FinancingModal({
                   value={formData.weeks || ''}
                   onChange={(valueString, valueNumber) => handleChange('weeks', valueNumber || null)}
                   min={1}
-                  placeholder={t('financing.form.weeks.placeholder', 'Opcional')}
                 >
-                  <NumberInputField />
+                  <NumberInputField placeholder={t('financing.form.weeks.placeholder', 'Opcional')} />
                   <NumberInputStepper>
                     <NumberIncrementStepper />
                     <NumberDecrementStepper />
