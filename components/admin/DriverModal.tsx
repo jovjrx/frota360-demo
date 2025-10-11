@@ -87,7 +87,7 @@ interface DriverModalProps {
   isOpen: boolean;
   onClose: () => void;
   driver?: Driver | null;
-  onSave: (driverData: any) => Promise<void>;
+  onSave: (driverData: any) => Promise<any>;
   tCommon: any;
   tPage: any;
 }
@@ -146,7 +146,7 @@ export default function DriverModal({
           fullName: driver.fullName || driver.name || '',
           email: driver.email || '',
           phone: driver.phone || '',
-          type: driver.type || 'affiliate',
+          type: (driver.type as 'affiliate' | 'renter') || 'affiliate',
           status: driver.status || 'active',
           birthDate: driver.birthDate || '',
           city: driver.city || '',
