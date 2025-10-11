@@ -402,7 +402,7 @@ function AdminFinancingPageContent({
                             transition="all 0.2s"
                             onClick={() => handleOpenDetails(fin)}
                           >
-                            <VStack align="start" spacing={2}>
+                            <VStack align="start" spacing={2} w="full">
                               <HStack justify="space-between" w="full">
                                 <VStack align="start" spacing={0}>
                                   <Text fontWeight="bold">{driver ? (driver.fullName || driver.name) : fin.driverId}</Text>
@@ -416,10 +416,54 @@ function AdminFinancingPageContent({
                                   </HStack>
                                 </VStack>
                                 <VStack align="end" spacing={0}>
-                                  <Text fontWeight="bold" color="blue.600">€{(fin.amount || 0).toFixed(2)}</Text>
-                                  {fin.weeks && <Text fontSize="xs" color="gray.600">{fin.remainingWeeks || 0}/{fin.weeks} sem.</Text>}
+                                  <Text fontWeight="bold" color="blue.600" fontSize="lg">€{(fin.amount || 0).toFixed(2)}</Text>
+                                  {fin.weeklyInterest > 0 && (
+                                    <Text fontSize="xs" color="orange.600">+{fin.weeklyInterest}% juros</Text>
+                                  )}
                                 </VStack>
                               </HStack>
+                              
+                              {/* Barra de progresso e info adicional */}
+                              {fin.weeks && fin.type === 'loan' && (
+                                <VStack align="stretch" spacing={1} w="full">
+                                  <HStack justify="space-between" fontSize="xs" color="gray.600">
+                                    <Text>{fin.weeks - (fin.remainingWeeks || 0)} / {fin.weeks} semanas pagas</Text>
+                                    <Text fontWeight="bold">{fin.remainingWeeks || 0} restantes</Text>
+                                  </HStack>
+                                  <Box w="full" h="6px" bg="gray.200" borderRadius="full" overflow="hidden">
+                                    <Box
+                                      h="full"
+                                      bg={fin.remainingWeeks === 0 ? 'green.400' : 'blue.400'}
+                                      w={`${((fin.weeks - (fin.remainingWeeks || 0)) / fin.weeks) * 100}%`}
+                                      transition="width 0.3s"
+                                    />
+                                  </Box>
+                                  <HStack justify="space-between" fontSize="xs">
+                                    <Text color="gray.600">
+                                      Parcela: €{(fin.amount / fin.weeks).toFixed(2)}/sem
+                                    </Text>
+                                    {fin.proofUrl && (
+                                      <HStack spacing={1} color="green.600">
+                                        <Icon as={FiCheckCircle} boxSize={3} />
+                                        <Text>Comprovante</Text>
+                                      </HStack>
+                                    )}
+                                  </HStack>
+                                </VStack>
+                              )}
+                              
+                              {/* Para descontos, mostrar apenas se tem comprovante */}
+                              {fin.type === 'discount' && (
+                                <HStack w="full" justify="space-between" fontSize="xs">
+                                  <Text color="gray.600">Desconto único</Text>
+                                  {fin.proofUrl && (
+                                    <HStack spacing={1} color="green.600">
+                                      <Icon as={FiCheckCircle} boxSize={3} />
+                                      <Text>Comprovante</Text>
+                                    </HStack>
+                                  )}
+                                </HStack>
+                              )}
                             </VStack>
                           </Box>
                         );
@@ -580,9 +624,12 @@ function AdminFinancingPageContent({
                   </Box>
                   {selectedFinancing.weeks && (
                     <Box>
-                      <Text fontSize="sm" color="gray.600">{t('financing.details.weeks', 'Semanas')}</Text>
+                      <Text fontSize="sm" color="gray.600">{t('financing.details.weeks', 'Progresso')}</Text>
                       <Text fontWeight="bold" fontSize="lg">
-                        {selectedFinancing.remainingWeeks || 0} / {selectedFinancing.weeks}
+                        {selectedFinancing.weeks - (selectedFinancing.remainingWeeks || 0)} / {selectedFinancing.weeks} semanas pagas
+                      </Text>
+                      <Text fontSize="sm" color="gray.600" mt={1}>
+                        {selectedFinancing.remainingWeeks || 0} semanas restantes
                       </Text>
                     </Box>
                   )}
