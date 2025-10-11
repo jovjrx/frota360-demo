@@ -70,6 +70,10 @@ function AdminFinancingPageContent({
   const toast = useToast();
   const { data, mutate } = useSWR('/api/admin/financing', fetcher);
   const financing: any[] = data?.financing || initialFinancing || [];
+  
+  // Buscar solicitações pendentes
+  const { data: requestsData } = useSWR('/api/admin/financing/requests', fetcher);
+  const requests: any[] = requestsData?.requests || [];
 
   const [loading, setLoading] = useState(false);
   const [selectedFinancingId, setSelectedFinancingId] = useState<string | null>(null);
@@ -211,25 +215,14 @@ function AdminFinancingPageContent({
       ]}
       translations={translations}
       side={
-        <HStack spacing={3}>
-          <Button
-            leftIcon={<Icon as={FiPlus} />}
-            colorScheme="blue"
-            size="sm"
-            onClick={handleAddFinancing}
-          >
-            {t('financing.create.new', 'Novo Financiamento')}
-          </Button>
-          <Button
-            leftIcon={<Icon as={FiAlertCircle} />}
-            colorScheme="orange"
-            size="sm"
-            variant="outline"
-            onClick={() => router.push('/admin/financing/requests')}
-          >
-            {t('financing.viewRequests', 'Ver Solicitações')}
-          </Button>
-        </HStack>
+        <Button
+          leftIcon={<Icon as={FiPlus} />}
+          colorScheme="blue"
+          size="sm"
+          onClick={handleAddFinancing}
+        >
+          {t('financing.create.new', 'Novo Financiamento')}
+        </Button>
       }
     >
       <VStack spacing={6} align="stretch">
@@ -298,41 +291,70 @@ function AdminFinancingPageContent({
 
         <Divider />
 
-        {/* ✅ Layout em duas colunas */}
-        {/* Seção de Ações Rápidas */}
-        <Card>
-          <CardBody>
-            <VStack spacing={4} align="stretch">
-              <Heading size="md" display="flex" alignItems="center">
-                <Icon as={FiDollarSign} mr={2} />
-                {t('financing.quickActions.title', 'Ações Rápidas')}
-              </Heading>
-              
-              <HStack spacing={4} wrap="wrap">
-                <Button
-                  leftIcon={<Icon as={FiPlus} />}
-                  colorScheme="blue"
-                  onClick={handleAddFinancing}
-                >
-                  {t('financing.create.new', 'Novo Financiamento')}
-                </Button>
+        {/* ✅ Solicitações Pendentes (se houver) */}
+        {requests.length > 0 && (
+          <Card borderLeft="4px" borderLeftColor="orange.400">
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                <Heading size="md" display="flex" alignItems="center">
+                  <Icon as={FiAlertCircle} mr={2} color="orange.500" />
+                  {t('financing.requests.title', 'Solicitações Pendentes')}
+                  <Badge ml={2} colorScheme="orange">{requests.length}</Badge>
+                </Heading>
                 
-                <Button
-                  leftIcon={<Icon as={FiAlertCircle} />}
-                  colorScheme="orange"
-                  variant="outline"
-                  onClick={() => router.push('/admin/financing/requests')}
-                >
-                  {t('financing.requests.viewAll', 'Ver Solicitações')}
-                </Button>
-          </HStack>
-              
-              <Text color="gray.600" fontSize="sm">
-                {t('financing.quickActions.description', 'Crie novos financiamentos ou revise solicitações pendentes de motoristas.')}
-              </Text>
-            </VStack>
-          </CardBody>
-        </Card>
+                <Text color="gray.600" fontSize="sm">
+                  {t('financing.requests.description', 'Motoristas que solicitaram financiamento e aguardam aprovação.')}
+                </Text>
+
+                <VStack spacing={3} align="stretch">
+                  {requests.map((req: any) => {
+                    const driver = initialDrivers.find((d) => d.id === req.driverId);
+                    return (
+                      <Box
+                        key={req.id}
+                        p={4}
+                        bg="orange.50"
+                        borderRadius="md"
+                        borderWidth={1}
+                        borderColor="orange.200"
+                      >
+                        <HStack justify="space-between" wrap="wrap">
+                          <VStack align="start" spacing={1} flex="1">
+                            <Text fontWeight="bold">{driver ? (driver.fullName || driver.name) : req.driverId}</Text>
+                            <HStack spacing={2}>
+                              <Badge colorScheme={req.type === 'loan' ? 'blue' : 'purple'}>
+                                {req.type === 'loan' ? t('financing.type.loan', 'Empréstimo') : t('financing.type.discount', 'Desconto')}
+                              </Badge>
+                              <Text fontSize="sm" fontWeight="bold" color="orange.700">
+                                €{(req.amount || 0).toFixed(2)}
+                              </Text>
+                              {req.weeks && <Text fontSize="sm" color="gray.600">{req.weeks} semanas</Text>}
+                            </HStack>
+                            {req.reason && (
+                              <Text fontSize="sm" color="gray.600" mt={1}>
+                                {req.reason}
+                              </Text>
+                            )}
+                          </VStack>
+                          
+                          <HStack spacing={2}>
+                            <Button
+                              size="sm"
+                              colorScheme="orange"
+                              onClick={() => router.push('/admin/financing/requests')}
+                            >
+                              {t('financing.requests.review', 'Revisar')}
+                            </Button>
+                          </HStack>
+                        </HStack>
+                      </Box>
+                    );
+                  })}
+                </VStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        )}
 
         {/* ✅ Financiamentos Existentes - Tabela Completa */}
         <Card>
