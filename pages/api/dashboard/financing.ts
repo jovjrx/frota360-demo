@@ -16,9 +16,21 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
   }
   try {
     const db = getFirestore(firebaseAdmin);
+    
+    // Buscar o driver pelo user.id para pegar o driver.id correto
+    const driverSnapshot = await db.collection('drivers').where('userId', '==', user.id).limit(1).get();
+    
+    if (driverSnapshot.empty) {
+      return res.status(404).json({ success: false, error: 'Driver not found' });
+    }
+    
+    const driverId = driverSnapshot.docs[0].id;
+    
+    // Buscar financiamentos pelo driver.id
     const snapshot = await db
       .collection('financing')
-      .where('driverId', '==', user.id)
+      .where('driverId', '==', driverId)
+      .orderBy('createdAt', 'desc')
       .get();
     const financings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return res.status(200).json({ success: true, financings });
