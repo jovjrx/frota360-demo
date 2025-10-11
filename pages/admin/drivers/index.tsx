@@ -136,7 +136,7 @@ function DriversPageContent({
 }: DriversPageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
+  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers || []);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,7 +151,7 @@ function DriversPageContent({
     '/api/admin/requests?status=pending',
     fetcher
   );
-  const pendingRequests = requestsData?.requests || [];
+  const pendingRequests = requestsData?.requests || initialRequests || [];
   
   // Modais de aprovação/rejeição
   const [selectedRequest, setSelectedRequest] = useState<DriverRequest | null>(null);
@@ -871,15 +871,25 @@ export default function DriversPage(props: DriversPageProps) {
 
 // SSR com autenticação, traduções e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  // Carregar motoristas e solicitações diretamente do Firestore
-  const [drivers, requests] = await Promise.all([
-    getDrivers(),
-    getRequests({ status: 'pending', limit: 50 }),
-  ]);
+  try {
+    // Carregar motoristas e solicitações diretamente do Firestore
+    const [drivers, requests] = await Promise.all([
+      getDrivers(),
+      getRequests({ status: 'pending', limit: 50 }),
+    ]);
 
   return {
     initialDrivers: drivers,
-    initialRequests: requests,
-  };
+      initialRequests: requests || [], // Fallback para array vazio
+    };
+  } catch (error) {
+    console.error('Error loading drivers page data:', error);
+    
+    // Em caso de erro, retornar dados vazios ao invés de quebrar
+    return {
+      initialDrivers: [],
+      initialRequests: [],
+    };
+  }
 });
 
