@@ -6,6 +6,7 @@ import {
   FiMapPin,
   FiHelpCircle,
   FiBarChart,
+  FiDollarSign,
 } from 'react-icons/fi';
 
 export interface DashboardMenuItem {
@@ -38,6 +39,12 @@ export const dashboardMenuItems: DashboardMenuItem[] = [
     label: 'payslips', // Traduzido via t('menu.payslips')
     href: '/dashboard/payslips',
     icon: FiFileText,
+  },
+  {
+    id: 'financing',
+    label: 'financing', // Traduzido via t('menu.financing')
+    href: '/dashboard/financing',
+    icon: FiDollarSign,
   },
   {
     id: 'tracking',

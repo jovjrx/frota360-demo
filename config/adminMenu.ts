@@ -61,6 +61,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
     },
     {
+        id: 'financing',
+        label: 'financing', // Traduzido via t('menu.financing')
+        href: '/admin/financing',
+        icon: FiActivity,
+        description: 'financing_management', // Traduzido via t('menu.financing_management')
+        showInMainMenu: false, // Fica no dropdown "Mais"
+    },
+    {
         id: 'monitor',
         label: 'monitor', // Traduzido via t('menu.monitor')
         href: '/admin/monitor',

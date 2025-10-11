@@ -75,6 +75,27 @@ export default withIronSessionApiRoute(async function driverWeeklySummaryRoute(r
       }, platformData, { type: driverData.type, rentalFee: driverData.rentalFee });
     }
 
+    try {
+      // Adicionar juros de financiamentos ativos do motorista
+      const finSnap = await db
+        .collection('financing')
+        .where('driverId', '==', user.id)
+        .where('status', '==', 'active')
+        .get();
+      let totalInterest = 0;
+      finSnap.docs.forEach((doc) => {
+        const fin = doc.data() as any;
+        if (typeof fin.remainingWeeks === 'number' && fin.remainingWeeks <= 0) return;
+        const interest = fin.weeklyInterest || 0;
+        if (interest > 0) totalInterest += interest;
+      });
+      if (totalInterest > 0) {
+        driverWeeklyRecord.despesasAdm += totalInterest;
+        driverWeeklyRecord.repasse -= totalInterest;
+      }
+    } catch (e) {
+      console.error('Erro ao ajustar resumo semanal com juros de financiamento:', e);
+    }
     return res.status(200).json({ success: true, data: driverWeeklyRecord });
   } catch (error: any) {
     console.error('Error fetching driver weekly summary:', error);

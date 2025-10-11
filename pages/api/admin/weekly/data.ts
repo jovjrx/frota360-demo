@@ -105,6 +105,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       paymentsByRecordId
     );
 
+    // Ajustar registros para incluir juros de financiamentos ativos
+    try {
+      const financingSnapshot = await adminDb.collection('financing').where('status', '==', 'active').get();
+      const financingByDriver: Record<string, Array<{ weeklyInterest?: number; remainingWeeks?: number }>> = {};
+      financingSnapshot.docs.forEach((doc) => {
+        const data = doc.data() as any;
+        const driverId = data.driverId;
+        if (!driverId) return;
+        if (!financingByDriver[driverId]) financingByDriver[driverId] = [];
+        financingByDriver[driverId].push({ weeklyInterest: data.weeklyInterest, remainingWeeks: data.remainingWeeks });
+      });
+      aggregation.records.forEach((rec: any) => {
+        const fins = financingByDriver[rec.driverId] || [];
+        let totalInterest = 0;
+        fins.forEach((f) => {
+          if (typeof f.remainingWeeks === 'number' && f.remainingWeeks <= 0) return;
+          const interest = f.weeklyInterest || 0;
+          if (interest > 0) totalInterest += interest;
+        });
+        if (totalInterest > 0) {
+          rec.despesasAdm += totalInterest;
+          rec.repasse -= totalInterest;
+        }
+      });
+    } catch (e) {
+      console.error('Erro ao ajustar registros com juros de financiamento:', e);
+    }
+
     return res.status(200).json(aggregation);
   } catch (error: any) {
     console.error('Error fetching weekly data:', error);

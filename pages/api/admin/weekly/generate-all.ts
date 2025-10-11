@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { DriverWeeklyRecord, createDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import { Financing } from '@/schemas/financing';
 import { getWeekId } from '@/lib/utils/date-helpers';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 import { Driver } from '@/schemas/driver';
@@ -60,6 +61,22 @@ export default async function handler(
       .where('status', '==', 'active')
       .get();
     const drivers: Driver[] = driversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Driver }));
+
+    // 1a. Buscar todos os financiamentos ativos para calcular juros semanais
+    const financingSnapshot = await adminDb
+      .collection('financing')
+      .where('status', '==', 'active')
+      .get();
+    const financingByDriver: Record<string, Financing[]> = {};
+    financingSnapshot.docs.forEach(doc => {
+      const data = doc.data() as Financing;
+      const driverId = data.driverId;
+      if (!driverId) return;
+      if (!financingByDriver[driverId]) {
+        financingByDriver[driverId] = [];
+      }
+      financingByDriver[driverId].push({ ...data, id: doc.id });
+    });
 
     // 2. Buscar dados normalizados da semana
     const normalizedSnapshot = await adminDb
@@ -127,7 +144,29 @@ export default async function handler(
         aluguel: driver.type === 'renter' ? (driver.rentalFee || 0) : 0,
         iban: driver.banking?.iban || null,
       }, incomeTotals, { type: driver.type, rentalFee: driver.rentalFee });
-
+      // Ajustar record para incluir juros de financiamentos ativos
+      const activeFinancings = financingByDriver[driver.id] || [];
+      let totalWeeklyInterest = 0;
+      for (const fin of activeFinancings) {
+        const interest = fin.weeklyInterest || 0;
+        if (interest > 0) {
+          totalWeeklyInterest += interest;
+        }
+        // Se houver contagem de semanas, decrementa e finaliza quando chegar a zero
+        if (typeof fin.remainingWeeks === 'number') {
+          const newRemaining = fin.remainingWeeks - 1;
+          const updates: any = { updatedAt: new Date().toISOString(), remainingWeeks: newRemaining };
+          if (newRemaining <= 0) {
+            updates.status = 'completed';
+            updates.endDate = new Date().toISOString();
+          }
+          await adminDb.collection('financing').doc(fin.id as string).update(updates);
+        }
+      }
+      if (totalWeeklyInterest > 0) {
+        record.despesasAdm += totalWeeklyInterest;
+        record.repasse -= totalWeeklyInterest;
+      }
       records.push(record);
     }
 

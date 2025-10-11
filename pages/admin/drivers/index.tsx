@@ -56,6 +56,9 @@ interface Driver {
   phone?: string;
   status?: string;
   type?: string;
+  rentalFee?: number;
+  birthDate?: string;
+  city?: string;
   integrations?: {
     uber?: {
       key?: string | null;
@@ -501,6 +504,41 @@ export default function DriversPage({
                       onChange={(e) => updateField('phone', e.target.value)}
                     />
                   </FormControl>
+
+                  <FormControl>
+                    <FormLabel>{t('drivers.form.birthDate.label', 'Data de Nascimento')}</FormLabel>
+                    <Input
+                      type="date"
+                      value={editingDriver.birthDate || ''}
+                      onChange={(e) => updateField('birthDate', e.target.value)}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>{t('drivers.form.city.label', 'Cidade')}</FormLabel>
+                    <Input
+                      value={editingDriver.city || ''}
+                      onChange={(e) => updateField('city', e.target.value)}
+                      placeholder={t('drivers.form.city.placeholder', 'Lisboa')}
+                    />
+                  </FormControl>
+
+                  {/* Campo de valor de aluguel apenas para locatários */}
+                  {editingDriver.type === 'renter' && (
+                    <FormControl>
+                      <FormLabel>{t('drivers.form.rentalFee.label', 'Valor de aluguel (€/semana)')}</FormLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editingDriver.rentalFee || 0}
+                        onChange={(e) => updateField('rentalFee', parseFloat(e.target.value) || 0)}
+                        placeholder={t('drivers.form.rentalFee.placeholder', '0.00')}
+                      />
+                      <Text fontSize="xs" color="gray.600" mt={1}>
+                        {t('drivers.form.rentalFee.description', 'Valor do aluguel semanal cobrado do locatário.')}
+                      </Text>
+                    </FormControl>
+                  )}
                 </VStack>
               </TabPanel>
 
