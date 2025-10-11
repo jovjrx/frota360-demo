@@ -30,7 +30,8 @@ import {
   Tooltip,
   IconButton,
 } from '@chakra-ui/react';
-import { FiDollarSign, FiSend, FiClock, FiCheckCircle, FiDownload, FiFileText } from 'react-icons/fi';
+import { FiDollarSign, FiSend, FiClock, FiCheckCircle, FiDownload, FiFileText, FiAlertCircle } from 'react-icons/fi';
+import { Grid, GridItem, Divider } from '@chakra-ui/react';
 import useSWR, { SWRConfig } from 'swr';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
@@ -58,7 +59,7 @@ function DriverFinancingPageContent({
 }: DriverFinancingPageProps) {
   const toast = useToast();
   const { data, mutate } = useSWR('/api/dashboard/financing', fetcher);
-  const financings: any[] = data?.financings || initialFinancings || [];
+  const financings: any[] = data?.financings || [];
 
   const [amount, setAmount] = useState('');
   const [weeks, setWeeks] = useState('');
@@ -148,99 +149,242 @@ function DriverFinancingPageContent({
         ]}
         translations={translations}
       >
-        <VStack spacing={6} align="stretch">
+      <VStack spacing={6} align="stretch">
           {/* Estatísticas */}
-          {activeFinancings.length > 0 && (
-            <HStack spacing={4} wrap="wrap">
-              <Card flex="1" minW="200px">
+          <HStack spacing={4} wrap="wrap">
+            <Card flex="1" minW="200px">
+              <CardBody>
+                <Stat>
+                  <StatLabel>Total Ativo</StatLabel>
+                  <StatNumber color="blue.600">€{totalActive.toFixed(2)}</StatNumber>
+                  <StatHelpText>
+                    {activeFinancings.length} financiamento{activeFinancings.length > 1 ? 's' : ''}
+                  </StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+            <Card flex="1" minW="200px">
+              <CardBody>
+                <Stat>
+                  <StatLabel>Desconto Semanal</StatLabel>
+                  <StatNumber color="orange.600">€{totalWeeklyDeduction.toFixed(2)}</StatNumber>
+                  <StatHelpText>Valor descontado por semana</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </HStack>
+
+          <Divider />
+
+          {/* Layout em 2 colunas: Meus Financiamentos | Solicitar Novo */}
+          <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+            {/* Coluna Esquerda: Meus Financiamentos Ativos */}
+            <GridItem>
+              <Card>
                 <CardBody>
-                  <Stat>
-                    <StatLabel>Total Ativo</StatLabel>
-                    <StatNumber color="blue.600">€{totalActive.toFixed(2)}</StatNumber>
-                    <StatHelpText>
-                      {activeFinancings.length} financiamento{activeFinancings.length > 1 ? 's' : ''}
-                    </StatHelpText>
-                  </Stat>
+                  <Heading size="sm" mb={4} display="flex" alignItems="center">
+                    <Icon as={FiDollarSign} mr={2} />
+                    {t('financing.list.title', 'Meus Financiamentos Ativos')}
+                  </Heading>
+                  
+                  <Box maxH="600px" overflowY="auto">
+                    {activeFinancings.length === 0 ? (
+                      <VStack spacing={2} align="center" py={8}>
+                        <Icon as={FiClock} fontSize="3xl" color="gray.400" />
+                        <Text color="gray.600" fontWeight="semibold">
+                          {t('financing.list.empty', 'Nenhum financiamento ativo')}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {t('financing.list.emptyDesc', 'Solicite um financiamento ao lado')}
+                        </Text>
+                      </VStack>
+                    ) : (
+                      <VStack spacing={3} align="stretch">
+                        {activeFinancings.map((fin) => (
+                          <Box
+                            key={fin.id}
+                            p={3}
+                            bg="white"
+                            borderWidth={1}
+                            borderRadius="md"
+                            borderColor="gray.200"
+                          >
+                            <VStack align="start" spacing={2} w="full">
+                              <HStack justify="space-between" w="full">
+                                <VStack align="start" spacing={0}>
+                                  <Badge colorScheme={fin.type === 'loan' ? 'blue' : 'purple'}>
+                                    {fin.type === 'loan' ? t('financing.type.loan', 'Empréstimo') : t('financing.type.discount', 'Desconto')}
+                                  </Badge>
+                                  <Badge colorScheme="green" mt={1}>
+                                    <Icon as={FiCheckCircle} mr={1} />
+                                    {t('financing.status.active', 'Ativo')}
+                                  </Badge>
+                                </VStack>
+                                <VStack align="end" spacing={0}>
+                                  <Text fontWeight="bold" color="blue.600" fontSize="lg">
+                                    €{(fin.amount || 0).toFixed(2)}
+                                  </Text>
+                                  {fin.weeklyInterest > 0 && (
+                                    <Text fontSize="xs" color="orange.600">+{fin.weeklyInterest}% juros</Text>
+                                  )}
+                                </VStack>
+                              </HStack>
+                              
+                              {/* Barra de progresso para empréstimos */}
+                              {fin.weeks && fin.type === 'loan' && (
+                                <VStack align="stretch" spacing={1} w="full">
+                                  <HStack justify="space-between" fontSize="xs" color="gray.600">
+                                    <Text>{fin.weeks - (fin.remainingWeeks || 0)} / {fin.weeks} semanas pagas</Text>
+                                    <Text fontWeight="bold">{fin.remainingWeeks || 0} restantes</Text>
+                                  </HStack>
+                                  <Box w="full" h="6px" bg="gray.200" borderRadius="full" overflow="hidden">
+                                    <Box
+                                      h="full"
+                                      bg={fin.remainingWeeks === 0 ? 'green.400' : 'blue.400'}
+                                      w={`${((fin.weeks - (fin.remainingWeeks || 0)) / fin.weeks) * 100}%`}
+                                      transition="width 0.3s"
+                                    />
+                                  </Box>
+                                  <HStack justify="space-between" fontSize="xs">
+                                    <Text color="gray.600">
+                                      Parcela: €{(fin.amount / fin.weeks).toFixed(2)}/sem
+                                    </Text>
+                                    {fin.proofUrl && (
+                                      <HStack spacing={1} color="green.600">
+                                        <Icon as={FiCheckCircle} boxSize={3} />
+                                        <Text>Comprovante</Text>
+                                      </HStack>
+                                    )}
+                                  </HStack>
+                                </VStack>
+                              )}
+                              
+                              {/* Para descontos */}
+                              {fin.type === 'discount' && (
+                                <HStack w="full" justify="space-between" fontSize="xs">
+                                  <Text color="gray.600">
+                                    Desconto semanal de €{(fin.amount || 0).toFixed(2)}
+                                  </Text>
+                                  {fin.proofUrl && (
+                                    <HStack spacing={1} color="green.600">
+                                      <Icon as={FiCheckCircle} boxSize={3} />
+                                      <Text>Comprovante</Text>
+                                    </HStack>
+                                  )}
+                                </HStack>
+                              )}
+                            </VStack>
+                          </Box>
+                        ))}
+                      </VStack>
+                    )}
+                  </Box>
                 </CardBody>
               </Card>
-              <Card flex="1" minW="200px">
+            </GridItem>
+
+            {/* Coluna Direita: Solicitar Novo Financiamento */}
+            <GridItem>
+              <Card borderLeft="4px" borderLeftColor="green.400">
                 <CardBody>
-                  <Stat>
-                    <StatLabel>Desconto Semanal</StatLabel>
-                    <StatNumber color="orange.600">€{totalWeeklyDeduction.toFixed(2)}</StatNumber>
-                    <StatHelpText>Valor descontado por semana</StatHelpText>
-                  </Stat>
+                  <Heading size="sm" mb={4} display="flex" alignItems="center">
+                    <Icon as={FiSend} mr={2} color="green.500" />
+                    {t('financing.request.title', 'Solicitar Financiamento')}
+                  </Heading>
+                  <Text fontSize="sm" color="gray.600" mb={4}>
+                    {t('financing.request.description', 'Preencha os dados abaixo para solicitar um empréstimo.')}
+                  </Text>
+                  <Box as="form" onSubmit={handleSubmit}>
+                    <VStack spacing={4}>
+            <FormControl isRequired>
+                        <FormLabel>{t('financing.form.amount', 'Valor (€)')}</FormLabel>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          value={amount} 
+                          onChange={(e) => setAmount(e.target.value)}
+                          placeholder="0.00"
+                          size="lg"
+                        />
+            </FormControl>
+            <FormControl isRequired>
+                        <FormLabel>{t('financing.form.weeks', 'Número de Semanas')}</FormLabel>
+                        <Input 
+                          type="number" 
+                          value={weeks} 
+                          onChange={(e) => setWeeks(e.target.value)}
+                          placeholder="12"
+                          size="lg"
+                        />
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          O valor será dividido em parcelas semanais
+                        </Text>
+            </FormControl>
+                      
+                      {amount && weeks && parseFloat(amount) > 0 && parseInt(weeks) > 0 && (
+                        <Box w="full" p={3} bg="blue.50" borderRadius="md">
+                          <VStack align="start" spacing={1}>
+                            <Text fontSize="sm" fontWeight="bold" color="blue.800">
+                              Resumo da Solicitação:
+                            </Text>
+                            <Text fontSize="sm" color="gray.700">
+                              Valor total: <strong>€{parseFloat(amount).toFixed(2)}</strong>
+                            </Text>
+                            <Text fontSize="sm" color="gray.700">
+                              Parcela semanal: <strong>€{(parseFloat(amount) / parseInt(weeks)).toFixed(2)}</strong>
+                            </Text>
+                            <Text fontSize="sm" color="gray.700">
+                              Duração: <strong>{weeks} semanas</strong>
+                            </Text>
+                          </VStack>
+                        </Box>
+                      )}
+                      
+                      <Button 
+                        type="submit" 
+                        colorScheme="green" 
+                        isLoading={loading}
+                        leftIcon={<Icon as={FiSend} />}
+                        size="lg"
+                        w="full"
+                      >
+                        {tc('send', 'Enviar Solicitação')}
+                      </Button>
+                      
+                      <Box p={3} bg="orange.50" borderRadius="md" w="full">
+                        <HStack align="start">
+                          <Icon as={FiAlertCircle} color="orange.500" mt={1} />
+                          <VStack align="start" spacing={1}>
+                            <Text fontSize="xs" color="orange.800" fontWeight="semibold">
+                              Importante:
+                            </Text>
+                            <Text fontSize="xs" color="gray.700">
+                              Sua solicitação será analisada pela administração. Você receberá uma resposta em breve.
+                            </Text>
+                          </VStack>
+          </HStack>
+        </Box>
+                    </VStack>
+                  </Box>
                 </CardBody>
               </Card>
-            </HStack>
-          )}
+            </GridItem>
+          </Grid>
 
-          {/* Formulário de Solicitação */}
-          <Card>
-            <CardBody>
-              <Box as="form" onSubmit={handleSubmit}>
-                <Heading size="sm" mb={4}>
-                  <Icon as={FiSend} mr={2} />
-                  {t('financing.request.title', 'Solicitar Financiamento')}
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mb={4}>
-                  {t('financing.request.description', 'Preencha os dados abaixo para solicitar um empréstimo. Sua solicitação será analisada pela administração.')}
-                </Text>
-                <HStack spacing={4} align="flex-end">
-                  <FormControl isRequired flex="1">
-                    <FormLabel>{t('financing.form.amount', 'Valor (€)')}</FormLabel>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      value={amount} 
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </FormControl>
-                  <FormControl isRequired flex="1">
-                    <FormLabel>{t('financing.form.weeks', 'Semanas')}</FormLabel>
-                    <Input 
-                      type="number" 
-                      value={weeks} 
-                      onChange={(e) => setWeeks(e.target.value)}
-                      placeholder="12"
-                    />
-                  </FormControl>
-                  <Button 
-                    type="submit" 
-                    colorScheme="green" 
-                    isLoading={loading}
-                    leftIcon={<Icon as={FiSend} />}
-                  >
-                    {tc('send', 'Enviar')}
-                  </Button>
-                </HStack>
-              </Box>
-            </CardBody>
-          </Card>
-
-          {/* Lista de Financiamentos */}
-          <Card>
+          {/* Histórico Completo (Tabela) */}
+          {financings.length > 0 && (
+            <>
+              <Divider />
+              <Card>
             <CardBody>
               <Heading size="sm" mb={4}>
                 <Icon as={FiDollarSign} mr={2} />
                 {t('financing.list.title', 'Meus Financiamentos')}
               </Heading>
-              {financings.length === 0 ? (
-                <Box textAlign="center" py={8}>
-                  <Icon as={FiClock} boxSize={12} color="gray.300" mb={3} />
-                  <Text color="gray.500">
-                    {t('financing.list.empty', 'Nenhum financiamento encontrado.')}
-                  </Text>
-                  <Text fontSize="sm" color="gray.400" mt={1}>
-                    {t('financing.list.emptyHint', 'Solicite um financiamento usando o formulário acima.')}
-                  </Text>
-                </Box>
-              ) : (
                 <Box overflowX="auto">
-                  <Table size="sm">
-                    <Thead>
-                      <Tr>
+            <Table size="sm">
+              <Thead>
+                <Tr>
                         <Th>{t('financing.table.type', 'Tipo')}</Th>
                         <Th>{t('financing.table.amount', 'Valor (€)')}</Th>
                         <Th>{t('financing.table.weeks', 'Semanas')}</Th>
@@ -253,9 +397,9 @@ function DriverFinancingPageContent({
                         {financings.some(f => f.proofUrl) && (
                           <Th>{t('financing.table.proof', 'Comprovante')}</Th>
                         )}
-                      </Tr>
-                    </Thead>
-                    <Tbody>
+                </Tr>
+              </Thead>
+              <Tbody>
                       {financings.map((fin) => {
                         const weeklyPayment = fin.type === 'loan' && fin.weeks ? 
                           (fin.amount / fin.weeks) : fin.amount;
@@ -263,14 +407,19 @@ function DriverFinancingPageContent({
                         const hasAnyProof = financings.some(f => f.proofUrl);
                         
                         return (
-                          <Tr key={fin.id}>
+                  <Tr key={fin.id}>
                             <Td>{getTypeBadge(fin.type)}</Td>
                             <Td fontWeight="semibold">€{(fin.amount ?? 0).toFixed(2)}</Td>
                             <Td>
                               {fin.weeks ? (
-                                <Badge colorScheme="blue">
-                                  {fin.remainingWeeks ?? fin.weeks}/{fin.weeks}
-                                </Badge>
+                                <VStack align="start" spacing={0}>
+                                  <Badge colorScheme="blue">
+                                    {fin.weeks - (fin.remainingWeeks || 0)}/{fin.weeks} pagas
+                                  </Badge>
+                                  <Text fontSize="xs" color="gray.600">
+                                    {fin.remainingWeeks || 0} restantes
+                                  </Text>
+                                </VStack>
                               ) : '-'}
                             </Td>
                             <Td fontWeight="semibold" color="orange.600">
@@ -307,17 +456,18 @@ function DriverFinancingPageContent({
                                 )}
                               </Td>
                             )}
-                          </Tr>
+                  </Tr>
                         );
                       })}
-                    </Tbody>
-                  </Table>
+              </Tbody>
+            </Table>
                 </Box>
-              )}
-            </CardBody>
-          </Card>
-        </VStack>
-      </DashboardLayout>
+              </CardBody>
+            </Card>
+            </>
+          )}
+      </VStack>
+    </DashboardLayout>
     </>
   );
 }
@@ -327,7 +477,7 @@ export default function DriverFinancingPage(props: DriverFinancingPageProps) {
     <SWRConfig
       value={{
         fallback: {
-          '/api/dashboard/financing': { financings: props.initialFinancings },
+          '/api/dashboard/financing': { success: true, financings: props.initialFinancings },
         },
       }}
     >
