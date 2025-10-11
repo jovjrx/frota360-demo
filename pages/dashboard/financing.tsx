@@ -61,6 +61,12 @@ function DriverFinancingPageContent({
   const { data, mutate } = useSWR('/api/dashboard/financing', fetcher);
   const financings: any[] = data?.financings || [];
 
+  // Debug logs
+  console.log('🎨 [Dashboard Financing] Rendering...');
+  console.log('📦 [Dashboard Financing] initialFinancings (SSR):', initialFinancings?.length || 0);
+  console.log('📡 [Dashboard Financing] SWR data:', data);
+  console.log('💰 [Dashboard Financing] financings (final):', financings?.length || 0);
+
   const [amount, setAmount] = useState('');
   const [weeks, setWeeks] = useState('');
   const [loading, setLoading] = useState(false);
@@ -111,9 +117,22 @@ function DriverFinancingPageContent({
   // Calcular estatísticas
   const activeFinancings = financings.filter(f => f.status === 'active');
   const totalActive = activeFinancings.reduce((sum, f) => sum + (f.amount || 0), 0);
+  
+  // Desconto semanal = apenas a parcela/desconto fixo
+  // Juros são aplicados sobre os ganhos, não sobre o valor do financiamento
   const totalWeeklyDeduction = activeFinancings.reduce((sum, f) => {
-    const weeklyAmount = f.type === 'loan' && f.weeks ? f.amount / f.weeks : f.amount;
-    return sum + weeklyAmount + (f.weeklyInterest || 0);
+    if (f.type === 'loan' && f.weeks && f.weeks > 0) {
+      // Empréstimo: parcela semanal (principal)
+      return sum + (f.amount / f.weeks);
+    } else {
+      // Desconto: valor fixo por semana
+      return sum + (f.amount || 0);
+    }
+  }, 0);
+  
+  // Total de juros percentual (aplicado sobre ganhos)
+  const totalInterestPercent = activeFinancings.reduce((sum, f) => {
+    return sum + (f.weeklyInterest || 0);
   }, 0);
 
   const getTypeBadge = (type: string) => {
@@ -166,12 +185,23 @@ function DriverFinancingPageContent({
             <Card flex="1" minW="200px">
               <CardBody>
                 <Stat>
-                  <StatLabel>Desconto Semanal</StatLabel>
+                  <StatLabel>Desconto Semanal (Fixo)</StatLabel>
                   <StatNumber color="orange.600">€{totalWeeklyDeduction.toFixed(2)}</StatNumber>
-                  <StatHelpText>Valor descontado por semana</StatHelpText>
+                  <StatHelpText>Parcelas + descontos fixos</StatHelpText>
                 </Stat>
               </CardBody>
             </Card>
+            {totalInterestPercent > 0 && (
+              <Card flex="1" minW="200px">
+                <CardBody>
+                  <Stat>
+                    <StatLabel>Taxa Adicional (Juros)</StatLabel>
+                    <StatNumber color="red.600">+{totalInterestPercent.toFixed(1)}%</StatNumber>
+                    <StatHelpText>Aplicado sobre seus ganhos</StatHelpText>
+                  </Stat>
+                </CardBody>
+              </Card>
+            )}
           </HStack>
 
           <Divider />
@@ -386,10 +416,10 @@ function DriverFinancingPageContent({
               <Thead>
                 <Tr>
                         <Th>{t('financing.table.type', 'Tipo')}</Th>
-                        <Th>{t('financing.table.amount', 'Valor (€)')}</Th>
-                        <Th>{t('financing.table.weeks', 'Semanas')}</Th>
-                        <Th>{t('financing.table.weeklyPayment', 'Pagamento/semana')}</Th>
-                        <Th>{t('financing.table.interest', 'Juros/sem (€)')}</Th>
+                        <Th>{t('financing.table.amount', 'Valor Total (€)')}</Th>
+                        <Th>{t('financing.table.weeks', 'Progresso')}</Th>
+                        <Th>{t('financing.table.weeklyPayment', 'Desconto Fixo/sem')}</Th>
+                        <Th>{t('financing.table.interest', 'Taxa Adicional')}</Th>
                         <Th>{t('financing.table.start', 'Início')}</Th>
                         <Th>{t('financing.table.end', 'Fim')}</Th>
                         <Th>{t('financing.table.status', 'Status')}</Th>
@@ -401,9 +431,10 @@ function DriverFinancingPageContent({
               </Thead>
               <Tbody>
                       {financings.map((fin) => {
-                        const weeklyPayment = fin.type === 'loan' && fin.weeks ? 
-                          (fin.amount / fin.weeks) : fin.amount;
-                        const totalWeekly = weeklyPayment + (fin.weeklyInterest || 0);
+                        // Desconto fixo semanal (parcela ou valor fixo)
+                        const weeklyPayment = fin.type === 'loan' && fin.weeks && fin.weeks > 0 ? 
+                          (fin.amount / fin.weeks) : (fin.amount || 0);
+                        
                         const hasAnyProof = financings.some(f => f.proofUrl);
                         
                         return (
@@ -423,9 +454,15 @@ function DriverFinancingPageContent({
                               ) : '-'}
                             </Td>
                             <Td fontWeight="semibold" color="orange.600">
-                              €{totalWeekly.toFixed(2)}
+                              €{weeklyPayment.toFixed(2)}
                             </Td>
-                            <Td>€{(fin.weeklyInterest ?? 0).toFixed(2)}</Td>
+                            <Td>
+                              {fin.weeklyInterest > 0 ? (
+                                <Badge colorScheme="red">+{fin.weeklyInterest}%</Badge>
+                              ) : (
+                                <Text color="gray.400">-</Text>
+                              )}
+                            </Td>
                             <Td>{fin.startDate ? new Date(fin.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
                             <Td>{fin.endDate ? new Date(fin.endDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
                             <Td>{getStatusBadge(fin.status)}</Td>
@@ -473,6 +510,12 @@ function DriverFinancingPageContent({
 }
 
 export default function DriverFinancingPage(props: DriverFinancingPageProps) {
+  console.log('🚀 [SWRConfig] Initializing with fallback:', {
+    key: '/api/dashboard/financing',
+    initialFinancings: props.initialFinancings?.length || 0,
+    fallback: { success: true, financings: props.initialFinancings?.length || 0 }
+  });
+  
   return (
     <SWRConfig
       value={{
