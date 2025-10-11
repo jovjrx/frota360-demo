@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import { Card } from "./Card";
+import { useFacebookTracking } from "@/hooks/useFacebookTracking";
 
 interface RequestFormProps {
   tPage: (key: string) => any;
@@ -37,6 +38,7 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const toast = useToast();
+  const { trackRegistrationComplete } = useFacebookTracking();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -124,6 +126,15 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
       const result = await response.json();
 
       if (result.success) {
+        // Track evento de conclusão de registro
+        trackRegistrationComplete('success', 'Driver Application', {
+          email: formData.email,
+          phone: formData.phone,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          city: formData.city,
+        });
+
         toast({
           title: "Candidatura Enviada!",
           description: "Recebemos a sua candidatura. A nossa equipa irá analisar e entrar em contacto em breve.",

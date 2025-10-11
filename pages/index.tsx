@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { useMemo } from "react";
 import { useLocalizedHref } from "@/lib/linkUtils";
 import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
+import { useFacebookTracking } from "@/hooks/useFacebookTracking";
 
 import {
   Box,
@@ -39,6 +40,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
   const getLocalizedHref = useLocalizedHref();
   const t = useMemo(() => makeSafeT(rawTPage), [rawTPage]);
   const tc = useMemo(() => makeSafeT(rawTCommon), [rawTCommon]);
+  const { trackCheckoutStart } = useFacebookTracking();
 
   return (
     <>
@@ -66,6 +68,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                 shadow="lg"
                 colorScheme="green"
                 rightIcon={<ArrowRightIcon />}
+                onClick={() => trackCheckoutStart('Driver Application - Hero')}
               >
                 {t(HOME.HERO.CTA_PRIMARY)}
               </Button>
@@ -192,6 +195,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                 colorScheme="green"
                 size="sm"
                 rightIcon={<ArrowRightIcon />}
+                onClick={() => trackCheckoutStart('Driver Application - Affiliate')}
               >
                 Candidatar-me
               </Button>
@@ -212,39 +216,12 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                 colorScheme="blue"
                 size="sm"
                 rightIcon={<ArrowRightIcon />}
+                onClick={() => trackCheckoutStart('Driver Application - Renter')}
               >
                 Candidatar-me
               </Button>
             </VStack>
           </Card>
-        </ContainerDivisions>
-      </Container>
-
-      {/* Porquê Escolher a Conduz PT */}
-      <Container>
-        <Title
-          title={t(HOME.FEATURES.TITLE)}
-          description="Descubra as vantagens de trabalhar connosco"
-          feature="VANTAGENS"
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
-          {(() => {
-            const features = t(HOME.FEATURES.ITEMS);
-            if (!Array.isArray(features)) return null;
-
-            return features.map((feature: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start">
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {feature.title}
-                  </Text>
-                  <Text color="gray.600">
-                    {feature.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
         </ContainerDivisions>
       </Container>
 

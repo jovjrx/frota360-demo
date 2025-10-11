@@ -6,6 +6,7 @@ import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { GoogleAnalytics } from "nextjs-google-analytics";
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import FacebookPixel from '@/components/FacebookPixel';
 import { theme } from "@/lib/theme";
 import { fonts } from "@/lib/fonts";
 import { LanguageProvider } from "@/components/Language";
@@ -93,6 +94,7 @@ export default function App({ Component, pageProps }: AppProps) {
             />
             <Footer t={tCommon} panel={router.pathname.startsWith("/admin") || router.pathname.startsWith("/dashboard")} />
             <GoogleAnalytics gaMeasurementId={GA_ID} trackPageViews />
+            <FacebookPixel />
             <Analytics />
             <SpeedInsights />
           </AuthProvider>

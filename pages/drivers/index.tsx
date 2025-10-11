@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Box,
   Text,
@@ -15,6 +16,7 @@ import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { FaCheckCircle, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
 import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
 import { SERVICES } from "@/translations/services/constants";
+import { useFacebookTracking } from "@/hooks/useFacebookTracking";
 
 interface ServiceItem {
   title: string;
@@ -27,6 +29,12 @@ interface ServiceItem {
 export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
   const pageT = (tPage as ((key: string) => unknown) | undefined) ?? ((key: string) => key);
   const commonT = (tCommon as ((key: string) => string) | undefined) ?? ((key: string) => key);
+  const { trackContentView } = useFacebookTracking();
+
+  // Track ViewContent ao carregar a página
+  useEffect(() => {
+    trackContentView('Drivers Page', 'drivers');
+  }, [trackContentView]);
 
   const benefitsData = pageT(SERVICES.BENEFITS.CARD.LIST_ITEMS);
   const benefitsList = Array.isArray(benefitsData) ? (benefitsData as string[]) : [];
