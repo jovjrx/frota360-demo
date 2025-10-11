@@ -147,11 +147,11 @@ function DriversPageContent({
   const [isEditMode, setIsEditMode] = useState(false);
   
   // Solicitações pendentes
-  const { data: requestsData, mutate: mutateRequests } = useSWR<{ requests: DriverRequest[] }>(
+  const { data: requestsData, mutate: mutateRequests } = useSWR(
     '/api/admin/requests?status=pending',
     fetcher
   );
-  const pendingRequests = requestsData?.requests || initialRequests || [];
+  const pendingRequests = requestsData?.data || [];
   
   // Modais de aprovação/rejeição
   const [selectedRequest, setSelectedRequest] = useState<DriverRequest | null>(null);
@@ -860,7 +860,10 @@ export default function DriversPage(props: DriversPageProps) {
     <SWRConfig
       value={{
         fallback: {
-          '/api/admin/requests?status=pending': { requests: props.initialRequests },
+          '/api/admin/requests?status=pending': { 
+            success: true,
+            data: props.initialRequests,
+          },
         },
       }}
     >
