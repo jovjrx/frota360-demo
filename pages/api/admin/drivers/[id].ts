@@ -53,12 +53,12 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
     const validationResult = FlexibleUpdateSchema.safeParse(req.body);
     
     if (!validationResult.success) {
-      console.error('❌ Erro de validação:', validationResult.error.errors);
+      console.error('❌ Erro de validação:', validationResult.error);
       console.error('📝 Dados recebidos:', req.body);
       return res.status(400).json({ 
         success: false,
         error: 'Validation error',
-        details: validationResult.error.errors 
+        details: validationResult.error 
       });
     }
     
