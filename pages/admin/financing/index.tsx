@@ -24,8 +24,6 @@ import {
   Icon,
   IconButton,
   Tooltip,
-  Textarea,
-  useDisclosure,
   Grid,
   GridItem,
   Stat,
@@ -36,6 +34,7 @@ import {
 } from '@chakra-ui/react';
 import { FiDollarSign, FiPlus, FiUpload, FiDownload, FiFileText, FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle } from 'react-icons/fi';
 import FinancingProofUpload from '@/components/admin/FinancingProofUpload';
+import FinancingModal from '@/components/admin/FinancingModal';
 import useSWR, { SWRConfig } from 'swr';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
@@ -72,15 +71,11 @@ function AdminFinancingPageContent({
   const { data, mutate } = useSWR('/api/admin/financing', fetcher);
   const financing: any[] = data?.financing || initialFinancing || [];
 
-  const [driverId, setDriverId] = useState('');
-  const [type, setType] = useState('loan');
-  const [amount, setAmount] = useState('');
-  const [weeks, setWeeks] = useState('');
-  const [weeklyInterest, setWeeklyInterest] = useState('');
-  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedFinancingId, setSelectedFinancingId] = useState<string | null>(null);
-  const { isOpen: isUploadOpen, onOpen: onUploadOpen, onClose: onUploadClose } = useDisclosure();
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isFinancingModalOpen, setIsFinancingModalOpen] = useState(false);
+  const [editingFinancing, setEditingFinancing] = useState<any | null>(null);
 
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
@@ -114,64 +109,80 @@ function AdminFinancingPageContent({
     };
   }, [financing]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!driverId) {
-      toast({ title: tc('error', 'Erro'), description: t('financing.errors.selectDriver', 'Selecione o motorista'), status: 'error' });
-      return;
-    }
-    const parsedAmount = parseFloat(amount) || 0;
-    const parsedWeeks = weeks ? parseInt(weeks, 10) : null;
-    const parsedInterest = weeklyInterest ? parseFloat(weeklyInterest) : 0;
-    if (type === 'loan' && (!parsedWeeks || parsedWeeks <= 0)) {
-      toast({ title: tc('error', 'Erro'), description: t('financing.errors.weeksRequired', 'Informe o número de semanas'), status: 'error' });
-      return;
-    }
-    setLoading(true);
+
+  const handleAddFinancing = () => {
+    setEditingFinancing(null);
+    setIsFinancingModalOpen(true);
+  };
+
+  const handleEditFinancing = (financing: any) => {
+    setEditingFinancing(financing);
+    setIsFinancingModalOpen(true);
+  };
+
+  const handleCloseFinancingModal = () => {
+    setIsFinancingModalOpen(false);
+    setEditingFinancing(null);
+  };
+
+  const handleSaveFinancing = async (financingData: any) => {
     try {
-      const res = await fetch('/api/admin/financing', {
-        method: 'POST',
+      if (editingFinancing?.id) {
+        // Modo edição - atualizar financiamento existente
+        const response = await fetch(`/api/admin/financing/${editingFinancing.id}`, {
+          method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          driverId, 
-          type, 
-          amount: parsedAmount, 
-          weeks: parsedWeeks, 
-          weeklyInterest: parsedInterest,
-          notes: notes || null,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Erro');
-      
-      toast({ 
-        title: tc('success', 'Sucesso'), 
-        description: t('financing.success.created', 'Financiamento criado com sucesso!'), 
-        status: 'success',
-        duration: 3000,
-      });
-      
-      setDriverId('');
-      setAmount('');
-      setWeeks('');
-      setWeeklyInterest('');
-      setNotes('');
-      
-      mutate();
-      
-      // Perguntar se quer anexar comprovante (opcional)
-      if (json.id) {
-        setTimeout(() => {
-          if (window.confirm(t('financing.confirm.attachProof', 'Deseja anexar o comprovante de pagamento agora?'))) {
-            setSelectedFinancingId(json.id);
-            onUploadOpen();
-          }
-        }, 500);
+          body: JSON.stringify(financingData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar financiamento');
+        }
+
+        toast({
+          title: t('financing.updateSuccess', 'Financiamento atualizado'),
+          status: 'success',
+          duration: 2000,
+        });
+      } else {
+        // Modo criação - criar novo financiamento
+        const response = await fetch('/api/admin/financing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(financingData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao criar financiamento');
+        }
+
+        const result = await response.json();
+        
+        toast({
+          title: t('financing.success.created', 'Financiamento criado!'),
+          description: t('financing.success.createdDesc', 'O financiamento foi criado com sucesso.'),
+          status: 'success',
+          duration: 3000,
+        });
+
+        // Perguntar se quer anexar comprovante (opcional)
+        if (result.id) {
+          setTimeout(() => {
+            if (window.confirm(t('financing.confirm.attachProof', 'Deseja anexar o comprovante de pagamento agora?'))) {
+              setSelectedFinancingId(result.id);
+              setIsUploadOpen(true);
+            }
+          }, 500);
+        }
+
+        return result; // Retorna para mostrar prompt de comprovante
       }
-    } catch (err: any) {
-      toast({ title: tc('error', 'Erro'), description: err.message, status: 'error' });
-    } finally {
-      setLoading(false);
+
+      mutate(); // Re-fetch financiamentos
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 
@@ -205,10 +216,7 @@ function AdminFinancingPageContent({
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             size="sm"
-            onClick={() => {
-              // Scroll para o formulário
-              document.getElementById('create-financing-form')?.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onClick={handleAddFinancing}
           >
             {t('financing.create.new', 'Novo Financiamento')}
           </Button>
@@ -291,108 +299,40 @@ function AdminFinancingPageContent({
         <Divider />
 
         {/* ✅ Layout em duas colunas */}
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
-          {/* Coluna Esquerda: Criar Financiamento */}
-          <GridItem>
-            <Card>
-              <CardBody>
-                <Box as="form" onSubmit={handleSubmit} id="create-financing-form">
-                  <Heading size="sm" mb={4} display="flex" alignItems="center">
-                    <Icon as={FiPlus} mr={2} />
-                    {t('financing.create.title', 'Criar Financiamento')}
-                  </Heading>
-                  
-                  <VStack spacing={4} align="stretch">
-                    <FormControl isRequired>
-                      <FormLabel>{t('financing.form.driver', 'Motorista')}</FormLabel>
-                      <Select placeholder={tc('select', 'Selecione')} value={driverId} onChange={(e) => setDriverId(e.target.value)}>
-                        {initialDrivers.map((d) => (
-                          <option key={d.id} value={d.id}>{d.fullName || d.name}</option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    
-                    <HStack spacing={4}>
-                      <FormControl isRequired flex="1">
-                        <FormLabel>{t('financing.form.type', 'Tipo')}</FormLabel>
-                        <Select value={type} onChange={(e) => setType(e.target.value)}>
-                          <option value="loan">{t('financing.type.loan', 'Empréstimo')}</option>
-                          <option value="discount">{t('financing.type.discount', 'Desconto')}</option>
-                        </Select>
-                      </FormControl>
-                      
-                      <FormControl isRequired flex="1">
-                        <FormLabel>{t('financing.form.amount', 'Valor (€)')}</FormLabel>
-                        <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                      </FormControl>
-                    </HStack>
-                    
-                    {type === 'loan' && (
-                      <HStack spacing={4}>
-                        <FormControl isRequired flex="1">
-                          <FormLabel>{t('financing.form.weeks', 'Semanas')}</FormLabel>
-                          <Input type="number" value={weeks} onChange={(e) => setWeeks(e.target.value)} />
-                        </FormControl>
-                        
-                        <FormControl flex="1">
-                          <FormLabel>{t('financing.form.interest', 'Juros/sem (€)')}</FormLabel>
-                          <Input type="number" step="0.01" value={weeklyInterest} onChange={(e) => setWeeklyInterest(e.target.value)} />
-                        </FormControl>
-                      </HStack>
-                    )}
-                    
-                    <FormControl>
-                      <FormLabel>{t('financing.form.notes', 'Observações (opcional)')}</FormLabel>
-                      <Textarea 
-                        value={notes} 
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder={t('financing.form.notesPlaceholder', 'Informações adicionais...')}
-                        rows={3}
-                      />
-                    </FormControl>
-                    
-                    <Button type="submit" colorScheme="blue" isLoading={loading} size="lg">
-                      {tc('create', 'Criar')}
-                    </Button>
-                  </VStack>
-                </Box>
-              </CardBody>
-            </Card>
-          </GridItem>
-
-          {/* Coluna Direita: Solicitações Pendentes */}
-          <GridItem>
-            <Card>
-              <CardBody>
-                <Heading size="sm" mb={4} display="flex" alignItems="center">
-                  <Icon as={FiAlertCircle} mr={2} />
-                  {t('financing.requests.title', 'Solicitações Pendentes')}
-                </Heading>
+        {/* Seção de Ações Rápidas */}
+        <Card>
+          <CardBody>
+            <VStack spacing={4} align="stretch">
+              <Heading size="md" display="flex" alignItems="center">
+                <Icon as={FiDollarSign} mr={2} />
+                {t('financing.quickActions.title', 'Ações Rápidas')}
+              </Heading>
+              
+              <HStack spacing={4} wrap="wrap">
+                <Button
+                  leftIcon={<Icon as={FiPlus} />}
+                  colorScheme="blue"
+                  onClick={handleAddFinancing}
+                >
+                  {t('financing.create.new', 'Novo Financiamento')}
+                </Button>
                 
-                <VStack spacing={3} align="stretch">
-                  <Text color="gray.600" fontSize="sm">
-                    {t('financing.requests.description', 'Motoristas que solicitaram financiamento e aguardam aprovação.')}
-                  </Text>
-                  
-                  <Button
-                    leftIcon={<Icon as={FiAlertCircle} />}
-                    colorScheme="orange"
-                    variant="outline"
-                    onClick={() => router.push('/admin/financing/requests')}
-                  >
-                    {t('financing.requests.viewAll', 'Ver Todas as Solicitações')}
-                  </Button>
-                  
-                  <Box p={4} bg="orange.50" borderRadius="md" borderLeft="4px" borderLeftColor="orange.400">
-                    <Text fontSize="sm" color="orange.700">
-                      {t('financing.requests.reminder', 'Lembre-se de revisar e aprovar/rejeitar as solicitações pendentes para manter o fluxo ativo.')}
-                    </Text>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-          </GridItem>
-        </Grid>
+                <Button
+                  leftIcon={<Icon as={FiAlertCircle} />}
+                  colorScheme="orange"
+                  variant="outline"
+                  onClick={() => router.push('/admin/financing/requests')}
+                >
+                  {t('financing.requests.viewAll', 'Ver Solicitações')}
+                </Button>
+          </HStack>
+              
+              <Text color="gray.600" fontSize="sm">
+                {t('financing.quickActions.description', 'Crie novos financiamentos ou revise solicitações pendentes de motoristas.')}
+              </Text>
+            </VStack>
+          </CardBody>
+        </Card>
 
         {/* ✅ Financiamentos Existentes - Tabela Completa */}
         <Card>
@@ -402,13 +342,13 @@ function AdminFinancingPageContent({
               {t('financing.list.title', 'Financiamentos Existentes')}
             </Heading>
             
-            {financing.length === 0 ? (
+          {financing.length === 0 ? (
               <Text color="gray.500">{t('financing.list.empty', 'Nenhum financiamento encontrado.')}</Text>
-            ) : (
+          ) : (
               <Box overflowX="auto">
-                <Table size="sm">
-                  <Thead>
-                    <Tr>
+            <Table size="sm">
+              <Thead>
+                <Tr>
                       <Th>{t('financing.table.driver', 'Motorista')}</Th>
                       <Th>{t('financing.table.type', 'Tipo')}</Th>
                       <Th>{t('financing.table.amount', 'Valor (€)')}</Th>
@@ -419,19 +359,19 @@ function AdminFinancingPageContent({
                       <Th>{t('financing.table.end', 'Fim')}</Th>
                       <Th>{t('financing.table.status', 'Status')}</Th>
                       <Th>{t('financing.table.proof', 'Comprovante')}</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {financing.map((fin) => {
+                </Tr>
+              </Thead>
+              <Tbody>
+                {financing.map((fin) => {
                       const driver = initialDrivers.find((d) => d.id === fin.driverId);
-                      return (
-                        <Tr key={fin.id}>
+                  return (
+                    <Tr key={fin.id}>
                           <Td>{driver ? (driver.fullName || driver.name) : fin.driverId}</Td>
                           <Td>{getTypeBadge(fin.type)}</Td>
-                          <Td>{(fin.amount ?? 0).toFixed(2)}</Td>
-                          <Td>{fin.weeks ?? '-'}</Td>
-                          <Td>{(fin.weeklyInterest ?? 0).toFixed(2)}</Td>
-                          <Td>{typeof fin.remainingWeeks === 'number' ? fin.remainingWeeks : '-'}</Td>
+                      <Td>{(fin.amount ?? 0).toFixed(2)}</Td>
+                      <Td>{fin.weeks ?? '-'}</Td>
+                      <Td>{(fin.weeklyInterest ?? 0).toFixed(2)}</Td>
+                      <Td>{typeof fin.remainingWeeks === 'number' ? fin.remainingWeeks : '-'}</Td>
                           <Td>{fin.startDate ? new Date(fin.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
                           <Td>{fin.endDate ? new Date(fin.endDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
                           <Td>{getStatusBadge(fin.status)}</Td>
@@ -465,7 +405,7 @@ function AdminFinancingPageContent({
                                     variant="outline"
                                     onClick={() => {
                                       setSelectedFinancingId(fin.id);
-                                      onUploadOpen();
+                                      setIsUploadOpen(true);
                                     }}
                                   >
                                     {t('financing.actions.attach', 'Anexar')}
@@ -474,13 +414,13 @@ function AdminFinancingPageContent({
                               )}
                             </HStack>
                           </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
               </Box>
-            )}
+          )}
           </CardBody>
         </Card>
       </VStack>
@@ -488,8 +428,8 @@ function AdminFinancingPageContent({
       {/* Modal de Upload de Comprovante */}
       {selectedFinancingId && (
         <FinancingProofUpload
-          isOpen={isUploadOpen}
-          onClose={onUploadClose}
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
           financingId={selectedFinancingId}
           onUploadSuccess={() => {
             mutate();
@@ -500,6 +440,16 @@ function AdminFinancingPageContent({
           }}
         />
       )}
+
+      <FinancingModal
+        isOpen={isFinancingModalOpen}
+        onClose={handleCloseFinancingModal}
+        financing={editingFinancing}
+        drivers={initialDrivers}
+        onSave={handleSaveFinancing}
+        tCommon={tCommon}
+        tPage={tPage}
+      />
     </AdminLayout>
   );
 }

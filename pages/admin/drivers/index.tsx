@@ -21,25 +21,12 @@ import {
   IconButton,
   Tooltip,
   useToast,
-  FormControl,
-  FormLabel,
-  Switch,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  useDisclosure,
   useBreakpointValue,
 } from '@chakra-ui/react';
 import {
   FiEdit,
   FiRefreshCw,
   FiSearch,
-  FiUser,
-  FiCreditCard,
-  FiTruck,
-  FiDollarSign,
   FiPlus,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
@@ -47,7 +34,7 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getDrivers } from '@/lib/admin/adminQueries';
-import StructuredModal from '@/components/admin/StructuredModal';
+import DriverModal from '@/components/admin/DriverModal';
 
 interface Driver {
   id: string;
@@ -110,8 +97,9 @@ export default function DriversPage({
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
@@ -152,96 +140,74 @@ export default function DriversPage({
   }, [filterStatus, filterType, searchQuery]);
 
   const handleEdit = (driver: Driver) => {
-    setEditingDriver(driver);
-    onOpen();
+    setSelectedDriver(driver);
+    setIsEditMode(true);
+    setIsModalOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!editingDriver) return;
+  const handleAddNew = () => {
+    setSelectedDriver(null);
+    setIsEditMode(false);
+    setIsModalOpen(true);
+  };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDriver(null);
+    setIsEditMode(false);
+  };
+
+  const handleSaveDriver = async (driverData: any) => {
     try {
-      // ✅ Preparar apenas os campos que o schema espera
-      const updateData = {
-        // Campos básicos
-        status: editingDriver.status,
-        type: editingDriver.type,
-        fullName: editingDriver.fullName || editingDriver.name,
-        email: editingDriver.email,
-        phone: editingDriver.phone,
-        birthDate: editingDriver.birthDate,
-        city: editingDriver.city,
-        rentalFee: editingDriver.rentalFee || 0,
-        
-        // Integrações (se existirem)
-        integrations: editingDriver.integrations || undefined,
-        
-        // Dados bancários (se existirem)
-        banking: editingDriver.banking || undefined,
-        
-        // Veículo (se existir)
-        vehicle: editingDriver.vehicle || undefined,
-      };
-
-      console.log('🚀 Enviando dados:', updateData); // Debug
-
-      const response = await fetch(`/api/admin/drivers/${editingDriver.id}`, {
+      if (isEditMode && selectedDriver?.id) {
+        // Modo edição
+        const response = await fetch(`/api/admin/drivers/${selectedDriver.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
-      });
+          body: JSON.stringify(driverData),
+        });
 
-      if (response.ok) {
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar motorista');
+        }
+
         toast({
           title: t('drivers.list.toasts.updateSuccess', 'Motorista atualizado'),
           status: 'success',
           duration: 2000,
         });
-        onClose();
-        fetchDrivers(); // Re-fetch drivers to update the list
       } else {
+        // Modo criação
+        const response = await fetch('/api/admin/drivers/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(driverData),
+        });
+
+        if (!response.ok) {
         const error = await response.json();
-        console.error('❌ Erro na API:', error); // Debug
-        
-        // Mostrar detalhes específicos do erro de validação
-        let errorMessage = error.error || t('drivers.list.toasts.updateErrorDescription', 'Não foi possível atualizar os dados do motorista.');
-        
-        if (error.details && Array.isArray(error.details)) {
-          const validationErrors = error.details.map((detail: any) => `${detail.path?.join('.') || 'campo'}: ${detail.message}`).join(', ');
-          errorMessage = `Erro de validação: ${validationErrors}`;
+          throw new Error(error.error || 'Erro ao criar motorista');
         }
+
+        const result = await response.json();
         
         toast({
-          title: t('drivers.list.toasts.updateError', 'Erro ao atualizar motorista'),
-          description: errorMessage,
-          status: 'error',
-          duration: 5000, // Mais tempo para ler o erro
+          title: t('drivers.add.toasts.success.title', 'Motorista criado com sucesso!'),
+          description: t('drivers.add.toasts.success.description', 'Uma senha temporária foi gerada para o motorista.'),
+          status: 'success',
+          duration: 5000,
         });
+
+        return result; // Retorna para mostrar senha temporária
       }
-    } catch (error) {
-      toast({
-        title: t('drivers.list.toasts.updateError', 'Erro ao atualizar motorista'),
-        status: 'error',
-        duration: 3000,
-      });
+
+      fetchDrivers(); // Re-fetch drivers to update the list
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 
-  const updateField = (path: string, value: any) => {
-    if (!editingDriver) return;
-
-    const pathParts = path.split('.');
-    const updated = JSON.parse(JSON.stringify(editingDriver));
-
-    let current: any = updated;
-    for (let i = 0; i < pathParts.length - 1; i++) {
-      const key = pathParts[i];
-      if (!current[key]) current[key] = {};
-      current = current[key];
-    }
-
-    current[pathParts[pathParts.length - 1]] = value;
-    setEditingDriver(updated);
-  };
 
   const getStatusBadge = (status?: string) => {
     const colorMap: Record<string, string> = {
@@ -289,7 +255,7 @@ export default function DriversPage({
           leftIcon={<Icon as={FiPlus} />}
           colorScheme="red"
           size={'sm'}
-          onClick={() => router.push('/admin/drivers/add')}
+          onClick={handleAddNew}
         >
           {t('drivers.addDriver', 'Adicionar Motorista')}
         </Button>
@@ -453,318 +419,14 @@ export default function DriversPage({
         </CardBody>
       </Card>
 
-      <StructuredModal
-        isOpen={isOpen}
-        onClose={onClose}
-        size="2xl"
-        title={t('drivers.editDriver', 'Editar Motorista')}
-        footer={(
-          <HStack spacing={3} justify="flex-end" w="full">
-            <Button variant="ghost" onClick={onClose}>
-              {tc('actions.cancel', 'Cancelar')}
-            </Button>
-            <Button colorScheme="blue" onClick={handleSave}>
-              {tc('actions.save', 'Guardar')}
-            </Button>
-          </HStack>
-        )}
-      >
-        {editingDriver && (
-          <Tabs>
-            <TabList>
-              <Tab>
-                <Icon as={FiUser} mr={isMobile ? 1 : 2} />
-                {!isMobile && t('drivers.tabs.basic', 'Dados básicos')}
-              </Tab>
-              <Tab>
-                <Icon as={FiCreditCard} mr={isMobile ? 1 : 2} />
-                {!isMobile && t('drivers.tabs.integrations', 'Integrações')}
-              </Tab>
-              <Tab>
-                <Icon as={FiTruck} mr={isMobile ? 1 : 2} />
-                {!isMobile && t('drivers.tabs.vehicle', 'Veículo')}
-              </Tab>
-              <Tab>
-                <Icon as={FiDollarSign} mr={isMobile ? 1 : 2} />
-                {!isMobile && t('drivers.tabs.banking', 'Dados bancários')}
-              </Tab>
-            </TabList>
-
-            <TabPanels>
-              {/* Tab Básico */}
-              <TabPanel>
-                <VStack spacing={4}>
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.status.label', 'Status')}</FormLabel>
-                    <Select
-                      value={editingDriver.status || 'pending'}
-                      onChange={(e) => updateField('status', e.target.value)}
-                    >
-                      <option value="pending">{tc('status.pending', 'Pendente')}</option>
-                      <option value="active">{tc('status.active', 'Ativo')}</option>
-                      <option value="inactive">{tc('status.inactive', 'Inativo')}</option>
-                      <option value="suspended">{tc('status.suspended', 'Suspenso')}</option>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.type.label', 'Tipo')}</FormLabel>
-                    <Select
-                      value={editingDriver.type || 'affiliate'}
-                      onChange={(e) => updateField('type', e.target.value)}
-                    >
-                      <option value="affiliate">{t('drivers.type.affiliate', 'Afiliado')}</option>
-                      <option value="renter">{t('drivers.type.renter', 'Locatário')}</option>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.fullName.label', 'Nome completo')}</FormLabel>
-                    <Input
-                      value={editingDriver.fullName || editingDriver.name || ''}
-                      onChange={(e) => updateField('fullName', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.email.label', 'Email')}</FormLabel>
-                    <Input
-                      type="email"
-                      value={editingDriver.email || ''}
-                      onChange={(e) => updateField('email', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.phone.label', 'Telefone')}</FormLabel>
-                    <Input
-                      value={editingDriver.phone || ''}
-                      onChange={(e) => updateField('phone', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.birthDate.label', 'Data de Nascimento')}</FormLabel>
-                    <Input
-                      type="date"
-                      value={editingDriver.birthDate || ''}
-                      onChange={(e) => updateField('birthDate', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.form.city.label', 'Cidade')}</FormLabel>
-                    <Input
-                      value={editingDriver.city || ''}
-                      onChange={(e) => updateField('city', e.target.value)}
-                      placeholder={t('drivers.form.city.placeholder', 'Lisboa')}
-                    />
-                  </FormControl>
-
-                  {/* Campo de valor de aluguel apenas para locatários */}
-                  {editingDriver.type === 'renter' && (
-                    <FormControl>
-                      <FormLabel>{t('drivers.form.rentalFee.label', 'Valor de aluguel (€/semana)')}</FormLabel>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={editingDriver.rentalFee || 0}
-                        onChange={(e) => updateField('rentalFee', parseFloat(e.target.value) || 0)}
-                        placeholder={t('drivers.form.rentalFee.placeholder', '0.00')}
-                      />
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        {t('drivers.form.rentalFee.description', 'Valor do aluguel semanal cobrado do locatário.')}
-                      </Text>
-                    </FormControl>
-                  )}
-                </VStack>
-              </TabPanel>
-
-              {/* Tab Integrações */}
-              <TabPanel>
-                <VStack spacing={4}>
-                  {/* Uber */}
-                  <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
-                    <HStack justify="space-between" mb={3}>
-                      <Heading size="sm">{t('drivers.integrations.uber.title', 'Uber')}</Heading>
-                      <Switch
-                        isChecked={editingDriver.integrations?.uber?.enabled || false}
-                        onChange={(e) => updateField('integrations.uber.enabled', e.target.checked)}
-                        colorScheme="green"
-                      />
-                    </HStack>
-                    <FormControl>
-                      <FormLabel fontSize="sm">{t('drivers.integrations.uber.keyLabel', 'UUID do motorista')}</FormLabel>
-                      <Input
-                        placeholder={t('drivers.integrations.uber.placeholder', 'Ex: 12345678-1234-1234-1234-123456789012')}
-                        value={editingDriver.integrations?.uber?.key || ''}
-                        onChange={(e) => updateField('integrations.uber.key', e.target.value)}
-                        isDisabled={!editingDriver.integrations?.uber?.enabled}
-                        fontFamily="mono"
-                        fontSize="sm"
-                      />
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        {t('drivers.integrations.uber.description', 'Identificador do motorista utilizado nas exportações da Uber.')}
-                      </Text>
-                    </FormControl>
-                  </Box>
-
-                  {/* Bolt */}
-                  <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
-                    <HStack justify="space-between" mb={3}>
-                      <Heading size="sm">{t('drivers.integrations.bolt.title', 'Bolt')}</Heading>
-                      <Switch
-                        isChecked={editingDriver.integrations?.bolt?.enabled || false}
-                        onChange={(e) => updateField('integrations.bolt.enabled', e.target.checked)}
-                        colorScheme="green"
-                      />
-                    </HStack>
-                    <FormControl>
-                      <FormLabel fontSize="sm">{t('drivers.integrations.bolt.keyLabel', 'Email associado')}</FormLabel>
-                      <Input
-                        type="email"
-                        placeholder={t('drivers.integrations.bolt.placeholder', 'email@exemplo.com')}
-                        value={editingDriver.integrations?.bolt?.key || ''}
-                        onChange={(e) => updateField('integrations.bolt.key', e.target.value)}
-                        isDisabled={!editingDriver.integrations?.bolt?.enabled}
-                        fontSize="sm"
-                      />
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        {t('drivers.integrations.bolt.description', 'Email utilizado para autenticar a integração com a Bolt.')}
-                      </Text>
-                    </FormControl>
-                  </Box>
-
-                  {/* MyPrio */}
-                  <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
-                    <HStack justify="space-between" mb={3}>
-                      <Heading size="sm">{t('drivers.integrations.myprio.title', 'MyPrio')}</Heading>
-                      <Switch
-                        isChecked={editingDriver.integrations?.myprio?.enabled || false}
-                        onChange={(e) => updateField('integrations.myprio.enabled', e.target.checked)}
-                        colorScheme="green"
-                      />
-                    </HStack>
-                    <FormControl>
-                      <FormLabel fontSize="sm">{t('drivers.integrations.myprio.keyLabel', 'Número do cartão')}</FormLabel>
-                      <Input
-                        placeholder={t('drivers.integrations.myprio.placeholder', 'Ex: 1234567890123456')}
-                        value={editingDriver.integrations?.myprio?.key || ''}
-                        onChange={(e) => updateField('integrations.myprio.key', e.target.value)}
-                        isDisabled={!editingDriver.integrations?.myprio?.enabled}
-                        fontFamily="mono"
-                        fontSize="sm"
-                      />
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        {t('drivers.integrations.myprio.description', 'Número do cartão para abastecimentos PRIO.')}
-                      </Text>
-                    </FormControl>
-                  </Box>
-
-                  {/* ViaVerde */}
-                  <Box w="100%" p={4} borderWidth={1} borderRadius="md" bg="gray.50">
-                    <HStack justify="space-between" mb={3}>
-                      <Heading size="sm">{t('drivers.integrations.viaverde.title', 'ViaVerde')}</Heading>
-                      <Switch
-                        isChecked={editingDriver.integrations?.viaverde?.enabled || false}
-                        onChange={(e) => updateField('integrations.viaverde.enabled', e.target.checked)}
-                        colorScheme="green"
-                      />
-                    </HStack>
-                    <FormControl>
-                      <FormLabel fontSize="sm">{t('drivers.integrations.viaverde.keyLabel', 'Matrícula vinculada')}</FormLabel>
-                      <Input
-                        placeholder={t('drivers.integrations.viaverde.placeholder', 'Ex: AB-12-CD')}
-                        value={editingDriver.integrations?.viaverde?.key || editingDriver.vehicle?.plate || ''}
-                        onChange={(e) => updateField('integrations.viaverde.key', e.target.value)}
-                        isDisabled={!editingDriver.integrations?.viaverde?.enabled}
-                        fontFamily="mono"
-                        fontSize="sm"
-                      />
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        {t('drivers.integrations.viaverde.description', 'Matrícula utilizada para associar transações de portagens.')}
-                      </Text>
-                    </FormControl>
-                  </Box>
-                </VStack>
-              </TabPanel>
-
-              {/* Tab Veículo */}
-              <TabPanel>
-                <VStack spacing={4}>
-                  <FormControl>
-                    <FormLabel>{t('drivers.vehicle.plate.label', 'Matrícula')}</FormLabel>
-                    <Input
-                      placeholder={t('drivers.vehicle.plate.placeholder', 'Ex: AB-12-CD')}
-                      value={editingDriver.vehicle?.plate || ''}
-                      onChange={(e) => updateField('vehicle.plate', e.target.value)}
-                      fontFamily="mono"
-                    />
-                    <Text fontSize="xs" color="gray.600" mt={1}>
-                      {t('drivers.vehicle.plate.description', 'Utilizado para associações com ViaVerde e controle de frota.')}
-                    </Text>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.vehicle.make.label', 'Marca')}</FormLabel>
-                    <Input
-                      placeholder={t('drivers.vehicle.make.placeholder', 'Ex: Toyota')}
-                      value={editingDriver.vehicle?.make || ''}
-                      onChange={(e) => updateField('vehicle.make', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.vehicle.model.label', 'Modelo')}</FormLabel>
-                    <Input
-                      placeholder={t('drivers.vehicle.model.placeholder', 'Ex: Prius')}
-                      value={editingDriver.vehicle?.model || ''}
-                      onChange={(e) => updateField('vehicle.model', e.target.value)}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.vehicle.year.label', 'Ano')}</FormLabel>
-                    <Input
-                      type="number"
-                      placeholder={t('drivers.vehicle.year.placeholder', 'Ex: 2020')}
-                      value={editingDriver.vehicle?.year || ''}
-                      onChange={(e) => updateField('vehicle.year', parseInt(e.target.value) || undefined)}
-                    />
-                  </FormControl>
-                </VStack>
-              </TabPanel>
-
-              {/* Tab Bancário */}
-              <TabPanel>
-                <VStack spacing={4}>
-                  <FormControl>
-                    <FormLabel>{t('drivers.bank.iban.label', 'IBAN')}</FormLabel>
-                    <Input
-                      placeholder={t('drivers.bank.iban.placeholder', 'PT50 0000 0000 0000 0000 0000 0')}
-                      value={editingDriver.banking?.iban || ''}
-                      onChange={(e) => updateField('banking.iban', e.target.value)}
-                      fontFamily="mono"
-                    />
-                    <Text fontSize="xs" color="gray.600" mt={1}>
-                      {t('drivers.bank.iban.description', 'Utilizado para pagamentos e repasses semanais.')}
-                    </Text>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>{t('drivers.bank.accountHolder.label', 'Titular da conta')}</FormLabel>
-                    <Input
-                      placeholder={t('drivers.bank.accountHolder.placeholder', 'Nome completo do titular')}
-                      value={editingDriver.banking?.accountHolder || ''}
-                      onChange={(e) => updateField('banking.accountHolder', e.target.value)}
-                    />
-                  </FormControl>
-                </VStack>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        )}
-      </StructuredModal>
+      <DriverModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        driver={selectedDriver}
+        onSave={handleSaveDriver}
+        tCommon={tCommon}
+        tPage={tPage}
+      />
     </AdminLayout>
   );
 }
