@@ -31,8 +31,15 @@ import {
   StatNumber,
   StatHelpText,
   Divider,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from '@chakra-ui/react';
-import { FiDollarSign, FiPlus, FiUpload, FiDownload, FiFileText, FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiDollarSign, FiPlus, FiUpload, FiDownload, FiFileText, FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle, FiEdit, FiXCircle } from 'react-icons/fi';
 import FinancingProofUpload from '@/components/admin/FinancingProofUpload';
 import FinancingModal from '@/components/admin/FinancingModal';
 import useSWR, { SWRConfig } from 'swr';
@@ -83,9 +90,72 @@ function AdminFinancingPageContent({
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFinancingModalOpen, setIsFinancingModalOpen] = useState(false);
   const [editingFinancing, setEditingFinancing] = useState<any | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedFinancing, setSelectedFinancing] = useState<any | null>(null);
 
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+
+  const handleOpenDetails = (fin: any) => {
+    setSelectedFinancing(fin);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedFinancing(null);
+    setIsDetailsModalOpen(false);
+  };
+
+  const handleEditFromDetails = () => {
+    setEditingFinancing(selectedFinancing);
+    setIsDetailsModalOpen(false);
+    setIsFinancingModalOpen(true);
+  };
+
+  const handleUploadProofFromDetails = () => {
+    setSelectedFinancingId(selectedFinancing?.id);
+    setIsDetailsModalOpen(false);
+    setIsUploadOpen(true);
+  };
+
+  const handleCancelFinancing = async () => {
+    if (!selectedFinancing?.id) return;
+    
+    if (!confirm(t('financing.actions.cancelConfirm', 'Tem certeza que deseja cancelar este financiamento?'))) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/admin/financing/${selectedFinancing.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast({
+          title: t('financing.messages.cancelled', 'Financiamento cancelado'),
+          status: 'success',
+          duration: 3000,
+        });
+      mutate();
+        handleCloseDetails();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        title: t('financing.messages.error', 'Erro'),
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ Calcular estatísticas
   const stats = useMemo(() => {
@@ -327,7 +397,10 @@ function AdminFinancingPageContent({
                             bg="white"
                             borderWidth={1}
                             borderRadius="md"
-                            _hover={{ bg: 'gray.50' }}
+                            cursor="pointer"
+                            _hover={{ bg: 'blue.50', borderColor: 'blue.300' }}
+                            transition="all 0.2s"
+                            onClick={() => handleOpenDetails(fin)}
                           >
                             <VStack align="start" spacing={2}>
                               <HStack justify="space-between" w="full">
@@ -443,107 +516,165 @@ function AdminFinancingPageContent({
                           </HStack>
           </HStack>
         </Box>
-                        );
-                      })}
+                  );
+                })}
                       </VStack>
-                    )}
-                  </Box>
+          )}
+        </Box>
                 </VStack>
               </CardBody>
             </Card>
           </GridItem>
         </Grid>
 
-        <Divider />
-
-        {/* Tabela completa para mais detalhes (desktop) */}
-        <Card>
-          <CardBody>
-            <Heading size="sm" mb={4} display="flex" alignItems="center">
-              <Icon as={FiDollarSign} mr={2} />
-              {t('financing.list.details', 'Detalhes dos Financiamentos')}
-            </Heading>
-            
-          {financing.length === 0 ? (
-              <Text color="gray.500">{t('financing.list.empty', 'Nenhum financiamento encontrado.')}</Text>
-          ) : (
-              <Box overflowX="auto">
-            <Table size="sm">
-              <Thead>
-                <Tr>
-                      <Th>{t('financing.table.driver', 'Motorista')}</Th>
-                      <Th>{t('financing.table.type', 'Tipo')}</Th>
-                      <Th>{t('financing.table.amount', 'Valor (€)')}</Th>
-                      <Th>{t('financing.table.weeks', 'Semanas')}</Th>
-                      <Th>{t('financing.table.interest', 'Juros/sem (€)')}</Th>
-                      <Th>{t('financing.table.remaining', 'Restante')}</Th>
-                      <Th>{t('financing.table.start', 'Início')}</Th>
-                      <Th>{t('financing.table.status', 'Status')}</Th>
-                      <Th>{t('financing.table.proof', 'Comprovante')}</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {financing.map((fin) => {
-                      const driver = initialDrivers.find((d) => d.id === fin.driverId);
-                  return (
-                    <Tr key={fin.id}>
-                          <Td>{driver ? (driver.fullName || driver.name) : fin.driverId}</Td>
-                          <Td>{getTypeBadge(fin.type)}</Td>
-                      <Td>{(fin.amount ?? 0).toFixed(2)}</Td>
-                      <Td>{fin.weeks ?? '-'}</Td>
-                      <Td>{(fin.weeklyInterest ?? 0).toFixed(2)}</Td>
-                      <Td>{typeof fin.remainingWeeks === 'number' ? fin.remainingWeeks : '-'}</Td>
-                          <Td>{fin.startDate ? new Date(fin.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
-                          <Td>{getStatusBadge(fin.status)}</Td>
-                          <Td>
-                            <HStack spacing={2}>
-                              {fin.proofUrl ? (
-                                <>
-                                  <Tooltip label={t('financing.actions.downloadProof', 'Baixar comprovante')}>
-                                    <IconButton
-                                      aria-label={t('financing.actions.downloadProof', 'Baixar comprovante')}
-                                      icon={<Icon as={FiDownload} />}
-                                      size="sm"
-                                      colorScheme="green"
-                                      variant="ghost"
-                                      as="a"
-                                      href={fin.proofUrl}
-                                      target="_blank"
-                                    />
-                                  </Tooltip>
-                                  <Badge colorScheme="green" fontSize="xs">
-                                    <Icon as={FiFileText} mr={1} />
-                                    {t('financing.status.attached', 'Anexado')}
-                                  </Badge>
-                                </>
-                              ) : (
-                                <Tooltip label={t('financing.actions.attachProof', 'Anexar comprovante')}>
-                                  <Button
-                                    size="sm"
-                                    leftIcon={<Icon as={FiUpload} />}
-                                    colorScheme="blue"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setSelectedFinancingId(fin.id);
-                                      setIsUploadOpen(true);
-                                    }}
-                                  >
-                                    {t('financing.actions.attach', 'Anexar')}
-                                  </Button>
-                                </Tooltip>
-                              )}
-                            </HStack>
-                          </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-              </Box>
-          )}
-          </CardBody>
-        </Card>
       </VStack>
+      
+      {/* Modal de Detalhes do Financiamento */}
+      <Modal isOpen={isDetailsModalOpen} onClose={handleCloseDetails} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <HStack>
+              <Icon as={FiDollarSign} />
+              <Text>{t('financing.details.title', 'Detalhes do Financiamento')}</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            {selectedFinancing && (
+              <VStack spacing={4} align="stretch">
+                {/* Motorista */}
+                <Box>
+                  <Text fontSize="sm" color="gray.600" mb={1}>{t('financing.details.driver', 'Motorista')}</Text>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {initialDrivers.find((d) => d.id === selectedFinancing.driverId)?.fullName || 
+                     initialDrivers.find((d) => d.id === selectedFinancing.driverId)?.name || 
+                     selectedFinancing.driverId}
+                  </Text>
+                </Box>
+
+                <Divider />
+
+                {/* Informações Principais */}
+                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                  <Box>
+                    <Text fontSize="sm" color="gray.600">{t('financing.details.type', 'Tipo')}</Text>
+                    <HStack>
+                      <Badge colorScheme={selectedFinancing.type === 'loan' ? 'blue' : 'purple'} fontSize="md">
+                        {selectedFinancing.type === 'loan' ? t('financing.type.loan', 'Empréstimo') : t('financing.type.discount', 'Desconto')}
+                      </Badge>
+                    </HStack>
+                  </Box>
+                  <Box>
+                    <Text fontSize="sm" color="gray.600">{t('financing.details.status', 'Status')}</Text>
+                    <Badge colorScheme={selectedFinancing.status === 'active' ? 'green' : 'gray'} fontSize="md">
+                      {selectedFinancing.status === 'active' ? t('financing.status.active', 'Ativo') : t('financing.status.completed', 'Finalizado')}
+                    </Badge>
+                  </Box>
+                </Grid>
+
+                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                  <Box>
+                    <Text fontSize="sm" color="gray.600">{t('financing.details.amount', 'Valor')}</Text>
+                    <Text fontWeight="bold" fontSize="xl" color="blue.600">€{(selectedFinancing.amount || 0).toFixed(2)}</Text>
+                  </Box>
+                  {selectedFinancing.weeks && (
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">{t('financing.details.weeks', 'Semanas')}</Text>
+                      <Text fontWeight="bold" fontSize="lg">
+                        {selectedFinancing.remainingWeeks || 0} / {selectedFinancing.weeks}
+                      </Text>
+                    </Box>
+                  )}
+                </Grid>
+
+                {selectedFinancing.weeklyInterest > 0 && (
+                  <Box>
+                    <Text fontSize="sm" color="gray.600">{t('financing.details.interest', 'Juros Semanal')}</Text>
+                    <Text fontWeight="bold">{selectedFinancing.weeklyInterest}%</Text>
+                  </Box>
+                )}
+
+                <Box>
+                  <Text fontSize="sm" color="gray.600">{t('financing.details.startDate', 'Data de Início')}</Text>
+                  <Text>{selectedFinancing.startDate ? new Date(selectedFinancing.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Text>
+                </Box>
+
+                {selectedFinancing.notes && (
+                  <Box>
+                    <Text fontSize="sm" color="gray.600">{t('financing.details.notes', 'Observações')}</Text>
+                    <Text>{selectedFinancing.notes}</Text>
+                  </Box>
+                )}
+
+                <Divider />
+
+                {/* Comprovante */}
+                <Box>
+                  <Text fontSize="sm" color="gray.600" mb={2}>{t('financing.details.proof', 'Comprovante de Pagamento')}</Text>
+                  {selectedFinancing.proofUrl ? (
+                    <HStack>
+                      <Icon as={FiCheckCircle} color="green.500" />
+                      <Text color="green.600">{t('financing.proof.attached', 'Comprovante anexado')}</Text>
+                      <Button
+                        size="sm"
+                        leftIcon={<Icon as={FiDownload} />}
+                        colorScheme="green"
+                        variant="outline"
+                        onClick={() => window.open(selectedFinancing.proofUrl, '_blank')}
+                      >
+                        {t('financing.proof.view', 'Ver')}
+                      </Button>
+                    </HStack>
+                  ) : (
+                    <HStack>
+                      <Icon as={FiAlertCircle} color="orange.500" />
+                      <Text color="gray.600">{t('financing.proof.notAttached', 'Sem comprovante')}</Text>
+                    </HStack>
+                  )}
+                </Box>
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <HStack spacing={3} w="full" justify="space-between">
+              <HStack>
+                {selectedFinancing?.status === 'active' && (
+                  <Button
+                    colorScheme="red"
+                    variant="outline"
+                    leftIcon={<Icon as={FiXCircle} />}
+                    onClick={handleCancelFinancing}
+                    isLoading={loading}
+                  >
+                    {t('financing.actions.cancel', 'Cancelar')}
+                  </Button>
+                )}
+              </HStack>
+              <HStack>
+                <Button
+                  leftIcon={<Icon as={FiUpload} />}
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={handleUploadProofFromDetails}
+                >
+                  {selectedFinancing?.proofUrl 
+                    ? t('financing.proof.update', 'Atualizar Comprovante')
+                    : t('financing.proof.attach', 'Anexar Comprovante')
+                  }
+                </Button>
+                <Button
+                  leftIcon={<Icon as={FiEdit} />}
+                  colorScheme="green"
+                  onClick={handleEditFromDetails}
+                >
+                  {t('common.actions.edit', 'Editar')}
+                </Button>
+              </HStack>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       
       {/* Modal de Upload de Comprovante */}
       {selectedFinancingId && (
