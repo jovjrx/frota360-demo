@@ -48,7 +48,7 @@ import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
-import useSWR from 'swr';
+import useSWR, { SWRConfig } from 'swr';
 
 interface DriverRequest {
   id: string;
@@ -80,7 +80,7 @@ interface SolicitacoesPageProps extends AdminPageProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, translations }: SolicitacoesPageProps) {
+function SolicitacoesPageContent({ locale, initialData, tCommon, tPage, translations }: SolicitacoesPageProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -99,11 +99,7 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
 
   const { data, mutate } = useSWR<RequestsData>(
     `/api/admin/requests?status=${statusFilter}`,
-    fetcher,
-    {
-      fallbackData: initialData,
-      refreshInterval: 10000,
-    }
+    fetcher
   );
 
   const requests = data?.requests || [];
@@ -473,6 +469,20 @@ export default function SolicitacoesPage({ locale, initialData, tCommon, tPage, 
 }
 
 // SSR com autenticação, traduções e dados iniciais
+export default function SolicitacoesPage(props: SolicitacoesPageProps) {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          '/api/admin/requests?status=all': props.initialData,
+        },
+      }}
+    >
+      <SolicitacoesPageContent {...props} />
+    </SWRConfig>
+  );
+}
+
 export const getServerSideProps = withAdminSSR(async (context, user) => {
   // Carregar dados iniciais diretamente do Firestore
   const [requests, stats] = await Promise.all([

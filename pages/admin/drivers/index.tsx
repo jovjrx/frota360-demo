@@ -132,11 +132,15 @@ export default function DriversPage({
   };
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchDrivers();
-    }, 300);
+    // Só fazer fetch se houver filtros ativos ou busca
+    // Caso contrário, usar os dados do SSR
+    if (filterStatus !== 'all' || filterType !== 'all' || searchQuery) {
+      const delayDebounceFn = setTimeout(() => {
+        fetchDrivers();
+      }, 300);
 
-    return () => clearTimeout(delayDebounceFn);
+      return () => clearTimeout(delayDebounceFn);
+    }
   }, [filterStatus, filterType, searchQuery]);
 
   const handleEdit = (driver: Driver) => {
