@@ -55,6 +55,7 @@ interface Driver {
 interface AdminFinancingPageProps extends AdminPageProps {
   initialDrivers: Driver[];
   initialFinancing: any[];
+  initialRequests: any[];
 }
 
 function AdminFinancingPageContent({
@@ -62,6 +63,7 @@ function AdminFinancingPageContent({
   locale,
   initialDrivers,
   initialFinancing,
+  initialRequests,
   tCommon,
   tPage,
   translations,
@@ -346,8 +348,8 @@ function AdminFinancingPageContent({
                               {t('financing.requests.review', 'Revisar')}
                             </Button>
                           </HStack>
-                        </HStack>
-                      </Box>
+          </HStack>
+        </Box>
                     );
                   })}
                 </VStack>
@@ -480,6 +482,7 @@ export default function AdminFinancingPage(props: AdminFinancingPageProps) {
       value={{
         fallback: {
           '/api/admin/financing': { financing: props.initialFinancing },
+          '/api/admin/financing/requests': { requests: props.initialRequests },
         },
       }}
     >
@@ -493,14 +496,24 @@ export const getServerSideProps = withAdminSSR(async (context, user) => {
   const drivers = await getDrivers({ status: 'active' });
   
   // Buscar financiamentos direto do Firestore
-  const snapshot = await adminDb
+  const financingSnapshot = await adminDb
     .collection('financing')
     .orderBy('createdAt', 'desc')
     .get();
-  const financing = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const financing = financingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  // Buscar solicitações pendentes
+  const requestsSnapshot = await adminDb
+    .collection('financing_requests')
+    .where('status', '==', 'pending')
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .get();
+  const requests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
   return {
     initialDrivers: drivers,
     initialFinancing: financing,
+    initialRequests: requests,
   };
 });

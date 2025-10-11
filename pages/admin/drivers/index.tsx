@@ -22,19 +22,38 @@ import {
   Tooltip,
   useToast,
   useBreakpointValue,
+  Grid,
+  GridItem,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Divider,
+  Textarea,
+  useDisclosure,
 } from '@chakra-ui/react';
 import {
   FiEdit,
   FiRefreshCw,
   FiSearch,
   FiPlus,
+  FiUsers,
+  FiUserCheck,
+  FiClock,
+  FiUserPlus,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiXCircle,
+  FiPhone,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
-import { getDrivers } from '@/lib/admin/adminQueries';
+import { getDrivers, getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
 import DriverModal from '@/components/admin/DriverModal';
+import useSWR, { SWRConfig } from 'swr';
+import StructuredModal from '@/components/admin/StructuredModal';
 
 interface Driver {
   id: string;
@@ -77,14 +96,40 @@ interface Driver {
   };
 }
 
-interface DriversPageProps extends AdminPageProps {
-  initialDrivers: Driver[];
+interface DriverRequest {
+  id: string;
+  fullName: string;
+  birthDate?: string;
+  email: string;
+  phone: string;
+  city?: string;
+  nif?: string;
+  licenseNumber?: string;
+  type: 'affiliate' | 'renter';
+  vehicle?: {
+    make: string;
+    model: string;
+    year: number;
+    plate: string;
+  };
+  status: 'pending' | 'evaluation' | 'approved' | 'rejected';
+  createdAt: string;
+  notes?: string;
+  rejectionReason?: string;
 }
 
-export default function DriversPage({
+interface DriversPageProps extends AdminPageProps {
+  initialDrivers: Driver[];
+  initialRequests: DriverRequest[];
+}
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+function DriversPageContent({
   user,
   locale,
   initialDrivers,
+  initialRequests,
   tCommon,
   tPage,
   translations,
@@ -100,12 +145,38 @@ export default function DriversPage({
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Solicitações pendentes
+  const { data: requestsData, mutate: mutateRequests } = useSWR<{ requests: DriverRequest[] }>(
+    '/api/admin/requests?status=pending',
+    fetcher
+  );
+  const pendingRequests = requestsData?.requests || [];
+  
+  // Modais de aprovação/rejeição
+  const [selectedRequest, setSelectedRequest] = useState<DriverRequest | null>(null);
+  const { isOpen: isApproveModalOpen, onOpen: onApproveModalOpen, onClose: onApproveModalClose } = useDisclosure();
+  const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [isApproving, setIsApproving] = useState(false);
 
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
   
   // Detectar se é mobile para ajustar abas
   const isMobile = useBreakpointValue({ base: true, md: false });
+
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    const total = drivers.length;
+    const active = drivers.filter(d => d.status === 'active').length;
+    const pending = drivers.filter(d => d.status === 'pending').length;
+    const affiliates = drivers.filter(d => d.type === 'affiliate').length;
+    const renters = drivers.filter(d => d.type === 'renter').length;
+    const pendingRequestsCount = pendingRequests.length;
+
+    return { total, active, pending, affiliates, renters, pendingRequestsCount };
+  }, [drivers, pendingRequests]);
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -135,11 +206,11 @@ export default function DriversPage({
     // Só fazer fetch se houver filtros ativos ou busca
     // Caso contrário, usar os dados do SSR
     if (filterStatus !== 'all' || filterType !== 'all' || searchQuery) {
-      const delayDebounceFn = setTimeout(() => {
-        fetchDrivers();
-      }, 300);
+    const delayDebounceFn = setTimeout(() => {
+      fetchDrivers();
+    }, 300);
 
-      return () => clearTimeout(delayDebounceFn);
+    return () => clearTimeout(delayDebounceFn);
     }
   }, [filterStatus, filterType, searchQuery]);
 
@@ -159,6 +230,122 @@ export default function DriversPage({
     setIsModalOpen(false);
     setSelectedDriver(null);
     setIsEditMode(false);
+  };
+
+  // Funções para solicitações
+  const handleApproveRequest = (request: DriverRequest) => {
+    setSelectedRequest(request);
+    onApproveModalOpen();
+  };
+
+  const handleRejectRequest = (request: DriverRequest) => {
+    setSelectedRequest(request);
+    setRejectionReason('');
+    onRejectModalOpen();
+  };
+
+  const handleMarkContact = async (requestId: string) => {
+    try {
+      const response = await fetch('/api/admin/requests/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: 'evaluation' }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.contact.success', 'Status atualizado'),
+          description: t('requests.contact.description', 'Solicitação marcada como "em avaliação"'),
+          status: 'success',
+          duration: 2000,
+        });
+        mutateRequests();
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.contact.error', 'Erro ao atualizar'),
+        status: 'error',
+        duration: 3000,
+      });
+    }
+  };
+
+  const confirmApprove = async () => {
+    if (!selectedRequest) return;
+    
+    setIsApproving(true);
+    try {
+      const response = await fetch('/api/admin/requests/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: selectedRequest.id }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.approve.success', 'Solicitação aprovada!'),
+          description: t('requests.approve.description', 'Motorista criado com sucesso'),
+          status: 'success',
+          duration: 3000,
+        });
+        onApproveModalClose();
+        mutateRequests();
+        fetchDrivers(); // Atualizar lista de motoristas
+      } else {
+        throw new Error('Erro ao aprovar');
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.approve.error', 'Erro ao aprovar'),
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!selectedRequest || !rejectionReason) {
+      toast({
+        title: t('requests.reject.reasonRequired', 'Motivo é obrigatório'),
+        status: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+    
+    setIsApproving(true);
+    try {
+      const response = await fetch('/api/admin/requests/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          requestId: selectedRequest.id,
+          rejectionReason,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.reject.success', 'Solicitação rejeitada'),
+          status: 'success',
+          duration: 2000,
+        });
+        onRejectModalClose();
+        mutateRequests();
+      } else {
+        throw new Error('Erro ao rejeitar');
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.reject.error', 'Erro ao rejeitar'),
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const handleSaveDriver = async (driverData: any) => {
@@ -265,7 +452,158 @@ export default function DriversPage({
         </Button>
       }
     >
+      <VStack spacing={6} align="stretch">
+        {/* Estatísticas */}
+        <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap={4}>
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiUsers} mr={2} />
+                    {t('drivers.stats.total', 'Total')}
+                  </StatLabel>
+                  <StatNumber>{stats.total}</StatNumber>
+                  <StatHelpText>{t('drivers.stats.totalDesc', 'Motoristas')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiUserCheck} mr={2} />
+                    {t('drivers.stats.active', 'Ativos')}
+                  </StatLabel>
+                  <StatNumber color="green.500">{stats.active}</StatNumber>
+                  <StatHelpText>{t('drivers.stats.activeDesc', 'Trabalhando')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiClock} mr={2} />
+                    {t('drivers.stats.pending', 'Pendentes')}
+                  </StatLabel>
+                  <StatNumber color="orange.500">{stats.pending}</StatNumber>
+                  <StatHelpText>{t('drivers.stats.pendingDesc', 'Aguardando')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+          
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Stat>
+                  <StatLabel display="flex" alignItems="center">
+                    <Icon as={FiUserPlus} mr={2} />
+                    {t('drivers.stats.affiliates', 'Afiliados')}
+                  </StatLabel>
+                  <StatNumber color="blue.500">{stats.affiliates}</StatNumber>
+                  <StatHelpText>{stats.renters} {t('drivers.stats.renters', 'Locatários')}</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
 
+        <Divider />
+
+        {/* Solicitações Pendentes */}
+        {pendingRequests.length > 0 && (
+          <Card borderLeft="4px" borderLeftColor="orange.400">
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                <Heading size="md" display="flex" alignItems="center">
+                  <Icon as={FiAlertCircle} mr={2} color="orange.500" />
+                  {t('drivers.requests.title', 'Solicitações Pendentes')}
+                  <Badge ml={2} colorScheme="orange">{pendingRequests.length}</Badge>
+                </Heading>
+                
+                <Text color="gray.600" fontSize="sm">
+                  {t('drivers.requests.description', 'Candidaturas que aguardam aprovação para se tornarem motoristas.')}
+                </Text>
+
+                <VStack spacing={3} align="stretch">
+                  {pendingRequests.map((req) => (
+                    <Box
+                      key={req.id}
+                      p={4}
+                      bg="orange.50"
+                      borderRadius="md"
+                      borderWidth={1}
+                      borderColor="orange.200"
+                    >
+                      <HStack justify="space-between" wrap="wrap" spacing={4}>
+                        <VStack align="start" spacing={1} flex="1">
+                          <Text fontWeight="bold">{req.fullName}</Text>
+                          <HStack spacing={2} flexWrap="wrap">
+                            <Badge colorScheme={req.type === 'affiliate' ? 'blue' : 'purple'}>
+                              {req.type === 'affiliate' ? t('drivers.type.affiliate', 'Afiliado') : t('drivers.type.renter', 'Locatário')}
+                            </Badge>
+                            <Text fontSize="sm" color="gray.600">{req.email}</Text>
+                            <Text fontSize="sm" color="gray.600">{req.phone}</Text>
+                            {req.city && <Text fontSize="sm" color="gray.600">📍 {req.city}</Text>}
+                          </HStack>
+                          {req.vehicle && (
+                            <Text fontSize="sm" color="gray.600">
+                              🚗 {req.vehicle.make} {req.vehicle.model} ({req.vehicle.year}) - {req.vehicle.plate}
+                            </Text>
+                          )}
+                        </VStack>
+                        
+                        <HStack spacing={2}>
+                          <Tooltip label={t('requests.actions.approve', 'Aprovar solicitação')}>
+                            <IconButton
+                              aria-label="Aprovar"
+                              icon={<Icon as={FiCheckCircle} />}
+                              colorScheme="green"
+                              size="sm"
+                              onClick={() => handleApproveRequest(req)}
+                            />
+                          </Tooltip>
+                          
+                          <Tooltip label={t('requests.actions.contact', 'Marcar contato feito')}>
+                            <IconButton
+                              aria-label="Contato"
+                              icon={<Icon as={FiPhone} />}
+                              colorScheme="blue"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleMarkContact(req.id)}
+                            />
+                          </Tooltip>
+                          
+                          <Tooltip label={t('requests.actions.reject', 'Rejeitar solicitação')}>
+                            <IconButton
+                              aria-label="Rejeitar"
+                              icon={<Icon as={FiXCircle} />}
+                              colorScheme="red"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRejectRequest(req)}
+                            />
+                          </Tooltip>
+                        </HStack>
+                      </HStack>
+                    </Box>
+                  ))}
+                </VStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        )}
+
+        <Divider />
 
       <Card>
         <CardBody>
@@ -431,17 +769,117 @@ export default function DriversPage({
         tCommon={tCommon}
         tPage={tPage}
       />
+
+      {/* Modal de Aprovação */}
+      <StructuredModal
+        isOpen={isApproveModalOpen}
+        onClose={onApproveModalClose}
+        title={t('requests.approve.title', 'Aprovar Solicitação')}
+        size="md"
+        footer={(
+          <HStack spacing={3} justify="flex-end" w="full">
+            <Button variant="ghost" onClick={onApproveModalClose}>
+              {tc('actions.cancel', 'Cancelar')}
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={confirmApprove}
+              isLoading={isApproving}
+            >
+              {tc('actions.approve', 'Aprovar')}
+            </Button>
+          </HStack>
+        )}
+      >
+        {selectedRequest && (
+          <VStack spacing={4} align="stretch">
+            <Text>
+              {t('requests.approve.confirm', 'Tem certeza que deseja aprovar a solicitação de')} <strong>{selectedRequest.fullName}</strong>?
+            </Text>
+            <Box p={4} bg="blue.50" borderRadius="md">
+              <VStack align="start" spacing={1}>
+                <Text fontSize="sm"><strong>Email:</strong> {selectedRequest.email}</Text>
+                <Text fontSize="sm"><strong>Telefone:</strong> {selectedRequest.phone}</Text>
+                <Text fontSize="sm"><strong>Cidade:</strong> {selectedRequest.city}</Text>
+                {selectedRequest.nif && <Text fontSize="sm"><strong>NIF:</strong> {selectedRequest.nif}</Text>}
+                <Text fontSize="sm"><strong>Tipo:</strong> {selectedRequest.type === 'affiliate' ? 'Afiliado' : 'Locatário'}</Text>
+                </VStack>
+                  </Box>
+            <Text fontSize="sm" color="gray.600">
+              {t('requests.approve.note', 'Um motorista será criado automaticamente e receberá uma senha temporária por email.')}
+                      </Text>
+          </VStack>
+        )}
+      </StructuredModal>
+
+      {/* Modal de Rejeição */}
+      <StructuredModal
+        isOpen={isRejectModalOpen}
+        onClose={onRejectModalClose}
+        title={t('requests.reject.title', 'Rejeitar Solicitação')}
+        size="md"
+        footer={(
+          <HStack spacing={3} justify="flex-end" w="full">
+            <Button variant="ghost" onClick={onRejectModalClose}>
+              {tc('actions.cancel', 'Cancelar')}
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={confirmReject}
+              isLoading={isApproving}
+            >
+              {tc('actions.reject', 'Rejeitar')}
+            </Button>
+                    </HStack>
+        )}
+      >
+        {selectedRequest && (
+          <VStack spacing={4} align="stretch">
+            <Text>
+              {t('requests.reject.confirm', 'Deseja rejeitar a solicitação de')} <strong>{selectedRequest.fullName}</strong>?
+                      </Text>
+            <Textarea
+              placeholder={t('requests.reject.reasonPlaceholder', 'Motivo da rejeição...')}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={4}
+            />
+            <Text fontSize="sm" color="red.600">
+              {t('requests.reject.note', 'O candidato receberá um email com o motivo da rejeição.')}
+                    </Text>
+                </VStack>
+        )}
+      </StructuredModal>
+      </VStack>
     </AdminLayout>
+  );
+}
+
+export default function DriversPage(props: DriversPageProps) {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          '/api/admin/requests?status=pending': { requests: props.initialRequests },
+        },
+      }}
+    >
+      <DriversPageContent {...props} />
+    </SWRConfig>
   );
 }
 
 // SSR com autenticação, traduções e dados iniciais
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  // Carregar motoristas diretamente do Firestore
-  const drivers = await getDrivers();
+  // Carregar motoristas e solicitações diretamente do Firestore
+  const [drivers, requests] = await Promise.all([
+    getDrivers(),
+    getRequests({ status: 'pending', limit: 50 }),
+  ]);
 
   return {
     initialDrivers: drivers,
+    initialRequests: requests,
   };
 });
 

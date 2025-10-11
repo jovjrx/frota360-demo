@@ -37,14 +37,6 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
     },
     {
-        id: 'requests',
-        label: 'requests', // Traduzido via t('menu.requests')
-        href: '/admin/requests',
-        icon: FiFileText,
-        description: 'requests', // Traduzido via t('menu.requests')
-        showInMainMenu: true,
-    },
-    {
         id: 'drivers',
         label: 'drivers', // Traduzido via t('menu.drivers')
         href: '/admin/drivers',

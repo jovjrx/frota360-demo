@@ -61,7 +61,7 @@ export default function AdminLayout({
                 href={item.href}
                 variant={isMenuItemActive(item.href, router.pathname) ? 'solid' : 'ghost'}
                 colorScheme={'whiteAlpha'}
-                size="xs"
+                size="sm"
                 textColor={'white'}
                 iconSpacing={{ base: 0, md: 2 }}
                 leftIcon={<Icon as={item.icon} />}
