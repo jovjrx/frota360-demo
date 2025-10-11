@@ -135,6 +135,8 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
       const result = await response.json();
 
       if (result.success) {
+        console.log('✅ Candidatura enviada com sucesso! Mostrando Hero...');
+        
         // Track evento de conclusão de registro
         const [firstName, ...lastNameParts] = formData.fullName.split(' ');
         trackRegistrationComplete('success', 'Driver Application', {
@@ -147,6 +149,7 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
 
         // Mostrar tela de sucesso
         setIsSuccess(true);
+        console.log('✅ isSuccess setado para true');
       } else {
         throw new Error(result.error || "Erro ao enviar candidatura");
       }
@@ -165,6 +168,7 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
 
   // Se foi enviado com sucesso, mostrar Hero de sucesso
   if (isSuccess) {
+    console.log('🎉 Renderizando Hero de sucesso!');
     return (
       <Card borded>
         <VStack spacing={6} align="center" textAlign="center" py={8}>
