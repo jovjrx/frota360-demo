@@ -96,6 +96,7 @@ export default function WeeklyPage({
   initialRecords,
   tCommon,
   tPage,
+  translations,
 }: WeeklyPageProps) {
   const [filterWeek, setFilterWeek] = useState(currentWeek);
   const [records, setRecords] = useState<DriverRecord[]>(initialRecords);
@@ -772,6 +773,7 @@ export default function WeeklyPage({
       title={t('weekly.control.title', 'Controle Semanal')}
       subtitle={t('weekly.control.subtitle', 'Gestão semanal de dados TVDE')}
       breadcrumbs={[{ label: t('weekly.control.title', 'Controle Semanal') }]}
+      translations={translations}
       side={<Button
         leftIcon={<Icon as={FiUpload} />}
         onClick={() => router.push('/admin/data')}
