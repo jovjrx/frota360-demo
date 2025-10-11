@@ -18,15 +18,21 @@ export default async function handler(
     // Validar dados
     const validatedData = requestSchema.parse(req.body);
 
-    // Criar solicitação no Firestore
+    // Converter para formato do admin (driver_requests)
     const requestData = {
-      ...validatedData,
+      fullName: `${validatedData.firstName} ${validatedData.lastName}`,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      city: validatedData.city,
+      type: validatedData.driverType, // Converter driverType → type
+      vehicle: validatedData.vehicle || null,
       status: 'pending',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    const docRef = await db.collection('requests').add(requestData);
+    // ✅ CORREÇÃO: Salvar em driver_requests (mesma collection que o admin usa)
+    const docRef = await db.collection('driver_requests').add(requestData);
 
     // Atualizar com o ID
     await docRef.update({ id: docRef.id });
@@ -38,31 +44,31 @@ export default async function handler(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: `${validatedData.firstName} ${validatedData.lastName}`,
-          email: validatedData.email,
-          phone: validatedData.phone,
-          interest: `Candidatura ${validatedData.driverType === 'affiliate' ? 'Afiliado' : 'Locatário'}`,
+          name: requestData.fullName,
+          email: requestData.email,
+          phone: requestData.phone,
+          interest: `Candidatura ${requestData.type === 'affiliate' ? 'Afiliado' : 'Locatário'}`,
           message: `
-Nova Candidatura de Motorista
+🚗 Nova Candidatura de Motorista
 
-Nome: ${validatedData.firstName} ${validatedData.lastName}
-Email: ${validatedData.email}
-Telefone: ${validatedData.phone}
-Cidade: ${validatedData.city}
-Tipo: ${validatedData.driverType === 'affiliate' ? 'Afiliado (veículo próprio)' : 'Locatário (aluguer de veículo)'}
+Nome: ${requestData.fullName}
+Email: ${requestData.email}
+Telefone: ${requestData.phone}
+Cidade: ${requestData.city}
+Tipo: ${requestData.type === 'affiliate' ? 'Afiliado (veículo próprio)' : 'Locatário (aluguer de veículo)'}
 
 ${validatedData.vehicle ? `
-Informações do Veículo:
+📋 Informações do Veículo:
 - Marca: ${validatedData.vehicle.make}
 - Modelo: ${validatedData.vehicle.model}
 - Ano: ${validatedData.vehicle.year}
 - Matrícula: ${validatedData.vehicle.plate}
 ` : ''}
 
-ID da Solicitação: ${docRef.id}
-Data: ${new Date().toLocaleString('pt-PT')}
+🔑 ID da Solicitação: ${docRef.id}
+📅 Data: ${new Date().toLocaleString('pt-PT')}
 
-Ver no painel: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/admin/requests
+👉 Ver no painel: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/admin/requests
           `,
         }),
       });

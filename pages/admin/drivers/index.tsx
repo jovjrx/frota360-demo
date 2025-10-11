@@ -30,6 +30,7 @@ import {
   Tab,
   TabPanel,
   useDisclosure,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import {
   FiEdit,
@@ -114,6 +115,9 @@ export default function DriversPage({
 
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+  
+  // Detectar se é mobile para ajustar abas
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -435,20 +439,20 @@ export default function DriversPage({
           <Tabs>
             <TabList>
               <Tab>
-                <Icon as={FiUser} mr={2} />
-                {t('drivers.tabs.basic', 'Dados básicos')}
+                <Icon as={FiUser} mr={isMobile ? 1 : 2} />
+                {!isMobile && t('drivers.tabs.basic', 'Dados básicos')}
               </Tab>
               <Tab>
-                <Icon as={FiCreditCard} mr={2} />
-                {t('drivers.tabs.integrations', 'Integrações')}
+                <Icon as={FiCreditCard} mr={isMobile ? 1 : 2} />
+                {!isMobile && t('drivers.tabs.integrations', 'Integrações')}
               </Tab>
               <Tab>
-                <Icon as={FiTruck} mr={2} />
-                {t('drivers.tabs.vehicle', 'Veículo')}
+                <Icon as={FiTruck} mr={isMobile ? 1 : 2} />
+                {!isMobile && t('drivers.tabs.vehicle', 'Veículo')}
               </Tab>
               <Tab>
-                <Icon as={FiDollarSign} mr={2} />
-                {t('drivers.tabs.banking', 'Dados bancários')}
+                <Icon as={FiDollarSign} mr={isMobile ? 1 : 2} />
+                {!isMobile && t('drivers.tabs.banking', 'Dados bancários')}
               </Tab>
             </TabList>
 
