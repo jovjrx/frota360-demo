@@ -10,6 +10,7 @@ import {
   FormErrorMessage,
   Box,
   Divider,
+  Heading,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
@@ -23,6 +24,7 @@ interface RequestFormProps {
 
 export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     birthDate: "",
@@ -143,29 +145,8 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
           city: formData.city,
         });
 
-        toast({
-          title: "Candidatura Enviada!",
-          description: "Recebemos a sua candidatura. A nossa equipa irá analisar e entrar em contacto em breve.",
-          status: "success",
-          duration: 8000,
-          isClosable: true,
-        });
-
-        // Limpar formulário
-        setFormData({
-          fullName: "",
-          birthDate: "",
-          email: "",
-          phone: "",
-          city: "",
-          nif: "",
-          licenseNumber: "",
-          driverType: "",
-          vehicleMake: "",
-          vehicleModel: "",
-          vehicleYear: "",
-          vehiclePlate: "",
-        });
+        // Mostrar tela de sucesso
+        setIsSuccess(true);
       } else {
         throw new Error(result.error || "Erro ao enviar candidatura");
       }
@@ -181,6 +162,68 @@ export const RequestForm = ({ tPage, tCommon }: RequestFormProps) => {
       setIsSubmitting(false);
     }
   };
+
+  // Se foi enviado com sucesso, mostrar Hero de sucesso
+  if (isSuccess) {
+    return (
+      <Card borded>
+        <VStack spacing={6} align="center" textAlign="center" py={8}>
+          <Box
+            w="80px"
+            h="80px"
+            borderRadius="full"
+            bg="green.500"
+            color="white"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            fontSize="4xl"
+          >
+            ✓
+          </Box>
+          
+          <VStack spacing={2}>
+            <Heading size="lg" color="green.600">
+              Candidatura Enviada com Sucesso!
+            </Heading>
+            <Text color="gray.600" fontSize="lg">
+              Recebemos a sua candidatura
+            </Text>
+          </VStack>
+
+          <Box p={6} bg="blue.50" borderRadius="lg" w="full" maxW="500px">
+            <VStack spacing={3} align="start">
+              <Text fontSize="md" fontWeight="semibold" color="blue.800">
+                📧 O que acontece agora?
+              </Text>
+              <VStack spacing={2} align="start" fontSize="sm" color="gray.700">
+                <HStack>
+                  <Text>✓</Text>
+                  <Text>A nossa equipa irá analisar a sua candidatura</Text>
+                </HStack>
+                <HStack>
+                  <Text>✓</Text>
+                  <Text>Entraremos em contacto em até 24 horas úteis</Text>
+                </HStack>
+                <HStack>
+                  <Text>✓</Text>
+                  <Text>Verifique o seu email ({formData.email})</Text>
+                </HStack>
+                <HStack>
+                  <Text>✓</Text>
+                  <Text>Fique atento ao telefone ({formData.phone})</Text>
+                </HStack>
+              </VStack>
+            </VStack>
+          </Box>
+
+          <Text fontSize="sm" color="gray.500">
+            Tem alguma dúvida? Entre em contacto connosco via WhatsApp
+          </Text>
+        </VStack>
+      </Card>
+    );
+  }
 
   return (
     <Card title="Candidatura de Motorista" description="Preencha os dados abaixo" borded>
