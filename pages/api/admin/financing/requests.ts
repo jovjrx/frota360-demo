@@ -18,7 +18,14 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
 
   if (req.method === 'GET') {
     try {
-      const snapshot = await db.collection('financing_requests').where('status', '==', 'pending').get();
+      const { status } = req.query;
+      let query: FirebaseFirestore.Query = db.collection('financing_requests');
+      
+      if (status && status !== 'all') {
+        query = query.where('status', '==', status);
+      }
+      
+      const snapshot = await query.orderBy('createdAt', 'desc').get();
       const requests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       return res.status(200).json({ success: true, requests });
     } catch (error: any) {

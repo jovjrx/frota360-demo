@@ -73,8 +73,9 @@ function AdminFinancingPageContent({
   const { data, mutate } = useSWR('/api/admin/financing', fetcher);
   const financing: any[] = data?.financing || initialFinancing || [];
   
-  // Buscar solicitações pendentes
-  const { data: requestsData } = useSWR('/api/admin/financing/requests', fetcher);
+  // Solicitações com filtro de status
+  const [requestStatusFilter, setRequestStatusFilter] = useState('pending');
+  const { data: requestsData } = useSWR(`/api/admin/financing/requests?status=${requestStatusFilter}`, fetcher);
   const requests: any[] = requestsData?.requests || [];
 
   const [loading, setLoading] = useState(false);
@@ -293,23 +294,115 @@ function AdminFinancingPageContent({
 
         <Divider />
 
-        {/* ✅ Solicitações Pendentes (se houver) */}
-        {requests.length > 0 && (
-          <Card borderLeft="4px" borderLeftColor="orange.400">
-            <CardBody>
-              <VStack spacing={4} align="stretch">
-                <Heading size="md" display="flex" alignItems="center">
-                  <Icon as={FiAlertCircle} mr={2} color="orange.500" />
-                  {t('financing.requests.title', 'Solicitações Pendentes')}
-                  <Badge ml={2} colorScheme="orange">{requests.length}</Badge>
+        {/* Layout em 2 colunas: Financiamentos | Solicitações */}
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6}>
+          {/* Coluna Esquerda: Financiamentos Existentes */}
+          <GridItem>
+            <Card>
+              <CardBody>
+                <Heading size="sm" mb={4} display="flex" alignItems="center">
+                  <Icon as={FiDollarSign} mr={2} />
+                  {t('financing.list.title', 'Financiamentos Existentes')}
                 </Heading>
                 
-                <Text color="gray.600" fontSize="sm">
-                  {t('financing.requests.description', 'Motoristas que solicitaram financiamento e aguardam aprovação.')}
-                </Text>
+                <Box maxH="600px" overflowY="auto">
+                  {financing.length === 0 ? (
+                    <VStack spacing={2} align="center" py={8}>
+                      <Icon as={FiCheckCircle} fontSize="3xl" color="gray.400" />
+                      <Text color="gray.600" fontWeight="semibold">
+                        {t('financing.list.empty', 'Nenhum financiamento')}
+                      </Text>
+                      <Text fontSize="sm" color="gray.500">
+                        {t('financing.list.emptyDesc', 'Nenhum financiamento registrado ainda')}
+                      </Text>
+                    </VStack>
+                  ) : (
+                    <VStack spacing={3} align="stretch">
+                      {financing.map((fin) => {
+                        const driver = initialDrivers.find((d) => d.id === fin.driverId);
+                        return (
+                          <Box
+                            key={fin.id}
+                            p={3}
+                            bg="white"
+                            borderWidth={1}
+                            borderRadius="md"
+                            _hover={{ bg: 'gray.50' }}
+                          >
+                            <VStack align="start" spacing={2}>
+                              <HStack justify="space-between" w="full">
+                                <VStack align="start" spacing={0}>
+                                  <Text fontWeight="bold">{driver ? (driver.fullName || driver.name) : fin.driverId}</Text>
+                                  <HStack spacing={2}>
+                                    <Badge colorScheme={fin.type === 'loan' ? 'blue' : 'purple'}>
+                                      {fin.type === 'loan' ? t('financing.type.loan', 'Empréstimo') : t('financing.type.discount', 'Desconto')}
+                                    </Badge>
+                                    <Badge colorScheme={fin.status === 'active' ? 'green' : 'gray'}>
+                                      {fin.status === 'active' ? t('financing.status.active', 'Ativo') : t('financing.status.completed', 'Finalizado')}
+                                    </Badge>
+                                  </HStack>
+                                </VStack>
+                                <VStack align="end" spacing={0}>
+                                  <Text fontWeight="bold" color="blue.600">€{(fin.amount || 0).toFixed(2)}</Text>
+                                  {fin.weeks && <Text fontSize="xs" color="gray.600">{fin.remainingWeeks || 0}/{fin.weeks} sem.</Text>}
+                                </VStack>
+                              </HStack>
+                            </VStack>
+                          </Box>
+                        );
+                      })}
+                    </VStack>
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+          </GridItem>
 
-                <VStack spacing={3} align="stretch">
-                  {requests.map((req: any) => {
+          {/* Coluna Direita: Solicitações */}
+          <GridItem>
+            <Card borderLeft="4px" borderLeftColor="orange.400">
+              <CardBody>
+                <VStack spacing={4} align="stretch">
+                  <HStack justify="space-between" align="center">
+                    <Heading size="sm" display="flex" alignItems="center">
+                      <Icon as={FiAlertCircle} mr={2} color="orange.500" />
+                      {t('financing.requests.title', 'Solicitações')}
+                      <Badge ml={2} colorScheme="orange">{requests.length}</Badge>
+                    </Heading>
+                    
+                    <Select
+                      size="sm"
+                      value={requestStatusFilter}
+                      onChange={(e) => setRequestStatusFilter(e.target.value)}
+                      maxW="150px"
+                    >
+                      <option value="pending">{t('requests.status.pending', 'Pendentes')}</option>
+                      <option value="approved">{t('requests.status.approved', 'Aprovadas')}</option>
+                      <option value="rejected">{t('requests.status.rejected', 'Rejeitadas')}</option>
+              </Select>
+                  </HStack>
+                  
+                  <Text color="gray.600" fontSize="sm">
+                    {t('financing.requests.description', 'Solicitações de financiamento.')}
+                  </Text>
+
+                  <Box maxH="600px" overflowY="auto">
+                    {requests.length === 0 ? (
+                      <VStack spacing={2} align="center" py={8}>
+                        <Icon as={FiCheckCircle} fontSize="3xl" color="green.400" />
+                        <Text color="gray.600" fontWeight="semibold">
+                          {t('financing.requests.empty', 'Nenhuma solicitação')}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {requestStatusFilter === 'pending' 
+                            ? t('financing.requests.emptyDesc', 'Todas as solicitações foram processadas')
+                            : t('financing.requests.noResults', 'Nenhum resultado para este filtro')
+                          }
+                        </Text>
+                      </VStack>
+                    ) : (
+                      <VStack spacing={3} align="stretch">
+                        {requests.map((req: any) => {
                     const driver = initialDrivers.find((d) => d.id === req.driverId);
                     return (
                       <Box
@@ -350,20 +443,25 @@ function AdminFinancingPageContent({
                           </HStack>
           </HStack>
         </Box>
-                    );
-                  })}
+                        );
+                      })}
+                      </VStack>
+                    )}
+                  </Box>
                 </VStack>
-              </VStack>
-            </CardBody>
-          </Card>
-        )}
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
 
-        {/* ✅ Financiamentos Existentes - Tabela Completa */}
+        <Divider />
+
+        {/* Tabela completa para mais detalhes (desktop) */}
         <Card>
           <CardBody>
             <Heading size="sm" mb={4} display="flex" alignItems="center">
               <Icon as={FiDollarSign} mr={2} />
-              {t('financing.list.title', 'Financiamentos Existentes')}
+              {t('financing.list.details', 'Detalhes dos Financiamentos')}
             </Heading>
             
           {financing.length === 0 ? (
@@ -481,8 +579,8 @@ export default function AdminFinancingPage(props: AdminFinancingPageProps) {
     <SWRConfig
       value={{
         fallback: {
-          '/api/admin/financing': { financing: props.initialFinancing },
-          '/api/admin/financing/requests': { requests: props.initialRequests },
+          '/api/admin/financing': { success: true, financing: props.initialFinancing },
+          '/api/admin/financing/requests': { success: true, requests: props.initialRequests },
         },
       }}
     >
