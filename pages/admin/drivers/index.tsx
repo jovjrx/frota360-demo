@@ -160,10 +160,34 @@ export default function DriversPage({
     if (!editingDriver) return;
 
     try {
+      // ✅ Preparar apenas os campos que o schema espera
+      const updateData = {
+        // Campos básicos
+        status: editingDriver.status,
+        type: editingDriver.type,
+        fullName: editingDriver.fullName || editingDriver.name,
+        email: editingDriver.email,
+        phone: editingDriver.phone,
+        birthDate: editingDriver.birthDate,
+        city: editingDriver.city,
+        rentalFee: editingDriver.rentalFee || 0,
+        
+        // Integrações (se existirem)
+        integrations: editingDriver.integrations || undefined,
+        
+        // Dados bancários (se existirem)
+        banking: editingDriver.banking || undefined,
+        
+        // Veículo (se existir)
+        vehicle: editingDriver.vehicle || undefined,
+      };
+
+      console.log('🚀 Enviando dados:', updateData); // Debug
+
       const response = await fetch(`/api/admin/drivers/${editingDriver.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingDriver),
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
@@ -176,11 +200,21 @@ export default function DriversPage({
         fetchDrivers(); // Re-fetch drivers to update the list
       } else {
         const error = await response.json();
+        console.error('❌ Erro na API:', error); // Debug
+        
+        // Mostrar detalhes específicos do erro de validação
+        let errorMessage = error.error || t('drivers.list.toasts.updateErrorDescription', 'Não foi possível atualizar os dados do motorista.');
+        
+        if (error.details && Array.isArray(error.details)) {
+          const validationErrors = error.details.map((detail: any) => `${detail.path?.join('.') || 'campo'}: ${detail.message}`).join(', ');
+          errorMessage = `Erro de validação: ${validationErrors}`;
+        }
+        
         toast({
           title: t('drivers.list.toasts.updateError', 'Erro ao atualizar motorista'),
-          description: error.error || t('drivers.list.toasts.updateErrorDescription', 'Não foi possível atualizar os dados do motorista.'),
+          description: errorMessage,
           status: 'error',
-          duration: 3000,
+          duration: 5000, // Mais tempo para ler o erro
         });
       }
     } catch (error) {
