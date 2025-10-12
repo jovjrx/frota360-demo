@@ -5,7 +5,7 @@ import { sessionOptions } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { z } from 'zod';
-import { getPortugalTimestamp } from '@/lib/timezone';
+import { getPortugalTime } from '@/lib/timezone';
 
 export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
@@ -51,7 +51,8 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
     }
 
     const validatedData = validationResult.data;
-    const now = getPortugalTimestamp();
+    // ✅ CORREÇÃO: Usar formato ISO string para consistência com criação
+    const now = getPortugalTime().toISO();
 
     // Check if financing exists
     const financingRef = db.collection('financing').doc(id);

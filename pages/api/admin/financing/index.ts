@@ -35,16 +35,17 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         return res.status(400).json({ success: false, error: 'driverId e type são obrigatórios' });
       }
       const now = new Date().toISOString();
+      // ✅ CORREÇÃO: Melhorar conversão de tipos para evitar valores 0 indesejados
       const financing = FinancingSchema.parse({
         driverId,
         type,
-        amount: typeof amount === 'number' ? amount : 0,
-        weeks: type === 'loan' ? (typeof weeks === 'number' ? weeks : null) : null,
-        weeklyInterest: typeof weeklyInterest === 'number' ? weeklyInterest : 0,
+        amount: Number(amount) || 0,
+        weeks: type === 'loan' && weeks ? Number(weeks) : null,
+        weeklyInterest: Number(weeklyInterest) || 0,
         startDate: now,
         endDate: null,
         status: 'active',
-        remainingWeeks: type === 'loan' ? (typeof weeks === 'number' ? weeks : null) : null,
+        remainingWeeks: type === 'loan' && weeks ? Number(weeks) : null,
         // Campos de comprovante (serão adicionados depois via upload)
         proofUrl: null,
         proofFileName: null,

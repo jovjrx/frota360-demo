@@ -91,7 +91,10 @@ export default function FinancingModal({
           amount: financing.amount || 0,
           weeks: financing.weeks || null,
           weeklyInterest: financing.weeklyInterest || 0,
-          startDate: financing.startDate || '',
+          // ✅ CORREÇÃO: Converter data para formato YYYY-MM-DD esperado pelo input type="date"
+          startDate: financing.startDate 
+            ? new Date(financing.startDate).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
           status: financing.status || 'active',
           notes: financing.notes || '',
         });
@@ -142,6 +145,11 @@ export default function FinancingModal({
         // Converter semanas para null se não especificado
         weeks: formData.weeks || null,
       };
+
+      // ✅ CORREÇÃO: Remover driverId do payload em modo edição para evitar alteração indevida
+      if (isEditMode) {
+        delete payload.driverId;
+      }
 
       await onSave(payload);
       onClose();
