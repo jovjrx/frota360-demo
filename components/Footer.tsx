@@ -9,7 +9,10 @@ import {
   Image,
   Stack,
   VStack,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
+import { FaFacebook, FaInstagram } from "react-icons/fa";
 import { Container } from "./Container";
 import { ContainerDivisions } from "./ContainerDivisions";
 import { useLocalizedHref } from "@/lib/linkUtils";
@@ -61,6 +64,36 @@ export default function Footer({ t, panel = false }: FooterProps) {
                 "{t("footer.description")}"
               </Text>
             </VStack>
+            
+            {/* Redes Sociais */}
+            <HStack spacing={3} pt={2}>
+              <IconButton
+                as="a"
+                href="https://www.facebook.com/conduzpt"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                icon={<Icon as={FaFacebook} boxSize={5} />}
+                variant="ghost"
+                colorScheme="whiteAlpha"
+                color={color}
+                _hover={{ bg: "whiteAlpha.200", color: "brand.400" }}
+                size="md"
+              />
+              <IconButton
+                as="a"
+                href="https://www.instagram.com/conduzpt"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                icon={<Icon as={FaInstagram} boxSize={5} />}
+                variant="ghost"
+                colorScheme="whiteAlpha"
+                color={color}
+                _hover={{ bg: "whiteAlpha.200", color: "brand.400" }}
+                size="md"
+              />
+            </HStack>
           </Stack>
 
           <Divider borderColor={border} display={{ base: "flex", md: "none" }} />
