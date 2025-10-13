@@ -297,7 +297,7 @@ function getWeekId(date: Date): string {
 /**
  * Buscar estatísticas do dashboard
  */
-export async function getDashboardStats(): Promise<{
+export async function getDashboardStats(cookies?: string): Promise<{
   totalDrivers: number;
   activeDrivers: number;
   pendingRequests: number;
@@ -361,7 +361,7 @@ export async function getDashboardStats(): Promise<{
   if (latestWeekId) {
     try {
       const { processWeeklyData } = await import('../api/process-weekly-data');
-      const data = await processWeeklyData(latestWeekId);
+      const data = await processWeeklyData(latestWeekId, cookies);
       
       console.log(`📊 Semana atual (${latestWeekId}): ${data.records?.length || 0} registros`);
       
@@ -391,7 +391,7 @@ export async function getDashboardStats(): Promise<{
   if (previousWeekId) {
     try {
       const { processWeeklyData } = await import('../api/process-weekly-data');
-      const data = await processWeeklyData(previousWeekId);
+      const data = await processWeeklyData(previousWeekId, cookies);
       
       console.log(`📊 Semana anterior (${previousWeekId}): ${data.records?.length || 0} registros`);
       

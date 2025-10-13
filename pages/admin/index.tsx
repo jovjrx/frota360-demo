@@ -341,8 +341,10 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
 }
 
 export const getServerSideProps = withAdminSSR(async (context, user) => {
+  const cookies = context.req.headers.cookie || '';
+  
   const [stats, recentDrivers, recentRequests] = await Promise.all([
-    getDashboardStats(),
+    getDashboardStats(cookies),
     getDrivers({ limit: 5 }),
     getRequests({ limit: 5 }),
   ]);
