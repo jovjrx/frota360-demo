@@ -774,14 +774,6 @@ export default function WeeklyPage({
       subtitle={t('weekly.control.subtitle', 'Gestão semanal de dados TVDE')}
       breadcrumbs={[{ label: t('weekly.control.title', 'Controle Semanal') }]}
       translations={translations}
-      side={<Button
-        leftIcon={<Icon as={FiUpload} />}
-        onClick={() => router.push('/admin/data')}
-        colorScheme="blue"
-        size="sm"
-      >
-        {t('weekly.control.actions.importData', 'Importar dados')}
-      </Button>}
     >
       {/* Filtros e Ações */}
       <Card>

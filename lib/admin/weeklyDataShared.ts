@@ -1,8 +1,8 @@
 import { WeeklyDataSources } from '@/schemas/weekly-data-sources';
 
-export type WeeklyPlatform = 'uber' | 'bolt' | 'myprio' | 'viaverde' | 'cartrack';
+export type WeeklyPlatform = 'uber' | 'bolt' | 'myprio' | 'viaverde';
 
-export const WEEKLY_PLATFORMS: WeeklyPlatform[] = ['uber', 'bolt', 'myprio', 'viaverde', 'cartrack'];
+export const WEEKLY_PLATFORMS: WeeklyPlatform[] = ['uber', 'bolt', 'myprio', 'viaverde'];
 
 export interface RawFileSummary {
   id: string;

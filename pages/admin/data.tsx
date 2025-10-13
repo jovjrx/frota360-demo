@@ -212,7 +212,6 @@ const LOG_TYPE_COLORS: Record<IntegrationLogType, string> = {
 const DEFAULT_STRATEGIES: Record<WeeklyPlatform, StrategyOption> = {
   uber: 'api',
   bolt: 'api',
-  cartrack: 'upload',
   myprio: 'upload',
   viaverde: 'upload',
 };
@@ -1146,7 +1145,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
           </TabList>
           <TabPanels>
             <TabPanel px={0}>
-              <Grid templateColumns={{ base: '1fr', xl: '280px 1fr 320px' }} gap={4} alignItems="stretch">
+              <Grid templateColumns={{ base: '1fr', xl: '280px 1fr' }} gap={4} alignItems="stretch">
                 <GridItem>
                   <Card h="100%">
                     <CardHeader pb={3}>
@@ -1190,12 +1189,12 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
                         ) : (
                           filteredWeeks.map((week) => {
                             const weekStatus = getWeekStatus(week);
-                            const isSelected = week.weekId === selectedWeekId;
+                            const isSelected = week.weekId == selectedWeekId;
                             return (
                               <Card
                                 key={week.weekId}
                                 variant={isSelected ? 'solid' : 'outline'}
-                                colorScheme={isSelected ? 'green' : undefined}
+                                bgColor={isSelected ? 'green.100' : undefined}
                                 cursor="pointer"
                                 onClick={() => setSelectedWeekId(week.weekId)}
                               >
@@ -1268,7 +1267,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
                                   <MenuItem
                                     onClick={() => {
                                       WEEKLY_PLATFORMS.filter(
-                                        (platform): platform is IntegrationPlatform =>
+                                        (platform) =>
                                           !MANUAL_ONLY_PLATFORMS.includes(platform as IntegrationPlatform)
                                       ).forEach((platform) => handleFetchPlatform(platform as IntegrationPlatform));
                                     }}
@@ -1405,92 +1404,6 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
                       </CardBody>
                     </Card>
                   </Stack>
-                </GridItem>
-
-                <GridItem>
-                  <Card h="100%">
-                    <CardHeader pb={3}>
-                      <Heading {...SECTION_HEADING_PROPS}>
-                        {t('weeklyDataSources.summary.title', 'Resumo da semana')}
-                      </Heading>
-                    </CardHeader>
-                    <CardBody>
-                      {selectedWeek ? (
-                        <Stack spacing={4}>
-                          <Stack spacing={3}>
-                            <Stat>
-                              <StatLabel>{t('weeklyDataSources.summary.drivers', 'Motoristas')}</StatLabel>
-                              <StatNumber>
-                                {Math.max(
-                                  ...WEEKLY_PLATFORMS.map((platform) => selectedWeek.sources[platform].driversCount ?? 0)
-                                )}
-                              </StatNumber>
-                            </Stat>
-                            <Stat>
-                              <StatLabel>{t('weeklyDataSources.summary.trips', 'Registos')}</StatLabel>
-                              <StatNumber>
-                                {WEEKLY_PLATFORMS.reduce(
-                                  (acc, platform) => acc + (selectedWeek.sources[platform].recordsCount ?? 0),
-                                  0
-                                )}
-                              </StatNumber>
-                            </Stat>
-                            <Stat>
-                              <StatLabel>{t('weeklyDataSources.summary.lastUpdate', 'Última atualização')}</StatLabel>
-                              <StatHelpText>{formatDateTime(selectedWeek.updatedAt, router.locale || 'pt-PT')}</StatHelpText>
-                            </Stat>
-                          </Stack>
-
-                          <Divider />
-
-                          <Stack spacing={3}>
-                            <Heading size="xs" textTransform="uppercase" color="gray.500">
-                              {t('weeklyDataSources.summary.alerts', 'Alertas')}
-                            </Heading>
-                            {WEEKLY_PLATFORMS.filter((platform) => !integrationMap[platform]?.enabled).length === 0 &&
-                              selectedWeek.pendingRawFiles === 0 &&
-                              selectedWeekStatus === 'complete' ? (
-                              <Tag size="sm" colorScheme="green">
-                                <TagLabel>{t('weeklyDataSources.summary.noAlerts', 'Tudo sincronizado')}</TagLabel>
-                              </Tag>
-                            ) : (
-                              <Stack spacing={2}>
-                                {WEEKLY_PLATFORMS.filter((platform) => !integrationMap[platform]?.enabled).map((platform) => (
-                                  <Tag key={`${platform}-integration`} size="sm" colorScheme="yellow">
-                                    <TagLabel>
-                                      {t('weeklyDataSources.alerts.integrationInactive', 'Integração {{platform}} inativa', {
-                                        platform: platform.toUpperCase(),
-                                      })}
-                                    </TagLabel>
-                                  </Tag>
-                                ))}
-                                {selectedWeek.pendingRawFiles > 0 && (
-                                  <Tag size="sm" colorScheme="orange">
-                                    <TagLabel>
-                                      {t('weeklyDataSources.alerts.pendingUploads', '{{count}} upload(s) pendente(s)', {
-                                        count: String(selectedWeek.pendingRawFiles),
-                                      })}
-                                    </TagLabel>
-                                  </Tag>
-                                )}
-                                {selectedWeekStatus === 'error' && (
-                                  <Tag size="sm" colorScheme="red">
-                                    <TagLabel>
-                                      {t('weeklyDataSources.alerts.snapshotError', 'Erro durante processamento. Consulte os logs.')}
-                                    </TagLabel>
-                                  </Tag>
-                                )}
-                              </Stack>
-                            )}
-                          </Stack>
-                        </Stack>
-                      ) : (
-                        <Text fontSize="sm" color="gray.500">
-                          {t('weeklyDataSources.messages.selectWeek', 'Selecione uma semana para visualizar o resumo.')}
-                        </Text>
-                      )}
-                    </CardBody>
-                  </Card>
                 </GridItem>
               </Grid>
             </TabPanel>
