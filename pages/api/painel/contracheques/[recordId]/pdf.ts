@@ -87,14 +87,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       financingInterestPercent: recordData.financingDetails?.interestPercent,
       financingInstallment: recordData.financingDetails?.installment,
-      financingInterestAmount: recordData.financingDetails?.interestAmount,
-      financingTotalCost: recordData.financingDetails?.totalCost,
+      financingInterestAmount: recordData.financingDetails?.interestAmount || 
+        (recordData.financingDetails?.installment && recordData.financingDetails?.interestPercent 
+          ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
+          : 0),
+      financingTotalCost: recordData.financingDetails?.totalCost || 
+        (recordData.financingDetails?.installment 
+          ? recordData.financingDetails.installment + 
+            (recordData.financingDetails?.interestPercent 
+              ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
+              : 0)
+          : 0),
       
       repasse: recordData.repasse || 0,
     };
 
     // Gerar PDF
     console.log('[PDF] Gerando PDF com dados:', payslipData);
+    console.log('[PDF] Financing details from DB:', recordData.financingDetails);
     const pdfBuffer = await generatePayslipPDF(payslipData);
 
     // Definir headers para download
