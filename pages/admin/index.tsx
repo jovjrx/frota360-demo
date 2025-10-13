@@ -8,7 +8,7 @@
  * - SWR com fallback para atualizações em tempo real
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Box,
   Heading,
@@ -32,10 +32,8 @@ import {
   Badge,
   Text,
   Icon,
-  useToast,
 } from '@chakra-ui/react';
-import { FiRefreshCw, FiDollarSign, FiTruck, FiUsers, FiFileText, FiClock, FiCheckCircle } from 'react-icons/fi';
-import useSWR from 'swr';
+import { FiDollarSign, FiTruck, FiUsers, FiFileText, FiClock, FiCheckCircle } from 'react-icons/fi';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
@@ -67,50 +65,14 @@ interface AdminDashboardProps extends AdminPageProps {
   initialData: DashboardData;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export default function AdminDashboard({ user, locale, initialData, tCommon, tPage, translations }: AdminDashboardProps) {
-  const toast = useToast();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
   const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
 
   const subtitleTemplate = t('dashboard.welcome', 'Bem-vindo, {{name}}');
   const subtitle = subtitleTemplate.replace('{{name}}', user.displayName || user.email || '');
 
-  const { data: apiData, mutate } = useSWR<{ success: boolean; data: DashboardData }>(
-    '/api/admin/dashboard/stats',
-    fetcher,
-    {
-      fallbackData: { success: true, data: initialData },
-      refreshInterval: 30000,
-      revalidateOnFocus: true,
-    }
-  );
-
-  const data = apiData?.data || initialData;
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await mutate();
-      toast({
-        title: t('dashboard.toasts.refreshSuccess', tc('messages.success')),
-        status: 'success',
-        duration: 2000,
-      });
-    } catch (error) {
-      toast({
-        title: t('dashboard.toasts.refreshError', tc('errors.title')),
-        description: tc('errors.tryAgain'),
-        status: 'error',
-        duration: 3000,
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  const data = initialData;
 
   const formatCurrency = (value: number) => {
     const intlLocale = locale === 'en' ? 'en-GB' : locale === 'es' ? 'es-ES' : 'pt-PT';
@@ -135,17 +97,6 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
     <AdminLayout
       title={t('dashboard.title', 'Dashboard')}
       subtitle={subtitle}
-      side={
-        <Button
-          leftIcon={<FiRefreshCw />}
-          onClick={handleRefresh}
-          isLoading={isRefreshing}
-          colorScheme="blue"
-          size="sm"
-        >
-          {t('dashboard.actions.refresh', 'Atualizar')}
-        </Button>
-      }
       breadcrumbs={[
         { label: t('dashboard.title', 'Dashboard') }
       ]}
@@ -210,14 +161,14 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
           </CardBody>
         </Card>
 
-        {/* Receita Total (Líquido para empresa) */}
+        {/* Receita (Líquido para empresa) */}
         <Card>
           <CardBody>
             <Stat>
               <StatLabel>
                 <HStack spacing={2}>
                   <Icon as={FiDollarSign} color="blue.600" />
-                  <Text fontSize="sm" color="gray.700">Receita Total</Text>
+                  <Text fontSize="sm" color="gray.700">Receita</Text>
                 </HStack>
               </StatLabel>
               <StatNumber color="blue.600" fontSize="2xl">
@@ -228,8 +179,7 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
                   ? (() => {
                     const diff = data.stats.totalEarningsThisWeek - data.stats.totalEarningsLastWeek;
                     const percentChange = ((diff / data.stats.totalEarningsLastWeek) * 100).toFixed(1);
-                    // INVERTIDO: Para receita total, maior é melhor, então inverte a seta
-                    const isIncrease = diff < 0;
+                    const isIncrease = diff >= 0;
                     return `${isIncrease ? '↑' : '↓'} ${Math.abs(Number(percentChange))}% vs semana anterior`;
                   })()
                   : 'Primeira semana com dados'

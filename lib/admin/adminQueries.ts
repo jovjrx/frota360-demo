@@ -329,20 +329,21 @@ export async function getDashboardStats(): Promise<{
     .get();
   const pendingRequests = requestsSnapshot.size;
 
-  // Buscar de rawFileArchive (mesma lógica do endpoint /api/admin/dashboard/stats)
-  const rawSnapshot = await db.collection('rawFileArchive')
-    .orderBy('weekStart', 'desc')
-    .limit(50)
+  // Buscar semanas disponíveis do dataWeekly
+  const dataWeeklySnapshot = await db.collection('dataWeekly')
+    .orderBy('weekId', 'desc')
+    .limit(100)
     .get();
 
-  // Pegar as 2 semanas mais recentes
-  const weekIds = Array.from(new Set(rawSnapshot.docs.map(doc => doc.data().weekId)))
+  const weekIds = Array.from(new Set(dataWeeklySnapshot.docs.map(doc => doc.data().weekId)))
     .sort()
     .reverse()
     .slice(0, 2);
 
   const latestWeekId = weekIds[0] || '';
   const previousWeekId = weekIds[1] || '';
+
+  console.log(`📊 Semanas encontradas: ${latestWeekId}, ${previousWeekId}`);
 
   let totalGrossEarningsThisWeek = 0;
   let totalRepasseThisWeek = 0;
@@ -353,37 +354,78 @@ export async function getDashboardStats(): Promise<{
   let profitCommissions = 0;
   let profitRentals = 0;
   let profitDiscounts = 0;
+  let profitFinancing = 0; // Parcelas de financiamento
+  let profitFinancingLastWeek = 0;
 
-  // Buscar registros processados da semana atual (driverWeeklyRecords)
+  // Buscar dados da semana atual via endpoint (que já processa tudo corretamente)
   if (latestWeekId) {
-    const thisWeekSnapshot = await db.collection('driverWeeklyRecords')
-      .where('weekId', '==', latestWeekId)
-      .get();
-    
-    thisWeekSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      totalGrossEarningsThisWeek += data.ganhosTotal || 0;
-      totalRepasseThisWeek += data.repasse || 0;
-      profitCommissions += data.despesasAdm || 0;
-      profitRentals += data.aluguel || 0;
+    try {
+      // No SSR, chamar o endpoint interno
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/admin/weekly/data?weekId=${latestWeekId}`);
       
-      if (data.paymentStatus === 'pending') {
-        totalPaymentsPending += data.repasse || 0;
+      if (response.ok) {
+        const data = await response.json();
+        
+        console.log(`📊 Semana atual (${latestWeekId}): ${data.records?.length || 0} registros`);
+        
+        data.records?.forEach((rec: any) => {
+          totalGrossEarningsThisWeek += rec.ganhosTotal || 0;
+          totalRepasseThisWeek += rec.repasse || 0;
+          profitCommissions += rec.despesasAdm || 0;
+          profitRentals += rec.aluguel || 0;
+          profitFinancing += rec.financingDetails?.installment || 0;
+          
+          if (rec.paymentStatus === 'pending') {
+            totalPaymentsPending += rec.repasse || 0;
+          }
+        });
+        
+        console.log(`   Ganhos: €${totalGrossEarningsThisWeek.toFixed(2)}`);
+        console.log(`   Repasse: €${totalRepasseThisWeek.toFixed(2)}`);
+        console.log(`   DespesasAdm: €${profitCommissions.toFixed(2)}`);
+        console.log(`   Aluguel: €${profitRentals.toFixed(2)}`);
+        console.log(`   Financiamento: €${profitFinancing.toFixed(2)}`);
       }
-    });
+    } catch (error) {
+      console.error('Erro ao buscar dados da semana atual:', error);
+    }
   }
 
-  // Buscar semana anterior
+  // Buscar dados da semana anterior
   if (previousWeekId) {
-    const lastWeekSnapshot = await db.collection('driverWeeklyRecords')
-      .where('weekId', '==', previousWeekId)
-      .get();
-    
-    lastWeekSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      totalGrossEarningsLastWeek += data.ganhosTotal || 0;
-      totalRepasseLastWeek += data.repasse || 0;
-    });
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/admin/weekly/data?weekId=${previousWeekId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        console.log(`📊 Semana anterior (${previousWeekId}): ${data.records?.length || 0} registros`);
+        
+        let lastWeekDespesasAdm = 0;
+        let lastWeekAluguel = 0;
+        
+        data.records?.forEach((rec: any) => {
+          totalGrossEarningsLastWeek += rec.ganhosTotal || 0;
+          totalRepasseLastWeek += rec.repasse || 0;
+          lastWeekDespesasAdm += rec.despesasAdm || 0;
+          lastWeekAluguel += rec.aluguel || 0;
+          profitFinancingLastWeek += rec.financingDetails?.installment || 0;
+        });
+        
+        console.log(`   Ganhos: €${totalGrossEarningsLastWeek.toFixed(2)}`);
+        console.log(`   Repasse: €${totalRepasseLastWeek.toFixed(2)}`);
+        console.log(`   DespesasAdm: €${lastWeekDespesasAdm.toFixed(2)}`);
+        console.log(`   Aluguel: €${lastWeekAluguel.toFixed(2)}`);
+        console.log(`   Financiamento: €${profitFinancingLastWeek.toFixed(2)}`);
+        
+        // Calcular receita da semana anterior
+        totalGrossEarningsLastWeek = lastWeekDespesasAdm + lastWeekAluguel + profitFinancingLastWeek;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados da semana anterior:', error);
+    }
   }
 
   // Buscar pagamentos realizados
@@ -408,9 +450,13 @@ export async function getDashboardStats(): Promise<{
     }
   });
 
-  // Calcular lucro da empresa = ganhos - repasse
-  const companyProfitThisWeek = totalGrossEarningsThisWeek - totalRepasseThisWeek;
-  const companyProfitLastWeek = totalGrossEarningsLastWeek - totalRepasseLastWeek;
+  // Calcular lucro da empresa = despesasAdm + aluguel + financiamento
+  const companyProfitThisWeek = profitCommissions + profitRentals + profitFinancing;
+  const companyProfitLastWeek = totalGrossEarningsLastWeek; // Já foi calculado acima
+
+  console.log(`💰 Receita empresa:`);
+  console.log(`   Esta semana: €${companyProfitThisWeek.toFixed(2)} (Adm: ${profitCommissions.toFixed(2)} + Aluguel: ${profitRentals.toFixed(2)} + Financ: ${profitFinancing.toFixed(2)})`);
+  console.log(`   Semana anterior: €${companyProfitLastWeek.toFixed(2)}`);
 
   // Média por motorista
   let totalPaidAmount = 0;
