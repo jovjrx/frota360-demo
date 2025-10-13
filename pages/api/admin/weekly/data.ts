@@ -226,7 +226,7 @@ function buildDriverMaps(drivers: DriverInfo[]): DriverMaps {
   return { byId, byUber, byBolt, byMyPrio, byPlate, byViaVerde };
 }
 
-function aggregateWeeklyRecords(
+export function aggregateWeeklyRecords(
   normalizedData: WeeklyNormalizedData[],
   driverMaps: DriverMaps,
   weekId: string,

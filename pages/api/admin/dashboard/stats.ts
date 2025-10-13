@@ -74,18 +74,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (lastWeekResponse.ok) {
         const lastWeekData = await lastWeekResponse.json();
         if (lastWeekData.records) {
-          let lastWeekDespesasAdm = 0;
-          let lastWeekAluguel = 0;
-          let lastWeekFinanciamento = 0;
-          
           lastWeekData.records.forEach((rec: any) => {
             statsLastWeek.ganhos += rec.ganhosTotal || 0;
             statsLastWeek.repasse += rec.repasse || 0;
-            lastWeekDespesasAdm += rec.despesasAdm || 0;
-            lastWeekAluguel += rec.aluguel || 0;
-            lastWeekFinanciamento += rec.financingDetails?.installment || 0;
           });
-          statsLastWeek.lucro = lastWeekDespesasAdm + lastWeekAluguel + lastWeekFinanciamento;
+          // Lucro da empresa = ganhos - repasse (o que sobra para a empresa)
+          statsLastWeek.lucro = statsLastWeek.ganhos - statsLastWeek.repasse;
         }
       }
     }

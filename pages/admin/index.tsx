@@ -228,7 +228,8 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
                   ? (() => {
                     const diff = data.stats.totalEarningsThisWeek - data.stats.totalEarningsLastWeek;
                     const percentChange = ((diff / data.stats.totalEarningsLastWeek) * 100).toFixed(1);
-                    const isIncrease = diff >= 0;
+                    // INVERTIDO: Para receita total, maior é melhor, então inverte a seta
+                    const isIncrease = diff < 0;
                     return `${isIncrease ? '↑' : '↓'} ${Math.abs(Number(percentChange))}% vs semana anterior`;
                   })()
                   : 'Primeira semana com dados'
