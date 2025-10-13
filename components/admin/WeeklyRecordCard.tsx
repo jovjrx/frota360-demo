@@ -59,14 +59,14 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
 }) => {
   const isPaid = record.paymentStatus === 'paid';
 
-  const platformValues = {
-    uber: record.platformData
-      .filter((p) => p.platform === 'uber')
-      .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
-    bolt: record.platformData
-      .filter((p) => p.platform === 'bolt')
-      .reduce((acc, curr) => acc + (curr.totalValue || 0), 0),
-  };
+  // Use valores diretamente do record (nova arquitetura)
+  const uberTotal = record.uberTotal || 0;
+  const boltTotal = record.boltTotal || 0;
+  
+  // Calcular valores de financiamento se existir
+  const financingInstallment = record.financingDetails?.installment || 0;
+  const financingInterest = record.financingDetails?.interestAmount || 0;
+  const financingTotal = record.financingDetails?.totalCost || 0;
 
   return (
     <Card shadow="md" borderWidth="1px">
@@ -107,11 +107,11 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
             <Grid templateColumns="repeat(2, 1fr)" gap={2}>
               <GridItem>
                 <Text fontSize="xs" color="gray.600">Uber</Text>
-                <Text fontSize="sm" fontWeight="medium">{formatCurrency(platformValues.uber)}</Text>
+                <Text fontSize="sm" fontWeight="medium">{formatCurrency(uberTotal)}</Text>
               </GridItem>
               <GridItem>
                 <Text fontSize="xs" color="gray.600">Bolt</Text>
-                <Text fontSize="sm" fontWeight="medium">{formatCurrency(platformValues.bolt)}</Text>
+                <Text fontSize="sm" fontWeight="medium">{formatCurrency(boltTotal)}</Text>
               </GridItem>
             </Grid>
           </Box>
@@ -169,9 +169,22 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
                   {t('weekly.control.records.columns.rent', 'Aluguel')}
                 </Text>
                 <Text fontSize="sm" fontWeight="medium" color="purple.600">
-                  -{formatCurrency(record.aluguel)}
+                  {record.aluguel > 0 ? `-${formatCurrency(record.aluguel)}` : '-'}
                 </Text>
               </Flex>
+              {financingTotal > 0 && (
+                <Flex justify="space-between">
+                  <Text fontSize="sm" color="gray.600">
+                    {t('weekly.control.records.columns.financing', 'Financiamento')}
+                  </Text>
+                  <Text fontSize="sm" fontWeight="medium" color="purple.600">
+                    -{formatCurrency(financingTotal)}
+                    <Text as="span" fontSize="xs" color="gray.500" ml={1}>
+                      (Parcela: {formatCurrency(financingInstallment)} + Juros: {formatCurrency(financingInterest)})
+                    </Text>
+                  </Text>
+                </Flex>
+              )}
               <Divider />
               <Flex justify="space-between">
                 <Text fontSize="sm" fontWeight="bold" color="gray.700">

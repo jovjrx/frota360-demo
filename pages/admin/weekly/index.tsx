@@ -815,12 +815,13 @@ export default function WeeklyPage({
       {/* Filtros e Ações */}
       <Card>
         <CardBody p={4}>
-          <Stack flexDirection={{ base: 'column', md: 'row' }} spacing={4} align="center" justify={'space-between'}>
+          <HStack spacing={{ base: 2, md: 4 }} align="center" justify="space-between" flexWrap="wrap">
             <Select
-              size={'sm'}
+              size="sm"
               value={filterWeek}
               onChange={(e) => setFilterWeek(e.target.value)}
-              w={{ base: "100%", md: "300px" }}
+              flex={{ base: "1", md: "0 0 300px" }}
+              minW={{ base: "150px", md: "300px" }}
             >
               {weekOptions.map(week => (
                 <option key={week.value} value={week.value}>
@@ -828,38 +829,42 @@ export default function WeeklyPage({
                 </option>
               ))}
             </Select>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            <HStack spacing={{ base: 1, md: 2 }}>
               <Button
-                leftIcon={<Icon as={FiRefreshCw} />}
+                leftIcon={isMobile ? undefined : <Icon as={FiRefreshCw} />}
                 onClick={() => loadWeekData(filterWeek)}
                 isLoading={isLoading}
                 size="sm"
+                title={t('weekly.control.actions.refresh', 'Atualizar')}
               >
-                {t('weekly.control.actions.refresh', 'Atualizar')}
+                {isMobile ? <Icon as={FiRefreshCw} /> : t('weekly.control.actions.refresh', 'Atualizar')}
               </Button>
          
               <Button
-                leftIcon={<Icon as={FiDownload} />}
+                leftIcon={isMobile ? undefined : <Icon as={FiDownload} />}
                 onClick={handleExportPayments}
                 colorScheme="teal"
                 size="sm"
                 isDisabled={records.length === 0}
+                title={t('weekly.control.actions.exportPayments', 'Exportar planilha')}
               >
-                {t('weekly.control.actions.exportPayments', 'Exportar planilha')}
+                {isMobile ? <Icon as={FiDownload} /> : t('weekly.control.actions.exportPayments', 'Exportar planilha')}
               </Button>
-                <Button
-                leftIcon={<Icon as={FiFileText} />}
+              
+              <Button
+                leftIcon={isMobile ? undefined : <Icon as={FiFileText} />}
                 onClick={handleGenerateResumos}
                 colorScheme="green"
                 size="sm"
                 isLoading={isGeneratingResumos}
-                loadingText={t('weekly.control.actions.generateSummariesLoading', 'A gerar...')}
+                loadingText={isMobile ? undefined : t('weekly.control.actions.generateSummariesLoading', 'A gerar...')}
                 isDisabled={records.length === 0}
+                title={t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
               >
-                {t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
+                {isMobile ? <Icon as={FiFileText} /> : t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
               </Button>
-            </SimpleGrid>
-          </Stack>
+            </HStack>
+          </HStack>
         </CardBody>
       </Card>
 
