@@ -360,33 +360,28 @@ export async function getDashboardStats(): Promise<{
   // Buscar dados da semana atual via endpoint (que já processa tudo corretamente)
   if (latestWeekId) {
     try {
-      // No SSR, chamar o endpoint interno
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/admin/weekly/data?weekId=${latestWeekId}`);
+      const { processWeeklyData } = await import('../api/process-weekly-data');
+      const data = await processWeeklyData(latestWeekId);
       
-      if (response.ok) {
-        const data = await response.json();
+      console.log(`📊 Semana atual (${latestWeekId}): ${data.records?.length || 0} registros`);
+      
+      data.records?.forEach((rec: any) => {
+        totalGrossEarningsThisWeek += rec.ganhosTotal || 0;
+        totalRepasseThisWeek += rec.repasse || 0;
+        profitCommissions += rec.despesasAdm || 0;
+        profitRentals += rec.aluguel || 0;
+        profitFinancing += rec.financingDetails?.installment || 0;
         
-        console.log(`📊 Semana atual (${latestWeekId}): ${data.records?.length || 0} registros`);
-        
-        data.records?.forEach((rec: any) => {
-          totalGrossEarningsThisWeek += rec.ganhosTotal || 0;
-          totalRepasseThisWeek += rec.repasse || 0;
-          profitCommissions += rec.despesasAdm || 0;
-          profitRentals += rec.aluguel || 0;
-          profitFinancing += rec.financingDetails?.installment || 0;
-          
-          if (rec.paymentStatus === 'pending') {
-            totalPaymentsPending += rec.repasse || 0;
-          }
-        });
-        
-        console.log(`   Ganhos: €${totalGrossEarningsThisWeek.toFixed(2)}`);
-        console.log(`   Repasse: €${totalRepasseThisWeek.toFixed(2)}`);
-        console.log(`   DespesasAdm: €${profitCommissions.toFixed(2)}`);
-        console.log(`   Aluguel: €${profitRentals.toFixed(2)}`);
-        console.log(`   Financiamento: €${profitFinancing.toFixed(2)}`);
-      }
+        if (rec.paymentStatus === 'pending') {
+          totalPaymentsPending += rec.repasse || 0;
+        }
+      });
+      
+      console.log(`   Ganhos: €${totalGrossEarningsThisWeek.toFixed(2)}`);
+      console.log(`   Repasse: €${totalRepasseThisWeek.toFixed(2)}`);
+      console.log(`   DespesasAdm: €${profitCommissions.toFixed(2)}`);
+      console.log(`   Aluguel: €${profitRentals.toFixed(2)}`);
+      console.log(`   Financiamento: €${profitFinancing.toFixed(2)}`);
     } catch (error) {
       console.error('Erro ao buscar dados da semana atual:', error);
     }
@@ -395,34 +390,30 @@ export async function getDashboardStats(): Promise<{
   // Buscar dados da semana anterior
   if (previousWeekId) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/admin/weekly/data?weekId=${previousWeekId}`);
+      const { processWeeklyData } = await import('../api/process-weekly-data');
+      const data = await processWeeklyData(previousWeekId);
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        console.log(`📊 Semana anterior (${previousWeekId}): ${data.records?.length || 0} registros`);
-        
-        let lastWeekDespesasAdm = 0;
-        let lastWeekAluguel = 0;
-        
-        data.records?.forEach((rec: any) => {
-          totalGrossEarningsLastWeek += rec.ganhosTotal || 0;
-          totalRepasseLastWeek += rec.repasse || 0;
-          lastWeekDespesasAdm += rec.despesasAdm || 0;
-          lastWeekAluguel += rec.aluguel || 0;
-          profitFinancingLastWeek += rec.financingDetails?.installment || 0;
-        });
-        
-        console.log(`   Ganhos: €${totalGrossEarningsLastWeek.toFixed(2)}`);
-        console.log(`   Repasse: €${totalRepasseLastWeek.toFixed(2)}`);
-        console.log(`   DespesasAdm: €${lastWeekDespesasAdm.toFixed(2)}`);
-        console.log(`   Aluguel: €${lastWeekAluguel.toFixed(2)}`);
-        console.log(`   Financiamento: €${profitFinancingLastWeek.toFixed(2)}`);
-        
-        // Calcular receita da semana anterior
-        totalGrossEarningsLastWeek = lastWeekDespesasAdm + lastWeekAluguel + profitFinancingLastWeek;
-      }
+      console.log(`📊 Semana anterior (${previousWeekId}): ${data.records?.length || 0} registros`);
+      
+      let lastWeekDespesasAdm = 0;
+      let lastWeekAluguel = 0;
+      
+      data.records?.forEach((rec: any) => {
+        totalGrossEarningsLastWeek += rec.ganhosTotal || 0;
+        totalRepasseLastWeek += rec.repasse || 0;
+        lastWeekDespesasAdm += rec.despesasAdm || 0;
+        lastWeekAluguel += rec.aluguel || 0;
+        profitFinancingLastWeek += rec.financingDetails?.installment || 0;
+      });
+      
+      console.log(`   Ganhos: €${totalGrossEarningsLastWeek.toFixed(2)}`);
+      console.log(`   Repasse: €${totalRepasseLastWeek.toFixed(2)}`);
+      console.log(`   DespesasAdm: €${lastWeekDespesasAdm.toFixed(2)}`);
+      console.log(`   Aluguel: €${lastWeekAluguel.toFixed(2)}`);
+      console.log(`   Financiamento: €${profitFinancingLastWeek.toFixed(2)}`);
+      
+      // Calcular receita da semana anterior
+      totalGrossEarningsLastWeek = lastWeekDespesasAdm + lastWeekAluguel + profitFinancingLastWeek;
     } catch (error) {
       console.error('Erro ao buscar dados da semana anterior:', error);
     }
