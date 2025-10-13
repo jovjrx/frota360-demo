@@ -35,6 +35,7 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { useRouter } from 'next/router';
+import { getWeekId } from '@/lib/utils/date-helpers';
 
 interface ImportPageProps extends AdminPageProps {}
 
@@ -123,9 +124,11 @@ export default function ImportNewPage({ user, locale, tCommon, tPage, tAdmin: tA
     setImportResult(null);
 
     try {
+      // Converter data de início para weekId (formato YYYY-Wxx)
+      const weekIdValue = getWeekId(new Date(weekStart));
+      
       const formData = new FormData();
-      formData.append('weekStart', weekStart);
-      formData.append('weekEnd', weekEnd);
+      formData.append('weekId', weekIdValue);
       formData.append('adminId', user.uid); // Usar ID do admin logado
 
       filesToUpload.forEach(fileData => {
@@ -134,7 +137,7 @@ export default function ImportNewPage({ user, locale, tCommon, tPage, tAdmin: tA
         }
       });
 
-      const response = await fetch('/api/admin/weekly/import-raw', {
+      const response = await fetch('/api/admin/weekly/import', {
         method: 'POST',
         body: formData,
       });
