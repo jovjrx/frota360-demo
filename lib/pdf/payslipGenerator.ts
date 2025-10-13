@@ -27,12 +27,12 @@ export interface PayslipData {
   viaverde: number;
   aluguel: number;
   
+  // Financiamento (opcional)
+  financingInterestPercent?: number; // % adicional de juros
+  financingInstallment?: number; // Parcela semanal
+  
   // Repasse
   repasse: number;
-  
-  // Dados bancários
-  iban: string;
-  status: 'paid' | 'pending' | 'cancelled';
 }
 
 /**
@@ -168,9 +168,12 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       y += 15;
       
-      // Despesas Administrativas
+      // Despesas Administrativas (com breakdown de juros se houver)
       doc.font("Helvetica");
-      doc.text("Despesas Administrativas (7%)", leftMargin, y);
+      const despesasLabel = data.financingInterestPercent && data.financingInterestPercent > 0
+        ? `Despesas Administrativas (7% + ${data.financingInterestPercent}%)`
+        : "Despesas Administrativas (7%)";
+      doc.text(despesasLabel, leftMargin, y);
       doc.text(`-${data.comissao.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       
       doc.moveDown(2);
@@ -207,6 +210,13 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         y += 15;
       }
       
+      // Financiamento (se houver)
+      if (data.financingInstallment && data.financingInstallment > 0) {
+        doc.text("Financiamento", leftMargin, y);
+        doc.text(`-${data.financingInstallment.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+        y += 15;
+      }
+      
       doc.moveDown(2);
       
       // ============================================================================
@@ -227,33 +237,6 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.text(`${data.repasse.toFixed(2)} EUR`, rightMargin - 110, y + 10, { width: 100, align: "right" });
       
       doc.moveDown(3);
-      
-      // ============================================================================
-      // DADOS BANCÁRIOS
-      // ============================================================================
-      
-      doc.fontSize(11).font("Helvetica-Bold")
-        .text("DADOS BANCÁRIOS", leftMargin);
-      
-      doc.moveDown(0.5);
-      
-      doc.fontSize(10).font("Helvetica");
-      
-      y = doc.y;
-      
-      // IBAN
-      doc.text("IBAN:", leftMargin, y);
-      doc.text(data.iban, leftMargin + 150, y);
-      y += 15;
-      
-      // Status
-      doc.text("Status:", leftMargin, y);
-      const statusText = data.status === "paid" ? "PAGO" : "PENDENTE";
-      const statusColor = data.status === "paid" ? "#48BB78" : "#D69E2E";
-      doc.fillColor(statusColor).text(statusText, leftMargin + 150, y);
-      
-      doc.fillColor("#000000");
-      doc.moveDown(2);
       
       // ============================================================================
       // OBSERVAÇÕES

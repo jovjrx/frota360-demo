@@ -62,9 +62,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       combustivel: record.combustivel,
       viaverde: record.viaverde,
       aluguel: record.aluguel,
+      financingInterestPercent: (record as any).financingDetails?.interestPercent,
+      financingInstallment: (record as any).financingDetails?.installment,
       repasse: record.repasse,
-      iban: record.iban || driverData?.banking?.iban || 'N/A',
-      status: record.paymentStatus,
     };
 
     const pdfBuffer = await generatePayslipPDF(payslipData);

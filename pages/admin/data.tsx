@@ -717,7 +717,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
   const wizardDisclosure = useDisclosure();
   const [wizardMode, setWizardMode] = useState<'create' | 'replace'>('create');
   const [wizardWeekId, setWizardWeekId] = useState<string | null>(null);
-  
+
   // Upload modal state
   const uploadDisclosure = useDisclosure();
   const [uploadPlatform, setUploadPlatform] = useState<WeeklyPlatform | null>(null);
@@ -1019,16 +1019,37 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
       if (!response.ok) {
         let errorMessage = t('weeklyDataSources.errors.upload', 'Falha no upload');
         try {
-          const error = await response.json();
-          errorMessage = error.error || errorMessage;
-          console.error('❌ Error response:', error);
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+            console.error('❌ Error response:', error);
+          } else {
+            const text = await response.text();
+            console.error('❌ Non-JSON error response:', text);
+            errorMessage = text || errorMessage;
+          }
         } catch (e) {
           console.error('❌ Failed to parse error response:', e);
         }
         throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      let result: any = {};
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          result = await response.json();
+        } else {
+          const text = await response.text();
+          console.warn('⚠️  Non-JSON success response:', text);
+          result = { message: 'Upload realizado', raw: text };
+        }
+      } catch (e) {
+        console.error('❌ Failed to parse success response:', e);
+        result = { message: 'Upload realizado (resposta inválida)' };
+      }
+      
       console.log('✅ Upload result:', result);
 
       toast({
@@ -1164,7 +1185,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
           </HStack>
         }
       >
-        <Tabs index={activeTab} onChange={setActiveTab} variant="soft-rounded" colorScheme="green">
+        <Tabs index={activeTab} onChange={setActiveTab} variant="soft-rounded" colorScheme="green" minH={'full'}>
           <TabList overflowX="auto">
             <Tab>{t('weeklyDataSources.tabs.weeks', 'Semanas')}</Tab>
             <Tab>{t('weeklyDataSources.tabs.integrations', 'Integrações')}</Tab>
@@ -1172,273 +1193,266 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
           </TabList>
           <TabPanels>
             <TabPanel px={0}>
-              <Grid templateColumns={{ base: '1fr', xl: '280px 1fr' }} gap={4} alignItems="stretch">
-                <GridItem>
-                  <Card h="100%">
-                    <CardHeader pb={3}>
-                      <Stack spacing={2}>
-                        <Heading {...SECTION_HEADING_PROPS}>
-                          {t('weeklyDataSources.weeks.list', 'Semanas')}
-                        </Heading>
-                        <InputGroup size="sm">
-                          <InputLeftElement pointerEvents="none">
-                            <Icon as={FiSearch} color="gray.400" />
-                          </InputLeftElement>
-                          <Input
-                            value={searchTerm}
-                            onChange={(event) => setSearchTerm(event.target.value)}
-                            placeholder={t('weeklyDataSources.filters.search', 'Pesquisar semana')}
-                          />
-                        </InputGroup>
-                        <Select
-                          size="sm"
-                          value={statusFilter}
-                          onChange={(event) => setStatusFilter(event.target.value as WeekStatus | 'all')}
-                        >
-                          <option value="all">{t('weeklyDataSources.filters.status.all', 'Todos')}</option>
-                          <option value="complete">{statusLabels.complete}</option>
-                          <option value="partial">{statusLabels.partial}</option>
-                          <option value="pending">{statusLabels.pending}</option>
-                          <option value="error">{statusLabels.error}</option>
-                        </Select>
-                      </Stack>
-                    </CardHeader>
-                    <CardBody>
-                      <Stack spacing={2} maxH="520px" overflowY="auto">
-                        {isValidatingWeeks && weeks.length === 0 ? (
-                          <Flex justify="center" py={10}>
-                            <Spinner />
-                          </Flex>
-                        ) : filteredWeeks.length === 0 ? (
-                          <Text fontSize="sm" color="gray.500">
-                            {t('weeklyDataSources.messages.empty', 'Nenhuma semana encontrada para os filtros selecionados.')}
-                          </Text>
-                        ) : (
-                          filteredWeeks.map((week) => {
-                            const weekStatus = getWeekStatus(week);
-                            const isSelected = week.weekId == selectedWeekId;
-                            return (
-                              <Card
-                                key={week.weekId}
-                                variant={isSelected ? 'solid' : 'outline'}
-                                bgColor={isSelected ? 'green.100' : undefined}
-                                cursor="pointer"
-                                onClick={() => setSelectedWeekId(week.weekId)}
-                              >
-                                <CardBody>
-                                  <Stack spacing={2}>
-                                    <HStack justify="space-between" align="start">
-                                      <Heading size="sm">{week.weekId}</Heading>
-                                      <Badge colorScheme={WEEK_STATUS_COLORS[weekStatus]}>{statusLabels[weekStatus]}</Badge>
-                                    </HStack>
-                                    <Text fontSize="xs" color="gray.500">
-                                      {formatDate(week.weekStart)} — {formatDate(week.weekEnd)}
-                                    </Text>
-                                    <HStack spacing={2}>
-                                      <Tag size="sm" colorScheme="blue" variant="subtle">
-                                        <TagLabel>
-                                          {t('weeklyDataSources.labels.sourcesComplete', '{{complete}}/{{total}} fontes', {
-                                            complete: String(
-                                              WEEKLY_PLATFORMS.filter((platform) =>
-                                                week.sources?.[platform]?.status === 'complete'
-                                              ).length
-                                            ),
-                                            total: String(WEEKLY_PLATFORMS.length),
-                                          })}
-                                        </TagLabel>
-                                      </Tag>
-                                      <Tag size="sm" colorScheme="gray" variant="subtle">
-                                        <TagLabel>
-                                          {t('weeklyDataSources.labels.pendingRaw', 'Pendentes')}: {week.pendingRawFiles}
-                                        </TagLabel>
-                                      </Tag>
-                                    </HStack>
-                                  </Stack>
-                                </CardBody>
-                              </Card>
-                            );
-                          })
-                        )}
-                      </Stack>
-                    </CardBody>
-                  </Card>
-                </GridItem>
+              <Grid templateColumns={{ base: '1fr', xl: '280px 1fr' }} flexGrow={1} gap={4} alignItems="stretch">
 
-                <GridItem>
-                  <Stack spacing={4} h="100%">
-                    <Card>
-                      <CardHeader pb={3}>
-                        <HStack align="center" spacing={3}>
-                          <Heading {...SECTION_HEADING_PROPS}>
-                            {t('weeklyDataSources.week.header', 'Snapshot da semana')}
-                          </Heading>
-                          <Spacer />
-                          {selectedWeek && (
-                            <HStack spacing={2}>
-                              <Button
-                                size="xs"
-                                variant="outline"
-                                onClick={() => handleProcessWeek(selectedWeek.weekId)}
+                <Card h="full">
+                  <CardHeader p={4} pb={0}>
+                    <Stack spacing={2}>
+                      <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                          <Icon as={FiSearch} color="gray.400" />
+                        </InputLeftElement>
+                        <Input
+                          value={searchTerm}
+                          onChange={(event) => setSearchTerm(event.target.value)}
+                          placeholder={t('weeklyDataSources.filters.search', 'Pesquisar semana')}
+                        />
+                      </InputGroup>
+                      <Select
+                        size="sm"
+                        value={statusFilter}
+                        onChange={(event) => setStatusFilter(event.target.value as WeekStatus | 'all')}
+                      >
+                        <option value="all">{t('weeklyDataSources.filters.status.all', 'Todos')}</option>
+                        <option value="complete">{statusLabels.complete}</option>
+                        <option value="partial">{statusLabels.partial}</option>
+                        <option value="pending">{statusLabels.pending}</option>
+                        <option value="error">{statusLabels.error}</option>
+                      </Select>
+                    </Stack>
+                  </CardHeader>
+                  <CardBody p={4}>
+                    <Stack spacing={4} h={{base: 'auto', md: '56vh'}} maxH={"56vh"} overflowY="auto">
+                      {isValidatingWeeks && weeks.length === 0 ? (
+                        <Flex justify="center" py={10}>
+                          <Spinner />
+                        </Flex>
+                      ) : filteredWeeks.length === 0 ? (
+                        <Text fontSize="sm" color="gray.500">
+                          {t('weeklyDataSources.messages.empty', 'Nenhuma semana encontrada para os filtros selecionados.')}
+                        </Text>
+                      ) : (
+                        filteredWeeks.map((week) => {
+                          const weekStatus = getWeekStatus(week);
+                          const isSelected = week.weekId == selectedWeekId;
+                          return (
+                            <Card
+                              key={week.weekId}
+                              variant={isSelected ? 'solid' : 'outline'}
+                              bgColor={isSelected ? 'green.100' : undefined}
+                              cursor="pointer"
+                              onClick={() => setSelectedWeekId(week.weekId)}
+                            >
+                              <CardBody>
+                                <Stack spacing={2}>
+                                  <HStack justify="space-between" align="start">
+                                    <Heading size="sm">{week.weekId}</Heading>
+                                    <Badge colorScheme={WEEK_STATUS_COLORS[weekStatus]}>{statusLabels[weekStatus]}</Badge>
+                                  </HStack>
+                                  <Text fontSize="xs" color="gray.500">
+                                    {formatDate(week.weekStart)} — {formatDate(week.weekEnd)}
+                                  </Text>
+                                  <HStack spacing={2}>
+                                    <Tag size="sm" colorScheme="blue" variant="subtle">
+                                      <TagLabel>
+                                        {t('weeklyDataSources.labels.sourcesComplete', '{{complete}}/{{total}} fontes', {
+                                          complete: String(
+                                            WEEKLY_PLATFORMS.filter((platform) =>
+                                              week.sources?.[platform]?.status === 'complete'
+                                            ).length
+                                          ),
+                                          total: String(WEEKLY_PLATFORMS.length),
+                                        })}
+                                      </TagLabel>
+                                    </Tag>
+                                    <Tag size="sm" colorScheme="gray" variant="subtle">
+                                      <TagLabel>
+                                        {t('weeklyDataSources.labels.pendingRaw', 'Pendentes')}: {week.pendingRawFiles}
+                                      </TagLabel>
+                                    </Tag>
+                                  </HStack>
+                                </Stack>
+                              </CardBody>
+                            </Card>
+                          );
+                        })
+                      )}
+                    </Stack>
+                  </CardBody>
+                </Card>
+
+                <Card>
+                  <CardHeader p={4} pb={0}>
+                    <HStack align="center" spacing={3}>
+                      <Heading {...SECTION_HEADING_PROPS}>
+                        {selectedWeek.weekId}
+                      </Heading>
+                      <Spacer />
+                      {selectedWeek && (
+                        <HStack spacing={2}>
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => handleProcessWeek(selectedWeek.weekId)}
+                          >
+                            {t('weeklyDataSources.actions.processAll', 'Processar tudo')}
+                          </Button>
+                          <Menu>
+                            <MenuButton as={Button} size="xs" rightIcon={<FiChevronDown />}>
+                              {t('weeklyDataSources.actions.more', 'Ações')}
+                            </MenuButton>
+                            <MenuList>
+                              <MenuItem onClick={() => router.push(`/admin/weekly/import?week=${selectedWeek.weekId}`)}>
+                                <Icon as={FiUpload} mr={2} />
+                                {t('weeklyDataSources.actions.importAll', 'Importar tudo')}
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => {
+                                  WEEKLY_PLATFORMS.filter(
+                                    (platform) =>
+                                      !MANUAL_ONLY_PLATFORMS.includes(platform as IntegrationPlatform)
+                                  ).forEach((platform) => handleFetchPlatform(platform as IntegrationPlatform));
+                                }}
                               >
-                                {t('weeklyDataSources.actions.processAll', 'Processar tudo')}
-                              </Button>
-                              <Menu>
-                                <MenuButton as={Button} size="xs" rightIcon={<FiChevronDown />}>
-                                  {t('weeklyDataSources.actions.more', 'Ações')}
-                                </MenuButton>
-                                <MenuList>
-                                  <MenuItem onClick={() => router.push(`/admin/weekly/import?week=${selectedWeek.weekId}`)}>
-                                    <Icon as={FiUpload} mr={2} />
-                                    {t('weeklyDataSources.actions.importAll', 'Importar tudo')}
-                                  </MenuItem>
-                                  <MenuItem
-                                    onClick={() => {
-                                      WEEKLY_PLATFORMS.filter(
-                                        (platform) =>
-                                          !MANUAL_ONLY_PLATFORMS.includes(platform as IntegrationPlatform)
-                                      ).forEach((platform) => handleFetchPlatform(platform as IntegrationPlatform));
-                                    }}
-                                  >
-                                    <Icon as={FiRefreshCw} mr={2} />
-                                    {t('weeklyDataSources.actions.fetchAll', 'Buscar tudo da API')}
-                                  </MenuItem>
-                                  <MenuItem onClick={openReplaceWeekWizard}>
-                                    <Icon as={FiSettings} mr={2} />
-                                    {t('weeklyDataSources.actions.replaceSnapshot', 'Substituir snapshot')}
-                                  </MenuItem>
-                                </MenuList>
-                              </Menu>
-                            </HStack>
-                          )}
+                                <Icon as={FiRefreshCw} mr={2} />
+                                {t('weeklyDataSources.actions.fetchAll', 'Buscar tudo da API')}
+                              </MenuItem>
+                              <MenuItem onClick={openReplaceWeekWizard}>
+                                <Icon as={FiSettings} mr={2} />
+                                {t('weeklyDataSources.actions.replaceSnapshot', 'Substituir snapshot')}
+                              </MenuItem>
+                            </MenuList>
+                          </Menu>
                         </HStack>
-                      </CardHeader>
-                      <CardBody>
-                        {selectedWeek ? (
-                          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                            {WEEKLY_PLATFORMS.map((platform) => {
-                              const source = selectedWeek.sources?.[platform];
-                              const raw = selectedWeek.rawFiles?.[platform];
-                              
-                              // Skip if source or raw are undefined (shouldn't happen but safety check)
-                              if (!source || !raw) {
-                                console.warn(`⚠️ Missing data for platform ${platform}:`, { source, raw });
-                                return null;
-                              }
-                              
-                              const strategy = deriveStrategy(source, raw);
-                              const integration = integrationMap[platform];
-                              const platformStatus = (source.status as WeekStatus) ?? 'pending';
+                      )}
+                    </HStack>
+                  </CardHeader>
+                  <CardBody p={4}>
+                    {selectedWeek ? (
+                      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                        {WEEKLY_PLATFORMS.map((platform) => {
+                          const source = selectedWeek.sources?.[platform];
+                          const raw = selectedWeek.rawFiles?.[platform];
 
-                              return (
-                                <Card key={platform} variant="outline" borderColor="gray.200">
-                                  <CardBody>
-                                    <Stack spacing={3}>
-                                      <HStack justify="space-between" align="start">
-                                        <VStack align="start" spacing={1}>
-                                          <Text fontWeight="semibold" textTransform="capitalize">
-                                            {platform}
-                                          </Text>
-                                          <Tag size="sm" colorScheme={STRATEGY_COLORS[strategy]}>
-                                            <TagLabel>{STRATEGY_LABELS[strategy]}</TagLabel>
-                                          </Tag>
-                                        </VStack>
-                                        <Badge colorScheme={SOURCE_STATUS_COLORS[platformStatus]}>
-                                          {statusLabels[platformStatus]}
-                                        </Badge>
-                                      </HStack>
-                                      <Stack spacing={1} fontSize="xs" color="gray.600">
-                                        <Text>
-                                          {t('weeklyDataSources.labels.lastSnapshot', 'Snapshot API')}:{' '}
-                                          {formatDateTime(source.importedAt, router.locale || 'pt-PT')}
-                                        </Text>
-                                        <Text>
-                                          {t('weeklyDataSources.labels.files', 'Arquivos')}:{' '}
-                                          {raw.total} · {t('weeklyDataSources.labels.processed', 'processados')}: {raw.processed}
-                                        </Text>
-                                        <Text>
-                                          {t('weeklyDataSources.labels.records', 'Registos')}:{' '}
-                                          {source.recordsCount ?? 0}
-                                        </Text>
-                                      </Stack>
-                                      <HStack justify="space-between" flexWrap="wrap" rowGap={2}>
-                                        <Tooltip label={t('weeklyDataSources.tooltips.integration', 'Integração associada')}>
-                                          <Tag size="sm" colorScheme={integration?.enabled ? 'green' : 'gray'}>
-                                            <TagLabel>
-                                              {integration?.enabled
-                                                ? t('weeklyDataSources.integration.enabled', 'Integração ativa')
-                                                : t('weeklyDataSources.integration.disabled', 'Integração inativa')}
-                                            </TagLabel>
-                                          </Tag>
-                                        </Tooltip>
-                                        <Menu>
-                                          <MenuButton as={Button} size="xs" rightIcon={<FiChevronDown />}>
-                                            {t('weeklyDataSources.actions.cardMenu', 'Ações')}
-                                          </MenuButton>
-                                          <MenuList>
-                                            <MenuItem onClick={() => handleOpenUploadModal(platform)}>
-                                              <Icon as={FiUpload} mr={2} />
-                                              {t('weeklyDataSources.actions.importFile', 'Importar arquivo')}
-                                            </MenuItem>
-                                            <MenuItem
-                                              onClick={() => handleFetchPlatform(platform)}
-                                              isDisabled={MANUAL_ONLY_PLATFORMS.includes(platform)}
-                                            >
-                                              <Icon as={FiRefreshCw} mr={2} />
-                                              {t('weeklyDataSources.actions.fetchApi', 'Buscar da API')}
-                                            </MenuItem>
-                                            <MenuItem onClick={() => handleProcessWeek(selectedWeek.weekId)}>
-                                              <Icon as={FiActivity} mr={2} />
-                                              {t('weeklyDataSources.actions.process', 'Processar')}
-                                            </MenuItem>
-                                            <MenuItem onClick={() => handleOpenLogs(platform)}>
-                                              <Icon as={FiInfo} mr={2} />
-                                              {t('weeklyDataSources.actions.viewLogs', 'Ver logs')}
-                                            </MenuItem>
-                                          </MenuList>
-                                        </Menu>
-                                      </HStack>
+                          // Skip if source or raw are undefined (shouldn't happen but safety check)
+                          if (!source || !raw) {
+                            console.warn(`⚠️ Missing data for platform ${platform}:`, { source, raw });
+                            return null;
+                          }
 
-                                      {raw.entries.length > 0 && (
-                                        <Stack spacing={1} fontSize="xs" color="gray.500">
-                                          <Text>
-                                            {t('weeklyDataSources.labels.versions', 'Versões do snapshot')}:{' '}
-                                            {raw.entries
-                                              .slice(0, 3)
-                                              .map((entry, index) => `${t('weeklyDataSources.labels.version', 'v')}${index + 1}`)
-                                              .join(', ')}
-                                            {raw.entries.length > 3 ? '…' : ''}
-                                          </Text>
-                                        </Stack>
-                                      )}
+                          const strategy = deriveStrategy(source, raw);
+                          const integration = integrationMap[platform];
+                          const platformStatus = (source.status as WeekStatus) ?? 'pending';
 
-                                      {integration && integration.missingScopes.length > 0 && (
-                                        <Alert status="warning" variant="left-accent" borderRadius="md" fontSize="xs">
-                                          <AlertIcon />
-                                          <Text>
-                                            {t('weeklyDataSources.alerts.missingScopes', 'Escopos ausentes')}: {integration.missingScopes.join(', ')}
-                                          </Text>
-                                        </Alert>
-                                      )}
+                          return (
+                            <Card key={platform} variant="outline" borderColor="gray.200">
+                              <CardBody>
+                                <Stack spacing={3}>
+                                  <HStack justify="space-between" align="start">
+                                    <VStack align="start" spacing={1}>
+                                      <Text fontWeight="semibold" textTransform="capitalize">
+                                        {platform}
+                                      </Text>
+                                      <Tag size="sm" colorScheme={STRATEGY_COLORS[strategy]}>
+                                        <TagLabel>{STRATEGY_LABELS[strategy]}</TagLabel>
+                                      </Tag>
+                                    </VStack>
+                                    <Badge colorScheme={SOURCE_STATUS_COLORS[platformStatus]}>
+                                      {statusLabels[platformStatus]}
+                                    </Badge>
+                                  </HStack>
+                                  <Stack spacing={1} fontSize="xs" color="gray.600">
+                                    <Text>
+                                      {t('weeklyDataSources.labels.lastSnapshot', 'Snapshot API')}:{' '}
+                                      {formatDateTime(source.importedAt, router.locale || 'pt-PT')}
+                                    </Text>
+                                    <Text>
+                                      {t('weeklyDataSources.labels.files', 'Arquivos')}:{' '}
+                                      {raw.total} · {t('weeklyDataSources.labels.processed', 'processados')}: {raw.processed}
+                                    </Text>
+                                    <Text>
+                                      {t('weeklyDataSources.labels.records', 'Registos')}:{' '}
+                                      {source.recordsCount ?? 0}
+                                    </Text>
+                                  </Stack>
+                                  <HStack justify="space-between" flexWrap="wrap" rowGap={2}>
+                                    <Tooltip label={t('weeklyDataSources.tooltips.integration', 'Integração associada')}>
+                                      <Tag size="sm" colorScheme={integration?.enabled ? 'green' : 'gray'}>
+                                        <TagLabel>
+                                          {integration?.enabled
+                                            ? t('weeklyDataSources.integration.enabled', 'Integração ativa')
+                                            : t('weeklyDataSources.integration.disabled', 'Integração inativa')}
+                                        </TagLabel>
+                                      </Tag>
+                                    </Tooltip>
+                                    <Menu>
+                                      <MenuButton as={Button} size="xs" rightIcon={<FiChevronDown />}>
+                                        {t('weeklyDataSources.actions.cardMenu', 'Ações')}
+                                      </MenuButton>
+                                      <MenuList>
+                                        <MenuItem onClick={() => handleOpenUploadModal(platform)}>
+                                          <Icon as={FiUpload} mr={2} />
+                                          {t('weeklyDataSources.actions.importFile', 'Importar arquivo')}
+                                        </MenuItem>
+                                        <MenuItem
+                                          onClick={() => handleFetchPlatform(platform)}
+                                          isDisabled={MANUAL_ONLY_PLATFORMS.includes(platform)}
+                                        >
+                                          <Icon as={FiRefreshCw} mr={2} />
+                                          {t('weeklyDataSources.actions.fetchApi', 'Buscar da API')}
+                                        </MenuItem>
+                                        <MenuItem onClick={() => handleProcessWeek(selectedWeek.weekId)}>
+                                          <Icon as={FiActivity} mr={2} />
+                                          {t('weeklyDataSources.actions.process', 'Processar')}
+                                        </MenuItem>
+                                        <MenuItem onClick={() => handleOpenLogs(platform)}>
+                                          <Icon as={FiInfo} mr={2} />
+                                          {t('weeklyDataSources.actions.viewLogs', 'Ver logs')}
+                                        </MenuItem>
+                                      </MenuList>
+                                    </Menu>
+                                  </HStack>
+
+                                  {raw.entries.length > 0 && (
+                                    <Stack spacing={1} fontSize="xs" color="gray.500">
+                                      <Text>
+                                        {t('weeklyDataSources.labels.versions', 'Versões do snapshot')}:{' '}
+                                        {raw.entries
+                                          .slice(0, 3)
+                                          .map((entry, index) => `${t('weeklyDataSources.labels.version', 'v')}${index + 1}`)
+                                          .join(', ')}
+                                        {raw.entries.length > 3 ? '…' : ''}
+                                      </Text>
                                     </Stack>
-                                  </CardBody>
-                                </Card>
-                              );
-                            })}
-                          </SimpleGrid>
-                        ) : (
-                          <Flex justify="center" py={20}>
-                            <Stack spacing={3} align="center">
-                              <Spinner />
-                              <Text fontSize="sm" color="gray.500">
-                                {t('weeklyDataSources.messages.selectWeek', 'Selecione uma semana para ver os detalhes.')}
-                              </Text>
-                            </Stack>
-                          </Flex>
-                        )}
-                      </CardBody>
-                    </Card>
-                  </Stack>
-                </GridItem>
+                                  )}
+
+                                  {integration && integration.missingScopes.length > 0 && (
+                                    <Alert status="warning" variant="left-accent" borderRadius="md" fontSize="xs">
+                                      <AlertIcon />
+                                      <Text>
+                                        {t('weeklyDataSources.alerts.missingScopes', 'Escopos ausentes')}: {integration.missingScopes.join(', ')}
+                                      </Text>
+                                    </Alert>
+                                  )}
+                                </Stack>
+                              </CardBody>
+                            </Card>
+                          );
+                        })}
+                      </SimpleGrid>
+                    ) : (
+                      <Flex justify="center" py={20}>
+                        <Stack spacing={3} align="center">
+                          <Spinner />
+                          <Text fontSize="sm" color="gray.500">
+                            {t('weeklyDataSources.messages.selectWeek', 'Selecione uma semana para ver os detalhes.')}
+                          </Text>
+                        </Stack>
+                      </Flex>
+                    )}
+                  </CardBody>
+                </Card>
+
               </Grid>
             </TabPanel>
 
@@ -1615,131 +1629,131 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
 
             <TabPanel px={0}>
               <VStack spacing={4} mb={4} align={"stretch"}>
-              <Card>
-                <CardBody>
-                  <Flex gap={4} flexWrap="wrap">
-                    <Select
-                      value={logPlatformFilter}
-                      onChange={(event) => setLogPlatformFilter(event.target.value as 'all' | IntegrationPlatform)}
-                      maxW="180px"
-                    >
-                      <option value="all">{t('weeklyDataSources.logs.filters.platform', 'Todas as plataformas')}</option>
-                      {WEEKLY_PLATFORMS.map((platform) => (
-                        <option key={platform} value={platform}>
-                          {platform.toUpperCase()}
-                        </option>
-                      ))}
-                    </Select>
-                    <Select
-                      value={logTypeFilter}
-                      onChange={(event) => setLogTypeFilter(event.target.value as 'all' | IntegrationLogType)}
-                      maxW="180px"
-                    >
-                      <option value="all">{t('weeklyDataSources.logs.filters.type', 'Todos os tipos')}</option>
-                      {(['success', 'error', 'warning', 'info', 'auth', 'sync', 'test'] as IntegrationLogType[]).map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </Select>
-                    <Select
-                      value={logSeverityFilter}
-                      onChange={(event) => setLogSeverityFilter(event.target.value as 'all' | IntegrationLogSeverity)}
-                      maxW="180px"
-                    >
-                      <option value="all">{t('weeklyDataSources.logs.filters.severity', 'Todas as severidades')}</option>
-                      {(['debug', 'info', 'warning', 'error', 'critical'] as IntegrationLogSeverity[]).map((severity) => (
-                        <option key={severity} value={severity}>
-                          {severity}
-                        </option>
-                      ))}
-                    </Select>
-                    <Select value={logLimit} onChange={(event) => setLogLimit(Number(event.target.value))} maxW="120px">
-                      {[25, 50, 100, 200].map((limitOption) => (
-                        <option key={limitOption} value={limitOption}>
-                          {t('weeklyDataSources.logs.filters.limit', '{{count}} itens', {
-                            count: String(limitOption),
-                          })}
-                        </option>
-                      ))}
-                    </Select>
-                    <Spacer />
-                    <Button leftIcon={<FiRefreshCw />} onClick={() => mutateLogs()} size="sm">
-                      {tc('actions.refresh', 'Atualizar')}
-                    </Button>
-                  </Flex>
-                </CardBody>
-              </Card>
-              <Card>
-                <CardBody>
-                  {logs.length === 0 ? (
-                    <Text fontSize="sm" color="gray.500">
-                      {t('weeklyDataSources.logs.empty', 'Nenhum log encontrado com os filtros atuais.')}
-                    </Text>
-                  ) : (
-                    <Table variant="simple" size="sm">
-                      <Thead>
-                        <Tr>
-                          <Th>{t('weeklyDataSources.logs.columns.time', 'Horário')}</Th>
-                          <Th>{t('weeklyDataSources.logs.columns.platform', 'Plataforma')}</Th>
-                          <Th>{t('weeklyDataSources.logs.columns.type', 'Tipo')}</Th>
-                          <Th>{t('weeklyDataSources.logs.columns.severity', 'Severidade')}</Th>
-                          <Th>{t('weeklyDataSources.logs.columns.message', 'Mensagem')}</Th>
-                          <Th>{t('weeklyDataSources.logs.columns.actions', 'Ações')}</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {logs.map((log) => (
-                          <Tr key={log.id}>
-                            <Td>{formatDateTime(log.timestamp, router.locale || 'pt-PT')}</Td>
-                            <Td>
-                              <Tag size="sm" colorScheme="gray">
-                                <TagLabel>{log.platform.toUpperCase()}</TagLabel>
-                              </Tag>
-                            </Td>
-                            <Td>
-                              <Tag size="sm" colorScheme={LOG_TYPE_COLORS[log.type]}>
-                                <TagLabel>{log.type}</TagLabel>
-                              </Tag>
-                            </Td>
-                            <Td>
-                              <Tag size="sm" colorScheme={SEVERITY_COLORS[log.severity]}>
-                                <TagLabel>{log.severity}</TagLabel>
-                              </Tag>
-                            </Td>
-                            <Td maxW="360px">
-                              <Tooltip label={log.message}>
-                                <Text noOfLines={2}>{log.message}</Text>
-                              </Tooltip>
-                            </Td>
-                            <Td>
-                              <HStack spacing={2}>
-                                <IconButton
-                                  size="sm"
-                                  aria-label={t('weeklyDataSources.logs.actions.details', 'Ver detalhes')}
-                                  icon={<FiInfo />}
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setSelectedLog(log);
-                                    logDetailsDisclosure.onOpen();
-                                  }}
-                                />
-                                <IconButton
-                                  size="sm"
-                                  aria-label={t('weeklyDataSources.logs.actions.retry', 'Reexecutar')}
-                                  icon={<FiActivity />}
-                                  variant="ghost"
-                                  onClick={() => handleFetchPlatform(log.platform)}
-                                />
-                              </HStack>
-                            </Td>
-                          </Tr>
+                <Card>
+                  <CardBody>
+                    <Flex gap={4} flexWrap="wrap">
+                      <Select
+                        value={logPlatformFilter}
+                        onChange={(event) => setLogPlatformFilter(event.target.value as 'all' | IntegrationPlatform)}
+                        maxW="180px"
+                      >
+                        <option value="all">{t('weeklyDataSources.logs.filters.platform', 'Todas as plataformas')}</option>
+                        {WEEKLY_PLATFORMS.map((platform) => (
+                          <option key={platform} value={platform}>
+                            {platform.toUpperCase()}
+                          </option>
                         ))}
-                      </Tbody>
-                    </Table>
-                  )}
-                </CardBody>
-              </Card>
+                      </Select>
+                      <Select
+                        value={logTypeFilter}
+                        onChange={(event) => setLogTypeFilter(event.target.value as 'all' | IntegrationLogType)}
+                        maxW="180px"
+                      >
+                        <option value="all">{t('weeklyDataSources.logs.filters.type', 'Todos os tipos')}</option>
+                        {(['success', 'error', 'warning', 'info', 'auth', 'sync', 'test'] as IntegrationLogType[]).map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </Select>
+                      <Select
+                        value={logSeverityFilter}
+                        onChange={(event) => setLogSeverityFilter(event.target.value as 'all' | IntegrationLogSeverity)}
+                        maxW="180px"
+                      >
+                        <option value="all">{t('weeklyDataSources.logs.filters.severity', 'Todas as severidades')}</option>
+                        {(['debug', 'info', 'warning', 'error', 'critical'] as IntegrationLogSeverity[]).map((severity) => (
+                          <option key={severity} value={severity}>
+                            {severity}
+                          </option>
+                        ))}
+                      </Select>
+                      <Select value={logLimit} onChange={(event) => setLogLimit(Number(event.target.value))} maxW="120px">
+                        {[25, 50, 100, 200].map((limitOption) => (
+                          <option key={limitOption} value={limitOption}>
+                            {t('weeklyDataSources.logs.filters.limit', '{{count}} itens', {
+                              count: String(limitOption),
+                            })}
+                          </option>
+                        ))}
+                      </Select>
+                      <Spacer />
+                      <Button leftIcon={<FiRefreshCw />} onClick={() => mutateLogs()} size="sm">
+                        {tc('actions.refresh', 'Atualizar')}
+                      </Button>
+                    </Flex>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardBody>
+                    {logs.length === 0 ? (
+                      <Text fontSize="sm" color="gray.500">
+                        {t('weeklyDataSources.logs.empty', 'Nenhum log encontrado com os filtros atuais.')}
+                      </Text>
+                    ) : (
+                      <Table variant="simple" size="sm">
+                        <Thead>
+                          <Tr>
+                            <Th>{t('weeklyDataSources.logs.columns.time', 'Horário')}</Th>
+                            <Th>{t('weeklyDataSources.logs.columns.platform', 'Plataforma')}</Th>
+                            <Th>{t('weeklyDataSources.logs.columns.type', 'Tipo')}</Th>
+                            <Th>{t('weeklyDataSources.logs.columns.severity', 'Severidade')}</Th>
+                            <Th>{t('weeklyDataSources.logs.columns.message', 'Mensagem')}</Th>
+                            <Th>{t('weeklyDataSources.logs.columns.actions', 'Ações')}</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {logs.map((log) => (
+                            <Tr key={log.id}>
+                              <Td>{formatDateTime(log.timestamp, router.locale || 'pt-PT')}</Td>
+                              <Td>
+                                <Tag size="sm" colorScheme="gray">
+                                  <TagLabel>{log.platform.toUpperCase()}</TagLabel>
+                                </Tag>
+                              </Td>
+                              <Td>
+                                <Tag size="sm" colorScheme={LOG_TYPE_COLORS[log.type]}>
+                                  <TagLabel>{log.type}</TagLabel>
+                                </Tag>
+                              </Td>
+                              <Td>
+                                <Tag size="sm" colorScheme={SEVERITY_COLORS[log.severity]}>
+                                  <TagLabel>{log.severity}</TagLabel>
+                                </Tag>
+                              </Td>
+                              <Td maxW="360px">
+                                <Tooltip label={log.message}>
+                                  <Text noOfLines={2}>{log.message}</Text>
+                                </Tooltip>
+                              </Td>
+                              <Td>
+                                <HStack spacing={2}>
+                                  <IconButton
+                                    size="sm"
+                                    aria-label={t('weeklyDataSources.logs.actions.details', 'Ver detalhes')}
+                                    icon={<FiInfo />}
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setSelectedLog(log);
+                                      logDetailsDisclosure.onOpen();
+                                    }}
+                                  />
+                                  <IconButton
+                                    size="sm"
+                                    aria-label={t('weeklyDataSources.logs.actions.retry', 'Reexecutar')}
+                                    icon={<FiActivity />}
+                                    variant="ghost"
+                                    onClick={() => handleFetchPlatform(log.platform)}
+                                  />
+                                </HStack>
+                              </Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    )}
+                  </CardBody>
+                </Card>
               </VStack>
             </TabPanel>
           </TabPanels>

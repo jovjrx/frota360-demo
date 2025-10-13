@@ -14,6 +14,8 @@ import {
   Text,
   useToast,
   HStack,
+  VStack,
+  Tooltip,
 } from '@chakra-ui/react';
 import { FiCheck, FiX, FiEdit } from 'react-icons/fi';
 
@@ -24,6 +26,7 @@ interface EditableNumberFieldProps {
   color?: string;
   fontWeight?: 'normal' | 'medium' | 'bold';
   prefix?: string;
+  helpText?: string;
 }
 
 const EditableNumberField: React.FC<EditableNumberFieldProps> = ({
@@ -33,6 +36,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = ({
   color,
   fontWeight,
   prefix,
+  helpText,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -89,13 +93,22 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = ({
         </HStack>
       ) : (
         <Flex justify="flex-end" align="center">
-          <Text 
-            color={color} 
-            fontWeight={fontWeight}
-            mr={2}
-          >
-            {displayValue}
-          </Text>
+          <VStack align="flex-end" spacing={0}>
+            <Text 
+              color={color} 
+              fontWeight={fontWeight}
+              mr={2}
+            >
+              {displayValue}
+            </Text>
+            {helpText && (
+              <Tooltip label={helpText}>
+                <Text fontSize="xs" color="gray.500" mr={2}>
+                  {helpText}
+                </Text>
+              </Tooltip>
+            )}
+          </VStack>
           {!isPaid && (
             <IconButton 
               icon={<FiEdit />} 

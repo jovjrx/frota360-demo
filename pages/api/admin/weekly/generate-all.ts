@@ -363,9 +363,9 @@ export default async function handler(
         viaverde: record.viaverde,
         viaverdeTotal: record.viaverde, // ViaVerde é o mesmo que viaverde para o contracheque
         aluguel: record.aluguel,
+        financingInterestPercent: (record as any).financingDetails?.interestPercent,
+        financingInstallment: (record as any).financingDetails?.installment,
         repasse: record.repasse,
-        iban: record.iban || "N/A",
-        status: record.paymentStatus,
       };
 
       // Gerar PDF

@@ -225,11 +225,16 @@ export async function getWeekOptions(count: number = 12): Promise<WeekOption[]> 
     
     // Converter para array e ordenar
     const weeks = Array.from(weeksMap.entries()).map(([weekId, dates]) => {
-      const startDate = new Date(dates.weekStart);
-      const endDate = new Date(dates.weekEnd);
+      // Usar formato ISO sem conversão de timezone
+      const startParts = dates.weekStart.split('-'); // YYYY-MM-DD
+      const endParts = dates.weekEnd.split('-');
+      
+      // Formato DD/MM/YYYY
+      const startFormatted = `${startParts[2]}/${startParts[1]}/${startParts[0]}`;
+      const endFormatted = `${endParts[2]}/${endParts[1]}/${endParts[0]}`;
       
       return {
-        label: `${startDate.toLocaleDateString('pt-PT')} - ${endDate.toLocaleDateString('pt-PT')}`,
+        label: `${startFormatted} - ${endFormatted}`,
         value: weekId,
         start: dates.weekStart,
         end: dates.weekEnd,

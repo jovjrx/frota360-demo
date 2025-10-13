@@ -48,12 +48,16 @@ interface DashboardData {
     pendingRequests: number;
     totalEarningsThisWeek: number;
     totalGrossEarningsThisWeek: number; // Ganhos brutos da semana
-    totalPaymentsPending: number;
+    totalRepasseThisWeek: number; // Repasse total (valor a ser pago aos motoristas)
     totalPaymentsPaid: number;
     averageEarningsPerDriver: number;
     profitCommissions: number;
     profitRentals: number;
     profitDiscounts: number;
+    // Dados da semana anterior para comparação
+    totalGrossEarningsLastWeek?: number;
+    totalRepasseLastWeek?: number;
+    totalEarningsLastWeek?: number;
   };
   recentDrivers: any[];
   recentRequests: any[];
@@ -148,172 +152,155 @@ export default function AdminDashboard({ user, locale, initialData, tCommon, tPa
       translations={translations}
     >
 
-      {/* 3 Blocos Financeiros Principais + Lucro */}
-      <Box>
-        {/* Primeira linha - 3 blocos */}
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={4}>
-          {/* Ganhos Brutos (Total que entrou) */}
-          <Card bg="purple.50" borderColor="purple.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiTruck} color="purple.600" />
-                    <Text fontSize="sm" color="purple.700">{t('dashboard.grossEarnings', 'Ganhos')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber color="purple.600" fontSize="2xl">
-                  {formatCurrency(data?.stats?.totalGrossEarningsThisWeek || 0)}
-                </StatNumber>
-                <StatHelpText color="purple.500" fontSize="xs">
-                  {t('dashboard.helpers.grossEarnings', 'Total entrou')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          {/* Pagamentos Pendentes (A Pagar) */}
-          <Card bg="orange.50" borderColor="orange.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiClock} color="orange.600" />
-                    <Text fontSize="sm" color="orange.700">{t('dashboard.paymentsPending', 'A Pagar')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber color="orange.600" fontSize="2xl">
-                  {formatCurrency(data?.stats?.totalPaymentsPending || 0)}
-                </StatNumber>
-                <StatHelpText color="orange.500" fontSize="xs">
-                  {t('dashboard.helpers.awaitingPayment', 'Pendente')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-
-          {/* Pagamentos Realizados (Pagos) */}
-          <Card bg="green.50" borderColor="green.200" borderWidth="1px">
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiCheckCircle} color="green.600" />
-                    <Text fontSize="sm" color="green.700">{t('dashboard.paymentsPaid', 'Pagos')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber color="green.600" fontSize="2xl">
-                  {formatCurrency(data?.stats?.totalPaymentsPaid || 0)}
-                </StatNumber>
-                <StatHelpText color="green.500" fontSize="xs">
-                  {t('dashboard.helpers.totalPaid', 'Total realizado')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-
-        {/* Segunda linha - Lucro Semanal (destaque com breakdown) */}
-        <Card bg="blue.50" borderColor="blue.200" borderWidth="2px">
+      {/* 3 Cards Principais com Comparação */}
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+        {/* Entradas Totais */}
+        <Card>
           <CardBody>
             <Stat>
               <StatLabel>
                 <HStack spacing={2}>
-                  <Icon as={FiDollarSign} color="blue.600" boxSize={5} />
-                  <Text fontSize="md" fontWeight="bold" color="blue.700">
-                    {t('dashboard.weeklyProfit', 'Lucro Semanal')}
-                  </Text>
+                  <Icon as={FiTruck} color="green.600" />
+                  <Text fontSize="sm" color="gray.700">Entradas Totais</Text>
                 </HStack>
               </StatLabel>
-              <StatNumber color="blue.600" fontSize="3xl" mt={2}>
-                {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
+              <StatNumber color="green.600" fontSize="2xl">
+                {formatCurrency(data?.stats?.totalGrossEarningsThisWeek || 0)}
               </StatNumber>
-              
-              {/* Breakdown do Lucro */}
-              <Box mt={3} pt={3} borderTopWidth="1px" borderColor="blue.200">
-                <VStack align="stretch" spacing={1}>
-                  <HStack justify="space-between" fontSize="sm" color="blue.600">
-                    <Text>Comissões</Text>
-                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitCommissions || 0)}</Text>
-                  </HStack>
-                  <HStack justify="space-between" fontSize="sm" color="blue.600">
-                    <Text>Aluguéis</Text>
-                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitRentals || 0)}</Text>
-                  </HStack>
-                  <HStack justify="space-between" fontSize="sm" color="blue.600">
-                    <Text>Descontos aplicados</Text>
-                    <Text fontWeight="medium">{formatCurrency(data?.stats?.profitDiscounts || 0)}</Text>
-                  </HStack>
-                </VStack>
-              </Box>
+              <StatHelpText fontSize="xs" color="gray.600">
+                {data?.stats?.totalGrossEarningsLastWeek && data?.stats?.totalGrossEarningsLastWeek > 0
+                  ? (() => {
+                    const diff = data.stats.totalGrossEarningsThisWeek - data.stats.totalGrossEarningsLastWeek;
+                    const percentChange = ((diff / data.stats.totalGrossEarningsLastWeek) * 100).toFixed(1);
+                    const isIncrease = diff >= 0;
+                    return `${isIncrease ? '↑' : '↓'} ${Math.abs(Number(percentChange))}% vs semana anterior`;
+                  })()
+                  : 'Primeira semana com dados'
+                }
+              </StatHelpText>
             </Stat>
           </CardBody>
         </Card>
-      </Box>
 
-      {/* Estatísticas Secundárias */}
-      <Box mt={4}>
-        <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
-          {/* Solicitações Pendentes */}
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiFileText} />
-                    <Text fontSize="sm">{t('dashboard.pendingRequests', 'Solicitações')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
-                <StatHelpText fontSize="xs">
-                  {t('dashboard.helpers.awaitingReview', 'Aguardando análise')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
+        {/* Repasse Total (valor a ser repassado aos motoristas) */}
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={2}>
+                  <Icon as={FiClock} color="orange.600" />
+                  <Text fontSize="sm" color="gray.700">Repasse</Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber color="orange.600" fontSize="2xl">
+                {formatCurrency(data?.stats?.totalRepasseThisWeek || 0)}
+              </StatNumber>
+              <StatHelpText fontSize="xs" color="gray.600">
+                {data?.stats?.totalRepasseLastWeek && data?.stats?.totalRepasseLastWeek > 0
+                  ? (() => {
+                    const diff = data.stats.totalRepasseThisWeek - data.stats.totalRepasseLastWeek;
+                    const percentChange = ((diff / data.stats.totalRepasseLastWeek) * 100).toFixed(1);
+                    const isIncrease = diff >= 0;
+                    return `${isIncrease ? '↑' : '↓'} ${Math.abs(Number(percentChange))}% vs semana anterior`;
+                  })()
+                  : 'Primeira semana com dados'
+                }
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
 
-          {/* Total de Motoristas */}
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiUsers} />
-                    <Text fontSize="sm">{t('dashboard.totalDrivers', 'Motoristas')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
-                <StatHelpText fontSize="xs">
-                  {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
-                    '{{count}}',
-                    String(data?.stats?.activeDrivers || 0)
-                  )}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
+        {/* Receita Total (Líquido para empresa) */}
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={2}>
+                  <Icon as={FiDollarSign} color="blue.600" />
+                  <Text fontSize="sm" color="gray.700">Receita Total</Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber color="blue.600" fontSize="2xl">
+                {formatCurrency(data?.stats?.totalEarningsThisWeek || 0)}
+              </StatNumber>
+              <StatHelpText fontSize="xs" color="gray.600">
+                {data?.stats?.totalEarningsLastWeek && data?.stats?.totalEarningsLastWeek > 0
+                  ? (() => {
+                    const diff = data.stats.totalEarningsThisWeek - data.stats.totalEarningsLastWeek;
+                    const percentChange = ((diff / data.stats.totalEarningsLastWeek) * 100).toFixed(1);
+                    const isIncrease = diff >= 0;
+                    return `${isIncrease ? '↑' : '↓'} ${Math.abs(Number(percentChange))}% vs semana anterior`;
+                  })()
+                  : 'Primeira semana com dados'
+                }
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
 
-          {/* Média por Motorista */}
-          <Card>
-            <CardBody>
-              <Stat>
-                <StatLabel>
-                  <HStack spacing={1}>
-                    <Icon as={FiUsers} />
-                    <Text fontSize="sm">{t('dashboard.averageEarnings', 'Média/Motorista')}</Text>
-                  </HStack>
-                </StatLabel>
-                <StatNumber fontSize="lg">
-                  {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
-                </StatNumber>
-                <StatHelpText fontSize="xs">
-                  {t('dashboard.helpers.weeklyAverage', 'Média paga')}
-                </StatHelpText>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-      </Box>
+
+      <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
+        {/* Solicitações Pendentes */}
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={1}>
+                  <Icon as={FiFileText} />
+                  <Text fontSize="sm">{t('dashboard.pendingRequests', 'Solicitações')}</Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber>{data?.stats?.pendingRequests || 0}</StatNumber>
+              <StatHelpText fontSize="xs">
+                {t('dashboard.helpers.awaitingReview', 'Aguardando análise')}
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        {/* Total de Motoristas */}
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={1}>
+                  <Icon as={FiUsers} />
+                  <Text fontSize="sm">{t('dashboard.totalDrivers', 'Motoristas')}</Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber>{data?.stats?.totalDrivers || 0}</StatNumber>
+              <StatHelpText fontSize="xs">
+                {t('dashboard.helpers.activeCount', '{{count}} ativos').replace(
+                  '{{count}}',
+                  String(data?.stats?.activeDrivers || 0)
+                )}
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        {/* Média por Motorista */}
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>
+                <HStack spacing={1}>
+                  <Icon as={FiUsers} />
+                  <Text fontSize="sm">{t('dashboard.averageEarnings', 'Média/Motorista')}</Text>
+                </HStack>
+              </StatLabel>
+              <StatNumber fontSize="lg">
+                {formatCurrency(data?.stats?.averageEarningsPerDriver || 0)}
+              </StatNumber>
+              <StatHelpText fontSize="xs">
+                {t('dashboard.helpers.weeklyAverage', 'Média paga')}
+              </StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+
 
       <Card>
         <CardBody>

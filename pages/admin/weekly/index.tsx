@@ -694,6 +694,7 @@ export default function WeeklyPage({
       const payload = await response.json();
       const updated: DriverWeeklyRecord | undefined = payload?.record;
       const paymentInfo: DriverPayment | undefined = payload?.payment;
+      const financingProcessed: Array<any> | undefined = (paymentInfo as any)?.financingProcessed;
 
       setRecords((prev) =>
         prev.map((item) =>
@@ -709,11 +710,26 @@ export default function WeeklyPage({
         )
       );
 
+      // Mensagem de sucesso com informações sobre financiamentos processados
+      let description = t('weekly.control.records.messages.paymentSuccessDescription', 'O pagamento foi marcado como concluído.');
+      
+      if (financingProcessed && financingProcessed.length > 0) {
+        const installmentDetails = financingProcessed.map(f => {
+          if (f.completed) {
+            return `✅ Financiamento de €${f.amount.toFixed(2)} completado!`;
+          } else {
+            return `📉 Parcela descontada. Restam ${f.remainingInstallments} de ${f.remainingInstallments + f.installmentPaid} parcelas`;
+          }
+        }).join('\n');
+        
+        description = `${description}\n\n${installmentDetails}`;
+      }
+
       toast({
         title: t('weekly.control.records.messages.paymentSuccessTitle', 'Pagamento registrado!'),
-        description: t('weekly.control.records.messages.paymentSuccessDescription', 'O pagamento foi marcado como concluído.'),
+        description: description,
         status: 'success',
-        duration: 4000,
+        duration: 6000,
         isClosable: true,
       });
 
@@ -750,21 +766,36 @@ export default function WeeklyPage({
   };
 
   // Calcular totais
-  const totals = records.reduce((acc, record) => ({
-    ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
-    ivaValor: acc.ivaValor + record.ivaValor,
-    despesasAdm: acc.despesasAdm + record.despesasAdm,
-    combustivel: acc.combustivel + record.combustivel,
-    viaverde: acc.viaverde + record.viaverde,
-    aluguel: acc.aluguel + record.aluguel,
-    repasse: acc.repasse + record.repasse,
-  }), {
+  const totals = records.reduce((acc, record) => {
+    // Calcular base de 7% e juros separadamente para exibição
+    const ganhosMenosIVA = record.ganhosTotal - record.ivaValor;
+    const despesasBase = ganhosMenosIVA * 0.07; // 7% fixo
+    const despesasJuros = record.financingDetails?.interestPercent 
+      ? ganhosMenosIVA * (record.financingDetails.interestPercent / 100)
+      : 0;
+    
+    return {
+      ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
+      ivaValor: acc.ivaValor + record.ivaValor,
+      despesasAdm: acc.despesasAdm + record.despesasAdm,
+      despesasBase: acc.despesasBase + despesasBase,
+      despesasJuros: acc.despesasJuros + despesasJuros,
+      combustivel: acc.combustivel + record.combustivel,
+      viaverde: acc.viaverde + record.viaverde,
+      aluguel: acc.aluguel + record.aluguel,
+      financiamento: acc.financiamento + (record.financingDetails?.installment || 0),
+      repasse: acc.repasse + record.repasse,
+    };
+  }, {
     ganhosTotal: 0,
     ivaValor: 0,
     despesasAdm: 0,
+    despesasBase: 0,
+    despesasJuros: 0,
     combustivel: 0,
     viaverde: 0,
     aluguel: 0,
+    financiamento: 0,
     repasse: 0,
   });
 
@@ -800,17 +831,7 @@ export default function WeeklyPage({
               >
                 {t('weekly.control.actions.refresh', 'Atualizar')}
               </Button>
-              <Button
-                leftIcon={<Icon as={FiFileText} />}
-                onClick={handleGenerateResumos}
-                colorScheme="purple"
-                size="sm"
-                isLoading={isGeneratingResumos}
-                loadingText={t('weekly.control.actions.generateSummariesLoading', 'A gerar...')}
-                isDisabled={records.length === 0}
-              >
-                {t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
-              </Button>
+         
               <Button
                 leftIcon={<Icon as={FiDownload} />}
                 onClick={handleExportPayments}
@@ -820,84 +841,77 @@ export default function WeeklyPage({
               >
                 {t('weekly.control.actions.exportPayments', 'Exportar planilha')}
               </Button>
+                <Button
+                leftIcon={<Icon as={FiFileText} />}
+                onClick={handleGenerateResumos}
+                colorScheme="green"
+                size="sm"
+                isLoading={isGeneratingResumos}
+                loadingText={t('weekly.control.actions.generateSummariesLoading', 'A gerar...')}
+                isDisabled={records.length === 0}
+              >
+                {t('weekly.control.actions.generateSummaries', 'Gerar resumos')}
+              </Button>
             </SimpleGrid>
           </Stack>
         </CardBody>
       </Card>
 
-      {/* Resumo */}
+      {/* Resumo - Linha 1 */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
         <StatCard
-          label={t('weekly.control.summary.cards.totalEarnings', 'Ganhos Totais')}
+          label="Entradas"
           value={totals.ganhosTotal}
           color="green.600"
           helpText={`${records.length} ${t('weekly.control.summary.cards.driversCountLabel', 'motoristas')}`}
         />
         <StatCard
-          label={t('weekly.control.summary.cards.totalDiscounts', 'Descontos Totais')}
-          value={totals.ivaValor + totals.despesasAdm + totals.combustivel + totals.viaverde + totals.aluguel}
+          label="IVA (6%)"
+          value={totals.ivaValor}
           color="red.600"
-          helpText={t('weekly.control.summary.cards.discountsHelp', 'IVA, Adm, Combustível, Portagens, Aluguel')}
+          helpText="Imposto sobre o valor"
         />
         <StatCard
-          label={t('weekly.control.summary.cards.fuel', 'Combustível')}
+          label="Combustível"
           value={totals.combustivel}
           color="orange.600"
-          helpText={t('weekly.control.summary.cards.prioLabel', 'PRIO')}
+          helpText="PRIO"
         />
         <StatCard
-          label={t('weekly.control.summary.cards.netValue', 'Valor Líquido')}
-          value={totals.repasse}
-          color="blue.600"
-          helpText={t('weekly.control.summary.cards.totalToPay', 'Total a pagar')}
+          label="Portagens"
+          value={totals.viaverde}
+          color="orange.600"
+          helpText="Via Verde"
         />
       </SimpleGrid>
 
-      <Card>
-        <CardHeader mb={0}>
-          <Heading size="md">{t('weekly.control.summary.title', 'Resumo Semanal')}</Heading>
-        </CardHeader>
-        <CardBody mt={0}>
-          <Table variant="simple" size="sm">
-            <Thead>
-              <Tr>
-                <Th>{t('weekly.control.summary.table.item', 'Item')}</Th>
-                <Th isNumeric>{t('weekly.control.summary.table.value', 'Valor')}</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.totalEarnings', 'Ganhos Totais')}</Td>
-                <Td isNumeric>{formatCurrency(totals.ganhosTotal)}</Td>
-              </Tr>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.iva', 'IVA')}</Td>
-                <Td isNumeric color="red.600">-{formatCurrency(totals.ivaValor)}</Td>
-              </Tr>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.adminExpenses', 'Despesas Administrativas')}</Td>
-                <Td isNumeric color="red.600">-{formatCurrency(totals.despesasAdm)}</Td>
-              </Tr>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.fuel', 'Combustível')}</Td>
-                <Td isNumeric color="orange.600">-{formatCurrency(totals.combustivel)}</Td>
-              </Tr>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.tolls', 'Portagens')}</Td>
-                <Td isNumeric color="orange.600">-{formatCurrency(totals.viaverde)}</Td>
-              </Tr>
-              <Tr>
-                <Td>{t('weekly.control.summary.rows.rent', 'Aluguel')}</Td>
-                <Td isNumeric color="purple.600">-{formatCurrency(totals.aluguel)}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">{t('weekly.control.summary.rows.netValue', 'Valor Líquido')}</Td>
-                <Td isNumeric fontWeight="bold" color="blue.600">{formatCurrency(totals.repasse)}</Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </CardBody>
-      </Card>
+      {/* Resumo - Linha 2 */}
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+        <StatCard
+          label="Despesas Adm"
+          value={totals.despesasAdm}
+          color="red.600"
+          helpText={`Base: ${formatCurrency(totals.despesasBase)} | Juros: ${formatCurrency(totals.despesasJuros)}`}
+        />
+        <StatCard
+          label="Aluguéis"
+          value={totals.aluguel}
+          color="purple.600"
+          helpText="Aluguel de viaturas"
+        />
+        <StatCard
+          label="Financiamento"
+          value={totals.financiamento}
+          color="pink.600"
+          helpText="Parcelas semanais (valor fixo, não % )"
+        />
+        <StatCard
+          label="Líquido"
+          value={totals.despesasAdm + totals.aluguel + totals.financiamento}
+          color="blue.600"
+          helpText={`Entradas: ${formatCurrency(totals.despesasAdm + totals.aluguel)} | Financ: ${formatCurrency(totals.financiamento)}`}
+        />
+      </SimpleGrid>
 
       {/* Tabela de Registros */}
       <Card>
@@ -960,7 +974,8 @@ export default function WeeklyPage({
                     <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.rent', 'Aluguel')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.net', 'Valor líquido')}</Th>
+                    <Th isNumeric>FINANC.</Th>
+                    <Th isNumeric>Líquido</Th>
                     <Th>{t('weekly.control.records.columns.status', 'Status')}</Th>
                     <Th textAlign="right">{t('weekly.control.records.columns.actions', 'Ações')}</Th>
                   </Tr>
@@ -1002,6 +1017,7 @@ export default function WeeklyPage({
                         isPaid={record.paymentStatus === 'paid'}
                         color="red.600"
                         prefix="-"
+                        helpText="6%"
                       />
                       <EditableNumberField
                         value={record.despesasAdm}
@@ -1009,6 +1025,10 @@ export default function WeeklyPage({
                         isPaid={record.paymentStatus === 'paid'}
                         color="red.600"
                         prefix="-"
+                        helpText={record.financingDetails?.interestPercent > 0 
+                          ? `${7 + record.financingDetails.interestPercent}% (7% + ${record.financingDetails.interestPercent}% juros)` 
+                          : "7%"
+                        }
                       />
                       <EditableNumberField
                         value={record.combustivel}
@@ -1031,6 +1051,15 @@ export default function WeeklyPage({
                         color="purple.600"
                         prefix="-"
                       />
+                      <Td isNumeric>
+                        {record.financingDetails?.hasFinancing ? (
+                          <Text color="pink.600" fontWeight="medium">
+                            -{formatCurrency(record.financingDetails.installment)}
+                          </Text>
+                        ) : (
+                          <Text color="gray.400">-</Text>
+                        )}
+                      </Td>
                       <EditableNumberField
                         value={record.repasse}
                         onChange={(newValue) => handleUpdateRecord(record.id, { repasse: newValue })}

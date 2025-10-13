@@ -136,6 +136,9 @@ export default async function handler(
         continue;
       }
 
+      // Delete existing raw files for this platform/week before importing
+      await deleteExistingRawFiles(weekId, platform);
+
       const summary = await processAndArchiveFile({
         platform,
         file,
@@ -182,6 +185,13 @@ export default async function handler(
 
     await weeklyDataSourceRef.set(weeklyDataSources, { merge: true });
 
+    console.log('✅ Import completed successfully:', {
+      weekId,
+      platformsProcessed: summaries.length,
+      totalRecords: summaries.reduce((sum, s) => sum + s.recordsCount, 0),
+      errors: resultsSummary.errors.length,
+    });
+
     return res.status(200).json({
       success: resultsSummary.errors.length === 0,
       weekId,
@@ -196,8 +206,8 @@ export default async function handler(
       results: resultsSummary,
     });
   } catch (error: any) {
-    console.error('Erro ao processar importação semanal:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('❌ Fatal error in import handler:', error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
 
@@ -228,8 +238,105 @@ async function processAndArchiveFile({
     warnings: [],
   };
 
+  // Função para normalizar dados brutos antes de salvar no Firebase
+  // Mantém apenas as colunas essenciais em formato consistente
+  function normalizeRawDataForStorage(
+    platform: Platform,
+    data: { headers: string[]; rows: any[] }
+  ): { headers: string[]; rows: any[] } {
+    switch (platform) {
+      case 'uber': {
+        const essentialHeaders = ['UUID do motorista', 'Pago a si', 'Viagens', 'Nome do motorista'];
+        const normalizedRows = data.rows.map((row) => {
+          const uuid = extractFirstAvailable(row, ['UUID do motorista', 'UUID', 'Driver UUID']) || '';
+          const pagoASi = extractFirstAvailable(row, ['Pago a si', 'Pago a si (€)', 'Paid to you', 'Net amount']) || '0';
+          const viagens = extractFirstAvailable(row, ['Viagens', 'Trips', 'Viagens (total)']) || 0;
+          const nome = extractFirstAvailable(row, [
+            'Nome do motorista',
+            'Driver name',
+            'Motorista',
+            'Nome próprio do motorista',
+          ]) || '';
+          const apelido = extractFirstAvailable(row, ['Apelido do motorista', 'Last name']) || '';
+          const nomeCompleto = apelido ? `${nome} ${apelido}`.trim() : nome;
+
+          return {
+            'UUID do motorista': uuid,
+            'Pago a si': pagoASi,
+            'Viagens': viagens,
+            'Nome do motorista': nomeCompleto,
+          };
+        });
+        return { headers: essentialHeaders, rows: normalizedRows };
+      }
+
+      case 'bolt': {
+        const essentialHeaders = ['Email', 'Ganhos brutos (total)|€', 'Viagens (total)', 'Motorista'];
+        const normalizedRows = data.rows.map((row) => {
+          const email = extractFirstAvailable(row, ['Email', 'Driver email', 'Email do motorista']) || '';
+          const ganhos = extractFirstAvailable(row, [
+            'Ganhos brutos (total)|€',
+            'Ganhos brutos (total)',
+            'Total Earnings',
+          ]) || '0';
+          const viagens = extractFirstAvailable(row, ['Viagens (total)', 'Viagens', 'Trips']) || 0;
+          const motorista = extractFirstAvailable(row, ['Motorista', 'Driver', 'Nome do motorista']) || '';
+
+          return {
+            'Email': email,
+            'Ganhos brutos (total)|€': ganhos,
+            'Viagens (total)': viagens,
+            'Motorista': motorista,
+          };
+        });
+        return { headers: essentialHeaders, rows: normalizedRows };
+      }
+
+      case 'myprio': {
+        const essentialHeaders = ['CARTAO', 'TOTAL'];
+        const normalizedRows = data.rows.map((row) => {
+          const cartao = extractFirstAvailable(row, ['CARTAO', 'CARTÃO', 'Card', 'Número do cartão']) || '';
+          const total = extractFirstAvailable(row, ['TOTAL', 'Total', 'Valor', 'Amount']) || '0';
+
+          return {
+            'CARTAO': cartao,
+            'TOTAL': total,
+          };
+        });
+        return { headers: essentialHeaders, rows: normalizedRows };
+      }
+
+      case 'viaverde': {
+        const essentialHeaders = ['OBU', 'Value'];
+        const normalizedRows = data.rows.map((row) => {
+          const obu = extractFirstAvailable(row, ['OBU', 'Dispositivo', 'Device']) || '';
+          const value = extractFirstAvailable(row, ['Value', 'Valor', 'Amount', 'Total']) || '0';
+
+          return {
+            'OBU': obu,
+            'Value': value,
+          };
+        });
+        return { headers: essentialHeaders, rows: normalizedRows };
+      }
+
+      default:
+        return data;
+    }
+  }
+
   try {
     const { headers, rows } = await readUploadedFile(file);
+
+    console.log(`📊 ${platform.toUpperCase()}: Read ${rows.length} rows with ${headers.length} columns`);
+
+    // Normalizar dados para formato consistente antes de salvar
+    const normalizedData = normalizeRawDataForStorage(platform, { headers, rows });
+    
+    console.log(`✅ ${platform.toUpperCase()}: Normalized to ${normalizedData.rows.length} rows with ${normalizedData.headers.length} columns`);
+    if (normalizedData.rows.length > 0) {
+      console.log(`📋 First row sample:`, JSON.stringify(normalizedData.rows[0]));
+    }
 
     const rawDataDocId = buildRawArchiveId(weekId, platform);
     summary.rawDataDocId = rawDataDocId;
@@ -241,48 +348,35 @@ async function processAndArchiveFile({
       weekEnd,
       platform,
       fileName: file.originalFilename || file.newFilename,
-      rawData: { headers, rows },
+      rawData: normalizedData,
       importedAt,
       importedBy: adminId,
       processed: false,
     };
+    
+    console.log(`💾 Saving to rawFileArchive: ${rawDataDocId}`);
 
     await db.collection('rawFileArchive').doc(rawDataDocId).set(rawFileEntry);
 
-    const aggregation = aggregatePlatformData(platform, rows, driverMaps);
-    summary.warnings.push(...aggregation.warnings);
+    if (rows.length === 0) {
+      console.warn(`⚠️  ${platform.toUpperCase()}: Arquivo vazio, nenhum dado para processar`);
+      summary.warnings.push(`Arquivo ${platform.toUpperCase()} está vazio ou não possui dados válidos.`);
+      // Mark as processed even if empty
+      await db.collection('rawFileArchive').doc(rawDataDocId).update({
+        processed: false, // Mudado para false - não processar arquivo vazio
+        processedAt: new Date().toISOString(),
+      });
+      return summary;
+    }
 
-    const normalizedEntries = aggregation.entries.map((entry) =>
-      createWeeklyNormalizedData({
-        id: buildDataWeeklyId(weekId, platform, entry.referenceId),
-        weekId,
-        weekStart,
-        weekEnd,
-        platform,
-        referenceId: entry.referenceId,
-        referenceLabel: entry.referenceLabel,
-        driverId: entry.driver?.id ?? null,
-        driverName: entry.driver?.name ?? null,
-        vehiclePlate: entry.driver?.vehiclePlate ?? null,
-        totalValue: Number(entry.totalValue.toFixed(2)),
-        totalTrips: entry.totalTrips,
-        rawDataRef: rawDataDocId,
-      })
-    );
+    // Não processar automaticamente - apenas contar registros para feedback
+    summary.recordsCount = normalizedData.rows.length;
+    console.log(`✅ ${platform.toUpperCase()}: Saved ${summary.recordsCount} rows to rawFileArchive (pending processing)`);
 
-    summary.normalizedEntries = normalizedEntries;
-    summary.recordsCount = normalizedEntries.length;
-    summary.driverMatches = new Set(
-      normalizedEntries.filter((entry) => entry.driverId).map((entry) => entry.driverId as string)
-    ).size;
-
-    await deleteExistingDataWeekly(weekId, platform);
-    await saveNormalizedEntries(normalizedEntries);
-
-    await db.collection('rawFileArchive').doc(rawDataDocId).update({
-      processed: true,
-      processedAt: new Date().toISOString(),
-    });
+    // O processamento será feito quando o usuário clicar em "Processar"
+    // await db.collection('rawFileArchive').doc(rawDataDocId).update({
+    //   processed: false, // Aguardando processamento manual
+    // });
   } catch (error: any) {
     summary.error = error.message || 'Erro desconhecido';
     console.error(`Erro ao processar arquivo da plataforma ${platform}:`, error);
@@ -300,30 +394,62 @@ async function readUploadedFile(file: formidable.File): Promise<{ headers: strin
   const mimetype = file.mimetype || '';
   const originalName = file.originalFilename?.toLowerCase() || '';
 
+  console.log('📖 Reading file:', { originalName, mimetype, filePath });
+
   if (mimetype.includes('csv') || originalName.endsWith('.csv')) {
     let content = fs.readFileSync(filePath, 'utf8');
+    console.log('📄 CSV file size:', content.length, 'bytes');
+    
     if (content.charCodeAt(0) === 0xfeff) {
       content = content.slice(1);
     }
     const parsed = Papa.parse(content, { header: true, skipEmptyLines: true });
     const headers = parsed.meta.fields || [];
     const rows = Array.isArray(parsed.data) ? (parsed.data as any[]) : [];
+    
+    console.log('✅ CSV parsed:', { headers: headers.length, rows: rows.length });
     return { headers, rows };
   }
 
   const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
-  const json = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
-  const headers = (json[0] || []) as string[];
-  const rows = json.slice(1).map((row) => {
-    const rowObject: Record<string, any> = {};
-    headers.forEach((header, index) => {
-      rowObject[header] = row[index];
-    });
-    return rowObject;
-  });
+  const json = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '' });
+  
+  // Find the first row with more than 1 non-empty column (that's the header)
+  let headerRowIndex = -1;
+  for (let i = 0; i < json.length; i++) {
+    const row = json[i];
+    const nonEmptyCells = row.filter((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+    if (nonEmptyCells.length > 1) {
+      headerRowIndex = i;
+      break;
+    }
+  }
 
+  if (headerRowIndex === -1) {
+    console.warn('⚠️  No valid header row found in XLSX file');
+    return { headers: [], rows: [] };
+  }
+
+  const headers = (json[headerRowIndex] || []) as string[];
+  const rows = json.slice(headerRowIndex + 1)
+    .filter((row) => {
+      // Skip completely empty rows
+      const nonEmptyCells = row.filter((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+      return nonEmptyCells.length > 0;
+    })
+    .map((row) => {
+      const rowObject: Record<string, any> = {};
+      headers.forEach((header, index) => {
+        if (header && String(header).trim() !== '') {
+          rowObject[header] = row[index];
+        }
+      });
+      return rowObject;
+    });
+
+  console.log('✅ XLSX parsed:', { sheetName, headerRowIndex, headers: headers.length, rows: rows.length });
   return { headers, rows };
 }
 
@@ -643,6 +769,24 @@ async function deleteExistingDataWeekly(weekId: string, platform: Platform) {
     docs.slice(i, i + chunkSize).forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
   }
+}
+
+async function deleteExistingRawFiles(weekId: string, platform: Platform) {
+  const snapshot = await db
+    .collection('rawFileArchive')
+    .where('weekId', '==', weekId)
+    .where('platform', '==', platform)
+    .get();
+
+  if (snapshot.empty) {
+    return;
+  }
+
+  const batch = db.batch();
+  snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+  await batch.commit();
+  
+  console.log(`🗑️  Deleted ${snapshot.docs.length} existing raw file(s) for ${platform} week ${weekId}`);
 }
 
 async function saveNormalizedEntries(entries: WeeklyNormalizedData[]) {

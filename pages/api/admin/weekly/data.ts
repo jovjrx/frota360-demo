@@ -147,18 +147,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         
         // Aplicar taxa de juros adicional sobre (ganhos - IVA)
-        // Taxa base: 7% + juros de financiamento
+        // Taxa base: 7% + juros de financiamento (PERCENTUAL)
         if (totalFinancingInterestPercent > 0) {
           const additionalInterest = rec.ganhosMenosIVA * (totalFinancingInterestPercent / 100);
           rec.despesasAdm += additionalInterest;
           rec.repasse -= additionalInterest;
         }
         
-        // Aplicar parcela do financiamento
+        // Aplicar parcela do financiamento (VALOR FIXO - NÃO VAI PARA DESPESAS ADM)
+        // As parcelas são subtraídas apenas do repasse, não são despesas administrativas
         if (totalInstallment > 0) {
-          rec.despesasAdm += totalInstallment;
           rec.repasse -= totalInstallment;
         }
+        
+        // Adicionar detalhes do financiamento ao registro (para exibição na UI)
+        rec.financingDetails = {
+          interestPercent: totalFinancingInterestPercent,
+          installment: totalInstallment,
+          hasFinancing: totalFinancingInterestPercent > 0 || totalInstallment > 0
+        };
       });
     } catch (e) {
       console.error('Erro ao ajustar registros com descontos de financiamento:', e);

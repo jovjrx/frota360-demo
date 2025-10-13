@@ -255,6 +255,81 @@ async function createDriverPayment(
       transaction.set(recordRef, sanitizedRecord, { merge: true });
       transaction.set(paymentRef, sanitizedPayment);
       persistedPayment = sanitizedPayment as DriverPayment;
+      
+      // Decrementar remainingWeeks dos financiamentos ativos do motorista (apenas empréstimos)
+      const financingSnapshot = await adminDb
+        .collection('financing')
+        .where('driverId', '==', record.driverId)
+        .where('status', '==', 'active')
+        .where('type', '==', 'loan')
+        .get();
+      
+      const financingUpdates: Array<{
+        id: string;
+        type: string;
+        amount: number;
+        previousRemaining: number;
+        newRemaining: number;
+        completed: boolean;
+      }> = [];
+      
+      financingSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const currentRemaining = typeof data.remainingWeeks === 'number' ? data.remainingWeeks : 0;
+        
+        if (currentRemaining > 0) {
+          const newRemaining = currentRemaining - 1;
+          
+          // Se chegou a 0, marcar como completed
+          if (newRemaining <= 0) {
+            transaction.update(doc.ref, {
+              remainingWeeks: 0,
+              status: 'completed',
+              updatedAt: nowIso,
+            });
+            financingUpdates.push({
+              id: doc.id,
+              type: data.type || 'loan',
+              amount: data.amount || 0,
+              previousRemaining: currentRemaining,
+              newRemaining: 0,
+              completed: true,
+            });
+            console.log(`✅ Financiamento ${doc.id} do motorista ${record.driverId} completado`);
+          } else {
+            transaction.update(doc.ref, {
+              remainingWeeks: newRemaining,
+              updatedAt: nowIso,
+            });
+            financingUpdates.push({
+              id: doc.id,
+              type: data.type || 'loan',
+              amount: data.amount || 0,
+              previousRemaining: currentRemaining,
+              newRemaining: newRemaining,
+              completed: false,
+            });
+            console.log(`📉 Financiamento ${doc.id} do motorista ${record.driverId}: ${newRemaining} semanas restantes`);
+          }
+        }
+      });
+      
+      // Armazenar informações de financiamento processado no documento de pagamento
+      if (financingUpdates.length > 0) {
+        const financingLog = financingUpdates.map(f => ({
+          financingId: f.id,
+          type: f.type,
+          amount: f.amount,
+          installmentPaid: f.previousRemaining - f.newRemaining,
+          remainingInstallments: f.newRemaining,
+          completed: f.completed,
+        }));
+        
+        transaction.update(paymentRef, {
+          financingProcessed: financingLog,
+          updatedAt: nowIso,
+        });
+      }
     });
 
     if (!updatedRecord) {

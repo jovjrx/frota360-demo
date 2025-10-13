@@ -16,15 +16,21 @@ export type WeeklyDriverPlatformData = z.infer<typeof WeeklyDriverPlatformDataSc
 
 export function createWeeklyDriverPlatformData(data: Partial<WeeklyDriverPlatformData>): WeeklyDriverPlatformData {
   const now = new Date().toISOString();
-  return {
+  const result: any = {
     driverId: data.driverId || '',
     weekId: data.weekId || '',
     platform: data.platform || 'uber',
     totalValue: data.totalValue || 0,
     totalTrips: data.totalTrips || 0,
-    rawDataRef: data.rawDataRef || undefined,
     createdAt: data.createdAt || now,
     updatedAt: now,
   };
+  
+  // Só adiciona rawDataRef se tiver valor
+  if (data.rawDataRef !== undefined && data.rawDataRef !== null) {
+    result.rawDataRef = data.rawDataRef;
+  }
+  
+  return result;
 }
 

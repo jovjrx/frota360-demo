@@ -83,11 +83,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       combustivel: recordData.combustivel || 0,
       viaverde: recordData.viaverde || 0,
-      aluguel: recordData.aluguel || 0,   
-      repasse: recordData.repasse || 0,
+      aluguel: recordData.aluguel || 0,
       
-      iban: driverData.banking?.iban || 'N/A',
-      status: recordData.paymentStatus || 'pending',
+      financingInterestPercent: recordData.financingDetails?.interestPercent,
+      financingInstallment: recordData.financingDetails?.installment,
+      
+      repasse: recordData.repasse || 0,
     };
 
     // Gerar PDF

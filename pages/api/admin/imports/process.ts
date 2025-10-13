@@ -60,8 +60,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   driverId: driverUuid, weekId, platform: 'uber',
                 });
               }
-              platformAggregates[key].totalValue += parseFloat(row['Pago a si']?.replace(',', '.') || '0');
-              platformAggregates[key].totalTrips += parseInt(row['Viagens'] || '0');
+              // Limpar valor: remover €, espaços, converter vírgula para ponto
+              const valueStr = String(row['Pago a si'] || '0')
+                .replace(/[€\s]/g, '')
+                .replace(',', '.');
+              platformAggregates[key].totalValue += parseFloat(valueStr) || 0;
+              platformAggregates[key].totalTrips += parseInt(String(row['Viagens'] || '0'));
             }
           });
           break;
@@ -75,14 +79,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   driverId: driverEmail, weekId, platform: 'bolt',
                 });
               }
-              platformAggregates[key].totalValue += parseFloat(row['Ganhos brutos (total)|€']?.replace(',', '.') || '0');
-              platformAggregates[key].totalTrips += parseInt(row['Viagens (total)'] || '0');
+              // Limpar valor: remover €, espaços, converter vírgula para ponto
+              const valueStr = String(row['Ganhos brutos (total)|€'] || '0')
+                .replace(/[€\s]/g, '')
+                .replace(',', '.');
+              platformAggregates[key].totalValue += parseFloat(valueStr) || 0;
+              platformAggregates[key].totalTrips += parseInt(String(row['Viagens (total)'] || '0'));
             }
           });
           break;
         case 'myprio':
           rawDataRows.forEach((row: any) => {
-            const myprioCard = String(row['CARTÃO']);
+            const myprioCard = String(row['CARTAO'] || '');
             if (myprioCard) {
               const key = `${entry.platform}-${myprioCard}`;
               if (!platformAggregates[key]) {
@@ -90,13 +98,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   driverId: myprioCard, weekId, platform: 'myprio',
                 });
               }
-              platformAggregates[key].totalValue += parseFloat(String(row['TOTAL'])?.replace(',', '.') || '0');
+              // Limpar valor: remover espaços, converter vírgula para ponto
+              const valueStr = String(row['TOTAL'] || '0')
+                .replace(/\s/g, '')
+                .replace(',', '.');
+              platformAggregates[key].totalValue += parseFloat(valueStr) || 0;
             }
           });
           break;
         case 'viaverde':
           rawDataRows.forEach((row: any) => {
-            const viaverdeOBU = String(row['OBU']);
+            const viaverdeOBU = String(row['OBU'] || '');
             if (viaverdeOBU) {
               const key = `${entry.platform}-${viaverdeOBU}`;
               if (!platformAggregates[key]) {
@@ -104,7 +116,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   driverId: viaverdeOBU, weekId, platform: 'viaverde',
                 });
               }
-              platformAggregates[key].totalValue += parseFloat(String(row['Value'])?.replace(',', '.') || '0');
+              // Limpar valor: remover espaços, converter vírgula para ponto
+              const valueStr = String(row['Value'] || '0')
+                .replace(/\s/g, '')
+                .replace(',', '.');
+              platformAggregates[key].totalValue += parseFloat(valueStr) || 0;
             }
           });
           break;

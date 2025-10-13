@@ -16,7 +16,13 @@ export const DriverWeeklyRecordSchema = z.object({
   combustivel: z.number().default(0),  // myprio
   viaverde: z.number().default(0),     // ViaVerde (portagens)
   aluguel: z.number().default(0),      // Aluguel semanal (se locatário)
-
+  
+  // Financiamento (empréstimos e descontos)
+  financingDetails: z.object({
+    interestPercent: z.number().default(0),    // % adicional de juros sobre taxa administrativa
+    installment: z.number().default(0),        // Parcela semanal (empréstimo) ou desconto fixo
+    hasFinancing: z.boolean().default(false),  // Indica se há financiamento ativo
+  }).optional(),
 
   
   // Cálculos automáticos
