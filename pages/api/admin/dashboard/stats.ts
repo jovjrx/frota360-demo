@@ -21,113 +21,85 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const pendingRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'pending').length;
     const evaluationRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'evaluation').length;
 
-    // Buscar TODOS os registros semanais ordenados por weekStart (mais recente primeiro)
-    const allWeeklyRecordsSnapshot = await db.collection('driverWeeklyRecords').orderBy('weekStart', 'desc').get();
-
-    // Descobrir qual é a última semana disponível nos dados e a penúltima
-    let latestWeekId = '';
-    let previousWeekId = '';
-    const weekIdsWithDates = new Map<string, string>(); // weekId -> weekStart
+    // Buscar semanas disponíveis no rawFileArchive
+    const rawSnapshot = await db.collection('rawFileArchive')
+      .orderBy('weekStart', 'desc')
+      .limit(50)
+      .get();
     
-    allWeeklyRecordsSnapshot.docs.forEach(doc => {
+    // Agrupar por weekId e pegar as 2 semanas mais recentes
+    const weekIdsWithDates = new Map<string, string>();
+    
+    rawSnapshot.docs.forEach(doc => {
       const data = doc.data();
       if (data.weekId && data.weekStart) {
         weekIdsWithDates.set(data.weekId, data.weekStart);
       }
     });
     
-    // Ordenar por weekStart (data) em ordem decrescente
     const sortedWeekIds = Array.from(weekIdsWithDates.entries())
-      .sort((a, b) => b[1].localeCompare(a[1])) // Ordenar por data DESC
-      .map(entry => entry[0]); // Pegar só o weekId
+      .sort((a, b) => b[1].localeCompare(a[1]))
+      .map(entry => entry[0]);
     
-    if (sortedWeekIds.length > 0) {
-      latestWeekId = sortedWeekIds[0];
-      if (sortedWeekIds.length > 1) {
-        previousWeekId = sortedWeekIds[1];
-      }
-    }
+    const latestWeekId = sortedWeekIds[0] || '';
+    const previousWeekId = sortedWeekIds[1] || '';
 
     console.log('📊 Dashboard Stats - Semanas encontradas:');
     console.log('   Última semana:', latestWeekId);
     console.log('   Semana anterior:', previousWeekId);
 
-    let totalGrossEarningsThisWeek = 0; // Ganhos brutos da última semana
-    let totalGrossEarningsLastWeek = 0; // Ganhos brutos da penúltima semana
-    let totalRepasseThisWeek = 0; // Repasse total (valor a ser pago aos motoristas) da última semana
-    let totalRepasseLastWeek = 0; // Repasse total da penúltima semana
-    let totalPaymentsPaid = 0; // Pagos (total de driverPayments)
-    let companyProfitThisWeek = 0; // Lucro da empresa (despesasAdm + aluguel + financiamento) da última semana
-    let companyProfitLastWeek = 0; // Lucro da empresa da penúltima semana
-    let profitCommissions = 0; // Comissões (despesasAdm) da última semana
-    let profitRentals = 0; // Aluguéis da última semana
-    let profitDiscounts = 0; // Financiamento (parcelas semanais)
+    // Buscar dados processados usando a API weekly/data
+    let statsThisWeek = { ganhos: 0, repasse: 0, lucro: 0, despesasAdm: 0, aluguel: 0, financiamento: 0 };
+    let statsLastWeek = { ganhos: 0, repasse: 0, lucro: 0 };
     
-    // Buscar todos os pagamentos para somar total pago
+    if (latestWeekId) {
+      const thisWeekResponse = await fetch(`http://localhost:3000/api/admin/weekly/data?weekId=${latestWeekId}`);
+      if (thisWeekResponse.ok) {
+        const thisWeekData = await thisWeekResponse.json();
+        if (thisWeekData.records) {
+          thisWeekData.records.forEach((rec: any) => {
+            statsThisWeek.ganhos += rec.ganhosTotal || 0;
+            statsThisWeek.repasse += rec.repasse || 0;
+            statsThisWeek.despesasAdm += rec.despesasAdm || 0;
+            statsThisWeek.aluguel += rec.aluguel || 0;
+            statsThisWeek.financiamento += rec.financingDetails?.installment || 0;
+          });
+          statsThisWeek.lucro = statsThisWeek.despesasAdm + statsThisWeek.aluguel + statsThisWeek.financiamento;
+        }
+      }
+    }
+    
+    if (previousWeekId) {
+      const lastWeekResponse = await fetch(`http://localhost:3000/api/admin/weekly/data?weekId=${previousWeekId}`);
+      if (lastWeekResponse.ok) {
+        const lastWeekData = await lastWeekResponse.json();
+        if (lastWeekData.records) {
+          let lastWeekDespesasAdm = 0;
+          let lastWeekAluguel = 0;
+          let lastWeekFinanciamento = 0;
+          
+          lastWeekData.records.forEach((rec: any) => {
+            statsLastWeek.ganhos += rec.ganhosTotal || 0;
+            statsLastWeek.repasse += rec.repasse || 0;
+            lastWeekDespesasAdm += rec.despesasAdm || 0;
+            lastWeekAluguel += rec.aluguel || 0;
+            lastWeekFinanciamento += rec.financingDetails?.installment || 0;
+          });
+          statsLastWeek.lucro = lastWeekDespesasAdm + lastWeekAluguel + lastWeekFinanciamento;
+        }
+      }
+    }
+
+    // Buscar pagamentos totais
     const allPaymentsSnapshot = await db.collection('driverPayments').get();
+    let totalPaymentsPaid = 0;
     
     allPaymentsSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      // Somar total pago
-      totalPaymentsPaid += data.totalAmount || 0;
+      totalPaymentsPaid += doc.data().totalAmount || 0;
     });
-    
-    // Agrupar por motorista para calcular média
-    const driverPaymentsMap = new Map<string, { total: number; count: number }>();
-
-    allWeeklyRecordsSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      const repasse = data.repasse || 0;
-      const ganhosTotal = data.ganhosTotal || 0;
-      const despesasAdm = data.despesasAdm || data.despesaAdministrativa || 0;
-      const aluguel = data.aluguel || 0;
-      const financingInstallment = data.financingDetails?.installment || 0;
-      
-      // Ganhos brutos e lucro da última semana disponível
-      if (data.weekId === latestWeekId) {
-        totalGrossEarningsThisWeek += ganhosTotal;
-        totalRepasseThisWeek += repasse; // Somar repasse total
-        
-        // Lucro = despesasAdm (comissão) + aluguel (carros locatários) + financiamento (parcelas)
-        profitCommissions += despesasAdm;
-        profitRentals += aluguel;
-        profitDiscounts += financingInstallment; // Financiamento (parcelas semanais)
-      }
-      
-      // Dados da penúltima semana para comparação
-      if (previousWeekId && data.weekId === previousWeekId) {
-        totalGrossEarningsLastWeek += ganhosTotal;
-        totalRepasseLastWeek += repasse; // Somar repasse da semana anterior
-        
-        const lastWeekProfit = despesasAdm + aluguel + financingInstallment;
-        companyProfitLastWeek += lastWeekProfit;
-      }
-      
-      // Adicionar aos pagamentos por motorista para cálculo de média (baseado no repasse)
-      if (data.driverId) {
-        const current = driverPaymentsMap.get(data.driverId) || { total: 0, count: 0 };
-        driverPaymentsMap.set(data.driverId, {
-          total: current.total + repasse,
-          count: current.count + 1
-        });
-      }
-    });
-
-    // Calcular lucro total (incluindo parcelas de financiamento)
-    companyProfitThisWeek = profitCommissions + profitRentals + profitDiscounts;
 
     // Calcular média por motorista
-    let totalPaidAmount = 0;
-    let driversWithPayments = 0;
-    
-    driverPaymentsMap.forEach(({ total }) => {
-      totalPaidAmount += total;
-      driversWithPayments++;
-    });
-    
-    const averageEarningsPerDriver = driversWithPayments > 0 
-      ? totalPaidAmount / driversWithPayments
-      : 0;
+    const averageEarningsPerDriver = activeDrivers > 0 ? statsThisWeek.repasse / activeDrivers : 0;
 
     // Get recent drivers (e.g., last 5 added)
     const recentDriversSnapshot = await db.collection('drivers').orderBy('createdAt', 'desc').limit(5).get();
@@ -146,18 +118,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           totalRequests,
           pendingRequests,
           evaluationRequests,
-          totalEarningsThisWeek: companyProfitThisWeek, // Lucro total da empresa (última semana)
-          totalEarningsLastWeek: companyProfitLastWeek, // Lucro total da empresa (penúltima semana)
-          totalGrossEarningsThisWeek, // Ganhos brutos da última semana
-          totalGrossEarningsLastWeek, // Ganhos brutos da penúltima semana
-          totalRepasseThisWeek, // Repasse total da última semana
-          totalRepasseLastWeek, // Repasse total da penúltima semana
+          totalEarningsThisWeek: statsThisWeek.lucro,
+          totalEarningsLastWeek: statsLastWeek.lucro,
+          totalGrossEarningsThisWeek: statsThisWeek.ganhos,
+          totalGrossEarningsLastWeek: statsLastWeek.ganhos,
+          totalRepasseThisWeek: statsThisWeek.repasse,
+          totalRepasseLastWeek: statsLastWeek.repasse,
           totalPaymentsPaid,
           averageEarningsPerDriver,
-          // Breakdown do lucro
-          profitCommissions,
-          profitRentals,
-          profitDiscounts,
+          profitCommissions: statsThisWeek.despesasAdm,
+          profitRentals: statsThisWeek.aluguel,
+          profitDiscounts: statsThisWeek.financiamento,
         },
         recentDrivers,
         recentRequests,
