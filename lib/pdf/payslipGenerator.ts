@@ -28,8 +28,10 @@ export interface PayslipData {
   aluguel: number;
   
   // Financiamento (opcional)
-  financingInterestPercent?: number; // % adicional de juros
+  financingInterestPercent?: number; // % de juros sobre a parcela
   financingInstallment?: number; // Parcela semanal
+  financingInterestAmount?: number; // Valor dos juros
+  financingTotalCost?: number; // Total (parcela + juros)
   
   // Repasse
   repasse: number;
@@ -168,12 +170,9 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       y += 15;
       
-      // Despesas Administrativas (com breakdown de juros se houver)
+      // Despesas Administrativas (sempre 7% fixo)
       doc.font("Helvetica");
-      const despesasLabel = data.financingInterestPercent && data.financingInterestPercent > 0
-        ? `Despesas Administrativas (7% + ${data.financingInterestPercent}%)`
-        : "Despesas Administrativas (7%)";
-      doc.text(despesasLabel, leftMargin, y);
+      doc.text("Despesas Administrativas (7%)", leftMargin, y);
       doc.text(`-${data.comissao.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
       
       doc.moveDown(2);
@@ -210,11 +209,18 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         y += 15;
       }
       
-      // Financiamento (se houver)
+      // Financiamento (se houver) - com breakdown
       if (data.financingInstallment && data.financingInstallment > 0) {
-        doc.text("Financiamento", leftMargin, y);
+        doc.text("Financiamento (parcela)", leftMargin, y);
         doc.text(`-${data.financingInstallment.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
         y += 15;
+        
+        // Juros do financiamento (se houver)
+        if (data.financingInterestAmount && data.financingInterestAmount > 0) {
+          doc.text(`  → Juros (${data.financingInterestPercent}%)`, leftMargin, y);
+          doc.text(`-${data.financingInterestAmount.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
+          y += 15;
+        }
       }
       
       doc.moveDown(2);
@@ -248,12 +254,17 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         "OBSERVAÇÕES:",
         "- Valores Uber e Bolt são os totais repassados pelas plataformas",
         "- IVA de 6% aplicado sobre ganhos totais",
-        "- Despesas administrativas de 7% aplicadas sobre (Ganhos - IVA)",
-        data.aluguel > 0 ? "- Sem aluguel (Afiliado)" : "- Aluguel semanal incluído (Locatário)",
+        "- Despesas administrativas de 7% fixo aplicadas sobre (Ganhos - IVA)",
+        data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
         data.viaverde > 0 
           ? `- Portagens (ViaVerde): ${data.viaverde.toFixed(2)} EUR - Pago pelo motorista (não descontado)`
-          : "- Portagens (ViaVerde): 0.00 EUR - Pago pelo motorista (não descontado)"
-      ];
+          : "- Portagens (ViaVerde): 0.00 EUR - Pago pelo motorista (não descontado)",
+        data.financingInstallment && data.financingInstallment > 0
+          ? data.financingInterestAmount && data.financingInterestAmount > 0
+            ? `- Financiamento: Total ${data.financingTotalCost?.toFixed(2)} EUR (Parcela: ${data.financingInstallment.toFixed(2)} EUR + Juros: ${data.financingInterestAmount.toFixed(2)} EUR de ${data.financingInterestPercent}%)`
+            : `- Financiamento: ${data.financingInstallment.toFixed(2)} EUR (sem juros)`
+          : ""
+      ].filter(line => line !== ""); // Remove linhas vazias
       
       doc.text(obs.join("\n"), leftMargin, doc.y, { width: contentWidth, lineGap: 2 });
       

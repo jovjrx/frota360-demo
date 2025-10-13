@@ -87,6 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       financingInterestPercent: recordData.financingDetails?.interestPercent,
       financingInstallment: recordData.financingDetails?.installment,
+      financingInterestAmount: recordData.financingDetails?.interestAmount,
+      financingTotalCost: recordData.financingDetails?.totalCost,
       
       repasse: recordData.repasse || 0,
     };
