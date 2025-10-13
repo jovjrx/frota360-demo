@@ -44,8 +44,10 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ 
-        size: 'A4', 
-        margins: { top: 40, bottom: 40, left: 50, right: 50 } 
+        size: 'A4',
+        margin: 0,
+        bufferPages: true,
+        autoFirstPage: true
       });
       
       const chunks: Buffer[] = [];
@@ -56,217 +58,195 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
 
       const leftMargin = 50;
       const rightMargin = 545; // 595 - 50
-      const contentWidth = 495; // rightMargin - leftMargin
+      const contentWidth = 495;
+      let currentY = 30; // Começar mais no topo
 
       // ============================================================================
       // HEADER COM LOGO
       // ============================================================================
       
-      // Logo CONDUZ (centralizada)
       const logoPath = path.join(process.cwd(), 'public', 'img', 'logo.png');
       try {
-        // Centralizar: (595 - 180) / 2 = 207.5
-        doc.image(logoPath, 207.5, 40, { width: 180 });
-        doc.moveDown(5);
+        doc.image(logoPath, 222.5, currentY, { width: 150 });
+        currentY += 80;
       } catch (e) {
-        // Se logo não existir, usar texto
-        doc.fontSize(24).fillColor('#48BB78').text('CONDUZ.PT', { align: 'center' });
-        doc.moveDown(1);
+        doc.fontSize(24).fillColor('#48BB78').text('CONDUZ.PT', leftMargin, currentY, { width: contentWidth, align: 'center' });
+        currentY += 25;
       }
       
       // Alvorada Magistral LDA
-      doc.fontSize(10).fillColor("#666666")
-        .text("Alvorada Magistral LDA", { align: "center" });
+      doc.fontSize(9).fillColor("#666666")
+        .text("Alvorada Magistral LDA", leftMargin, currentY, { width: contentWidth, align: "center" });
+      currentY += 10;
       
       // Website
-      doc.fontSize(9).fillColor("#4472C4")
-        .text("conduz.pt", { align: "center" });
-      
-      doc.moveDown(2);
+      doc.fontSize(8).fillColor("#4472C4")
+        .text("conduz.pt", leftMargin, currentY, { width: contentWidth, align: "center" });
+      currentY += 18;
       
       // ============================================================================
       // TÍTULO
       // ============================================================================
       
       doc.fontSize(16).fillColor("#000000").font("Helvetica-Bold")
-        .text("CONTRACHEQUE SEMANAL", { align: "center" });
-      
-      doc.moveDown(2);
+        .text("RESUMO SEMANAL", leftMargin, currentY, { width: contentWidth, align: "center" });
+      currentY += 28;
       
       // ============================================================================
       // DADOS DO MOTORISTA
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("DADOS DO MOTORISTA", leftMargin);
-      
-      doc.moveDown(0.5);
+        .text("DADOS DO MOTORISTA", leftMargin, currentY);
+      currentY += 18;
       
       doc.fontSize(10).font("Helvetica");
       
-      let y = doc.y;
-      
       // Nome
-      doc.text("Nome:", leftMargin, y, { continued: false });
-      doc.text(data.driverName, leftMargin + 150, y);
-      y += 15;
+      doc.text("Nome:", leftMargin, currentY);
+      doc.text(data.driverName, leftMargin + 150, currentY);
+      currentY += 14;
       
       // Tipo
-      doc.text("Tipo:", leftMargin, y);
-      doc.text(data.driverType === "renter" ? "Locatário" : "Afiliado", leftMargin + 150, y);
-      y += 15;
+      doc.text("Tipo:", leftMargin, currentY);
+      doc.text(data.driverType === "renter" ? "Locatário" : "Afiliado", leftMargin + 150, currentY);
+      currentY += 14;
       
       // Veículo
       if (data.vehiclePlate) {
-        doc.text("Veículo:", leftMargin, y);
-        doc.text(data.vehiclePlate, leftMargin + 150, y);
-        y += 15;
+        doc.text("Veículo:", leftMargin, currentY);
+        doc.text(data.vehiclePlate, leftMargin + 150, currentY);
+        currentY += 14;
       }
       
       // Período
-      doc.text("Período:", leftMargin, y);
-      doc.text(`${data.weekStart} - ${data.weekEnd}`, leftMargin + 150, y);
-      
-      doc.moveDown(2);
+      doc.text("Período:", leftMargin, currentY);
+      doc.text(`${data.weekStart} - ${data.weekEnd}`, leftMargin + 150, currentY);
+      currentY += 22;
       
       // ============================================================================
       // RECEITAS
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("RECEITAS", leftMargin);
-      
-      doc.moveDown(0.5);
+        .text("RECEITAS", leftMargin, currentY);
+      currentY += 16;
       
       doc.fontSize(10).font("Helvetica");
       
-      y = doc.y;
-      
       // Uber
-      doc.text("Uber (Total Repassado)", leftMargin, y);
-      doc.text(`${data.uberTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 15;
+      doc.text("Uber (Total Repassado)", leftMargin, currentY);
+      doc.text(`${data.uberTotal.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 14;
       
       // Bolt
-      doc.text("Bolt (Total Repassado)", leftMargin, y);
-      doc.text(`${data.boltTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 15;
+      doc.text("Bolt (Total Repassado)", leftMargin, currentY);
+      doc.text(`${data.boltTotal.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 14;
 
       // GANHOS TOTAL
       doc.font("Helvetica-Bold");
-      doc.text("GANHOS TOTAL", leftMargin, y);
-      doc.text(`${data.ganhosTotal.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 20;
+      doc.text("GANHOS TOTAL", leftMargin, currentY);
+      doc.text(`${data.ganhosTotal.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 18;
       
       // IVA
       doc.font("Helvetica");
-      doc.text("IVA (6%)", leftMargin, y);
-      doc.text(`-${data.ivaValor.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 15;
+      doc.text("IVA (6%)", leftMargin, currentY);
+      doc.text(`-${data.ivaValor.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 14;
       
       // Ganhos - IVA
       doc.font("Helvetica-Bold");
-      doc.text("Ganhos - IVA", leftMargin, y);
-      doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 15;
+      doc.text("Ganhos - IVA", leftMargin, currentY);
+      doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 14;
       
-      // Despesas Administrativas (sempre 7% fixo)
+      // Despesas Administrativas
       doc.font("Helvetica");
-      doc.text("Despesas Administrativas (7%)", leftMargin, y);
-      doc.text(`-${data.comissao.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      
-      doc.moveDown(2);
+      doc.text("Despesas Administrativas (7%)", leftMargin, currentY);
+      doc.text(`-${data.comissao.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 22;
       
       // ============================================================================
       // DESCONTOS
       // ============================================================================
       
       doc.fontSize(11).font("Helvetica-Bold")
-        .text("DESCONTOS", leftMargin);
-      
-      doc.moveDown(0.5);
+        .text("DESCONTOS", leftMargin, currentY);
+      currentY += 16;
       
       doc.fontSize(10).font("Helvetica");
       
-      y = doc.y;
-      
       // Combustível
-      doc.text("Combustível", leftMargin, y);
-      doc.text(`-${data.combustivel.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-      y += 15;
+      doc.text("Combustível", leftMargin, currentY);
+      doc.text(`-${data.combustivel.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+      currentY += 14;
       
       // Aluguel (se houver)
       if (data.aluguel > 0) {
-        doc.text("Aluguel Semanal", leftMargin, y);
-        doc.text(`-${data.aluguel.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-        y += 15;
+        doc.text("Aluguel Semanal", leftMargin, currentY);
+        doc.text(`-${data.aluguel.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+        currentY += 14;
       }
       
       // Portagens (se houver)
       if (data.viaverde > 0) {
-        doc.text("Portagens (ViaVerde)", leftMargin, y);
-        doc.text(`-${data.viaverde.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-        y += 15;
+        doc.text("Portagens (ViaVerde)", leftMargin, currentY);
+        doc.text(`-${data.viaverde.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+        currentY += 14;
       }
       
-      // Financiamento (se houver) - com breakdown
+      // Financiamento (se houver)
       if (data.financingInstallment && data.financingInstallment > 0) {
-        doc.text("Financiamento (parcela)", leftMargin, y);
-        doc.text(`-${data.financingInstallment.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-        y += 15;
+        doc.text("Financiamento (parcela)", leftMargin, currentY);
+        doc.text(`-${data.financingInstallment.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+        currentY += 14;
         
-        // Juros do financiamento (se houver)
         if (data.financingInterestAmount && data.financingInterestAmount > 0) {
-          doc.text(`  → Juros (${data.financingInterestPercent}%)`, leftMargin, y);
-          doc.text(`-${data.financingInterestAmount.toFixed(2)} EUR`, rightMargin - 100, y, { width: 100, align: "right" });
-          y += 15;
+          doc.text(`  → Juros (${data.financingInterestPercent}%)`, leftMargin, currentY);
+          doc.text(`-${data.financingInterestAmount.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+          currentY += 14;
         }
       }
       
-      doc.moveDown(2);
+      currentY += 10;
       
       // ============================================================================
       // VALOR LÍQUIDO A RECEBER
       // ============================================================================
       
-      y = doc.y;
-      
       // Box com borda azul
-      doc.rect(leftMargin, y, contentWidth, 35)
+      doc.rect(leftMargin, currentY, contentWidth, 35)
         .lineWidth(2)
         .strokeColor("#4472C4")
         .fillColor("#E8F0FE")
         .fillAndStroke();
       
       doc.fontSize(14).font("Helvetica-Bold").fillColor("#000000");
-      doc.text("VALOR LÍQUIDO A RECEBER", leftMargin + 10, y + 10, { continued: false });
-      doc.text(`${data.repasse.toFixed(2)} EUR`, rightMargin - 110, y + 10, { width: 100, align: "right" });
+      doc.text("VALOR LÍQUIDO A RECEBER", leftMargin + 10, currentY + 10);
+      doc.text(`${data.repasse.toFixed(2)} EUR`, rightMargin - 110, currentY + 10, { width: 100, align: "right" });
       
-      doc.moveDown(3);
+      currentY += 50;
       
       // ============================================================================
       // OBSERVAÇÕES
       // ============================================================================
       
-      doc.fontSize(9).font("Helvetica-Oblique").fillColor("#666666");
+      doc.fontSize(8).font("Helvetica-Oblique").fillColor("#666666");
       
       const obs = [
         "OBSERVAÇÕES:",
-        "- Valores Uber e Bolt são os totais repassados pelas plataformas",
-        "- IVA de 6% aplicado sobre ganhos totais",
-        "- Despesas administrativas de 7% fixo aplicadas sobre (Ganhos - IVA)",
+        "- IVA de 6% aplicado sobre ganhos totais | Despesas administrativas de 7% fixo sobre (Ganhos - IVA)",
         data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
-        data.viaverde > 0 
-          ? `- Portagens (ViaVerde): ${data.viaverde.toFixed(2)} EUR - Pago pelo motorista (não descontado)`
-          : "- Portagens (ViaVerde): 0.00 EUR - Pago pelo motorista (não descontado)",
         data.financingInstallment && data.financingInstallment > 0
           ? data.financingInterestAmount && data.financingInterestAmount > 0
-            ? `- Financiamento: Total ${data.financingTotalCost?.toFixed(2)} EUR (Parcela: ${data.financingInstallment.toFixed(2)} EUR + Juros: ${data.financingInterestAmount.toFixed(2)} EUR de ${data.financingInterestPercent}%)`
+            ? `- Financiamento: Total ${data.financingTotalCost?.toFixed(2)} EUR (Parcela: ${data.financingInstallment.toFixed(2)} EUR + Juros: ${data.financingInterestAmount.toFixed(2)} EUR)`
             : `- Financiamento: ${data.financingInstallment.toFixed(2)} EUR (sem juros)`
           : ""
-      ].filter(line => line !== ""); // Remove linhas vazias
+      ].filter(line => line !== "");
       
-      doc.text(obs.join("\n"), leftMargin, doc.y, { width: contentWidth, lineGap: 2 });
+      doc.text(obs.join("\n"), leftMargin, currentY, { width: contentWidth, lineGap: 1 });
       
       // ============================================================================
       // FOOTER
@@ -274,9 +254,9 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       
       doc.fontSize(8).fillColor("#999999")
         .text(
-          `Página 1`,
+          `Documento gerado em ${new Date().toLocaleDateString('pt-PT')}`,
           leftMargin,
-          doc.page.height - 30,
+          780,
           { align: "center", width: contentWidth }
         );
       
