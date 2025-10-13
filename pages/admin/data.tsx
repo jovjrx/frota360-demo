@@ -564,7 +564,7 @@ type DataPageProps = AdminPageProps & {
   initialIntegrations: IntegrationSummary[];
 };
 
-export default function DataPage({ initialWeeks, initialIntegrations, tCommon, tPage, translations }: DataPageProps) {
+export default function DataPage({ user, initialWeeks, initialIntegrations, tCommon, tPage, translations }: DataPageProps) {
   const router = useRouter();
   const toast = useToast();
   const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
@@ -718,6 +718,12 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
   const wizardDisclosure = useDisclosure();
   const [wizardMode, setWizardMode] = useState<'create' | 'replace'>('create');
   const [wizardWeekId, setWizardWeekId] = useState<string | null>(null);
+  
+  // Upload modal state
+  const uploadDisclosure = useDisclosure();
+  const [uploadPlatform, setUploadPlatform] = useState<WeeklyPlatform | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [wizardStrategies, setWizardStrategies] = useState<Partial<Record<WeeklyPlatform, StrategyOption>>>({});
   const [isSubmittingSnapshot, setIsSubmittingSnapshot] = useState(false);
 
@@ -960,6 +966,73 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
     },
     [mutateWeeks, t, tc, toast]
   );
+
+  const handleOpenUploadModal = useCallback((platform: WeeklyPlatform) => {
+    setUploadPlatform(platform);
+    setUploadFile(null);
+    uploadDisclosure.onOpen();
+  }, [uploadDisclosure]);
+
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setUploadFile(file);
+  }, []);
+
+  const handleUploadFile = useCallback(async () => {
+    if (!uploadFile || !uploadPlatform || !selectedWeekId) {
+      toast({
+        title: tc('errors.title', 'Erro'),
+        description: t('weeklyDataSources.errors.noFile', 'Selecione um arquivo para upload'),
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('weekId', selectedWeekId);
+      formData.append('adminId', user.uid);
+      formData.append(uploadPlatform, uploadFile);
+
+      const response = await fetch('/api/admin/weekly/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || t('weeklyDataSources.errors.upload', 'Falha no upload'));
+      }
+
+      const result = await response.json();
+
+      toast({
+        title: t('weeklyDataSources.messages.uploadSuccess', 'Upload realizado'),
+        description: t('weeklyDataSources.messages.uploadSuccessDescription', 'Arquivo salvo com sucesso. Clique em "Processar" para gerar os registos.'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      uploadDisclosure.onClose();
+      setUploadFile(null);
+      setUploadPlatform(null);
+      await mutateWeeks();
+    } catch (error: any) {
+      toast({
+        title: tc('errors.title', 'Erro'),
+        description: error?.message ?? tc('errors.tryAgain', 'Tente novamente mais tarde.'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  }, [uploadFile, uploadPlatform, selectedWeekId, user.uid, toast, t, tc, uploadDisclosure, mutateWeeks]);
 
   const handleCreateSnapshot = useCallback(
     async ({ weekId, strategies, allowOverride }: { weekId: string; strategies: Record<WeeklyPlatform, StrategyOption>; allowOverride: boolean }) => {
@@ -1269,7 +1342,7 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
                                             {t('weeklyDataSources.actions.cardMenu', 'Ações')}
                                           </MenuButton>
                                           <MenuList>
-                                            <MenuItem onClick={() => router.push(`/admin/weekly/import?week=${selectedWeek.weekId}&platform=${platform}`)}>
+                                            <MenuItem onClick={() => handleOpenUploadModal(platform)}>
                                               <Icon as={FiUpload} mr={2} />
                                               {t('weeklyDataSources.actions.importFile', 'Importar arquivo')}
                                             </MenuItem>
@@ -1804,6 +1877,79 @@ export default function DataPage({ initialWeeks, initialIntegrations, tCommon, t
           </ModalBody>
           <ModalFooter>
             <Button onClick={logDetailsDisclosure.onClose}>{tc('actions.close', 'Fechar')}</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal de Upload */}
+      <Modal isOpen={uploadDisclosure.isOpen} onClose={uploadDisclosure.onClose} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            {t('weeklyDataSources.upload.title', 'Importar arquivo')}
+            {uploadPlatform && (
+              <Text fontSize="sm" fontWeight="normal" color="gray.600" mt={1}>
+                {uploadPlatform.toUpperCase()} · {t('weeklyDataSources.upload.week', 'Semana')} {selectedWeekId}
+              </Text>
+            )}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing={4}>
+              <Alert status="info" borderRadius="md">
+                <AlertIcon />
+                <Box fontSize="sm">
+                  <AlertDescription>
+                    {t('weeklyDataSources.upload.info', 'O arquivo será salvo e ficará pendente. Clique em "Processar" depois para gerar os registos.')}
+                  </AlertDescription>
+                </Box>
+              </Alert>
+
+              <FormControl>
+                <FormLabel>
+                  {t('weeklyDataSources.upload.fileLabel', 'Selecione o arquivo')}
+                </FormLabel>
+                <Input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={handleFileSelect}
+                  pt={1}
+                  sx={{
+                    '::file-selector-button': {
+                      height: '100%',
+                      padding: '0.5rem 1rem',
+                      mr: 3,
+                      background: 'gray.100',
+                      border: 'none',
+                      borderRadius: 'md',
+                      cursor: 'pointer',
+                      _hover: {
+                        background: 'gray.200',
+                      },
+                    },
+                  }}
+                />
+                {uploadFile && (
+                  <Text fontSize="sm" color="gray.600" mt={2}>
+                    {t('weeklyDataSources.upload.selected', 'Selecionado')}: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(2)} KB)
+                  </Text>
+                )}
+              </FormControl>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={uploadDisclosure.onClose} isDisabled={isUploading}>
+              {tc('actions.cancel', 'Cancelar')}
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleUploadFile}
+              isLoading={isUploading}
+              isDisabled={!uploadFile}
+              leftIcon={<Icon as={FiUpload} />}
+            >
+              {t('weeklyDataSources.upload.submit', 'Fazer upload')}
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
