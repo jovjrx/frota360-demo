@@ -370,7 +370,7 @@ export async function getDashboardStats(cookies?: string): Promise<{
         totalRepasseThisWeek += rec.repasse || 0;
         profitCommissions += rec.despesasAdm || 0;
         profitRentals += rec.aluguel || 0;
-        profitFinancing += rec.financingDetails?.installment || 0;
+        profitFinancing += rec.financingDetails?.totalCost || rec.financingDetails?.installment || 0;
         
         if (rec.paymentStatus === 'pending') {
           totalPaymentsPending += rec.repasse || 0;
@@ -403,7 +403,7 @@ export async function getDashboardStats(cookies?: string): Promise<{
         totalRepasseLastWeek += rec.repasse || 0;
         lastWeekDespesasAdm += rec.despesasAdm || 0;
         lastWeekAluguel += rec.aluguel || 0;
-        profitFinancingLastWeek += rec.financingDetails?.installment || 0;
+        profitFinancingLastWeek += rec.financingDetails?.totalCost || rec.financingDetails?.installment || 0;
       });
       
       console.log(`   Ganhos: €${totalGrossEarningsLastWeek.toFixed(2)}`);

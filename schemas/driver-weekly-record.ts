@@ -19,8 +19,10 @@ export const DriverWeeklyRecordSchema = z.object({
   
   // Financiamento (empréstimos e descontos)
   financingDetails: z.object({
-    interestPercent: z.number().default(0),    // % adicional de juros sobre taxa administrativa
+    interestPercent: z.number().default(0),    // % de juros sobre a parcela
     installment: z.number().default(0),        // Parcela semanal (empréstimo) ou desconto fixo
+    interestAmount: z.number().default(0),     // Valor dos juros (installment × interestPercent / 100)
+    totalCost: z.number().default(0),          // Custo total (installment + interestAmount)
     hasFinancing: z.boolean().default(false),  // Indica se há financiamento ativo
   }).optional(),
 

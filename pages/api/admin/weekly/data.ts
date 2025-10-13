@@ -124,47 +124,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       aggregation.records.forEach((rec: any) => {
         const fins = financingByDriver[rec.driverId] || [];
-        let totalFinancingInterestPercent = 0; // Percentual adicional de juros
         let totalInstallment = 0;
+        let totalInterestAmount = 0;
+        let totalInterestPercent = 0; // Para display apenas
         
         fins.forEach((f) => {
           if (typeof f.remainingWeeks === 'number' && f.remainingWeeks <= 0) return;
           
-          // 1. Acumular percentual de juros (será somado à taxa administrativa)
           const interestPercent = f.weeklyInterest || 0;
-          if (interestPercent > 0) totalFinancingInterestPercent += interestPercent;
+          let installment = 0;
           
-          // 2. Calcular parcela semanal (para empréstimos com prazo)
+          // Calcular parcela semanal
           if (f.type === 'loan' && f.weeks && f.weeks > 0 && f.amount) {
-            const weeklyInstallment = f.amount / f.weeks;
-            totalInstallment += weeklyInstallment;
+            installment = f.amount / f.weeks;
+          } else if (f.type === 'discount' && f.amount) {
+            installment = f.amount;
           }
           
-          // 3. Para descontos sem prazo, descontar o valor total a cada semana
-          if (f.type === 'discount' && f.amount) {
-            totalInstallment += f.amount;
+          // Calcular juros INDIVIDUALMENTE para cada financiamento
+          if (installment > 0 && interestPercent > 0) {
+            const interestAmount = installment * (interestPercent / 100);
+            totalInterestAmount += interestAmount;
           }
+          
+          totalInstallment += installment;
+          if (interestPercent > 0) totalInterestPercent += interestPercent;
         });
         
-        // Aplicar taxa de juros adicional sobre (ganhos - IVA)
-        // Taxa base: 7% + juros de financiamento (PERCENTUAL)
-        if (totalFinancingInterestPercent > 0) {
-          const additionalInterest = rec.ganhosMenosIVA * (totalFinancingInterestPercent / 100);
-          rec.despesasAdm += additionalInterest;
-          rec.repasse -= additionalInterest;
-        }
+        // NOVA LÓGICA: Juros calculados individualmente por financiamento
+        // despesasAdm mantém-se em 7% fixo
         
-        // Aplicar parcela do financiamento (VALOR FIXO - NÃO VAI PARA DESPESAS ADM)
-        // As parcelas são subtraídas apenas do repasse, não são despesas administrativas
-        if (totalInstallment > 0) {
-          rec.repasse -= totalInstallment;
+        // Aplicar parcela + juros do financiamento
+        const totalFinancingCost = totalInstallment + totalInterestAmount;
+        if (totalFinancingCost > 0) {
+          rec.repasse -= totalFinancingCost;
         }
         
         // Adicionar detalhes do financiamento ao registro (para exibição na UI)
         rec.financingDetails = {
-          interestPercent: totalFinancingInterestPercent,
+          interestPercent: totalInterestPercent, // Soma dos percentuais para display
           installment: totalInstallment,
-          hasFinancing: totalFinancingInterestPercent > 0 || totalInstallment > 0
+          interestAmount: totalInterestAmount, // Soma dos juros calculados individualmente
+          totalCost: totalFinancingCost,
+          hasFinancing: totalInstallment > 0
         };
       });
     } catch (e) {

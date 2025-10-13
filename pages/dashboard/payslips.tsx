@@ -62,6 +62,8 @@ interface Contracheque {
   financingDetails?: {
     interestPercent: number;
     installment: number;
+    interestAmount: number;
+    totalCost: number;
     hasFinancing: boolean;
   };
 }
@@ -411,9 +413,7 @@ export default function PainelContracheques({
                     </HStack>
                     <HStack justify="space-between">
                       <Text fontSize="sm" color="gray.600">
-                        Despesas Adm {contraqueSelecionado.financingDetails?.interestPercent 
-                          ? `(${7 + contraqueSelecionado.financingDetails.interestPercent}% = 7% + ${contraqueSelecionado.financingDetails.interestPercent}% juros)` 
-                          : '(7%)'}
+                        Despesas Adm (7%)
                       </Text>
                       <Text fontSize="sm" color="red.600">
                         -€{contraqueSelecionado.despesasAdm.toFixed(2)}
@@ -452,19 +452,29 @@ export default function PainelContracheques({
                         </Text>
                       </HStack>
                     )}
-                    {contraqueSelecionado.financingDetails?.installment && contraqueSelecionado.financingDetails.installment > 0 && (
-                      <HStack justify="space-between">
-                        <Text fontSize="sm">Financiamento (parcela semanal)</Text>
-                        <Text fontSize="sm" color="pink.600">
-                          -€{contraqueSelecionado.financingDetails.installment.toFixed(2)}
-                        </Text>
-                      </HStack>
+                    {contraqueSelecionado.financingDetails?.totalCost && contraqueSelecionado.financingDetails.totalCost > 0 && (
+                      <>
+                        <HStack justify="space-between">
+                          <Text fontSize="sm">Financiamento (parcela)</Text>
+                          <Text fontSize="sm" color="pink.600">
+                            -€{contraqueSelecionado.financingDetails.installment.toFixed(2)}
+                          </Text>
+                        </HStack>
+                        {contraqueSelecionado.financingDetails.interestAmount > 0 && (
+                          <HStack justify="space-between">
+                            <Text fontSize="sm" pl={4}>Juros ({contraqueSelecionado.financingDetails.interestPercent}%)</Text>
+                            <Text fontSize="sm" color="pink.600">
+                              -€{contraqueSelecionado.financingDetails.interestAmount.toFixed(2)}
+                            </Text>
+                          </HStack>
+                        )}
+                      </>
                     )}
                     <Divider />
                     <HStack justify="space-between">
                       <Text fontSize="md" fontWeight="bold">TOTAL DESPESAS</Text>
                       <Text fontSize="md" fontWeight="bold" color="red.600">
-                        -€{(contraqueSelecionado.totalDespesas + (contraqueSelecionado.financingDetails?.installment || 0)).toFixed(2)}
+                        -€{(contraqueSelecionado.totalDespesas + (contraqueSelecionado.financingDetails?.totalCost || 0)).toFixed(2)}
                       </Text>
                     </HStack>
                   </VStack>

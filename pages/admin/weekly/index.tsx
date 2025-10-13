@@ -767,23 +767,27 @@ export default function WeeklyPage({
 
   // Calcular totais
   const totals = records.reduce((acc, record) => {
-    // Calcular base de 7% e juros separadamente para exibição
+    // NOVA LÓGICA: despesasAdm sempre 7% fixo, juros vão para financiamento
     const ganhosMenosIVA = record.ganhosTotal - record.ivaValor;
     const despesasBase = ganhosMenosIVA * 0.07; // 7% fixo
-    const despesasJuros = record.financingDetails?.interestPercent 
-      ? ganhosMenosIVA * (record.financingDetails.interestPercent / 100)
-      : 0;
+    
+    // Juros agora são calculados sobre a parcela de financiamento
+    const financingInstallment = record.financingDetails?.installment || 0;
+    const financingInterest = record.financingDetails?.interestAmount || 0;
+    const financingTotal = record.financingDetails?.totalCost || financingInstallment;
     
     return {
       ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
       ivaValor: acc.ivaValor + record.ivaValor,
       despesasAdm: acc.despesasAdm + record.despesasAdm,
       despesasBase: acc.despesasBase + despesasBase,
-      despesasJuros: acc.despesasJuros + despesasJuros,
+      despesasJuros: acc.despesasJuros + 0, // Não há mais juros nas despesas adm
       combustivel: acc.combustivel + record.combustivel,
       viaverde: acc.viaverde + record.viaverde,
       aluguel: acc.aluguel + record.aluguel,
-      financiamento: acc.financiamento + (record.financingDetails?.installment || 0),
+      financiamento: acc.financiamento + financingInstallment,
+      financiamentoJuros: acc.financiamentoJuros + financingInterest,
+      financiamentoTotal: acc.financiamentoTotal + financingTotal,
       repasse: acc.repasse + record.repasse,
     };
   }, {
@@ -796,6 +800,8 @@ export default function WeeklyPage({
     viaverde: 0,
     aluguel: 0,
     financiamento: 0,
+    financiamentoJuros: 0,
+    financiamentoTotal: 0,
     repasse: 0,
   });
 
@@ -891,7 +897,7 @@ export default function WeeklyPage({
           label="Despesas Adm"
           value={totals.despesasAdm}
           color="red.600"
-          helpText={`Base: ${formatCurrency(totals.despesasBase)} | Juros: ${formatCurrency(totals.despesasJuros)}`}
+          helpText="7% fixo"
         />
         <StatCard
           label="Aluguéis"
@@ -901,15 +907,15 @@ export default function WeeklyPage({
         />
         <StatCard
           label="Financiamento"
-          value={totals.financiamento}
+          value={totals.financiamentoTotal}
           color="pink.600"
-          helpText="Parcelas semanais (valor fixo, não % )"
+          helpText={`Parcela: ${formatCurrency(totals.financiamento)} | Juros: ${formatCurrency(totals.financiamentoJuros)}`}
         />
         <StatCard
           label="Líquido"
-          value={totals.despesasAdm + totals.aluguel + totals.financiamento}
+          value={totals.despesasAdm + totals.aluguel + totals.financiamentoTotal}
           color="blue.600"
-          helpText={`Entradas: ${formatCurrency(totals.despesasAdm + totals.aluguel)} | Financ: ${formatCurrency(totals.financiamento)}`}
+          helpText={`Adm+Aluguel: ${formatCurrency(totals.despesasAdm + totals.aluguel)} | Financ: ${formatCurrency(totals.financiamentoTotal)}`}
         />
       </SimpleGrid>
 
@@ -1025,10 +1031,7 @@ export default function WeeklyPage({
                         isPaid={record.paymentStatus === 'paid'}
                         color="red.600"
                         prefix="-"
-                        helpText={record.financingDetails?.interestPercent > 0 
-                          ? `${7 + record.financingDetails.interestPercent}% (7% + ${record.financingDetails.interestPercent}% juros)` 
-                          : "7%"
-                        }
+                        helpText="7% fixo"
                       />
                       <EditableNumberField
                         value={record.combustivel}
@@ -1053,9 +1056,16 @@ export default function WeeklyPage({
                       />
                       <Td isNumeric>
                         {record.financingDetails?.hasFinancing ? (
-                          <Text color="pink.600" fontWeight="medium">
-                            -{formatCurrency(record.financingDetails.installment)}
-                          </Text>
+                          <VStack spacing={0} align="flex-end">
+                            <Text color="pink.600" fontWeight="medium">
+                              -{formatCurrency(record.financingDetails.totalCost || record.financingDetails.installment)}
+                            </Text>
+                            {record.financingDetails.interestAmount > 0 && (
+                              <Text fontSize="xs" color="pink.500">
+                                ({formatCurrency(record.financingDetails.installment)} + {formatCurrency(record.financingDetails.interestAmount)})
+                              </Text>
+                            )}
+                          </VStack>
                         ) : (
                           <Text color="gray.400">-</Text>
                         )}
