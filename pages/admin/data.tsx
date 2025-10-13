@@ -989,6 +989,17 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
       return;
     }
 
+    if (!user?.uid) {
+      toast({
+        title: tc('errors.title', 'Erro'),
+        description: t('weeklyDataSources.errors.noUser', 'Utilizador não identificado'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       const formData = new FormData();
@@ -996,17 +1007,29 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
       formData.append('adminId', user.uid);
       formData.append(uploadPlatform, uploadFile);
 
+      console.log('📤 Uploading:', { platform: uploadPlatform, weekId: selectedWeekId, fileName: uploadFile.name });
+
       const response = await fetch('/api/admin/weekly/import', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('📥 Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || t('weeklyDataSources.errors.upload', 'Falha no upload'));
+        let errorMessage = t('weeklyDataSources.errors.upload', 'Falha no upload');
+        try {
+          const error = await response.json();
+          errorMessage = error.error || errorMessage;
+          console.error('❌ Error response:', error);
+        } catch (e) {
+          console.error('❌ Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
+      console.log('✅ Upload result:', result);
 
       toast({
         title: t('weeklyDataSources.messages.uploadSuccess', 'Upload realizado'),
@@ -1031,7 +1054,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
     } finally {
       setIsUploading(false);
     }
-  }, [uploadFile, uploadPlatform, selectedWeekId, user.uid, toast, t, tc, uploadDisclosure, mutateWeeks]);
+  }, [uploadFile, uploadPlatform, selectedWeekId, user, toast, t, tc, uploadDisclosure, mutateWeeks]);
 
   const handleCreateSnapshot = useCallback(
     async ({ weekId, strategies, allowOverride }: { weekId: string; strategies: Record<WeeklyPlatform, StrategyOption>; allowOverride: boolean }) => {
@@ -1082,9 +1105,13 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
     if (!selectedWeek) return;
     const currentStrategies: Partial<Record<WeeklyPlatform, StrategyOption>> = {};
     WEEKLY_PLATFORMS.forEach((platform) => {
-      const strategy = deriveStrategy(selectedWeek.sources[platform], selectedWeek.rawFiles[platform]);
-      if (strategy !== 'empty') {
-        currentStrategies[platform] = strategy as StrategyOption;
+      const source = selectedWeek.sources?.[platform];
+      const raw = selectedWeek.rawFiles?.[platform];
+      if (source && raw) {
+        const strategy = deriveStrategy(source, raw);
+        if (strategy !== 'empty') {
+          currentStrategies[platform] = strategy as StrategyOption;
+        }
       }
     });
     setWizardMode('replace');
@@ -1177,7 +1204,7 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
                       </Stack>
                     </CardHeader>
                     <CardBody>
-                      <Stack spacing={3} maxH="520px" overflowY="auto">
+                      <Stack spacing={2} maxH="520px" overflowY="auto">
                         {isValidatingWeeks && weeks.length === 0 ? (
                           <Flex justify="center" py={10}>
                             <Spinner />
@@ -1289,8 +1316,15 @@ export default function DataPage({ user, initialWeeks, initialIntegrations, tCom
                         {selectedWeek ? (
                           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                             {WEEKLY_PLATFORMS.map((platform) => {
-                              const source = selectedWeek.sources[platform];
-                              const raw = selectedWeek.rawFiles[platform];
+                              const source = selectedWeek.sources?.[platform];
+                              const raw = selectedWeek.rawFiles?.[platform];
+                              
+                              // Skip if source or raw are undefined (shouldn't happen but safety check)
+                              if (!source || !raw) {
+                                console.warn(`⚠️ Missing data for platform ${platform}:`, { source, raw });
+                                return null;
+                              }
+                              
                               const strategy = deriveStrategy(source, raw);
                               const integration = integrationMap[platform];
                               const platformStatus = (source.status as WeekStatus) ?? 'pending';

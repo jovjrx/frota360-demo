@@ -162,14 +162,22 @@ export default async function handler(
         );
       }
 
-      weeklyDataSources = updateDataSource(weeklyDataSources, platform, {
+      const updateData: any = {
         status: summary.error ? 'partial' : 'complete',
         origin: 'manual',
         recordsCount: summary.recordsCount,
         driversCount: summary.driverMatches,
-        archiveRef: summary.rawDataDocId,
-        lastError: summary.error,
-      });
+      };
+
+      // Only set these fields if they have values (avoid undefined in Firestore)
+      if (summary.rawDataDocId) {
+        updateData.archiveRef = summary.rawDataDocId;
+      }
+      if (summary.error) {
+        updateData.lastError = summary.error;
+      }
+
+      weeklyDataSources = updateDataSource(weeklyDataSources, platform, updateData);
     }
 
     await weeklyDataSourceRef.set(weeklyDataSources, { merge: true });

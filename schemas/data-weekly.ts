@@ -25,21 +25,29 @@ export function createWeeklyNormalizedData(
 ): WeeklyNormalizedData {
   const now = new Date().toISOString();
 
-  return {
+  const result: any = {
     id: input.id || "",
     weekId: input.weekId || "",
     weekStart: input.weekStart || "",
     weekEnd: input.weekEnd || "",
     platform: input.platform || "uber",
     referenceId: input.referenceId || "",
-    referenceLabel: input.referenceLabel,
     driverId: input.driverId ?? null,
     driverName: input.driverName ?? null,
     vehiclePlate: input.vehiclePlate ?? null,
     totalValue: input.totalValue || 0,
     totalTrips: input.totalTrips || 0,
-    rawDataRef: input.rawDataRef,
     createdAt: input.createdAt || now,
     updatedAt: now,
   };
+
+  // Only add optional fields if they have values (avoid undefined in Firestore)
+  if (input.referenceLabel !== undefined && input.referenceLabel !== null) {
+    result.referenceLabel = input.referenceLabel;
+  }
+  if (input.rawDataRef !== undefined && input.rawDataRef !== null) {
+    result.rawDataRef = input.rawDataRef;
+  }
+
+  return result;
 }

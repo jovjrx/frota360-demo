@@ -95,8 +95,16 @@ export async function fetchWeeklyDataOverview(limit = 12): Promise<WeeklyDataOve
 
   weekSnapshot.forEach((doc) => {
     const data = doc.data() as WeeklyDataSources;
+    
+    // Remove cartrack from legacy data if it exists
+    const cleanedSources = { ...data.sources };
+    if ('cartrack' in cleanedSources) {
+      delete (cleanedSources as any).cartrack;
+    }
+    
     weekMap.set(data.weekId, {
       ...data,
+      sources: cleanedSources,
       id: data.id ?? doc.id,
       rawFiles: createEmptyRawFiles(),
       totalRawFiles: 0,
