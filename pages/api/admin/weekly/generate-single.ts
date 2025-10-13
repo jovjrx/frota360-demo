@@ -62,8 +62,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       combustivel: record.combustivel,
       viaverde: record.viaverde,
       aluguel: record.aluguel,
+      
+      // Financing com todos os campos necessários
       financingInterestPercent: (record as any).financingDetails?.interestPercent,
       financingInstallment: (record as any).financingDetails?.installment,
+      financingInterestAmount: (record as any).financingDetails?.interestAmount,
+      financingTotalCost: (record as any).financingDetails?.totalCost,
+      
       repasse: record.repasse,
     };
 

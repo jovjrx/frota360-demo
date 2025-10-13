@@ -1,11 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/lib/session/ironSession';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { getDriverWeekData } from '@/lib/api/driver-week-data';
 import { generatePayslipPDF, PayslipData } from '@/lib/pdf/payslipGenerator';
 
 /**
  * API para gerar PDF de contracheque
  * GET /api/painel/contracheques/[recordId]/pdf
+ * 
+ * ATUALIZADO: Usa função centralizada getDriverWeekData para sempre ter dados frescos
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -25,49 +27,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Record ID inválido' });
     }
 
-    // Buscar registro
-    const recordDoc = await adminDb
-      .collection('driverWeeklyRecords')
-      .doc(recordId)
-      .get();
+    // recordId formato: driverId_weekId (ex: abc123_2024-W40)
+    const [driverId, weekId] = recordId.split('_');
 
-    if (!recordDoc.exists) {
+    if (!driverId || !weekId) {
+      return res.status(400).json({ error: 'Record ID formato inválido. Esperado: driverId_weekId' });
+    }
+
+    console.log(`[PDF] Gerando contracheque para ${driverId} semana ${weekId}`);
+
+    // Buscar dados usando função centralizada (sempre atualizado!)
+    const recordData = await getDriverWeekData(driverId, weekId);
+
+    if (!recordData) {
       return res.status(404).json({ error: 'Contracheque não encontrado' });
     }
 
-    const recordData = recordDoc.data();
-
-    if (!recordData) {
-      return res.status(404).json({ error: 'Dados do contracheque não encontrados' });
-    }
-
-    // Buscar dados do motorista
-    const driverDoc = await adminDb
-      .collection('drivers')
-      .doc(recordData.driverId)
-      .get();
-
-    if (!driverDoc.exists) {
-      return res.status(404).json({ error: 'Motorista não encontrado' });
-    }
-
-    const driverData = driverDoc.data();
-
-    // Formatar datas para o formato DD/MM/YYYY se necessário
+    // Formatar datas para o formato DD/MM/YYYY
     const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
-      // Se já está no formato correto, retorna
       if (dateStr.includes('/')) return dateStr;
-      // Se está no formato ISO, converte
       const date = new Date(dateStr);
       return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
     };
 
     // Preparar dados para o PDF
     const payslipData: PayslipData = {
-      driverName: driverData.fullName || `${driverData.firstName} ${driverData.lastName}`,
-      driverType: driverData.type || 'affiliate',
-      vehiclePlate: driverData.vehicle?.plate,
+      driverName: recordData.driverName,
+      driverType: recordData.isLocatario ? 'renter' : 'affiliate',
+      vehiclePlate: (recordData as any).vehicle || undefined,
       weekStart: formatDate(recordData.weekStart),
       weekEnd: formatDate(recordData.weekEnd),
       
@@ -78,8 +66,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ganhosTotal: recordData.ganhosTotal || 0,
       
       ivaValor: recordData.ivaValor || 0,
-      ganhosMenosIva: recordData.ganhosMenosIVA || recordData.ganhosMenosIva || 0,
-      comissao: recordData.despesasAdm || recordData.comissao || 0,
+      ganhosMenosIva: recordData.ganhosMenosIVA || 0,
+      comissao: recordData.despesasAdm || 0,
       
       combustivel: recordData.combustivel || 0,
       viaverde: recordData.viaverde || 0,
@@ -87,17 +75,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       financingInterestPercent: recordData.financingDetails?.interestPercent,
       financingInstallment: recordData.financingDetails?.installment,
-      financingInterestAmount: recordData.financingDetails?.interestAmount || 
-        (recordData.financingDetails?.installment && recordData.financingDetails?.interestPercent 
-          ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
-          : 0),
-      financingTotalCost: recordData.financingDetails?.totalCost || 
-        (recordData.financingDetails?.installment 
-          ? recordData.financingDetails.installment + 
-            (recordData.financingDetails?.interestPercent 
-              ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
-              : 0)
-          : 0),
+      financingInterestAmount: recordData.financingDetails?.interestAmount !== undefined
+        ? recordData.financingDetails.interestAmount
+        : (recordData.financingDetails?.installment && recordData.financingDetails?.interestPercent 
+            ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
+            : 0),
+      financingTotalCost: recordData.financingDetails?.totalCost !== undefined
+        ? recordData.financingDetails.totalCost
+        : (recordData.financingDetails?.installment 
+            ? recordData.financingDetails.installment + 
+              (recordData.financingDetails?.interestPercent 
+                ? recordData.financingDetails.installment * (recordData.financingDetails.interestPercent / 100)
+                : 0)
+            : 0),
       
       repasse: recordData.repasse || 0,
     };
@@ -108,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const pdfBuffer = await generatePayslipPDF(payslipData);
 
     // Definir headers para download
-    const fileName = `Contracheque_${driverData.fullName?.replace(/\s+/g, '_')}_${payslipData.weekStart.replace(/\//g, '-')}_a_${payslipData.weekEnd.replace(/\//g, '-')}.pdf`;
+    const fileName = `Contracheque_${recordData.driverName.replace(/\s+/g, '_')}_${payslipData.weekStart.replace(/\//g, '-')}_a_${payslipData.weekEnd.replace(/\//g, '-')}.pdf`;
     
     console.log('[PDF] PDF gerado com sucesso:', fileName);
     

@@ -11,6 +11,10 @@ export const DriverWeeklyRecordSchema = z.object({
   
   isLocatario: z.boolean().default(false),
 
+  // Receitas por plataforma
+  uberTotal: z.number().default(0),
+  boltTotal: z.number().default(0),
+  prio: z.number().default(0),  // MyPrio (combustível)
   
   // Despesas
   combustivel: z.number().default(0),  // myprio
@@ -39,6 +43,10 @@ export const DriverWeeklyRecordSchema = z.object({
   iban: z.string().optional(),
   paymentStatus: z.enum(['pending', 'paid', 'cancelled']).default('pending'),
   paymentDate: z.string().optional(),
+  paymentInfo: z.object({
+    proofUrl: z.string().optional(),
+    proofFileName: z.string().optional(),
+  }).optional(),
   
   // Origem dos dados
   dataSource: z.enum(['manual', 'auto']).default('manual'),
@@ -103,10 +111,15 @@ export function createDriverWeeklyRecord(
     
     isLocatario: data.isLocatario || false,
     
+    uberTotal: data.uberTotal || 0,
+    boltTotal: data.boltTotal || 0,
+    prio: data.prio || 0,
+    
     combustivel: data.combustivel || 0,
     viaverde: data.viaverde || 0,
     aluguel,
 
+    financingDetails: data.financingDetails,
     
     ganhosTotal,
     ivaValor,
@@ -118,6 +131,7 @@ export function createDriverWeeklyRecord(
     iban: data.iban || '',
     paymentStatus: data.paymentStatus || 'pending',
     paymentDate: data.paymentDate || '',
+    paymentInfo: data.paymentInfo,
     
     dataSource: data.dataSource || 'manual',
     

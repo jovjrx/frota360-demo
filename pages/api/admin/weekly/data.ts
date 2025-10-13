@@ -1,378 +1,50 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { createDriverWeeklyRecord, DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
-import { DriverPayment, DriverPaymentSchema } from '@/schemas/driver-payment';
-import { WeeklyNormalizedData } from '@/schemas/data-weekly';
-import { getWeekDates, generateWeeklyRecordId } from '@/lib/utils/date-helpers';
+import { getSession } from '@/lib/session/ironSession';
+import { getAllDriversWeekData } from '@/lib/api/driver-week-data';
 
-type Platform = 'uber' | 'bolt' | 'myprio' | 'viaverde';
-
-interface DriverInfo {
-  id: string;
-  name: string;
-  type: 'affiliate' | 'renter';
-  rentalFee: number;
-  iban?: string | null;
-  email?: string | null;
-  vehiclePlate?: string | null;
-  integrations?: {
-    uber?: string | null;
-    bolt?: string | null;
-    myprio?: string | null;
-    viaverde?: string | null;
-  };
-}
-
-interface DriverMaps {
-  byId: Map<string, DriverInfo>;
-  byUber: Map<string, DriverInfo>;
-  byBolt: Map<string, DriverInfo>;
-  byMyPrio: Map<string, DriverInfo>;
-  byPlate: Map<string, DriverInfo>;
-  byViaVerde: Map<string, DriverInfo>;
-}
-
-interface AggregatedRecord extends DriverWeeklyRecord {
-  driverType: 'affiliate' | 'renter';
-  vehicle: string;
-  platformData: WeeklyNormalizedData[];
-  paymentInfo?: DriverPayment | null;
-}
-
+/**
+ * API ENDPOINT - DADOS SEMANAIS ADMIN
+ * GET /api/admin/weekly/data?weekId=2024-W40&forceRefresh=true
+ * 
+ * Usa função centralizada getDriverWeekData
+ */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
-  }
-
-  const { weekId } = req.query;
-
-  if (!weekId || typeof weekId !== 'string') {
-    return res.status(400).json({ message: 'Missing or invalid weekId' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { start: weekStart, end: weekEnd } = getWeekDates(weekId);
+    const session = await getSession(req, res);
+    if (!session.userId || session.role !== 'admin') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-    const normalizedSnapshot = await adminDb
-      .collection('dataWeekly')
-      .where('weekId', '==', weekId)
-      .get();
+    const { weekId, forceRefresh } = req.query;
 
-    const normalizedData: WeeklyNormalizedData[] = normalizedSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as WeeklyNormalizedData),
-    }));
+    if (!weekId || typeof weekId !== 'string') {
+      return res.status(400).json({ error: 'weekId é obrigatório' });
+    }
 
-    const storedRecordsSnapshot = await adminDb
-      .collection('driverWeeklyRecords')
-      .where('weekId', '==', weekId)
-      .get();
+    const shouldRefresh = forceRefresh === 'true';
+    
+    console.log(`[API Weekly Data] Buscando dados para semana ${weekId} (refresh: ${shouldRefresh})`);
+    
+    // Buscar todos os motoristas da semana usando função centralizada
+    const records = await getAllDriversWeekData(weekId, shouldRefresh);
+    
+    console.log(`[API Weekly Data] Retornando ${records.length} registros`);
 
-    const storedRecords = new Map<string, DriverWeeklyRecord>();
-    storedRecordsSnapshot.forEach((doc) => {
-      storedRecords.set(doc.id, { id: doc.id, ...(doc.data() as DriverWeeklyRecord) });
-    });
-
-    const driversSnapshot = await adminDb.collection('drivers').get();
-    const drivers = driversSnapshot.docs.map((doc) => buildDriverInfo(doc.id, doc.data() as any));
-    const driverMaps = buildDriverMaps(drivers);
-
-    const paymentsSnapshot = await adminDb
-      .collection('driverPayments')
-      .where('weekId', '==', weekId)
-      .orderBy('paymentDate', 'desc')
-      .get();
-
-    const paymentsByRecordId = new Map<string, DriverPayment>();
-    paymentsSnapshot.forEach((doc) => {
-      try {
-        const parsed = DriverPaymentSchema.parse({ id: doc.id, ...doc.data() });
-        if (!paymentsByRecordId.has(parsed.recordId)) {
-          paymentsByRecordId.set(parsed.recordId, parsed);
-        }
-      } catch (error) {
-        console.error('Failed to parse driver payment record:', error);
-      }
-    });
-
-    const aggregation = aggregateWeeklyRecords(
-      normalizedData,
-      driverMaps,
+    return res.status(200).json({
       weekId,
-      weekStart,
-      weekEnd,
-      storedRecords,
-      paymentsByRecordId
-    );
+      records,
+      count: records.length
+    });
 
-    // Ajustar registros para incluir descontos de financiamentos ativos
-    try {
-      const financingSnapshot = await adminDb.collection('financing').where('status', '==', 'active').get();
-      const financingByDriver: Record<string, Array<{ type?: string; amount?: number; weeks?: number; weeklyInterest?: number; remainingWeeks?: number }>> = {};
-      financingSnapshot.docs.forEach((doc) => {
-        const data = doc.data() as any;
-        const driverId = data.driverId;
-        if (!driverId) return;
-        if (!financingByDriver[driverId]) financingByDriver[driverId] = [];
-        financingByDriver[driverId].push({ 
-          type: data.type,
-          amount: data.amount,
-          weeks: data.weeks,
-          weeklyInterest: data.weeklyInterest, 
-          remainingWeeks: data.remainingWeeks 
-        });
-      });
-      aggregation.records.forEach((rec: any) => {
-        const fins = financingByDriver[rec.driverId] || [];
-        let totalInstallment = 0;
-        let totalInterestAmount = 0;
-        let totalInterestPercent = 0; // Para display apenas
-        
-        fins.forEach((f) => {
-          if (typeof f.remainingWeeks === 'number' && f.remainingWeeks <= 0) return;
-          
-          const interestPercent = f.weeklyInterest || 0;
-          let installment = 0;
-          
-          // Calcular parcela semanal
-          if (f.type === 'loan' && f.weeks && f.weeks > 0 && f.amount) {
-            installment = f.amount / f.weeks;
-          } else if (f.type === 'discount' && f.amount) {
-            installment = f.amount;
-          }
-          
-          // Calcular juros INDIVIDUALMENTE para cada financiamento
-          if (installment > 0 && interestPercent > 0) {
-            const interestAmount = installment * (interestPercent / 100);
-            totalInterestAmount += interestAmount;
-          }
-          
-          totalInstallment += installment;
-          if (interestPercent > 0) totalInterestPercent += interestPercent;
-        });
-        
-        // NOVA LÓGICA: Juros calculados individualmente por financiamento
-        // despesasAdm mantém-se em 7% fixo
-        
-        // Aplicar parcela + juros do financiamento
-        const totalFinancingCost = totalInstallment + totalInterestAmount;
-        if (totalFinancingCost > 0) {
-          rec.repasse -= totalFinancingCost;
-        }
-        
-        // Adicionar detalhes do financiamento ao registro (para exibição na UI)
-        rec.financingDetails = {
-          interestPercent: totalInterestPercent, // Soma dos percentuais para display
-          installment: totalInstallment,
-          interestAmount: totalInterestAmount, // Soma dos juros calculados individualmente
-          totalCost: totalFinancingCost,
-          hasFinancing: totalInstallment > 0
-        };
-      });
-    } catch (e) {
-      console.error('Erro ao ajustar registros com descontos de financiamento:', e);
-    }
-
-    return res.status(200).json(aggregation);
   } catch (error: any) {
-    console.error('Error fetching weekly data:', error);
-    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    console.error('[API Weekly Data] Erro:', error);
+    return res.status(500).json({ 
+      error: 'Internal Server Error',
+      message: error.message 
+    });
   }
 }
-
-function buildDriverInfo(id: string, data: any): DriverInfo {
-  return {
-    id,
-    name: data.fullName || data.name || data.email || 'Motorista sem nome',
-    type: data.type === 'renter' ? 'renter' : 'affiliate',
-    rentalFee: typeof data.rentalFee === 'number' ? data.rentalFee : 0,
-    iban: data.banking?.iban ?? null,
-    email: data.email ?? null,
-    vehiclePlate: data.vehicle?.plate ?? data.integrations?.viaverde?.key ?? null,
-    integrations: {
-      uber: data.integrations?.uber?.key ?? null,
-      bolt: data.integrations?.bolt?.key ?? null,
-      myprio: data.integrations?.myprio?.key ?? null,
-      viaverde: data.integrations?.viaverde?.key ?? null,
-    },
-  };
-}
-
-function buildDriverMaps(drivers: DriverInfo[]): DriverMaps {
-  const byId = new Map<string, DriverInfo>();
-  const byUber = new Map<string, DriverInfo>();
-  const byBolt = new Map<string, DriverInfo>();
-  const byMyPrio = new Map<string, DriverInfo>();
-  const byPlate = new Map<string, DriverInfo>();
-  const byViaVerde = new Map<string, DriverInfo>();
-
-  drivers.forEach((driver) => {
-    byId.set(driver.id, driver);
-    if (driver.integrations?.uber) {
-      byUber.set(normalizeKey(driver.integrations.uber), driver);
-    }
-    if (driver.integrations?.bolt) {
-      byBolt.set(normalizeKey(driver.integrations.bolt), driver);
-    }
-    if (driver.integrations?.myprio) {
-      byMyPrio.set(normalizeKey(driver.integrations.myprio), driver);
-    }
-    if (driver.vehiclePlate) {
-      byPlate.set(normalizePlate(driver.vehiclePlate), driver);
-    }
-    if (driver.integrations?.viaverde) {
-      byViaVerde.set(normalizeKey(driver.integrations.viaverde), driver);
-    }
-  });
-
-  return { byId, byUber, byBolt, byMyPrio, byPlate, byViaVerde };
-}
-
-export function aggregateWeeklyRecords(
-  normalizedData: WeeklyNormalizedData[],
-  driverMaps: DriverMaps,
-  weekId: string,
-  weekStart: string,
-  weekEnd: string,
-  storedRecords: Map<string, DriverWeeklyRecord>,
-  paymentsMap: Map<string, DriverPayment>
-) {
-  const totals = new Map<string, {
-    driver: DriverInfo;
-    uber: number;
-    bolt: number;
-    combustivel: number;
-    viaverde: number;
-    references: WeeklyNormalizedData[];
-  }>();
-  const unassigned: WeeklyNormalizedData[] = [];
-
-  normalizedData.forEach((entry) => {
-    const driver = resolveDriver(entry, driverMaps);
-
-    if (!driver) {
-      unassigned.push(entry);
-      return;
-    }
-
-    const existing = totals.get(driver.id) ?? {
-      driver,
-      uber: 0,
-      bolt: 0,
-      combustivel: 0,
-      viaverde: 0,
-      references: [],
-    };
-
-    switch (entry.platform as Platform) {
-      case 'uber':
-        existing.uber += entry.totalValue || 0;
-        break;
-      case 'bolt':
-        existing.bolt += entry.totalValue || 0;
-        break;
-      case 'myprio':
-        existing.combustivel += entry.totalValue || 0;
-        break;
-      case 'viaverde':
-        existing.viaverde += entry.totalValue || 0;
-        break;
-      default:
-        break;
-    }
-
-    existing.references.push(entry);
-    totals.set(driver.id, existing);
-  });
-
-  const records = Array.from(totals.values()).map(({ driver, uber, bolt, combustivel, viaverde, references }) => {
-    const record = createDriverWeeklyRecord(
-      {
-        id: generateWeeklyRecordId(driver.id, weekId),
-        driverId: driver.id,
-        driverName: driver.name,
-        driverEmail: driver.email ?? '',
-        weekId,
-        weekStart,
-        weekEnd,
-        combustivel,
-        viaverde,
-        isLocatario: driver.type === 'renter',
-        aluguel: driver.type === 'renter' ? driver.rentalFee : 0,
-        iban: driver.iban ?? undefined,
-      },
-      { uber, bolt },
-      { type: driver.type, rentalFee: driver.rentalFee }
-    );
-
-    const persisted = storedRecords.get(record.id);
-
-    const mergedRecord: DriverWeeklyRecord = {
-      ...record,
-      paymentStatus: persisted?.paymentStatus ?? record.paymentStatus,
-      updatedAt: persisted?.updatedAt ?? record.updatedAt,
-      createdAt: persisted?.createdAt ?? record.createdAt,
-      paymentDate: persisted?.paymentDate ?? record.paymentDate,
-      iban: persisted?.iban ?? record.iban,
-    };
-
-    return {
-      ...mergedRecord,
-      driverType: driver.type,
-      vehicle: driver.vehiclePlate ?? '',
-      platformData: references,
-      paymentInfo: paymentsMap.get(record.id) ?? null,
-    } as AggregatedRecord;
-  });
-
-  return {
-    weekId,
-    weekStart,
-    weekEnd,
-    records,
-    unassigned,
-  };
-}
-
-function resolveDriver(entry: WeeklyNormalizedData, driverMaps: DriverMaps): DriverInfo | undefined {
-  if (entry.driverId) {
-    const driver = driverMaps.byId.get(entry.driverId);
-    if (driver) {
-      return driver;
-    }
-  }
-
-  switch (entry.platform as Platform) {
-    case 'uber':
-      return driverMaps.byUber.get(normalizeKey(entry.referenceId)) ?? undefined;
-    case 'bolt':
-      return driverMaps.byBolt.get(normalizeKey(entry.referenceId)) ?? undefined;
-    case 'myprio': {
-      const cardMatch = driverMaps.byMyPrio.get(normalizeKey(entry.referenceId));
-      if (cardMatch) return cardMatch;
-      return driverMaps.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
-    }
-    case 'viaverde': {
-      const plateMatch = driverMaps.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
-      if (plateMatch) return plateMatch;
-      return driverMaps.byViaVerde.get(normalizeKey(entry.referenceId));
-    }
-    default:
-      return undefined;
-  }
-}
-
-function normalizeKey(value: any): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  return String(value).trim().toLowerCase();
-}
-
-function normalizePlate(value: any): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  return String(value).trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-}
-

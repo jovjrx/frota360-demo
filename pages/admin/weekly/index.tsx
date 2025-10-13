@@ -974,11 +974,11 @@ export default function WeeklyPage({
                     <Th>{t('weekly.control.records.columns.type', 'Tipo')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.platformUber', 'Uber')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.platformBolt', 'Bolt')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.grossTotal', 'Ganhos brutos')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.iva', 'IVA')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.adminExpenses', 'Taxa adm.')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.grossTotal', 'Ganhos brutos (✕)')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.iva', 'IVA (✕)')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.adminExpenses', 'Taxa adm. (✕)')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível (✕)')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens (✕)')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.rent', 'Aluguel')}</Th>
                     <Th isNumeric>FINANC.</Th>
                     <Th isNumeric>Líquido</Th>
@@ -999,61 +999,37 @@ export default function WeeklyPage({
                         </Badge>
                       </Td>
                       <Td isNumeric>
-                        {formatCurrency(
-                          record.platformData
-                            .filter((p) => p.platform === 'uber')
-                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                        )}
+                        {formatCurrency(record.uberTotal || 0)}
                       </Td>
                       <Td isNumeric>
-                        {formatCurrency(
-                          record.platformData
-                            .filter((p) => p.platform === 'bolt')
-                            .reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
-                        )}
+                        {formatCurrency(record.boltTotal || 0)}
                       </Td>
-                      <EditableNumberField
-                        value={record.ganhosTotal}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { ganhosTotal: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                      />
-                      <EditableNumberField
-                        value={record.ivaValor}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { ivaValor: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="red.600"
-                        prefix="-"
-                        helpText="6%"
-                      />
-                      <EditableNumberField
-                        value={record.despesasAdm}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { despesasAdm: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="red.600"
-                        prefix="-"
-                        helpText="7% fixo"
-                      />
-                      <EditableNumberField
-                        value={record.combustivel}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { combustivel: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="orange.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField
-                        value={record.viaverde}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { viaverde: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="orange.600"
-                        prefix="-"
-                      />
-                      <EditableNumberField
-                        value={record.aluguel}
-                        onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
-                        isPaid={record.paymentStatus === 'paid'}
-                        color="purple.600"
-                        prefix="-"
-                      />
+                      <Td isNumeric fontWeight="medium">
+                        {formatCurrency(record.ganhosTotal || 0)}
+                      </Td>
+                      <Td isNumeric color="red.600" fontWeight="medium">
+                        -{formatCurrency(record.ivaValor || 0)}
+                      </Td>
+                      <Td isNumeric color="red.600" fontWeight="medium">
+                        -{formatCurrency(record.despesasAdm || 0)}
+                      </Td>
+                      <Td isNumeric color="orange.600" fontWeight="medium">
+                        -{formatCurrency(record.combustivel || 0)}
+                      </Td>
+                      <Td isNumeric color="orange.600" fontWeight="medium">
+                        -{formatCurrency(record.viaverde || 0)}
+                      </Td>
+                      {record.aluguel > 0 ? (
+                        <EditableNumberField
+                          value={record.aluguel}
+                          onChange={(newValue) => handleUpdateRecord(record.id, { aluguel: newValue })}
+                          isPaid={record.paymentStatus === 'paid'}
+                          color="purple.600"
+                          prefix="-"
+                        />
+                      ) : (
+                        <Td isNumeric color="gray.400">-</Td>
+                      )}
                       <Td isNumeric>
                         {record.financingDetails?.hasFinancing ? (
                           <VStack spacing={0} align="flex-end">

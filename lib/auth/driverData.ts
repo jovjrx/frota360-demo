@@ -1,4 +1,5 @@
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getDriverWeekData } from '@/lib/api/driver-week-data';
 
 /**
  * Busca os dados do motorista no Firestore
@@ -73,6 +74,10 @@ export async function getDriverData(driverId: string) {
 /**
  * Busca os contracheques do motorista
  */
+/**
+ * Busca os contracheques do motorista
+ * ATUALIZADO: Usa função centralizada getDriverWeekData para sempre ter dados frescos
+ */
 export async function getDriverContracheques(driverId: string, limit: number = 12) {
   try {
     // Primeiro, buscar o documento do motorista para obter o ID real
@@ -89,102 +94,82 @@ export async function getDriverContracheques(driverId: string, limit: number = 1
     const driverDoc = driversSnapshot.docs[0];
     const realDriverId = driverDoc.id; // Usar o ID do documento
 
-    // Buscar registros semanais usando o ID do documento
-    // NOTA: where + orderBy requer índice composto no Firestore
-    // Solução temporária: buscar tudo e ordenar em memória
+    // Buscar todos os registros semanais do motorista
     const query = adminDb
       .collection('driverWeeklyRecords')
       .where('driverId', '==', realDriverId);
 
     const recordsSnapshot = await query.get();
     
-    // Ordenar em memória e limitar
-    const allRecords = recordsSnapshot.docs
-      .map(doc => ({ doc, data: doc.data() }))
+    // Ordenar em memória por data (mais recente primeiro) e limitar
+    const sortedRecords = recordsSnapshot.docs
+      .map(doc => ({ 
+        id: doc.id,
+        weekId: doc.data().weekId,
+        weekStart: doc.data().weekStart,
+        paymentStatus: doc.data().paymentStatus,
+      }))
       .sort((a, b) => {
-        const dateA = new Date(a.data.weekStart || '');
-        const dateB = new Date(b.data.weekStart || '');
+        const dateA = new Date(a.weekStart || '');
+        const dateB = new Date(b.weekStart || '');
         return dateB.getTime() - dateA.getTime(); // desc
       })
       .slice(0, limit);
     
-    // Buscar informações de pagamento da collection driverPayments
-    const recordIds = allRecords.map(({ doc }) => doc.id);
-    const paymentsMap = new Map();
-    
-    if (recordIds.length > 0) {
-      try {
-        const paymentsSnapshot = await adminDb
-          .collection('driverPayments')
-          .where('recordId', 'in', recordIds)
-          .get();
+    // Para cada registro, buscar dados ATUALIZADOS usando função centralizada
+    const contracheques = await Promise.all(
+      sortedRecords.map(async (record) => {
+        const weekId = record.weekId;
         
-        paymentsSnapshot.docs.forEach(doc => {
-          const paymentData = doc.data();
-          paymentsMap.set(paymentData.recordId, {
-            proofUrl: paymentData.proofUrl || null,
-            proofFileName: paymentData.proofFileName || null,
-            proofStoragePath: paymentData.proofStoragePath || null,
-          });
-        });
+        // Usar função centralizada para ter dados sempre frescos!
+        const freshData = await getDriverWeekData(realDriverId, weekId, false);
         
-      } catch (error) {
-        console.error('[getDriverContracheques] Erro ao buscar pagamentos:', error);
-      }
-    }
-
-    // Mapear registros com informações de pagamento
-    const contracheques = allRecords.map(({ doc, data }) => {
-      // Buscar paymentInfo em driverPayments primeiro, depois fallback para driverWeeklyRecords
-      let paymentInfo = paymentsMap.get(doc.id);
-      
-      // Se não encontrou em driverPayments, tentar pegar do próprio record
-      if (!paymentInfo && data.paymentInfo) {
-        paymentInfo = {
-          proofUrl: data.paymentInfo.proofUrl || null,
-          proofFileName: data.paymentInfo.proofFileName || null,
-          proofStoragePath: data.paymentInfo.proofStoragePath || null,
+        if (!freshData) {
+          // Fallback: se não conseguiu buscar dados frescos, retornar null
+          console.warn(`[getDriverContracheques] Não foi possível buscar dados para ${realDriverId} semana ${weekId}`);
+          return null;
+        }
+        
+        return {
+          id: record.id,
+          weekId: freshData.weekId,
+          weekStart: freshData.weekStart,
+          weekEnd: freshData.weekEnd,
+          
+          // Receitas (SEMPRE ATUALIZADAS do dataWeekly)
+          uberTotal: freshData.uberTotal || 0,
+          boltTotal: freshData.boltTotal || 0,
+          ganhosTotal: freshData.ganhosTotal || 0,
+          
+          // Cálculos
+          ivaValor: freshData.ivaValor || 0,
+          ganhosMenosIVA: freshData.ganhosMenosIVA || 0,
+          despesasAdm: freshData.despesasAdm || 0,
+          
+          // Despesas
+          combustivel: freshData.combustivel || 0,
+          viaverde: freshData.viaverde || 0,
+          aluguel: freshData.aluguel || 0,
+          totalDespesas: freshData.totalDespesas || 0,
+          
+          // Repasse
+          repasse: freshData.repasse || 0,
+          
+          // Pagamento (dados fixos)
+          iban: freshData.iban || null,
+          paymentStatus: freshData.paymentStatus || 'pending',
+          paymentDate: freshData.paymentDate || null,
+          paymentInfo: freshData.paymentInfo || null,
+          
+          // Metadados
+          createdAt: freshData.createdAt || null,
+          updatedAt: freshData.updatedAt || null,
         };
-      }
-      
-      return {
-        id: doc.id,
-        weekId: data.weekId,
-        weekStart: data.weekStart,
-        weekEnd: data.weekEnd,
-        
-        // Receitas
-        uberTotal: data.uberTotal || 0,
-        boltTotal: data.boltTotal || 0,
-        ganhosTotal: data.ganhosTotal || 0,
-        
-        // Cálculos
-        ivaValor: data.ivaValor || 0,
-        ganhosMenosIVA: data.ganhosMenosIVA || 0,
-        despesasAdm: data.despesasAdm || 0,
-        
-        // Despesas
-        combustivel: data.combustivel || 0,
-        viaverde: data.viaverde || 0,
-        aluguel: data.aluguel || 0,
-        totalDespesas: data.totalDespesas || 0,
-        
-        // Repasse
-        repasse: data.repasse || 0,
-        
-        // Pagamento
-        iban: data.iban || null,
-        paymentStatus: data.paymentStatus || 'pending',
-        paymentDate: data.paymentDate || null,
-        paymentInfo: paymentInfo || null,
-        
-        // Metadados
-        createdAt: data.createdAt || null,
-        updatedAt: data.updatedAt || null,
-      };
-    });
+      })
+    );
 
-    return contracheques;
+    // Filtrar nulls (casos onde não conseguiu buscar dados)
+    return contracheques.filter(c => c !== null);
 
   } catch (error) {
     console.error('[getDriverContracheques] Erro ao buscar contracheques:', error);

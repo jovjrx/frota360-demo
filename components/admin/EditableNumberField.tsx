@@ -66,7 +66,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = ({
     setIsEditing(false);
   };
 
-  const displayValue = `${prefix || ''}${inputValue.toFixed(2)}`;
+  const displayValue = `${prefix || ''}${(inputValue ?? 0).toFixed(2)}`;
 
   return (
     <Td isNumeric>
