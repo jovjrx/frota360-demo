@@ -97,12 +97,16 @@ export default withIronSessionApiRoute(async function handler(
         status: 'pending',
         origin: resolveOrigin(strategy),
         strategy,
-        importedAt: undefined,
+        // Não incluir campos undefined - Firestore não aceita
         driversCount: 0,
         recordsCount: 0,
-        lastError: undefined,
-        archiveRef: undefined,
       };
+      
+      // Remove campos undefined antes de salvar
+      delete (base as any).importedAt;
+      delete (base as any).lastError;
+      delete (base as any).archiveRef;
+      
       nextSources[platform] = base;
     });
 
