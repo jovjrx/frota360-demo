@@ -211,7 +211,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               variant="outline"
               width="100%"
             >
-              {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
+              {t('weekly.control.records.actions.generatePayslip', 'Resumo')}
             </Button>
             {isPaid ? (
               <Button

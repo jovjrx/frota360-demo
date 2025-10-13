@@ -354,7 +354,7 @@ export default function WeeklyPage({
 
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o contracheque.'));
+        throw new Error(errorPayload?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o resumo.'));
       }
 
       const blob = await response.blob();
@@ -365,8 +365,8 @@ export default function WeeklyPage({
 
     } catch (error: any) {
       toast({
-        title: t('weekly.control.records.actions.generatePayslip', 'Gerar contracheque'),
-        description: error?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o contracheque.'),
+        title: t('weekly.control.records.actions.generatePayslip', 'Gerar resumo'),
+        description: error?.message || t('weekly.control.records.messages.generateError', 'Não foi possível gerar o resumo.'),
         status: "error",
         duration: 4000,
       });
@@ -379,7 +379,7 @@ export default function WeeklyPage({
     if (payslipPdfUrl && selectedPayslipRecord) {
       const a = document.createElement("a");
       a.href = payslipPdfUrl;
-      const fileName = `contracheque_${selectedPayslipRecord.driverName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslipRecord.weekStart}_a_${selectedPayslipRecord.weekEnd}.pdf`;
+      const fileName = `resumo_${selectedPayslipRecord.driverName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslipRecord.weekStart}_a_${selectedPayslipRecord.weekEnd}.pdf`;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
@@ -391,7 +391,7 @@ export default function WeeklyPage({
     if (!selectedPayslipRecord || !payslipPdfUrl) {
       toast({
         title: t('weekly.control.records.messages.sendEmailErrorTitle', 'Erro ao enviar e-mail'),
-        description: t('weekly.control.records.messages.sendEmailErrorDesc', 'Nenhum contracheque selecionado ou PDF não gerado.'),
+        description: t('weekly.control.records.messages.sendEmailErrorDesc', 'Nenhum resumo selecionado ou PDF não gerado.'),
         status: "error",
         duration: 4000,
       });
@@ -424,12 +424,12 @@ export default function WeeklyPage({
 
         if (!emailRes.ok) {
           const errorPayload = await emailRes.json().catch(() => ({}));
-          throw new Error(errorPayload?.message || t('weekly.control.records.messages.sendEmailError', 'Não foi possível enviar o contracheque por e-mail.'));
+          throw new Error(errorPayload?.message || t('weekly.control.records.messages.sendEmailError', 'Não foi possível enviar o resumo por e-mail.'));
         }
 
         toast({
           title: t('weekly.control.records.messages.sendEmailSuccessTitle', 'E-mail enviado!'),
-          description: t('weekly.control.records.messages.sendEmailSuccessDesc', 'Contracheque enviado com sucesso para o motorista.'),
+          description: t('weekly.control.records.messages.sendEmailSuccessDesc', 'Resumo enviado com sucesso para o motorista.'),
           status: "success",
           duration: 4000,
         });
@@ -1124,7 +1124,7 @@ export default function WeeklyPage({
                             loadingText={t('weekly.control.records.messages.generateInProgress', 'A gerar...')}
                             size="xs"
                           >
-                            {t('weekly.control.records.actions.generatePayslip', 'Contracheque')}
+                            {t('weekly.control.records.actions.generatePayslip', 'Resumo')}
                           </Button>
                           {record.paymentInfo?.proofUrl && (
                             <Button
@@ -1341,14 +1341,14 @@ export default function WeeklyPage({
         </VStack>
       </StructuredModal>
 
-      {/* Modal de Visualização do Contracheque */}
+      {/* Modal de Visualização do Resumo */}
       <StructuredModal
         isOpen={isPayslipModalOpen}
         onClose={onClosePayslipModal}
         size="5xl"
         header={(
           <VStack align="start" spacing={1}>
-            <Text>{t('weekly.control.payslipModal.title', 'Contracheque Semanal')}</Text>
+            <Text>{t('weekly.control.payslipModal.title', 'Resumo Semanal')}</Text>
             {selectedPayslipRecord && (
               <Text fontSize="sm" fontWeight="normal" color="gray.600">
                 {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}
@@ -1375,7 +1375,7 @@ export default function WeeklyPage({
           <Alert status="info" borderRadius="lg">
             <AlertIcon />
             <AlertTitle>{t('weekly.control.payslipModal.noPdfTitle', 'Nenhum PDF gerado')}</AlertTitle>
-            <AlertDescription>{t('weekly.control.payslipModal.noPdfDesc', 'Gere o contracheque para visualizá-lo aqui.')}</AlertDescription>
+            <AlertDescription>{t('weekly.control.payslipModal.noPdfDesc', 'Gere o resumo para visualizá-lo aqui.')}</AlertDescription>
           </Alert>
         )}
       </StructuredModal>

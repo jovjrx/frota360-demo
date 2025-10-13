@@ -27,15 +27,15 @@
       "markPaidSuccess": "Pagamento marcado como concluído.",
       "markPendingSuccess": "Pagamento marcado como pendente.",
       "sendEmailErrorTitle": "Erro ao enviar e-mail",
-      "sendEmailErrorDesc": "Nenhum contracheque selecionado ou PDF não gerado.",
-      "sendEmailError": "Não foi possível enviar o contracheque por e-mail.",
+      "sendEmailErrorDesc": "Nenhum resumo selecionado ou PDF não gerado.",
+      "sendEmailError": "Não foi possível enviar o resumo por e-mail.",
       "sendEmailSuccessTitle": "E-mail enviado!",
-      "sendEmailSuccessDesc": "Contracheque enviado com sucesso para o motorista.",
+      "sendEmailSuccessDesc": "Resumo enviado com sucesso para o motorista.",
       "exportError": "Não foi possível exportar a planilha de pagamentos.",
       "exportErrorTitle": "Erro na exportação",
       "exportSuccessTitle": "Exportação concluída!",
       "exportSuccessDesc": "A planilha de pagamentos foi exportada com sucesso.",
-      "generateError": "Não foi possível gerar o contracheque.",
+      "generateError": "Não foi possível gerar o resumo.",
       "error_loading_data": "Erro ao carregar dados.",
       "error_loading_data_title": "Erro ao carregar dados",
       "error_loading_data_description": "Não foi possível carregar os dados da semana. Tente novamente.",
@@ -48,14 +48,14 @@
       "error_generating_summaries_description": "Não foi possível gerar os resumos semanais. Tente novamente."
     },
     "payslipModal": {
-      "title": "Contracheque Semanal",
+      "title": "Resumo Semanal",
       "downloadPdf": "Baixar PDF",
       "sendEmail": "Enviar por E-mail",
       "noPdfTitle": "Nenhum PDF gerado",
-      "noPdfDesc": "Gere o contracheque para visualizá-lo aqui."
+      "noPdfDesc": "Gere o resumo para visualizá-lo aqui."
     },
     "actions": {
-      "generatePayslip": "Contracheque",
+      "generatePayslip": "Resumo",
       "markAsPaid": "Pago",
       "markAsPending": "Pendente"
     },

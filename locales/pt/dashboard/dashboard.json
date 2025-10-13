@@ -2,7 +2,7 @@
     "menu": {
       "dashboard": "Dashboard",
       "data": "Meus Dados",
-      "payslips": "Contracheques",
+      "payslips": "Resumos",
       "analytics": "Análises",
       "tracking": "Rastreamento",
       "profile": "Perfil",
@@ -449,9 +449,9 @@
     "breadcrumb": "Meus Dados"
   },
   "payslips": {
-    "title": "Contracheques",
+    "title": "Resumos",
     "subtitle": "Histórico de pagamentos e repasses",
-    "breadcrumb": "Contracheques",
+    "breadcrumb": "Resumos",
     "filter": {
       "all": "Todos",
       "paid": "Pagos",

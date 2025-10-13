@@ -140,8 +140,8 @@ export default function PainelDashboard({
       a.href = url;
       const selectedPayslip = contracheques.find(p => p.id === payslipId);
       const fileName = selectedPayslip 
-        ? `contracheque_${motorista.fullName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslip.weekStart}_a_${selectedPayslip.weekEnd}.pdf`
-        : `contracheque_${payslipId}.pdf`;
+        ? `resumo_${motorista.fullName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")}_${selectedPayslip.weekStart}_a_${selectedPayslip.weekEnd}.pdf`
+        : `resumo_${payslipId}.pdf`;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
@@ -156,7 +156,7 @@ export default function PainelDashboard({
       });
 
     } catch (error: any) {
-      console.error("Erro ao baixar contracheque:", error);
+      console.error("Erro ao baixar resumo:", error);
       toast({
         title: tPainel("dashboard.payslips.downloadErrorTitle"),
         description: error?.message || tPainel("dashboard.payslips.downloadError"),
@@ -361,7 +361,7 @@ export default function PainelDashboard({
                   leftIcon={<Icon as={FiDownload} />}
                   isLoading={downloadingPayslipId === ultimoPagamento.id}
                 >
-                  Baixar Contracheque
+                  Baixar Resumo
                 </Button>
                 
                 {ultimoPagamento.paymentInfo?.proofUrl && (
@@ -390,7 +390,7 @@ export default function PainelDashboard({
                   variant="outline"
                   leftIcon={<Icon as={FiFileText} />}
                 >
-                  Ver Todos os Contracheques
+                  Ver Todos os Resumos
                 </Button>
               </VStack>
             </VStack>
@@ -408,7 +408,7 @@ export default function PainelDashboard({
                 variant="outline"
                 leftIcon={<Icon as={FiFileText} />}
               >
-                Ver Contracheques
+                Ver Resumos
               </Button>
             </VStack>
           )}
@@ -562,7 +562,7 @@ export default function PainelDashboard({
           variant="outline"
           leftIcon={<Icon as={FiFileText} />}
         >
-          Ver Todos os Contracheques
+          Ver Todos os Resumos
         </Button>
       </Box>
     </PainelLayout>

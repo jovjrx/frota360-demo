@@ -118,7 +118,7 @@ export default function PainelContracheques({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = `Contracheque_${formatarDataCurta(contracheque.weekStart)}_a_${formatarDataCurta(contracheque.weekEnd)}.pdf`;
+      const fileName = `Resumos_${formatarDataCurta(contracheque.weekStart)}_a_${formatarDataCurta(contracheque.weekEnd)}.pdf`;
       a.download = fileName.replace(/\//g, '-');
       document.body.appendChild(a);
       a.click();

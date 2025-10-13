@@ -465,19 +465,19 @@
           "financials": "Valores Financeiros"
         },
         "actions": {
-          "generatePayslip": "Contracheque",
+          "generatePayslip": "Resumo",
           "markAsPaid": "Pagar",
           "alreadyPaid": "Pago",
           "viewProof": "Comprovante"
         },
         "messages": {
           "generateInProgress": "A gerar...",
-          "generateError": "Não foi possível gerar o contracheque.",
+          "generateError": "Não foi possível gerar o resumo.",
           "sendEmailErrorTitle": "Erro ao enviar e-mail",
-          "sendEmailErrorDesc": "Nenhum contracheque selecionado ou PDF não gerado.",
-          "sendEmailError": "Não foi possível enviar o contracheque por e-mail.",
+          "sendEmailErrorDesc": "Nenhum resumo selecionado ou PDF não gerado.",
+          "sendEmailError": "Não foi possível enviar o resumo por e-mail.",
           "sendEmailSuccessTitle": "E-mail enviado!",
-          "sendEmailSuccessDesc": "Contracheque enviado com sucesso para o motorista.",
+          "sendEmailSuccessDesc": "Resumo enviado com sucesso para o motorista.",
           "exportError": "Não foi possível exportar a planilha de pagamentos.",
           "exportSuccessTitle": "Exportação concluída!",
           "exportSuccessDesc": "A planilha de pagamentos foi exportada com sucesso.",
@@ -530,11 +530,11 @@
         "confirm": "Confirmar pagamento"
       },
       "payslipModal": {
-        "title": "Contracheque Semanal",
+        "title": "Resumo Semanal",
         "downloadPdf": "Baixar PDF",
         "sendEmail": "Enviar por e-mail",
         "noPdfTitle": "Nenhum PDF gerado",
-        "noPdfDesc": "Gere o contracheque para visualizá-lo aqui."
+        "noPdfDesc": "Gere o resumo para visualizá-lo aqui."
       },
       "unassigned": {
         "title": "Registos sem motorista associado",
@@ -789,11 +789,11 @@
   },
   "weekly_control_title": "Controle semanal",
   "weekly_control_subtitle": "Gestão consolidada dos dados de ganhos e despesas da semana",
-  "new_structure_alert": "Esta vista exibe os dados normalizados de todas as plataformas para cálculo automático dos contracheques.",
+  "new_structure_alert": "Esta vista exibe os dados normalizados de todas as plataformas para cálculo automático dos resumos.",
   "week_label": "Semana",
   "import_data_button": "Importar dados",
-  "generate_summaries_button": "Gerar contracheques",
-  "generating_summaries_loading": "A gerar contracheques...",
+  "generate_summaries_button": "Gerar resumos",
+  "generating_summaries_loading": "A gerar resumos...",
   "drivers_label": "motoristas",
   "total_discounts": "Descontos totais",
   "iva_adm_fuel_tolls_rent": "IVA, despesas administrativas, combustível, portagens e aluguel",
@@ -830,7 +830,7 @@
       "cancelled": "Cancelado"
     },
     "actions": {
-      "generatePayslip": "Gerar contracheque",
+      "generatePayslip": "Gerar Resumo",
       "markAsPaid": "Marcar como pago",
       "markAsPending": "Marcar como pendente",
       "viewDetails": "Ver detalhes"
@@ -839,8 +839,8 @@
       "markPaidSuccess": "Pagamento marcado como concluído.",
       "markPendingSuccess": "Pagamento marcado como pendente.",
       "updateError": "Não foi possível atualizar o status do pagamento.",
-      "generateError": "Não foi possível gerar o contracheque.",
-      "generateInProgress": "A gerar contracheque..."
+      "generateError": "Não foi possível gerar o resumo.",
+      "generateInProgress": "A gerar resumo..."
     }
   },
   "loading_data": "A carregar dados...",
@@ -849,12 +849,12 @@
   "error_loading_data_title": "Erro ao carregar dados",
   "error_loading_data_description": "Verifique a ligação e tente novamente.",
   "select_week_error": "Selecione uma semana para continuar.",
-  "error_generating_summaries": "Não foi possível gerar os contracheques.",
-  "error_generating_summaries_title": "Erro ao gerar contracheques",
+  "error_generating_summaries": "Não foi possível gerar os resumos.",
+  "error_generating_summaries_title": "Erro ao gerar resumos",
   "error_generating_summaries_description": "Revise os dados e tente novamente.",
-  "summaries_generated_success_title": "Contracheques gerados",
+  "summaries_generated_success_title": "Resumos gerados",
   "summaries_generated_success_description": "O ficheiro ZIP foi descarregado com sucesso.",
-  "summaries_filename_prefix": "contracheques",
+  "summaries_filename_prefix": "resumos",
   "weekly_unassigned_title": "Registos sem motorista associado",
   "weekly_unassigned_description": "Revise estes lançamentos e atualize os cadastros para mapear corretamente.",
   "platform_label": "Plataforma",
