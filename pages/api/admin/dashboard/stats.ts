@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
+import { getProcessedWeeklyRecords, getAvailableWeekIds } from '@/lib/api/weekly-data-processor';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -21,67 +22,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const pendingRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'pending').length;
     const evaluationRequests = requestsSnapshot.docs.filter(doc => doc.data().status === 'evaluation').length;
 
-    // Buscar semanas disponíveis no rawFileArchive
-    const rawSnapshot = await db.collection('rawFileArchive')
-      .orderBy('weekStart', 'desc')
-      .limit(50)
-      .get();
-    
-    // Agrupar por weekId e pegar as 2 semanas mais recentes
-    const weekIdsWithDates = new Map<string, string>();
-    
-    rawSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.weekId && data.weekStart) {
-        weekIdsWithDates.set(data.weekId, data.weekStart);
-      }
-    });
-    
-    const sortedWeekIds = Array.from(weekIdsWithDates.entries())
-      .sort((a, b) => b[1].localeCompare(a[1]))
-      .map(entry => entry[0]);
-    
-    const latestWeekId = sortedWeekIds[0] || '';
-    const previousWeekId = sortedWeekIds[1] || '';
+    // Buscar semanas disponíveis
+    const weekIds = await getAvailableWeekIds(2);
+    const latestWeekId = weekIds[0] || '';
+    const previousWeekId = weekIds[1] || '';
 
     console.log('📊 Dashboard Stats - Semanas encontradas:');
     console.log('   Última semana:', latestWeekId);
     console.log('   Semana anterior:', previousWeekId);
 
-    // Buscar dados processados usando a API weekly/data
+    // Buscar dados processados diretamente do Firestore
     let statsThisWeek = { ganhos: 0, repasse: 0, lucro: 0, despesasAdm: 0, aluguel: 0, financiamento: 0 };
     let statsLastWeek = { ganhos: 0, repasse: 0, lucro: 0 };
     
     if (latestWeekId) {
-      const thisWeekResponse = await fetch(`http://localhost:3000/api/admin/weekly/data?weekId=${latestWeekId}`);
-      if (thisWeekResponse.ok) {
-        const thisWeekData = await thisWeekResponse.json();
-        if (thisWeekData.records) {
-          thisWeekData.records.forEach((rec: any) => {
-            statsThisWeek.ganhos += rec.ganhosTotal || 0;
-            statsThisWeek.repasse += rec.repasse || 0;
-            statsThisWeek.despesasAdm += rec.despesasAdm || 0;
-            statsThisWeek.aluguel += rec.aluguel || 0;
-            statsThisWeek.financiamento += rec.financingDetails?.installment || 0;
-          });
-          statsThisWeek.lucro = statsThisWeek.despesasAdm + statsThisWeek.aluguel + statsThisWeek.financiamento;
-        }
-      }
+      const thisWeekRecords = await getProcessedWeeklyRecords(latestWeekId);
+      thisWeekRecords.forEach((rec) => {
+        statsThisWeek.ganhos += rec.ganhosTotal || 0;
+        statsThisWeek.repasse += rec.repasse || 0;
+        statsThisWeek.despesasAdm += rec.despesasAdm || 0;
+        statsThisWeek.aluguel += rec.aluguel || 0;
+        statsThisWeek.financiamento += (rec as any).financingDetails?.installment || 0;
+      });
+      statsThisWeek.lucro = statsThisWeek.despesasAdm + statsThisWeek.aluguel + statsThisWeek.financiamento;
     }
     
     if (previousWeekId) {
-      const lastWeekResponse = await fetch(`http://localhost:3000/api/admin/weekly/data?weekId=${previousWeekId}`);
-      if (lastWeekResponse.ok) {
-        const lastWeekData = await lastWeekResponse.json();
-        if (lastWeekData.records) {
-          lastWeekData.records.forEach((rec: any) => {
-            statsLastWeek.ganhos += rec.ganhosTotal || 0;
-            statsLastWeek.repasse += rec.repasse || 0;
-          });
-          // Lucro da empresa = ganhos - repasse (o que sobra para a empresa)
-          statsLastWeek.lucro = statsLastWeek.ganhos - statsLastWeek.repasse;
-        }
-      }
+      const lastWeekRecords = await getProcessedWeeklyRecords(previousWeekId);
+      lastWeekRecords.forEach((rec) => {
+        statsLastWeek.ganhos += rec.ganhosTotal || 0;
+        statsLastWeek.repasse += rec.repasse || 0;
+      });
+      // Lucro da empresa = ganhos - repasse (o que sobra para a empresa)
+      statsLastWeek.lucro = statsLastWeek.ganhos - statsLastWeek.repasse;
     }
 
     // Buscar pagamentos totais
