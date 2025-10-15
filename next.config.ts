@@ -13,7 +13,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   poweredByHeader: false,
   // i18n removido - usando sistema customizado de traduções
   // i18n: {

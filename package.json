@@ -12,11 +12,6 @@
     "setup": "bash scripts/setup.sh",
     "setup:firebase": "node scripts/setup-firebase.js",
     "add-data": "node scripts/add-data.js",
-    "test:apis": "ts-node scripts/test-apis.ts",
-    "test:apis:uber": "ts-node scripts/test-apis.ts uber",
-    "test:apis:bolt": "ts-node scripts/test-apis.ts bolt",
-    "test:apis:cartrack": "ts-node scripts/test-apis.ts cartrack",
-    "test:integrations": "ts-node scripts/test-integrations.ts",
     "simulate:import": "tsx -r tsconfig-paths/register scripts/simulate_import_and_process.ts",
     "add:test-driver": "tsx -r tsconfig-paths/register scripts/add_test_driver.ts"
   },
