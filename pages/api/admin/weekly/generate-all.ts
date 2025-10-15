@@ -1,36 +1,31 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { DriverWeeklyRecord, createDriverWeeklyRecord } from '@/schemas/driver-weekly-record';
-import { Financing } from '@/schemas/financing';
-import { getWeekId } from '@/lib/utils/date-helpers';
-import { WeeklyNormalizedData } from '@/schemas/data-weekly';
-import { Driver } from '@/schemas/driver';
 import archiver from 'archiver';
-import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
-import { PayslipData, generatePayslipPDF } from '@/lib/pdf/payslipGenerator';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { getWeekId } from '@/lib/utils/date-helpers';
+import { getAllDriversWeekData } from '@/lib/api/driver-week-data';
+import { buildPayslipDataFromRecord } from '@/lib/pdf/payslipData';
+import { generatePayslipPDF } from '@/lib/pdf/payslipGenerator';
+import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 
-type Platform = 'uber' | 'bolt' | 'myprio' | 'viaverde';
-
-interface DriverIndex {
-  byId: Map<string, Driver>;
-  byUber: Map<string, Driver>;
-  byBolt: Map<string, Driver>;
-  byMyPrio: Map<string, Driver>;
-  byPlate: Map<string, Driver>;
-  byViaVerde: Map<string, Driver>;
+interface DriverData {
+  [key: string]: any;
 }
 
-// Função auxiliar para formatar moeda
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-PT', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(value || 0);
+type ExtendedRecord = DriverWeeklyRecord & {
+  driverType?: 'affiliate' | 'renter';
+  vehicle?: string;
+  platformData?: unknown;
 };
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) {
+    return '';
+  }
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) {
+    return dateStr;
+  }
   return date.toLocaleDateString('pt-PT', {
     day: '2-digit',
     month: '2-digit',
@@ -38,447 +33,279 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+function sanitizeFileName(name: string, weekStart: string, weekEnd: string): string {
+  const safeName = name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+  return `recibo_${safeName}_${weekStart}_a_${weekEnd}.pdf`;
+}
+
+function mapPaymentStatus(status: DriverWeeklyRecord['paymentStatus']): string {
+  switch (status) {
+    case 'paid':
+      return 'PAGO';
+    case 'cancelled':
+      return 'CANCELADO';
+    default:
+      return 'PENDENTE';
+  }
+}
+
+function normalizePlate(value: unknown): string {
+  if (!value) {
+    return 'N/A';
+  }
+  const stringValue = String(value).trim();
+  return stringValue.length ? stringValue.toUpperCase() : 'N/A';
+}
+
+function resolveDriverType(record: ExtendedRecord, driverData?: DriverData | null): 'affiliate' | 'renter' {
+  if (driverData?.type === 'renter') {
+    return 'renter';
+  }
+  if (record.driverType === 'renter' || record.isLocatario) {
+    return 'renter';
+  }
+  return 'affiliate';
+}
+
+async function fetchDriverData(driverIds: string[]): Promise<Map<string, DriverData | null>> {
+  const entries = await Promise.all(
+    driverIds.map(async (driverId) => {
+      try {
+        const doc = await adminDb.collection('drivers').doc(driverId).get();
+        return [driverId, doc.exists ? (doc.data() as DriverData) : null] as const;
+      } catch (error) {
+        console.error(`[generate-all] Falha ao buscar motorista ${driverId}:`, error);
+        return [driverId, null] as const;
+      }
+    })
+  );
+  return new Map(entries);
+}
+
+async function createWorkbook(
+  records: ExtendedRecord[],
+  driverDataMap: Map<string, DriverData | null>
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Recibos Semanais');
+
+  worksheet.columns = [
+    { header: 'Motorista', key: 'driverName', width: 30 },
+    { header: 'Tipo', key: 'driverType', width: 12 },
+    { header: 'Veículo', key: 'vehicle', width: 14 },
+    { header: 'Uber Total', key: 'uberTotal', width: 14 },
+    { header: 'Bolt Total', key: 'boltTotal', width: 14 },
+    { header: 'Ganhos Total', key: 'ganhosTotal', width: 16 },
+    { header: 'IVA 6%', key: 'ivaValor', width: 14 },
+    { header: 'Ganhos - IVA', key: 'ganhosMenosIVA', width: 16 },
+    { header: 'Taxa Adm 7%', key: 'despesasAdm', width: 16 },
+    { header: 'Combustível', key: 'combustivel', width: 14 },
+    { header: 'Portagens', key: 'viaverde', width: 14 },
+    { header: 'Aluguel', key: 'aluguel', width: 14 },
+    { header: 'Financ. Parcela', key: 'financingInstallment', width: 18 },
+    { header: 'Financ. Juros', key: 'financingInterest', width: 16 },
+    { header: 'Financ. Total', key: 'financingTotal', width: 16 },
+    { header: 'Valor Líquido', key: 'repasse', width: 16 },
+    { header: 'IBAN', key: 'iban', width: 30 },
+    { header: 'Status', key: 'paymentStatus', width: 14 },
+  ];
+
+  const header = worksheet.getRow(1);
+  header.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  header.alignment = { vertical: 'middle', horizontal: 'center' };
+  header.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF2D3748' },
+  };
+  header.height = 24;
+
+  const currencyKeys = [
+    'uberTotal',
+    'boltTotal',
+    'ganhosTotal',
+    'ivaValor',
+    'ganhosMenosIVA',
+    'despesasAdm',
+    'combustivel',
+    'viaverde',
+    'aluguel',
+    'financingInstallment',
+    'financingInterest',
+    'financingTotal',
+    'repasse',
+  ];
+  currencyKeys.forEach((key) => {
+    const column = worksheet.getColumn(key);
+    column.numFmt = '€#,##0.00';
+    column.alignment = { horizontal: 'right', vertical: 'middle' };
+  });
+  worksheet.getColumn('driverType').alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getColumn('paymentStatus').alignment = { horizontal: 'center', vertical: 'middle' };
+
+  const totals = {
+    uberTotal: 0,
+    boltTotal: 0,
+    ganhosTotal: 0,
+    ivaValor: 0,
+    ganhosMenosIVA: 0,
+    despesasAdm: 0,
+    combustivel: 0,
+    viaverde: 0,
+    aluguel: 0,
+    financingInstallment: 0,
+    financingInterest: 0,
+    financingTotal: 0,
+    repasse: 0,
+  };
+
+  for (const record of records) {
+    const driverData = record.driverId ? driverDataMap.get(record.driverId) : null;
+    const resolvedType = resolveDriverType(record, driverData);
+    const financing = record.financingDetails;
+    const financingInstallment = financing?.installment ?? 0;
+    const financingInterestAmount = financing?.interestAmount ?? 0;
+    const financingTotalCost = financing?.totalCost ?? 0;
+
+    worksheet.addRow({
+      driverName: record.driverName,
+      driverType: resolvedType === 'renter' ? 'Locatário' : 'Afiliado',
+      vehicle: normalizePlate(driverData?.vehicle?.plate ?? (record as any).vehicle ?? ''),
+      uberTotal: record.uberTotal || 0,
+      boltTotal: record.boltTotal || 0,
+      ganhosTotal: record.ganhosTotal || 0,
+      ivaValor: record.ivaValor || 0,
+      ganhosMenosIVA: (record as any).ganhosMenosIVA || (record as any).ganhosMenosIva || 0,
+      despesasAdm: record.despesasAdm || 0,
+      combustivel: record.combustivel || record.prio || 0,
+      viaverde: record.viaverde || 0,
+      aluguel: record.aluguel || 0,
+      financingInstallment,
+      financingInterest: financingInterestAmount,
+      financingTotal: financingTotalCost,
+      repasse: record.repasse || 0,
+      iban: record.iban || driverData?.iban || driverData?.banking?.iban || '',
+      paymentStatus: mapPaymentStatus(record.paymentStatus),
+    });
+
+    totals.uberTotal += record.uberTotal || 0;
+    totals.boltTotal += record.boltTotal || 0;
+    totals.ganhosTotal += record.ganhosTotal || 0;
+    totals.ivaValor += record.ivaValor || 0;
+    totals.ganhosMenosIVA += (record as any).ganhosMenosIVA || (record as any).ganhosMenosIva || 0;
+    totals.despesasAdm += record.despesasAdm || 0;
+    totals.combustivel += record.combustivel || record.prio || 0;
+    totals.viaverde += record.viaverde || 0;
+    totals.aluguel += record.aluguel || 0;
+    totals.financingInstallment += financingInstallment;
+    totals.financingInterest += financingInterestAmount;
+    totals.financingTotal += financingTotalCost;
+    totals.repasse += record.repasse || 0;
+  }
+
+  const totalRow = worksheet.addRow({
+    driverName: `TOTAL (${records.length})`,
+    driverType: '',
+    vehicle: '',
+    uberTotal: totals.uberTotal,
+    boltTotal: totals.boltTotal,
+    ganhosTotal: totals.ganhosTotal,
+    ivaValor: totals.ivaValor,
+    ganhosMenosIVA: totals.ganhosMenosIVA,
+    despesasAdm: totals.despesasAdm,
+    combustivel: totals.combustivel,
+    viaverde: totals.viaverde,
+    aluguel: totals.aluguel,
+    financingInstallment: totals.financingInstallment,
+    financingInterest: totals.financingInterest,
+    financingTotal: totals.financingTotal,
+    repasse: totals.repasse,
+    iban: '',
+    paymentStatus: '',
+  });
+  totalRow.font = { bold: true, color: { argb: 'FF1A202C' } };
+  totalRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE2E8F0' },
+  };
+
+  worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer as ArrayBuffer);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { weekStart, weekEnd } = req.body;
+  const { weekStart, weekEnd } = req.body as { weekStart?: string; weekEnd?: string };
 
   if (!weekStart || !weekEnd) {
     return res.status(400).json({ error: 'weekStart e weekEnd são obrigatórios' });
   }
 
-  const weekId = getWeekId(new Date(weekStart));
-
   try {
-    // 1. Buscar todos os motoristas ativos
-    const driversSnapshot = await adminDb
-      .collection('drivers')
-      .where('status', '==', 'active')
-      .get();
-    const drivers: Driver[] = driversSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Driver }));
+    const weekId = getWeekId(new Date(weekStart));
+    const records = (await getAllDriversWeekData(weekId, true)) as ExtendedRecord[];
 
-    // 1a. Buscar todos os financiamentos ativos para calcular juros semanais
-    const financingSnapshot = await adminDb
-      .collection('financing')
-      .where('status', '==', 'active')
-      .get();
-    const financingByDriver: Record<string, Financing[]> = {};
-    financingSnapshot.docs.forEach(doc => {
-      const data = doc.data() as Financing;
-      const driverId = data.driverId;
-      if (!driverId) return;
-      if (!financingByDriver[driverId]) {
-        financingByDriver[driverId] = [];
-      }
-      financingByDriver[driverId].push({ ...data, id: doc.id });
-    });
-
-    // 2. Buscar dados normalizados da semana
-    const normalizedSnapshot = await adminDb
-      .collection('dataWeekly')
-      .where('weekId', '==', weekId)
-      .get();
-    const normalizedEntries: WeeklyNormalizedData[] = normalizedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as WeeklyNormalizedData }));
-
-    const driverIndex = buildDriverIndex(drivers);
-
-    const platformDataByDriver: Record<string, { uber: number; bolt: number }> = {};
-    const expensesByDriver: Record<string, { combustivel: number; viaverde: number }> = {};
-
-    normalizedEntries.forEach(entry => {
-      const driver = resolveDriverForExport(entry, driverIndex);
-      if (!driver?.id) {
-        return;
-      }
-
-      if (!platformDataByDriver[driver.id]) {
-        platformDataByDriver[driver.id] = { uber: 0, bolt: 0 };
-      }
-      if (!expensesByDriver[driver.id]) {
-        expensesByDriver[driver.id] = { combustivel: 0, viaverde: 0 };
-      }
-
-      switch (entry.platform) {
-        case 'uber':
-          platformDataByDriver[driver.id].uber += entry.totalValue || 0;
-          break;
-        case 'bolt':
-          platformDataByDriver[driver.id].bolt += entry.totalValue || 0;
-          break;
-        case 'myprio':
-          expensesByDriver[driver.id].combustivel += entry.totalValue || 0;
-          break;
-        case 'viaverde':
-          expensesByDriver[driver.id].viaverde += entry.totalValue || 0;
-          break;
-        default:
-          break;
-      }
-    });
-
-    const records: DriverWeeklyRecord[] = [];
-
-    for (const driver of drivers) {
-      if (!driver.id) {
-        continue;
-      }
-
-      const incomeTotals = platformDataByDriver[driver.id] || { uber: 0, bolt: 0 };
-      const expenseTotals = expensesByDriver[driver.id] || { combustivel: 0, viaverde: 0 };
-
-      const record: DriverWeeklyRecord = createDriverWeeklyRecord({
-        driverId: driver.id,
-        driverName: driver.fullName,
-        driverEmail: driver.email,
-        weekId,
-        weekStart,
-        weekEnd,
-        combustivel: expenseTotals.combustivel,
-        viaverde: expenseTotals.viaverde,
-        isLocatario: driver.type === 'renter',
-        aluguel: driver.type === 'renter' ? (driver.rentalFee || 0) : 0,
-        iban: driver.banking?.iban || null,
-      }, incomeTotals, { type: driver.type, rentalFee: driver.rentalFee });
-      
-      // Ajustar record para incluir descontos de financiamentos ativos
-      const activeFinancings = financingByDriver[driver.id] || [];
-      let totalFinancingInterestPercent = 0; // Percentual adicional de juros
-      let totalWeeklyInstallment = 0;
-      
-      for (const fin of activeFinancings) {
-        // 1. Acumular percentual de juros (será somado à taxa administrativa)
-        const interestPercent = fin.weeklyInterest || 0;
-        if (interestPercent > 0) {
-          totalFinancingInterestPercent += interestPercent;
-        }
-        
-        // 2. Calcular parcela semanal (para empréstimos com prazo)
-        if (fin.type === 'loan' && fin.weeks && fin.weeks > 0) {
-          const weeklyInstallment = fin.amount / fin.weeks;
-          totalWeeklyInstallment += weeklyInstallment;
-        }
-        
-        // 3. Para descontos sem prazo, descontar o valor total a cada semana
-        if (fin.type === 'discount') {
-          totalWeeklyInstallment += fin.amount;
-        }
-        
-        // 4. Se houver contagem de semanas, decrementa e finaliza quando chegar a zero
-        if (typeof fin.remainingWeeks === 'number') {
-          const newRemaining = fin.remainingWeeks - 1;
-          const updates: any = { updatedAt: new Date().toISOString(), remainingWeeks: newRemaining };
-          if (newRemaining <= 0) {
-            updates.status = 'completed';
-            updates.endDate = new Date().toISOString();
-          }
-          await adminDb.collection('financing').doc(fin.id as string).update(updates);
-        }
-      }
-      
-      // Aplicar taxa de juros adicional sobre (ganhos - IVA)
-      // Taxa base: 7% + juros de financiamento
-      if (totalFinancingInterestPercent > 0) {
-        const additionalInterest = record.ganhosMenosIVA * (totalFinancingInterestPercent / 100);
-        record.despesasAdm += additionalInterest;
-        record.repasse -= additionalInterest;
-      }
-      
-      // Aplicar parcela do financiamento
-      if (totalWeeklyInstallment > 0) {
-        record.despesasAdm += totalWeeklyInstallment;
-        record.repasse -= totalWeeklyInstallment;
-      }
-      records.push(record);
+    if (!records.length) {
+      return res.status(404).json({ error: 'Nenhum registro encontrado para a semana selecionada.' });
     }
 
-    if (records.length === 0) {
-      return res.status(404).json({ message: 'Nenhum registro semanal encontrado para esta semana após amarração.' });
-    }
+    const driverIds = Array.from(new Set(records.map((record) => record.driverId).filter(Boolean))) as string[];
+    const driverDataMap = await fetchDriverData(driverIds);
 
-    // Configurar o arquivador ZIP
     const archive = archiver('zip', { zlib: { level: 9 } });
-    const archiveName = `relatorios_semanais_${weekStart}_a_${weekEnd}.zip`;
+    const archiveName = `recibos_semanais_${weekStart}_a_${weekEnd}.zip`;
+
+    archive.on('error', (error) => {
+      console.error('Erro ao gerar pacote de recibos:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Erro interno ao gerar os recibos.' });
+      } else {
+        res.end();
+      }
+    });
 
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${archiveName}"`);
 
-    archive.on('error', (err) => {
-      throw err;
-    });
-
     archive.pipe(res);
 
-    // ============================================================================
-    // GERAR EXCEL
-    // ============================================================================
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Controlo Semanal');
-
-    // Cabeçalhos
-    worksheet.columns = [
-      { header: 'Motorista', key: 'driverName', width: 30 },
-      { header: 'Tipo', key: 'driverType', width: 12 },
-      { header: 'Uber Total', key: 'uberTotal', width: 12 },
-      { header: 'Bolt Total', key: 'boltTotal', width: 12 },
-      { header: 'Ganhos Total', key: 'ganhosTotal', width: 14 },
-      { header: 'IVA 6%', key: 'ivaValor', width: 12 },
-      { header: 'Ganhos - IVA', key: 'ganhosMenosIVA', width: 14 },
-      { header: 'Despesas Adm. 7%', key: 'despesasAdm', width: 16 },
-      { header: 'Combustível', key: 'combustivel', width: 12 },
-      { header: 'Portagens', key: 'viaverde', width: 12 },
-      { header: 'Aluguel', key: 'aluguel', width: 12 },
-      { header: 'Valor Líquido', key: 'repasse', width: 14 },
-      { header: 'IBAN', key: 'iban', width: 30 },
-      { header: 'Status', key: 'paymentStatus', width: 12 },
-    ];
-
-    // Adicionar dados
-    records.forEach((record: DriverWeeklyRecord) => {
-      const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
-      worksheet.addRow({
-        driverName: record.driverName,
-        driverType: record.isLocatario ? 'Locatário' : 'Afiliado',
-        uberTotal: driverPlatformData.uber || 0,
-        boltTotal: driverPlatformData.bolt || 0,
-        ganhosTotal: record.ganhosTotal,
-        ivaValor: record.ivaValor,
-        ganhosMenosIVA: record.ganhosMenosIVA,
-        despesasAdm: record.despesasAdm,
-        combustivel: record.combustivel,
-        viaverde: record.viaverde,
-        aluguel: record.aluguel,
-        repasse: record.repasse,
-        iban: record.iban,
-        paymentStatus: record.paymentStatus === 'pending' ? 'PENDENTE' : record.paymentStatus === 'paid' ? 'PAGO' : 'CANCELADO',
-      });
+    const excelBuffer = await createWorkbook(records, driverDataMap);
+    archive.append(excelBuffer, {
+      name: `RecibosSemanais_${weekStart}_a_${weekEnd}.xlsx`,
     });
 
-    // Adicionar linha de total
-    const totals = records.reduce((acc: any, record: DriverWeeklyRecord) => {
-      const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
-      return {
-        uberTotal: acc.uberTotal + (driverPlatformData.uber || 0),
-        boltTotal: acc.boltTotal + (driverPlatformData.bolt || 0),
-        ganhosTotal: acc.ganhosTotal + record.ganhosTotal,
-        ivaValor: acc.ivaValor + record.ivaValor,
-        ganhosMenosIVA: acc.ganhosMenosIVA + record.ganhosMenosIVA,
-        despesasAdm: acc.despesasAdm + record.despesasAdm,
-        combustivel: acc.combustivel + record.combustivel,
-        viaverde: acc.viaverde + record.viaverde,
-        aluguel: acc.aluguel + record.aluguel,
-        repasse: acc.repasse + record.repasse,
-      };
-    }, {
-      uberTotal: 0,
-      boltTotal: 0,
-      ganhosTotal: 0,
-      ivaValor: 0,
-      ganhosMenosIVA: 0,
-      despesasAdm: 0,
-      combustivel: 0,
-      viaverde: 0,
-      aluguel: 0,
-      repasse: 0,
-    });
-
-    worksheet.addRow({
-      driverName: 'TOTAL',
-      driverType: '',
-      uberTotal: totals.uberTotal,
-      boltTotal: totals.boltTotal,
-      ganhosTotal: totals.ganhosTotal,
-      ivaValor: totals.ivaValor,
-      ganhosMenosIVA: totals.ganhosMenosIVA,
-      despesasAdm: totals.despesasAdm,
-      combustivel: totals.combustivel,
-      viaverde: totals.viaverde,
-      aluguel: totals.aluguel,
-      repasse: totals.repasse,
-      iban: '',
-      paymentStatus: '',
-    });
-
-    // Formatar células numéricas como moeda
-    const currencyColumns = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']; // Colunas de C a L
-    currencyColumns.forEach(col => {
-      worksheet.getColumn(col).numFmt = '€#,##0.00';
-    });
-
-    // Estilizar cabeçalho
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF4472C4' },
-    };
-    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-
-    // Estilizar linha de total
-    const lastRow = worksheet.lastRow;
-    if (lastRow) {
-      lastRow.font = { bold: true };
-      lastRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE7E6E6' },
-      };
-    }
-
-    const excelBuffer = await workbook.xlsx.writeBuffer();
-
-    // Adicionar Excel ao ZIP
-    archive.append(Buffer.from(excelBuffer), { 
-      name: `ControloSemanal_${weekStart}_a_${weekEnd}.xlsx` 
-    });
-
-    // 2. Gerar um PDF para cada registro de motorista e adicionar ao ZIP
     for (const record of records) {
-      // Buscar dados do motorista para vehiclePlate e driverType
-      const driverDoc = await adminDb.collection("drivers").doc(record.driverId).get();
-      const driverData = driverDoc.data();
+      const driverData = record.driverId ? driverDataMap.get(record.driverId) : null;
+      const resolvedType = resolveDriverType(record, driverData);
+      const vehiclePlate = normalizePlate(driverData?.vehicle?.plate ?? (record as any).vehicle ?? '');
 
-    const driverPlatformData = platformDataByDriver[record.driverId] || { uber: 0, bolt: 0 };
-
-      // Preparar dados para o PDF
-      const payslipData: PayslipData = {
+      const payslipData = buildPayslipDataFromRecord(record as any, {
         driverName: record.driverName,
-        driverType: driverData?.type || (record.isLocatario ? "renter" : "affiliate"),
-        vehiclePlate: driverData?.vehicle?.plate || "N/A",
+        driverType: resolvedType,
+        vehiclePlate,
         weekStart: formatDate(record.weekStart),
         weekEnd: formatDate(record.weekEnd),
-        uberTotal: driverPlatformData.uber || 0,
-        boltTotal: driverPlatformData.bolt || 0,
-        ganhosTotal: record.ganhosTotal,
-        ivaValor: record.ivaValor,
-        ganhosMenosIva: record.ganhosMenosIVA,
-        comissao: record.despesasAdm,
-        combustivel: record.combustivel,
-        prioTotal: record.combustivel, // PRIO é o mesmo que combustivel para o contracheque
-        viaverde: record.viaverde,
-        viaverdeTotal: record.viaverde, // ViaVerde é o mesmo que viaverde para o contracheque
-        aluguel: record.aluguel,
-        
-        // Financing com todos os campos necessários
-        financingInterestPercent: (record as any).financingDetails?.interestPercent,
-        financingInstallment: (record as any).financingDetails?.installment,
-        financingInterestAmount: (record as any).financingDetails?.interestAmount,
-        financingTotalCost: (record as any).financingDetails?.totalCost,
-        
-        repasse: record.repasse,
-      };
+      });
 
-      // Gerar PDF
       const pdfBuffer = await generatePayslipPDF(payslipData);
-
-      // Nome do arquivo (sanitizar nome do motorista)
-      const sanitizedName = record.driverName
-        .replace(/[^a-zA-Z0-9\s]/g, "")
-        .replace(/\s+/g, "_");
-      const fileName = `contracheque_${sanitizedName}_${weekStart}_a_${weekEnd}.pdf`;
-
-      // Adicionar ao ZIP
+      const fileName = sanitizeFileName(record.driverName, record.weekStart, record.weekEnd);
       archive.append(pdfBuffer, { name: fileName });
     }
 
-    archive.finalize();
-
+    await archive.finalize();
   } catch (error: any) {
-    console.error('Erro ao gerar relatórios semanais:', error);
+    console.error('Erro ao processar geração semanal:', error);
     if (!res.headersSent) {
-      res.status(500).json({ message: 'Internal Server Error', error: error.message, stack: error.stack });
+      res.status(500).json({ error: 'Erro interno ao gerar os recibos.', details: error?.message });
+    } else {
+      res.end();
     }
   }
-}
-
-function buildDriverIndex(drivers: Driver[]): DriverIndex {
-  const byId = new Map<string, Driver>();
-  const byUber = new Map<string, Driver>();
-  const byBolt = new Map<string, Driver>();
-  const byMyPrio = new Map<string, Driver>();
-  const byPlate = new Map<string, Driver>();
-  const byViaVerde = new Map<string, Driver>();
-
-  drivers.forEach((driver) => {
-    if (!driver.id) {
-      return;
-    }
-
-    byId.set(driver.id, driver);
-
-    const uberKey = driver.integrations?.uber?.key;
-    if (uberKey) {
-      byUber.set(normalizeKey(uberKey), driver);
-    }
-
-    const boltKey = driver.integrations?.bolt?.key;
-    if (boltKey) {
-      byBolt.set(normalizeKey(boltKey), driver);
-    }
-
-    const myprioKey = driver.integrations?.myprio?.key;
-    if (myprioKey) {
-      byMyPrio.set(normalizeKey(myprioKey), driver);
-    }
-
-    const plate = driver.vehicle?.plate || driver.integrations?.viaverde?.key;
-    if (plate) {
-      byPlate.set(normalizePlate(plate), driver);
-    }
-
-    const viaverdeKey = driver.integrations?.viaverde?.key;
-    if (viaverdeKey) {
-      byViaVerde.set(normalizeKey(viaverdeKey), driver);
-    }
-  });
-
-  return { byId, byUber, byBolt, byMyPrio, byPlate, byViaVerde };
-}
-
-function resolveDriverForExport(entry: WeeklyNormalizedData, index: DriverIndex): Driver | undefined {
-  if (entry.driverId) {
-    const driver = index.byId.get(entry.driverId);
-    if (driver) {
-      return driver;
-    }
-  }
-
-  switch (entry.platform as Platform) {
-    case 'uber':
-      return index.byUber.get(normalizeKey(entry.referenceId));
-    case 'bolt':
-      return index.byBolt.get(normalizeKey(entry.referenceId));
-    case 'myprio': {
-      const cardMatch = index.byMyPrio.get(normalizeKey(entry.referenceId));
-      if (cardMatch) return cardMatch;
-      return index.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
-    }
-    case 'viaverde': {
-      const plateMatch = index.byPlate.get(normalizePlate(entry.referenceLabel || entry.referenceId));
-      if (plateMatch) return plateMatch;
-      return index.byViaVerde.get(normalizeKey(entry.referenceId));
-    }
-    default:
-      return undefined;
-  }
-}
-
-function normalizeKey(value: any): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  return String(value).trim().toLowerCase();
-}
-
-function normalizePlate(value: any): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  return String(value).trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
