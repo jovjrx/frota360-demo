@@ -45,6 +45,7 @@ import FinancingModal from '@/components/admin/FinancingModal';
 import useSWR, { SWRConfig } from 'swr';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { formatDate } from '@/lib/utils/format';
 import { getDrivers } from '@/lib/admin/adminQueries';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { useRouter } from 'next/router';
@@ -644,7 +645,7 @@ function AdminFinancingPageContent({
 
                 <Box>
                   <Text fontSize="sm" color="gray.600">{t('financing.details.startDate', 'Data de Início')}</Text>
-                  <Text>{selectedFinancing.startDate ? new Date(selectedFinancing.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Text>
+                  <Text>{formatDate(selectedFinancing.startDate, '-')}</Text>
                 </Box>
 
                 {selectedFinancing.notes && (

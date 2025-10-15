@@ -26,6 +26,7 @@ import FinancingProofUpload from '@/components/admin/FinancingProofUpload';
 import useSWR, { SWRConfig } from 'swr';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { formatDate } from '@/lib/utils/format';
 import { getDrivers } from '@/lib/admin/adminQueries';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { useRouter } from 'next/router';
@@ -206,7 +207,7 @@ function FinancingRequestsPageContent({
                           </Td>
                           <Td>
                             <Text fontSize="sm">
-                              {req.createdAt ? new Date(req.createdAt).toLocaleDateString(locale || 'pt-PT') : '-'}
+                              {formatDate(req.createdAt, '-')}
                             </Text>
                           </Td>
                           <Td>

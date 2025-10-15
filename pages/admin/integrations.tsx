@@ -25,6 +25,7 @@ import { FiRefreshCw, FiCheckCircle, FiXCircle, FiAlertTriangle } from 'react-ic
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { formatDateTime } from '@/lib/utils/datetime';
 
 interface IntegrationStatus {
   platform: string;
@@ -224,7 +225,7 @@ function IntegrationsPage({ tCommon, tPage, translations }: AdminPageProps) {
 
             {cartrackStatus?.lastSync && (
               <Text fontSize="sm" color="gray.500" mt={4}>
-                Última sincronização: {new Date(cartrackStatus.lastSync).toLocaleString('pt-PT')}
+                Última sincronização: {formatDateTime(cartrackStatus.lastSync)}
               </Text>
             )}
           </Box>

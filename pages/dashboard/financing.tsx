@@ -34,6 +34,7 @@ import { FiDollarSign, FiSend, FiClock, FiCheckCircle, FiDownload, FiFileText, F
 import { Grid, GridItem, Divider } from '@chakra-ui/react';
 import useSWR, { SWRConfig } from 'swr';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
+import { formatDate } from '@/lib/utils/format';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getDriverData } from '@/lib/auth/driverData';
@@ -463,8 +464,8 @@ function DriverFinancingPageContent({
                                 <Text color="gray.400">-</Text>
                               )}
                             </Td>
-                            <Td>{fin.startDate ? new Date(fin.startDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
-                            <Td>{fin.endDate ? new Date(fin.endDate).toLocaleDateString(locale || 'pt-PT') : '-'}</Td>
+                            <Td>{formatDate(fin.startDate, '-')}</Td>
+                            <Td>{formatDate(fin.endDate, '-')}</Td>
                             <Td>{getStatusBadge(fin.status)}</Td>
                             {/* Só mostra célula de comprovante se houver pelo menos um na lista */}
                             {hasAnyProof && (

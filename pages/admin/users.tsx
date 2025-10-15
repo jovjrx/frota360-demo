@@ -58,6 +58,7 @@ import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { getUsers, getUsersStats } from '@/lib/admin/adminQueries';
 import StandardModal from '@/components/modals/StandardModal';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { formatDate } from '@/lib/utils/format';
 
 type UserAction = 'update_user' | 'delete_user' | 'change_role';
 interface User {
@@ -251,7 +252,7 @@ export default function UsersManagement({ tPage, tAdmin, initialUsers, initialSt
         user.name || '',
         user.email || '',
         getRoleText(user.role),
-        new Date(user.createdAt).toLocaleDateString('pt-BR')
+        formatDate(user.createdAt)
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -386,7 +387,7 @@ export default function UsersManagement({ tPage, tAdmin, initialUsers, initialSt
                       </Td>
                       <Td>
                         <Text fontSize="sm">
-                          {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                          {formatDate(user.createdAt)}
                         </Text>
                       </Td>
                       <Td>
@@ -452,13 +453,13 @@ export default function UsersManagement({ tPage, tAdmin, initialUsers, initialSt
                       <Text fontSize="sm" color="gray.500">
                         {t('users.modals.view.labels.createdAt', 'Data de Criação')}
                       </Text>
-                      <Text>{new Date(selectedUser.createdAt).toLocaleDateString('pt-BR')}</Text>
+                      <Text>{formatDate(selectedUser.createdAt)}</Text>
                     </Box>
                     <Box>
                       <Text fontSize="sm" color="gray.500">
                         {t('users.modals.view.labels.updatedAt', 'Última Atualização')}
                       </Text>
-                      <Text>{new Date(selectedUser.updatedAt).toLocaleDateString('pt-BR')}</Text>
+                      <Text>{formatDate(selectedUser.updatedAt)}</Text>
                     </Box>
                   </SimpleGrid>
                 </VStack>

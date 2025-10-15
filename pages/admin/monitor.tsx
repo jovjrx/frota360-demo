@@ -36,6 +36,8 @@ import { FiRefreshCw, FiList, FiNavigation, FiAlertTriangle, FiMap } from 'react
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { formatDateTime } from '@/lib/utils/datetime';
+import { formatDate } from '@/lib/utils/format';
 import { fetchCartrackMonitorData, type CartrackMonitorData } from '@/lib/integrations/cartrack/monitor';
 
 // Importação dinâmica do mapa (só carrega no cliente)
@@ -249,7 +251,7 @@ export default function MonitorPage({ locale, initialData, tPage, translations }
           </Badge>
           {data && (
             <Text fontSize="sm" color="gray.600">
-              {tMonitor("last_update")}: {new Date(data.lastUpdate).toLocaleString(locale)}
+              {tMonitor("last_update")}: {formatDateTime(data.lastUpdate)}
             </Text>
           )}
         </HStack>
@@ -450,7 +452,7 @@ export default function MonitorPage({ locale, initialData, tPage, translations }
                               <Td>
                                 <VStack align="start" spacing={0}>
                                   <Text fontSize="sm">
-                                    {new Date(trip.start_timestamp).toLocaleDateString(locale)}
+                                    {formatDate(trip.start_timestamp)}
                                   </Text>
                                   <Text fontSize="xs" color="gray.500">
                                     {new Date(trip.start_timestamp).toLocaleTimeString(locale, {

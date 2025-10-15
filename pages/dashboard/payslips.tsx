@@ -35,6 +35,7 @@ import { useRouter } from 'next/router';
 import PainelLayout from '@/components/layouts/DashboardLayout';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
+import { formatDate, formatDateShort } from '@/lib/utils/format';
 
 interface Contracheque {
   id: string;
@@ -118,7 +119,7 @@ export default function PainelContracheques({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = `Resumos_${formatarDataCurta(contracheque.weekStart)}_a_${formatarDataCurta(contracheque.weekEnd)}.pdf`;
+      const fileName = `Resumos_${formatDateShort(contracheque.weekStart)}_a_${formatDateShort(contracheque.weekEnd)}.pdf`;
       a.download = fileName.replace(/\//g, '-');
       document.body.appendChild(a);
       a.click();
@@ -153,7 +154,7 @@ export default function PainelContracheques({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = `Comprovante_${formatarDataCurta(weekStart)}_a_${formatarDataCurta(weekEnd)}.pdf`;
+      const fileName = `Comprovante_${formatDateShort(weekStart)}_a_${formatDateShort(weekEnd)}.pdf`;
       a.download = fileName.replace(/\//g, '-');
       document.body.appendChild(a);
       a.click();
@@ -176,20 +177,8 @@ export default function PainelContracheques({
     }
   }
 
-  function formatarData(data: string) {
-    return new Date(data).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
-
-  function formatarDataCurta(data: string) {
-    return new Date(data).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit'
-    });
-  }
+  // Funções de formatação movidas para lib/utils/format.ts
+  // Usando formatDate e formatDateShort para evitar problemas de timezone
 
   return (
     <PainelLayout 
@@ -252,7 +241,7 @@ export default function PainelContracheques({
                       <Icon as={statusIcon} boxSize={5} color={statusColor + '.500'} />
                       <VStack align="start" spacing={0}>
                         <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                          Semana {formatarDataCurta(contracheque.weekStart)} - {formatarDataCurta(contracheque.weekEnd)}
+                          Semana {formatDateShort(contracheque.weekStart)} - {formatDateShort(contracheque.weekEnd)}
                         </Text>
                         <Text fontSize="xs" color="gray.500">
                           {contracheque.weekId}
@@ -295,7 +284,7 @@ export default function PainelContracheques({
                   {/* Data de pagamento */}
                   {isPago && contracheque.paymentDate && (
                     <Text fontSize="xs" color="gray.500" textAlign="center">
-                      Pago em {formatarData(contracheque.paymentDate)}
+                      Pago em {formatDate(contracheque.paymentDate)}
                     </Text>
                   )}
 
@@ -357,7 +346,7 @@ export default function PainelContracheques({
               <Text>Contracheque Semanal</Text>
               {contraqueSelecionado && (
                 <Text fontSize="sm" fontWeight="normal" color="gray.600">
-                  {formatarData(contraqueSelecionado.weekStart)} - {formatarData(contraqueSelecionado.weekEnd)}
+                  {formatDate(contraqueSelecionado.weekStart)} - {formatDate(contraqueSelecionado.weekEnd)}
                 </Text>
               )}
             </VStack>
@@ -516,7 +505,7 @@ export default function PainelContracheques({
                       <HStack justify="space-between">
                         <Text fontSize="xs" color="gray.500">Data de Pagamento</Text>
                         <Text fontSize="xs" color="gray.500">
-                          {formatarData(contraqueSelecionado.paymentDate)}
+                          {formatDate(contraqueSelecionado.paymentDate)}
                         </Text>
                       </HStack>
                     )}
