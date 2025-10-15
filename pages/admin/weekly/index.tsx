@@ -157,6 +157,16 @@ export default function WeeklyPage({
     }).format(value || 0);
   };
 
+  const bankChargeBreakdownTemplate = useMemo(
+    () => t('weekly.control.records.labels.bankChargeBreakdown', 'Parcela: {{installment}} | Ônus bancário: {{interest}}'),
+    [t]
+  );
+
+  const formatBankChargeBreakdown = (installment: number, interest: number) =>
+    bankChargeBreakdownTemplate
+      .replace('{{installment}}', formatCurrency(installment))
+      .replace('{{interest}}', formatCurrency(interest));
+
   const parseMoneyInput = (value: string) => {
     if (!value) return 0;
     const normalized = value.replace(',', '.');
@@ -985,7 +995,7 @@ export default function WeeklyPage({
                     <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível (✕)')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens (✕)')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.rent', 'Aluguel')}</Th>
-                    <Th isNumeric>{t('weekly.control.records.columns.bankCharge', 'Ônus bancário')}</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.bankCharge', 'Financiamento')}</Th>
                     <Th isNumeric>Líquido</Th>
                     <Th>{t('weekly.control.records.columns.status', 'Status')}</Th>
                     <Th textAlign="right">{t('weekly.control.records.columns.actions', 'Ações')}</Th>
@@ -1054,10 +1064,10 @@ export default function WeeklyPage({
                             </Text>
                             {record.financingDetails.interestAmount > 0 && (
                               <Text fontSize="xs" color="pink.500">
-                                {t('weekly.control.records.labels.bankChargeBreakdown', 'Parcela: {{installment}} | Ônus: {{interest}}', {
-                                  installment: formatCurrency(record.financingDetails.installment),
-                                  interest: formatCurrency(record.financingDetails.interestAmount),
-                                })}
+                                {formatBankChargeBreakdown(
+                                  record.financingDetails.installment,
+                                  record.financingDetails.interestAmount
+                                )}
                               </Text>
                             )}
                           </VStack>

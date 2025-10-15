@@ -70,7 +70,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
 
   const bankChargeBreakdownLabel = t(
     'weekly.control.records.labels.bankChargeBreakdown',
-    'Parcela: {{installment}} | Ônus: {{interest}}'
+    'Parcela: {{installment}} | Ônus bancário: {{interest}}'
   )
     .replace('{{installment}}', formatCurrency(financingInstallment))
     .replace('{{interest}}', formatCurrency(financingInterest));
@@ -189,7 +189,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               {financingTotal > 0 && (
                 <Flex justify="space-between">
                   <Text fontSize="sm" color="gray.600">
-                      {t('weekly.control.records.columns.bankCharge', 'Ônus bancário')}
+                      {t('weekly.control.records.columns.bankCharge', 'Financiamento')}
                   </Text>
                   <Text fontSize="sm" fontWeight="medium" color="purple.600">
                     -{formatCurrency(financingTotal)}

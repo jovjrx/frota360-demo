@@ -469,7 +469,7 @@
           "fuel": "Fuel",
           "tolls": "Tolls",
           "tollsCompany": "Paid by the company",
-          "bankCharge": "Bank charge",
+          "bankCharge": "Financing",
           "rent": "Rent",
           "net": "Net value",
           "status": "Status",
@@ -480,7 +480,7 @@
           "financials": "Financial values"
         },
         "labels": {
-          "bankChargeBreakdown": "Installment: {{installment}} | Bank charge: {{interest}}"
+          "bankChargeBreakdown": "Installment: {{installment}} | Bank interest: {{interest}}"
         },
         "actions": {
           "generatePayslip": "Payslip",

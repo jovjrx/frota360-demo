@@ -470,7 +470,7 @@
           "tolls": "Portagens",
           "tollsCompany": "Pago pela empresa",
           "rent": "Aluguel",
-          "bankCharge": "Ônus bancário",
+          "bankCharge": "Financiamento",
           "net": "Valor líquido",
           "status": "Status",
           "actions": "Ações"
@@ -480,7 +480,7 @@
           "financials": "Valores Financeiros"
         },
         "labels": {
-          "bankChargeBreakdown": "Parcela: {{installment}} | Ônus: {{interest}}"
+          "bankChargeBreakdown": "Parcela: {{installment}} | Ônus bancário: {{interest}}"
         },
         "actions": {
           "generatePayslip": "Resumo",
