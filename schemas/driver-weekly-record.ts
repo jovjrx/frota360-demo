@@ -54,10 +54,7 @@ export const DriverWeeklyRecordSchema = z.object({
   iban: z.string().optional(),
   paymentStatus: z.enum(['pending', 'paid', 'cancelled']).default('pending'),
   paymentDate: z.string().optional(),
-  paymentInfo: z.object({
-    proofUrl: z.string().optional(),
-    proofFileName: z.string().optional(),
-  }).optional(),
+  paymentInfo: z.any().optional(),
   
   // Origem dos dados
   dataSource: z.enum(['manual', 'auto']).default('manual'),

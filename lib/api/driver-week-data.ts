@@ -9,6 +9,7 @@
 
 import { adminDb } from '@/lib/firebaseAdmin';
 import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
+import type { DriverPayment } from '@/schemas/driver-payment';
 
 interface DataWeeklyEntry {
   driverId: string | null;
@@ -240,11 +241,43 @@ export async function getDriverWeekData(
       .get();
     
     let savedRecord = savedRecordDoc.exists ? savedRecordDoc.data() : null;
+
+    let latestPayment: DriverPayment | null = null;
     
     // 3. Criar se não existe
     if (!savedRecord || forceRefresh) {
       console.log(`[getDriverWeekData] Criando record para ${driverId} semana ${weekId}`);
       savedRecord = await createDriverRecord(driverId, weekId);
+    }
+
+    if (savedRecord?.paymentStatus === 'paid') {
+      try {
+        if (savedRecord?.paymentInfo?.paymentId) {
+          const paymentDoc = await adminDb
+            .collection('driverPayments')
+            .doc(savedRecord.paymentInfo.paymentId)
+            .get();
+
+          if (paymentDoc.exists) {
+            latestPayment = paymentDoc.data() as DriverPayment;
+          }
+        }
+
+        if (!latestPayment) {
+          const paymentSnapshot = await adminDb
+            .collection('driverPayments')
+            .where('recordId', '==', recordId)
+            .orderBy('updatedAt', 'desc')
+            .limit(1)
+            .get();
+
+          if (!paymentSnapshot.empty) {
+            latestPayment = paymentSnapshot.docs[0].data() as DriverPayment;
+          }
+        }
+      } catch (paymentError) {
+        console.warn(`[getDriverWeekData] Não foi possível buscar payment para ${recordId}:`, paymentError);
+      }
     }
     
     // 3.5 Buscar dados do motorista para driverType e vehicle
@@ -289,26 +322,30 @@ export async function getDriverWeekData(
         + (savedRecord.aluguel || 0)
         + (savedRecord.financingDetails?.totalCost || 0),
 
-  // Repasse considera todas as despesas do motorista, incluindo portagens
+      // Repasse considera todas as despesas do motorista, incluindo portagens
       repasse: dataWeeklyValues.ganhosMenosIVA
         - dataWeeklyValues.despesasAdm
         - dataWeeklyValues.combustivel
         - dataWeeklyValues.viaverde
         - (savedRecord.aluguel || 0)
         - (savedRecord.financingDetails?.totalCost || 0),
-      
+
       // Pagamento
-  iban: savedRecord.iban || driverData?.iban || driverData?.banking?.iban || null,
+      iban: savedRecord.iban || driverData?.iban || driverData?.banking?.iban || null,
       paymentStatus: savedRecord.paymentStatus || 'pending',
       paymentDate: savedRecord.paymentDate || null,
       ...(savedRecord.paymentInfo && { paymentInfo: savedRecord.paymentInfo }),
-      
+
       // Metadados
       dataSource: 'auto',
       createdAt: savedRecord.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...(savedRecord.notes && { notes: savedRecord.notes }),
     };
+
+    if (latestPayment) {
+      completeRecord.paymentInfo = latestPayment;
+    }
     
     return completeRecord;
     
