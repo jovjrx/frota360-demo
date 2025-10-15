@@ -892,7 +892,7 @@ export default function WeeklyPage({
           label="Portagens"
           value={totals.viaverde}
           color="orange.600"
-          helpText="Via Verde"
+          helpText={t('weekly.control.summary.cards.tollsHelp', 'Pagamento direto da empresa')}
         />
       </SimpleGrid>
 
@@ -1021,8 +1021,19 @@ export default function WeeklyPage({
                       <Td isNumeric color="orange.600" fontWeight="medium">
                         -{formatCurrency(record.combustivel || 0)}
                       </Td>
-                      <Td isNumeric color="orange.600" fontWeight="medium">
-                        -{formatCurrency(record.viaverde || 0)}
+                      <Td isNumeric>
+                        {record.viaverde > 0 ? (
+                          <VStack spacing={0} align="flex-end">
+                            <Text color="orange.600" fontWeight="medium">
+                              {formatCurrency(record.viaverde || 0)}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              {t('weekly.control.records.columns.tollsCompany', 'Pago pela empresa')}
+                            </Text>
+                          </VStack>
+                        ) : (
+                          <Text color="gray.400">-</Text>
+                        )}
                       </Td>
                       {record.aluguel > 0 ? (
                         <EditableNumberField
@@ -1043,7 +1054,10 @@ export default function WeeklyPage({
                             </Text>
                             {record.financingDetails.interestAmount > 0 && (
                               <Text fontSize="xs" color="pink.500">
-                                Parcela: {formatCurrency(record.financingDetails.installment)} | Ônus: {formatCurrency(record.financingDetails.interestAmount)}
+                                {t('weekly.control.records.labels.bankChargeBreakdown', 'Parcela: {{installment}} | Ônus: {{interest}}', {
+                                  installment: formatCurrency(record.financingDetails.installment),
+                                  interest: formatCurrency(record.financingDetails.interestAmount),
+                                })}
                               </Text>
                             )}
                           </VStack>

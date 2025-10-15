@@ -45,6 +45,7 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiPhone,
+  FiSend,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
@@ -145,6 +146,7 @@ function DriversPageContent({
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [sendingAccessId, setSendingAccessId] = useState<string | null>(null);
   
   // Solicitações com filtro de status
   const [requestStatusFilter, setRequestStatusFilter] = useState('pending');
@@ -267,6 +269,74 @@ function DriversPageContent({
         status: 'error',
         duration: 3000,
       });
+    }
+  };
+
+  const handleSendAccess = async (driver: Driver) => {
+    if (!driver?.id) {
+      return;
+    }
+
+    if (!driver?.email) {
+      toast({
+        title: t('drivers.list.toasts.sendAccessNoEmail', 'Motorista sem email cadastrado.'),
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setSendingAccessId(driver.id);
+
+    try {
+      const response = await fetch('/api/admin/drivers/send-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: driver.id }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to send access');
+      }
+
+      const temporaryPassword = payload?.temporaryPassword as string | undefined;
+      let copiedToClipboard = false;
+
+      if (temporaryPassword && typeof navigator !== 'undefined' && navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(temporaryPassword);
+          copiedToClipboard = true;
+        } catch (clipboardError) {
+          console.warn('Failed to copy password to clipboard:', clipboardError);
+        }
+      }
+
+      const description = temporaryPassword
+        ? t('drivers.list.toasts.sendAccessSuccessDescription', 'Senha temporária: {{password}}', {
+            password: temporaryPassword,
+          }) + (copiedToClipboard ? ' ✅' : '')
+        : undefined;
+
+      toast({
+        title: t('drivers.list.toasts.sendAccessSuccess', 'Acesso enviado!'),
+        description,
+        status: 'success',
+        duration: 8000,
+        isClosable: true,
+      });
+    } catch (error: any) {
+      toast({
+        title: t('drivers.list.toasts.sendAccessError', 'Não foi possível reenviar o acesso. Tente novamente.'),
+        description: error?.message,
+        status: 'error',
+        duration: 6000,
+        isClosable: true,
+      });
+    } finally {
+      setSendingAccessId(null);
     }
   };
 
@@ -593,12 +663,27 @@ function DriversPageContent({
                             </HStack>
                             <Text fontSize="xs" color="gray.600">{driver.email}</Text>
                         </VStack>
-                          <IconButton
-                            aria-label="Editar"
-                            icon={<Icon as={FiEdit} />}
-                            size="sm"
-                            onClick={() => handleEdit(driver)}
-                          />
+                          <HStack spacing={2}>
+                            <Tooltip label={t('drivers.list.actions.sendAccess', 'Enviar acesso')}>
+                              <IconButton
+                                aria-label={t('drivers.list.actions.sendAccess', 'Enviar acesso')}
+                                icon={<Icon as={FiSend} />}
+                                size="sm"
+                                colorScheme="green"
+                                variant="outline"
+                                isLoading={sendingAccessId === driver.id}
+                                onClick={() => handleSendAccess(driver)}
+                              />
+                            </Tooltip>
+                            <Tooltip label={t('drivers.list.actions.edit', 'Editar motorista')}>
+                              <IconButton
+                                aria-label={t('drivers.list.actions.edit', 'Editar motorista')}
+                                icon={<Icon as={FiEdit} />}
+                                size="sm"
+                                onClick={() => handleEdit(driver)}
+                              />
+                            </Tooltip>
+                          </HStack>
                         </HStack>
                       </Box>
                     ))}

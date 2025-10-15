@@ -3,19 +3,7 @@ import { withIronSessionApiRoute, sessionOptions, SessionRequest } from '@/lib/s
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
-
-/**
- * Gera uma senha temporária aleatória
- */
-function generateTemporaryPassword(): string {
-  const length = 12;
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
-}
+import { generateTemporaryPassword } from '@/lib/utils/password';
 
 /**
  * API para criar motorista diretamente (sem passar por solicitação)

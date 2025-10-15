@@ -63,10 +63,17 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
   const uberTotal = record.uberTotal || 0;
   const boltTotal = record.boltTotal || 0;
   
-  // Calcular valores de financiamento se existir
+    // Calcular valores de ônus bancário se existir
   const financingInstallment = record.financingDetails?.installment || 0;
   const financingInterest = record.financingDetails?.interestAmount || 0;
   const financingTotal = record.financingDetails?.totalCost || 0;
+
+  const bankChargeBreakdownLabel = t(
+    'weekly.control.records.labels.bankChargeBreakdown',
+    'Parcela: {{installment}} | Ônus: {{interest}}'
+  )
+    .replace('{{installment}}', formatCurrency(financingInstallment))
+    .replace('{{interest}}', formatCurrency(financingInterest));
 
   return (
     <Card shadow="md" borderWidth="1px">
@@ -156,12 +163,19 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
                   -{formatCurrency(record.combustivel)}
                 </Text>
               </Flex>
-              <Flex justify="space-between">
-                <Text fontSize="sm" color="gray.600">
-                  {t('weekly.control.records.columns.tolls', 'Portagens')}
-                </Text>
+              <Flex justify="space-between" align="flex-start">
+                <Box>
+                  <Text fontSize="sm" color="gray.600">
+                    {t('weekly.control.records.columns.tolls', 'Portagens')}
+                  </Text>
+                  {record.viaverde > 0 && (
+                    <Text fontSize="xs" color="gray.500">
+                      {t('weekly.control.records.columns.tollsCompany', 'Pago pela empresa')}
+                    </Text>
+                  )}
+                </Box>
                 <Text fontSize="sm" fontWeight="medium" color="orange.600">
-                  -{formatCurrency(record.viaverde)}
+                  {formatCurrency(record.viaverde)}
                 </Text>
               </Flex>
               <Flex justify="space-between">
@@ -175,12 +189,12 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               {financingTotal > 0 && (
                 <Flex justify="space-between">
                   <Text fontSize="sm" color="gray.600">
-                    {t('weekly.control.records.columns.financing', 'Financiamento')}
+                      {t('weekly.control.records.columns.bankCharge', 'Ônus bancário')}
                   </Text>
                   <Text fontSize="sm" fontWeight="medium" color="purple.600">
                     -{formatCurrency(financingTotal)}
                     <Text as="span" fontSize="xs" color="gray.500" ml={1}>
-                      (Parcela: {formatCurrency(financingInstallment)} + Juros: {formatCurrency(financingInterest)})
+                      {bankChargeBreakdownLabel}
                     </Text>
                   </Text>
                 </Flex>

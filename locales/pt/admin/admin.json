@@ -131,6 +131,18 @@
     "type": {
       "affiliate": "Afiliado",
       "renter": "Locatário"
+    },
+    "list": {
+      "actions": {
+        "sendAccess": "Enviar acesso",
+        "edit": "Editar motorista"
+      },
+      "toasts": {
+        "sendAccessSuccess": "Acesso enviado!",
+        "sendAccessSuccessDescription": "Senha temporária: {{password}}",
+        "sendAccessError": "Não foi possível reenviar o acesso. Tente novamente.",
+        "sendAccessNoEmail": "Motorista sem email cadastrado."
+      }
     }
   },
   "users": {
@@ -411,6 +423,7 @@
           "driversCountLabel": "motoristas",
           "totalDiscounts": "Descontos Totais",
           "discountsHelp": "IVA, Adm, Combustível, Portagens, Aluguel",
+          "tollsHelp": "Pagamento direto da empresa",
           "fuel": "Combustível",
           "prioLabel": "PRIO",
           "netValue": "Valor Líquido",
@@ -455,7 +468,9 @@
           "adminExpenses": "Taxa adm.",
           "fuel": "Combustível",
           "tolls": "Portagens",
+          "tollsCompany": "Pago pela empresa",
           "rent": "Aluguel",
+          "bankCharge": "Ônus bancário",
           "net": "Valor líquido",
           "status": "Status",
           "actions": "Ações"
@@ -463,6 +478,9 @@
         "sections": {
           "platforms": "Plataformas",
           "financials": "Valores Financeiros"
+        },
+        "labels": {
+          "bankChargeBreakdown": "Parcela: {{installment}} | Ônus: {{interest}}"
         },
         "actions": {
           "generatePayslip": "Resumo",

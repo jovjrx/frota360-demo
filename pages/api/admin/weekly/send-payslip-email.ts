@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import nodemailer from 'nodemailer';
+import { emailService } from '@/lib/email/mailer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,26 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Get email configuration from Firebase (or environment variables)
-    const emailConfigDoc = await adminDb.collection('settings').doc('email').get();
-    const emailConfig = emailConfigDoc.data();
-
-    if (!emailConfig || !emailConfig.host || !emailConfig.port || !emailConfig.secure || !emailConfig.auth.user || !emailConfig.auth.pass) {
-      return res.status(500).json({ message: 'Email configuration missing or incomplete' });
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: emailConfig.host,
-      port: emailConfig.port,
-      secure: emailConfig.secure,
-      auth: {
-        user: emailConfig.auth.user,
-        pass: emailConfig.auth.pass,
-      },
-    });
-
-    const mailOptions = {
-      from: emailConfig.auth.user,
+    await emailService.sendEmail({
       to: driverEmail,
       subject: `Seu Contracheque Semanal - ${weekStart} a ${weekEnd}`,
       html: `
@@ -42,6 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         <p>Atenciosamente,</p>
         <p>A equipe Conduz.pt</p>
       `,
+      text: `Olá ${driverName},\n\nSeu contracheque referente à semana de ${weekStart} a ${weekEnd} está em anexo.\n\nAtenciosamente,\nEquipe Conduz.pt`,
       attachments: [
         {
           filename: `contracheque_${driverName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}_${weekStart}_a_${weekEnd}.pdf`,
@@ -50,9 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           contentType: 'application/pdf',
         },
       ],
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
 
     res.status(200).json({ message: 'Email sent successfully' });
 

@@ -1,4 +1,5 @@
-import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
+import { buildEmailTransporter, type EmailAttachments } from './transporter';
 
 export interface EmailTemplate {
   subject: string;
@@ -12,34 +13,22 @@ export interface EmailData {
   html: string;
   text?: string;
   from?: string;
+  replyTo?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+  attachments?: EmailAttachments;
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: Transporter | null = null;
+  private defaultFrom?: string;
   private isMock: boolean;
 
   constructor() {
-    this.isMock = !this.hasSMTPConfig();
-    if (!this.isMock) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_PORT === '465',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-    }
-  }
-
-  private hasSMTPConfig(): boolean {
-    return !!(
-      process.env.SMTP_HOST &&
-      process.env.SMTP_PORT &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASS
-    );
+    const { transporter, defaultFrom } = buildEmailTransporter();
+    this.transporter = transporter;
+    this.defaultFrom = defaultFrom;
+    this.isMock = !transporter;
   }
 
   async sendEmail(data: EmailData): Promise<void> {
@@ -48,6 +37,7 @@ class EmailService {
         to: data.to,
         subject: data.subject,
         html: data.html,
+        attachments: data.attachments?.length ?? 0,
       });
       return;
     }
@@ -56,12 +46,22 @@ class EmailService {
       throw new Error('Email service not configured');
     }
 
+    const fromAddress = data.from || this.defaultFrom;
+
+    if (!fromAddress) {
+      throw new Error('Email sender address is not configured');
+    }
+
     await this.transporter.sendMail({
-      from: data.from || process.env.SMTP_USER,
+      from: fromAddress,
       to: data.to,
       subject: data.subject,
       html: data.html,
       text: data.text,
+      replyTo: data.replyTo,
+      cc: data.cc,
+      bcc: data.bcc,
+      attachments: data.attachments,
     });
   }
 

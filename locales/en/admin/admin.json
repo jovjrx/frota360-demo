@@ -131,6 +131,18 @@
     "type": {
       "affiliate": "Affiliate",
       "renter": "Renter"
+    },
+    "list": {
+      "actions": {
+        "sendAccess": "Send access",
+        "edit": "Edit driver"
+      },
+      "toasts": {
+        "sendAccessSuccess": "Access email sent!",
+        "sendAccessSuccessDescription": "Temporary password: {{password}}",
+        "sendAccessError": "We couldn't resend the access email. Please try again.",
+        "sendAccessNoEmail": "Driver has no email on file."
+      }
     }
   },
   "users": {
@@ -411,6 +423,7 @@
           "driversCountLabel": "drivers",
           "totalDiscounts": "Total Discounts",
           "discountsHelp": "VAT, Admin, Fuel, Tolls, Rent",
+          "tollsHelp": "Company-paid expense",
           "fuel": "Fuel",
           "prioLabel": "PRIO",
           "netValue": "Net Value",
@@ -455,6 +468,8 @@
           "adminExpenses": "Admin fee",
           "fuel": "Fuel",
           "tolls": "Tolls",
+          "tollsCompany": "Paid by the company",
+          "bankCharge": "Bank charge",
           "rent": "Rent",
           "net": "Net value",
           "status": "Status",
@@ -463,6 +478,9 @@
         "sections": {
           "platforms": "Platforms",
           "financials": "Financial values"
+        },
+        "labels": {
+          "bankChargeBreakdown": "Installment: {{installment}} | Bank charge: {{interest}}"
         },
         "actions": {
           "generatePayslip": "Payslip",
