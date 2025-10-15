@@ -710,13 +710,13 @@ export default function WeeklyPage({
         )
       );
 
-      // Mensagem de sucesso com informações sobre financiamentos processados
+  // Mensagem de sucesso com informações sobre ônus bancário processado
       let description = t('weekly.control.records.messages.paymentSuccessDescription', 'O pagamento foi marcado como concluído.');
       
       if (financingProcessed && financingProcessed.length > 0) {
         const installmentDetails = financingProcessed.map(f => {
           if (f.completed) {
-            return `✅ Financiamento de €${f.amount.toFixed(2)} completado!`;
+            return `✅ Ônus bancário de €${f.amount.toFixed(2)} quitado!`;
           } else {
             return `📉 Parcela descontada. Restam ${f.remainingInstallments} de ${f.remainingInstallments + f.installmentPaid} parcelas`;
           }
@@ -911,16 +911,16 @@ export default function WeeklyPage({
           helpText="Aluguel de viaturas"
         />
         <StatCard
-          label="Financiamento"
+          label="Ônus bancário"
           value={totals.financiamentoTotal}
           color="pink.600"
-          helpText={`Parcela: ${formatCurrency(totals.financiamento)} | Juros: ${formatCurrency(totals.financiamentoJuros)}`}
+          helpText={`Parcela: ${formatCurrency(totals.financiamento)} | Ônus bancário: ${formatCurrency(totals.financiamentoJuros)}`}
         />
         <StatCard
           label="Líquido"
           value={totals.despesasAdm + totals.aluguel + totals.financiamentoTotal}
           color="blue.600"
-          helpText={`Adm+Aluguel: ${formatCurrency(totals.despesasAdm + totals.aluguel)} | Financ: ${formatCurrency(totals.financiamentoTotal)}`}
+          helpText={`Adm+Aluguel: ${formatCurrency(totals.despesasAdm + totals.aluguel)} | Ônus: ${formatCurrency(totals.financiamentoTotal)}`}
         />
       </SimpleGrid>
 
@@ -985,7 +985,7 @@ export default function WeeklyPage({
                     <Th isNumeric>{t('weekly.control.records.columns.fuel', 'Combustível (✕)')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.tolls', 'Portagens (✕)')}</Th>
                     <Th isNumeric>{t('weekly.control.records.columns.rent', 'Aluguel')}</Th>
-                    <Th isNumeric>FINANC.</Th>
+                    <Th isNumeric>{t('weekly.control.records.columns.bankCharge', 'Ônus bancário')}</Th>
                     <Th isNumeric>Líquido</Th>
                     <Th>{t('weekly.control.records.columns.status', 'Status')}</Th>
                     <Th textAlign="right">{t('weekly.control.records.columns.actions', 'Ações')}</Th>
@@ -1043,7 +1043,7 @@ export default function WeeklyPage({
                             </Text>
                             {record.financingDetails.interestAmount > 0 && (
                               <Text fontSize="xs" color="pink.500">
-                                ({formatCurrency(record.financingDetails.installment)} + {formatCurrency(record.financingDetails.interestAmount)})
+                                Parcela: {formatCurrency(record.financingDetails.installment)} | Ônus: {formatCurrency(record.financingDetails.interestAmount)}
                               </Text>
                             )}
                           </VStack>

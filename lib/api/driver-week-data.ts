@@ -197,7 +197,7 @@ async function createDriverRecord(driverId: string, weekId: string): Promise<any
       totalCost: totalFinancingCost,
       hasFinancing: totalInstallment > 0
     },
-    iban: driverData.iban || null,
+  iban: driverData.iban || driverData.banking?.iban || null,
     paymentStatus: 'pending',
     paymentDate: null,
     createdAt: new Date().toISOString(),
@@ -294,7 +294,7 @@ export async function getDriverWeekData(
         - (savedRecord.financingDetails?.totalCost || 0),
       
       // Pagamento
-      iban: savedRecord.iban,
+  iban: savedRecord.iban || driverData?.iban || driverData?.banking?.iban || null,
       paymentStatus: savedRecord.paymentStatus || 'pending',
       paymentDate: savedRecord.paymentDate || null,
       ...(savedRecord.paymentInfo && { paymentInfo: savedRecord.paymentInfo }),

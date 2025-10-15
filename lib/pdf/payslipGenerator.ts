@@ -197,14 +197,17 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         currentY += 14;
       }
       
-      // Financiamento (se houver)
+      // Financiamento / Ônus bancário (se houver)
       if (data.financingInstallment && data.financingInstallment > 0) {
         doc.text("Financiamento (parcela)", leftMargin, currentY);
         doc.text(`-${data.financingInstallment.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
         currentY += 14;
         
         if (data.financingInterestAmount && data.financingInterestAmount > 0) {
-          doc.text(`  → Juros (${data.financingInterestPercent}%)`, leftMargin, currentY);
+          const interestLabel = data.financingInterestPercent
+            ? `Ônus bancário (${data.financingInterestPercent}% a.s.)`
+            : 'Ônus bancário';
+          doc.text(interestLabel, leftMargin, currentY);
           doc.text(`-${data.financingInterestAmount.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
           currentY += 14;
         }
@@ -239,10 +242,13 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         "OBSERVAÇÕES:",
         "- IVA de 6% aplicado sobre ganhos totais | Despesas administrativas de 7% fixo sobre (Ganhos - IVA)",
         data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
+        data.viaverde > 0
+          ? "- Portagens (ViaVerde) suportadas pela empresa"
+          : "- Sem ônus de portagens nesta semana",
         data.financingInstallment && data.financingInstallment > 0
           ? data.financingInterestAmount && data.financingInterestAmount > 0
-            ? `- Financiamento: Total ${data.financingTotalCost?.toFixed(2)} EUR (Parcela: ${data.financingInstallment.toFixed(2)} EUR + Juros: ${data.financingInterestAmount.toFixed(2)} EUR)`
-            : `- Financiamento: ${data.financingInstallment.toFixed(2)} EUR (sem juros)`
+            ? `- Financiamento: Total ${data.financingTotalCost?.toFixed(2)} EUR (Parcela: ${data.financingInstallment.toFixed(2)} EUR + Ônus bancário: ${data.financingInterestAmount.toFixed(2)} EUR)`
+            : `- Financiamento: ${data.financingInstallment.toFixed(2)} EUR (sem ônus bancário)`
           : ""
       ].filter(line => line !== "");
       
