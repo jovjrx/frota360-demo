@@ -921,7 +921,7 @@ export default function WeeklyPage({
           helpText="Aluguel de viaturas"
         />
         <StatCard
-          label="Ônus bancário"
+          label="Financiamento"
           value={totals.financiamentoTotal}
           color="pink.600"
           helpText={`Parcela: ${formatCurrency(totals.financiamento)} | Ônus bancário: ${formatCurrency(totals.financiamentoJuros)}`}
