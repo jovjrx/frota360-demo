@@ -483,7 +483,7 @@
           "bankChargeBreakdown": "Installment: {{installment}} | Bank interest: {{interest}}"
         },
         "actions": {
-          "generatePayslip": "Payslip",
+          "generatePayslip": "Receipt",
           "markAsPaid": "Pay",
           "alreadyPaid": "Paid",
           "viewProof": "Payment proof"
@@ -548,11 +548,11 @@
         "confirm": "Confirm payment"
       },
       "payslipModal": {
-        "title": "Weekly Payslip",
+        "title": "Weekly Receipt",
         "downloadPdf": "Download PDF",
         "sendEmail": "Send by email",
         "noPdfTitle": "No PDF generated",
-        "noPdfDesc": "Generate the payslip to preview it here."
+        "noPdfDesc": "Generate the receipt to preview it here."
       },
       "unassigned": {
         "title": "Records without an assigned driver",
@@ -836,7 +836,7 @@
       "cancelled": "Cancelled"
     },
     "actions": {
-      "generatePayslip": "Generate payslip",
+      "generatePayslip": "Generate receipt",
       "markAsPaid": "Mark as paid",
       "markAsPending": "Mark as pending",
       "viewDetails": "View details"
@@ -845,8 +845,8 @@
       "markPaidSuccess": "Payment marked as paid.",
       "markPendingSuccess": "Payment marked as pending.",
       "updateError": "Couldn't update the payment status.",
-      "generateError": "Couldn't generate the payslip.",
-      "generateInProgress": "Generating payslip..."
+  "generateError": "Couldn't generate the receipt.",
+  "generateInProgress": "Generating receipt..."
     }
   },
   "loading_data": "Loading data...",
@@ -855,8 +855,8 @@
   "error_loading_data_title": "Error loading data",
   "error_loading_data_description": "Check the connection and try again.",
   "select_week_error": "Select a week to continue.",
-  "error_generating_summaries": "Couldn't generate the payslips.",
-  "error_generating_summaries_title": "Error generating payslips",
+  "error_generating_summaries": "Couldn't generate the receipts.",
+  "error_generating_summaries_title": "Error generating receipts",
   "error_generating_summaries_description": "Review the data and try again.",
   "summaries_generated_success_title": "Payslips generated",
   "summaries_generated_success_description": "The ZIP file was downloaded successfully.",

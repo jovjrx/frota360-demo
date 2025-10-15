@@ -284,12 +284,16 @@ export async function getDriverWeekData(
       aluguel: savedRecord.aluguel || 0,
       financingDetails: savedRecord.financingDetails,
       totalDespesas:
-        dataWeeklyValues.combustivel + (savedRecord.aluguel || 0) + (savedRecord.financingDetails?.totalCost || 0),
+        dataWeeklyValues.combustivel
+        + dataWeeklyValues.viaverde
+        + (savedRecord.aluguel || 0)
+        + (savedRecord.financingDetails?.totalCost || 0),
 
-      // Repasse considera despesas do motorista; portagens são custo da empresa
+  // Repasse considera todas as despesas do motorista, incluindo portagens
       repasse: dataWeeklyValues.ganhosMenosIVA
         - dataWeeklyValues.despesasAdm
         - dataWeeklyValues.combustivel
+        - dataWeeklyValues.viaverde
         - (savedRecord.aluguel || 0)
         - (savedRecord.financingDetails?.totalCost || 0),
       

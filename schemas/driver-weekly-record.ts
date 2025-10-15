@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
+
+const pickNumber = (...values: Array<unknown>): number | undefined => {
+  for (const value of values) {
+    if (isFiniteNumber(value)) {
+      return value;
+    }
+  }
+  return undefined;
+};
+
 export const DriverWeeklyRecordSchema = z.object({
   id: z.string(),
   driverId: z.string(),
@@ -70,36 +81,29 @@ export function createDriverWeeklyRecord(
   data: Partial<DriverWeeklyRecord>,
   platformData: { uber?: number; bolt?: number; myprio?: number; viaverde?: number; cartrack?: number } = {},
   driver?: { type: 'affiliate' | 'renter'; rentalFee?: number }): DriverWeeklyRecord {
-  // 1. Ganhos Total
-  const ganhosTotal = (platformData.uber || 0) + (platformData.bolt || 0) + (platformData.myprio || 0) + (platformData.viaverde || 0) + (platformData.cartrack || 0);
-  
-  // 2. IVA 6%
+  const resolvedUberTotal = pickNumber(data.uberTotal, platformData.uber) ?? 0;
+  const resolvedBoltTotal = pickNumber(data.boltTotal, platformData.bolt) ?? 0;
+  const resolvedPrioValue = pickNumber(data.combustivel, data.prio, platformData.myprio) ?? 0;
+  const resolvedViaverdeValue = pickNumber(data.viaverde, platformData.viaverde) ?? 0;
+  const resolvedCartrackValue = pickNumber(platformData.cartrack) ?? 0;
+
+  const ganhosTotal = resolvedUberTotal + resolvedBoltTotal + resolvedPrioValue + resolvedViaverdeValue + resolvedCartrackValue;
   const ivaValor = ganhosTotal * 0.06;
-  const ganhosMenosIVA = ganhosTotal * 0.94;
-  
-  // 3. Despesas Administrativas 7%
+  const ganhosMenosIVA = ganhosTotal - ivaValor;
   const despesasAdm = ganhosMenosIVA * 0.07;
-  
-  // 4. Aluguel (só para locatários)
-  let aluguel = data.aluguel || 0;
-  if (driver?.type === 'renter' && driver.rentalFee) {
-    aluguel = driver.rentalFee;
+
+  let resolvedAluguel = pickNumber(data.aluguel);
+  if (resolvedAluguel === undefined && driver?.type === 'renter' && isFiniteNumber(driver.rentalFee)) {
+    resolvedAluguel = driver.rentalFee;
   }
-    
-  // 5. ViaVerde (só desconta de locatários)
-  let viaverdeDesconto = 0;
-  if (driver?.type === 'renter') {
-    viaverdeDesconto = data.viaverde || 0;
-  }
-    
-  // 6. Total Despesas
-  const totalDespesas = (data.combustivel || 0) + viaverdeDesconto + aluguel;
-  
-  // 7. Repasse
+  resolvedAluguel = resolvedAluguel ?? 0;
+
+  const viaverdeDesconto = resolvedViaverdeValue;
+  const totalDespesas = resolvedPrioValue + viaverdeDesconto + resolvedAluguel;
   const repasse = ganhosMenosIVA - despesasAdm - totalDespesas;
-  
+
   const now = new Date().toISOString();
-  
+
   return {
     id: data.id || '',
     driverId: data.driverId || '',
@@ -111,13 +115,13 @@ export function createDriverWeeklyRecord(
     
     isLocatario: data.isLocatario || false,
     
-    uberTotal: data.uberTotal || 0,
-    boltTotal: data.boltTotal || 0,
-    prio: data.prio || 0,
+  uberTotal: resolvedUberTotal,
+  boltTotal: resolvedBoltTotal,
+  prio: resolvedPrioValue,
     
-    combustivel: data.combustivel || 0,
-    viaverde: data.viaverde || 0,
-    aluguel,
+  combustivel: resolvedPrioValue,
+  viaverde: resolvedViaverdeValue,
+  aluguel: resolvedAluguel,
 
     financingDetails: data.financingDetails,
     

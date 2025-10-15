@@ -164,18 +164,11 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
                 </Text>
               </Flex>
               <Flex justify="space-between" align="flex-start">
-                <Box>
-                  <Text fontSize="sm" color="gray.600">
-                    {t('weekly.control.records.columns.tolls', 'Portagens')}
-                  </Text>
-                  {record.viaverde > 0 && (
-                    <Text fontSize="xs" color="gray.500">
-                      {t('weekly.control.records.columns.tollsCompany', 'Pago pela empresa')}
-                    </Text>
-                  )}
-                </Box>
+                <Text fontSize="sm" color="gray.600">
+                  {t('weekly.control.records.columns.tolls', 'Portagens')}
+                </Text>
                 <Text fontSize="sm" fontWeight="medium" color="orange.600">
-                  {formatCurrency(record.viaverde)}
+                  -{formatCurrency(record.viaverde)}
                 </Text>
               </Flex>
               <Flex justify="space-between">

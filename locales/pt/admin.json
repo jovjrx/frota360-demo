@@ -48,14 +48,14 @@
       "error_generating_summaries_description": "Não foi possível gerar os resumos semanais. Tente novamente."
     },
     "payslipModal": {
-      "title": "Resumo Semanal",
+      "title": "Recibo Semanal",
       "downloadPdf": "Baixar PDF",
       "sendEmail": "Enviar por E-mail",
       "noPdfTitle": "Nenhum PDF gerado",
-      "noPdfDesc": "Gere o resumo para visualizá-lo aqui."
+      "noPdfDesc": "Gere o recibo para visualizá-lo aqui."
     },
     "actions": {
-      "generatePayslip": "Resumo",
+      "generatePayslip": "Recibo",
       "markAsPaid": "Pago",
       "markAsPending": "Pendente"
     },
@@ -70,7 +70,7 @@
     }
   },
   "export_payments_button": "Exportar Planilha",
-  "weekly_summary_title": "Resumo Semanal",
+  "weekly_summary_title": "Recibo Semanal",
   "summary_item": "Item",
   "summary_value": "Valor",
   "iva_label": "IVA",

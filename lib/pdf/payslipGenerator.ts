@@ -89,7 +89,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       // ============================================================================
       
       doc.fontSize(16).fillColor("#000000").font("Helvetica-Bold")
-        .text("RESUMO SEMANAL", leftMargin, currentY, { width: contentWidth, align: "center" });
+        .text("RECIBO SEMANAL", leftMargin, currentY, { width: contentWidth, align: "center" });
       currentY += 28;
       
       // ============================================================================
@@ -192,14 +192,9 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       
       // Portagens (se houver) - custo coberto pela empresa
       if (data.viaverde > 0) {
-        doc.text("Portagens (ViaVerde) - coberto pela empresa", leftMargin, currentY);
-        doc.text(`0.00 EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+        doc.text("Portagens (ViaVerde)", leftMargin, currentY);
+        doc.text(`-${data.viaverde.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
         currentY += 14;
-
-        doc.fontSize(8).fillColor("#666666")
-          .text(`Valor suportado: ${data.viaverde.toFixed(2)} EUR`, leftMargin + 15, currentY, { width: contentWidth - 15 });
-        currentY += 12;
-        doc.fontSize(10).fillColor("#000000").font("Helvetica");
       }
       
       // Financiamento / Ônus bancário (se houver)
@@ -248,7 +243,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         "- IVA de 6% aplicado sobre ganhos totais | Despesas administrativas de 7% fixo sobre (Ganhos - IVA)",
         data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
         data.viaverde > 0
-          ? `- Portagens (ViaVerde) suportadas pela empresa (total: ${data.viaverde.toFixed(2)} EUR)`
+          ? `- Portagens (ViaVerde) descontadas nesta semana (total: ${data.viaverde.toFixed(2)} EUR)`
           : "- Sem portagens cobradas nesta semana",
         data.financingInstallment && data.financingInstallment > 0
           ? data.financingInterestAmount && data.financingInterestAmount > 0

@@ -48,14 +48,14 @@
       "error_generating_summaries_description": "Could not generate weekly summaries. Please try again."
     },
     "payslipModal": {
-      "title": "Weekly Payslip",
+      "title": "Weekly Receipt",
       "downloadPdf": "Download PDF",
       "sendEmail": "Send by Email",
       "noPdfTitle": "No PDF generated",
-      "noPdfDesc": "Generate the payslip to view it here."
+      "noPdfDesc": "Generate the receipt to view it here."
     },
     "actions": {
-      "generatePayslip": "Payslip",
+      "generatePayslip": "Receipt",
       "markAsPaid": "Paid",
       "markAsPending": "Pending"
     },
@@ -70,7 +70,7 @@
     }
   },
   "export_payments_button": "Export Spreadsheet",
-  "weekly_summary_title": "Weekly Summary",
+  "weekly_summary_title": "Weekly Receipt",
   "summary_item": "Item",
   "summary_value": "Value",
   "iva_label": "VAT",

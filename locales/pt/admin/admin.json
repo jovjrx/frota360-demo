@@ -483,7 +483,7 @@
           "bankChargeBreakdown": "Parcela: {{installment}} | Ônus bancário: {{interest}}"
         },
         "actions": {
-          "generatePayslip": "Resumo",
+          "generatePayslip": "Recibo",
           "markAsPaid": "Pagar",
           "alreadyPaid": "Pago",
           "viewProof": "Comprovante"
@@ -548,11 +548,11 @@
         "confirm": "Confirmar pagamento"
       },
       "payslipModal": {
-        "title": "Resumo Semanal",
+        "title": "Recibo Semanal",
         "downloadPdf": "Baixar PDF",
         "sendEmail": "Enviar por e-mail",
         "noPdfTitle": "Nenhum PDF gerado",
-        "noPdfDesc": "Gere o resumo para visualizá-lo aqui."
+        "noPdfDesc": "Gere o recibo para visualizá-lo aqui."
       },
       "unassigned": {
         "title": "Registos sem motorista associado",
@@ -848,7 +848,7 @@
       "cancelled": "Cancelado"
     },
     "actions": {
-      "generatePayslip": "Gerar Resumo",
+      "generatePayslip": "Gerar Recibo",
       "markAsPaid": "Marcar como pago",
       "markAsPending": "Marcar como pendente",
       "viewDetails": "Ver detalhes"
@@ -857,8 +857,8 @@
       "markPaidSuccess": "Pagamento marcado como concluído.",
       "markPendingSuccess": "Pagamento marcado como pendente.",
       "updateError": "Não foi possível atualizar o status do pagamento.",
-      "generateError": "Não foi possível gerar o resumo.",
-      "generateInProgress": "A gerar resumo..."
+  "generateError": "Não foi possível gerar o recibo.",
+  "generateInProgress": "A gerar recibo..."
     }
   },
   "loading_data": "A carregar dados...",
@@ -867,8 +867,8 @@
   "error_loading_data_title": "Erro ao carregar dados",
   "error_loading_data_description": "Verifique a ligação e tente novamente.",
   "select_week_error": "Selecione uma semana para continuar.",
-  "error_generating_summaries": "Não foi possível gerar os resumos.",
-  "error_generating_summaries_title": "Erro ao gerar resumos",
+  "error_generating_summaries": "Não foi possível gerar os recibos.",
+  "error_generating_summaries_title": "Erro ao gerar recibos",
   "error_generating_summaries_description": "Revise os dados e tente novamente.",
   "summaries_generated_success_title": "Resumos gerados",
   "summaries_generated_success_description": "O ficheiro ZIP foi descarregado com sucesso.",

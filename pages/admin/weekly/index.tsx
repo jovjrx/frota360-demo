@@ -1031,19 +1031,8 @@ export default function WeeklyPage({
                       <Td isNumeric color="orange.600" fontWeight="medium">
                         -{formatCurrency(record.combustivel || 0)}
                       </Td>
-                      <Td isNumeric>
-                        {record.viaverde > 0 ? (
-                          <VStack spacing={0} align="flex-end">
-                            <Text color="orange.600" fontWeight="medium">
-                              {formatCurrency(record.viaverde || 0)}
-                            </Text>
-                            <Text fontSize="xs" color="gray.500">
-                              {t('weekly.control.records.columns.tollsCompany', 'Pago pela empresa')}
-                            </Text>
-                          </VStack>
-                        ) : (
-                          <Text color="gray.400">-</Text>
-                        )}
+                      <Td isNumeric color="orange.600" fontWeight="medium">
+                        -{formatCurrency(record.viaverde || 0)}
                       </Td>
                       {record.aluguel > 0 ? (
                         <EditableNumberField
@@ -1372,7 +1361,7 @@ export default function WeeklyPage({
         size="5xl"
         header={(
           <VStack align="start" spacing={1}>
-            <Text>{t('weekly.control.payslipModal.title', 'Resumo Semanal')}</Text>
+            <Text>{t('weekly.control.payslipModal.title', 'Recibo Semanal')}</Text>
             {selectedPayslipRecord && (
               <Text fontSize="sm" fontWeight="normal" color="gray.600">
                 {formatDateLabel(selectedPayslipRecord.weekStart, locale || 'pt-PT')} - {formatDateLabel(selectedPayslipRecord.weekEnd, locale || 'pt-PT')}

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { generatePayslipPDF, type PayslipData } from '@/lib/pdf/payslipGenerator';
+import { generatePayslipPDF } from '@/lib/pdf/payslipGenerator';
+import { buildPayslipDataFromRecord } from '@/lib/pdf/payslipData';
 import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import type { WeeklyNormalizedData } from '@/schemas/data-weekly';
 
@@ -15,12 +16,6 @@ function formatDate(dateStr: string | undefined): string {
   });
 }
 
-function sumPlatform(platformData: WeeklyNormalizedData[] = [], platform: WeeklyNormalizedData['platform']): number {
-  return platformData
-    .filter((entry) => entry.platform === platform)
-    .reduce((acc, entry) => acc + (entry.totalValue || 0), 0);
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -33,44 +28,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const platformData = record.platformData ?? [];
-
-    const [uberTotal, boltTotal, prioTotal, viaverdeTotal] = [
-      sumPlatform(platformData, 'uber'),
-      sumPlatform(platformData, 'bolt'),
-      sumPlatform(platformData, 'myprio'),
-      sumPlatform(platformData, 'viaverde'),
-    ];
-
     const driverDoc = record.driverId ? await adminDb.collection('drivers').doc(record.driverId).get() : null;
     const driverData = driverDoc?.data() as (Record<string, any> | undefined);
 
-    const payslipData: PayslipData = {
+    const formattedWeekStart = formatDate(record.weekStart);
+    const formattedWeekEnd = formatDate(record.weekEnd);
+    const resolvedDriverType = driverData?.type === 'renter' ? 'renter' : record.driverType === 'renter' ? 'renter' : 'affiliate';
+
+    const payslipData = buildPayslipDataFromRecord(record as any, {
       driverName: record.driverName,
-      driverType: driverData?.type || record.driverType || 'affiliate',
-      vehiclePlate: driverData?.vehicle?.plate || record.vehicle || 'N/A',
-      weekStart: formatDate(record.weekStart),
-      weekEnd: formatDate(record.weekEnd),
-      uberTotal,
-      boltTotal,
-      prioTotal,
-      viaverdeTotal,
-      ganhosTotal: record.ganhosTotal,
-      ivaValor: record.ivaValor,
-      ganhosMenosIva: record.ganhosMenosIVA,
-      comissao: record.despesasAdm,
-      combustivel: record.combustivel,
-      viaverde: record.viaverde,
-      aluguel: record.aluguel,
-      
-      // Financing com todos os campos necessários
-      financingInterestPercent: (record as any).financingDetails?.interestPercent,
-      financingInstallment: (record as any).financingDetails?.installment,
-      financingInterestAmount: (record as any).financingDetails?.interestAmount,
-      financingTotalCost: (record as any).financingDetails?.totalCost,
-      
-      repasse: record.repasse,
-    };
+      driverType: resolvedDriverType,
+      vehiclePlate: driverData?.vehicle?.plate || (record as any).vehicle || 'N/A',
+      weekStart: formattedWeekStart,
+      weekEnd: formattedWeekEnd,
+    });
 
     const pdfBuffer = await generatePayslipPDF(payslipData);
 
