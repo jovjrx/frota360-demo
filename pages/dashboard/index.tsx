@@ -33,6 +33,7 @@ import PainelLayout from '@/components/layouts/DashboardLayout';
 import Link from 'next/link';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import { getTranslation } from '@/lib/translations';
+import { formatDate, formatDateShort } from '@/lib/utils/format';
 import { useState, useEffect } from 'react';
 import { FiNavigation, FiTrendingUp } from 'react-icons/fi';
 
@@ -323,7 +324,7 @@ export default function PainelDashboard({
               <HStack justify="space-between">
                 <Text fontSize="sm" color="gray.600">Semana</Text>
                 <Text fontSize="sm" fontWeight="semibold">
-                  {new Date(ultimoPagamento.weekStart).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })} - {new Date(ultimoPagamento.weekEnd).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })}
+                  {formatDateShort(ultimoPagamento.weekStart)} - {formatDateShort(ultimoPagamento.weekEnd)}
                 </Text>
               </HStack>
               
@@ -346,9 +347,7 @@ export default function PainelDashboard({
               <HStack justify="space-between">
                 <Text fontSize="xs" color="gray.500">Pago em</Text>
                 <Text fontSize="xs" color="gray.500">
-                  {ultimoPagamento.paymentDate 
-                    ? new Date(ultimoPagamento.paymentDate).toLocaleDateString('pt-PT')
-                    : '-'}
+                  {formatDate(ultimoPagamento.paymentDate, '-')}
                 </Text>
               </HStack>
               
