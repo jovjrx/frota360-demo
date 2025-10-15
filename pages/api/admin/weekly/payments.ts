@@ -226,8 +226,8 @@ async function createDriverPayment(
       ...basePayment,
     });
 
-  let updatedRecord: DriverWeeklyRecord | null = null;
-  let persistedPayment: DriverPayment | null = null;
+    let updatedRecord: DriverWeeklyRecord | null = null;
+    let persistedPayment: DriverPayment | null = null;
 
     await adminDb.runTransaction(async (transaction) => {
       const recordRef = adminDb.collection('driverWeeklyRecords').doc(record.id);
@@ -247,10 +247,16 @@ async function createDriverPayment(
         updatedAt: nowIso,
       } satisfies Partial<DriverWeeklyRecord>;
 
-  const validRecord = DriverWeeklyRecordSchema.parse(mergedRecord);
-  const sanitizedRecord = sanitizeFirestoreData(validRecord);
-  const sanitizedPayment = sanitizeFirestoreData(validatedPayment);
-  updatedRecord = sanitizedRecord as DriverWeeklyRecord;
+      const normalizedRecord = { ...mergedRecord } as Partial<DriverWeeklyRecord>;
+
+      if ((normalizedRecord as any).paymentInfo === null) {
+        delete (normalizedRecord as any).paymentInfo;
+      }
+
+      const validRecord = DriverWeeklyRecordSchema.parse(normalizedRecord);
+      const sanitizedRecord = sanitizeFirestoreData(validRecord);
+      const sanitizedPayment = sanitizeFirestoreData(validatedPayment);
+      updatedRecord = sanitizedRecord as DriverWeeklyRecord;
 
       transaction.set(recordRef, sanitizedRecord, { merge: true });
       transaction.set(paymentRef, sanitizedPayment);
