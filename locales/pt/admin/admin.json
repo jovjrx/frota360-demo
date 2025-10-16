@@ -5,6 +5,7 @@
     "drivers": "Motoristas",
     "control": "Controle & Pagamentos",
     "financing": "Financiamentos",
+    "contracts": "Contratos",
     "monitor": "Monitoramento",
     "data": "Dados",
     "users": "Usuários",
@@ -13,6 +14,7 @@
     "drivers_management": "Gestão de motoristas",
     "weekly_control": "Controle semanal",
     "financing_management": "Gestão de financiamentos",
+    "contracts_management": "Gestão de contratos",
     "tracking": "Rastreamento",
     "weekly_data": "Dados semanais",
     "user_management": "Gerenciamento de usuários"

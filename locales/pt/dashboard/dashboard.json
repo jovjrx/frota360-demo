@@ -1,26 +1,27 @@
 {
-    "menu": {
-      "dashboard": "Dashboard",
-      "data": "Meus Dados",
-      "payslips": "Resumos",
-      "analytics": "Análises",
-      "tracking": "Rastreamento",
-      "profile": "Perfil",
-      "help": "Ajuda",
-      "requests": "Solicitações",
-      "drivers": "Motoristas",
-      "control": "Controle & Pagamentos",
-      "financing": "Financiamento",
-      "monitor": "Monitoramento",
-      "users": "Usuários",
-      "overview": "Visão geral",
-      "requests_desc": "Solicitações",
-      "drivers_management": "Gestão de motoristas",
-      "weekly_control": "Controle semanal",
-      "tracking_desc": "Rastreamento",
-      "weekly_data": "Dados semanais",
-      "user_management": "Gerenciamento de usuários"
-    },
+  "menu": {
+    "dashboard": "Dashboard",
+    "data": "Meus Dados",
+    "payslips": "Resumos",
+    "contracts": "Contratos",
+    "analytics": "Análises",
+    "tracking": "Rastreamento",
+    "profile": "Perfil",
+    "help": "Ajuda",
+    "requests": "Solicitações",
+    "drivers": "Motoristas",
+    "control": "Controle & Pagamentos",
+    "financing": "Financiamento",
+    "monitor": "Monitoramento",
+    "users": "Usuários",
+    "overview": "Visão geral",
+    "requests_desc": "Solicitações",
+    "drivers_management": "Gestão de motoristas",
+    "weekly_control": "Controle semanal",
+    "tracking_desc": "Rastreamento",
+    "weekly_data": "Dados semanais",
+    "user_management": "Gerenciamento de usuários"
+  },
     "breadcrumb": {
       "home": "Início"
     },
@@ -457,6 +458,13 @@
       "paid": "Pagos",
       "pending": "Pendentes"
     }
+  },
+  "contracts": {
+    "title": "Meus contratos",
+    "subtitle": "Baixe, assine e envie o contrato obrigatório para continuar ativo.",
+    "empty": "Ainda não há um contrato associado à sua conta. Aguarde contacto da equipa.",
+    "waitingReview": "Documento recebido. Notificaremos por email quando for aprovado.",
+    "rejected": "Envio rejeitado"
   },
   "help": {
     "title": "Ajuda e Suporte",

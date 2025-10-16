@@ -3,6 +3,7 @@
     "dashboard": "Dashboard",
     "data": "My Data",
     "payslips": "Payslips",
+    "contracts": "Contracts",
     "analytics": "Analytics",
     "tracking": "Tracking",
     "profile": "Profile",
@@ -61,6 +62,13 @@
       "paid": "Paid",
       "pending": "Pending"
     }
+  },
+  "contracts": {
+    "title": "My contracts",
+    "subtitle": "Download, sign and upload the required contract to stay active.",
+    "empty": "There is no contract associated with your account yet. Please wait for the team to contact you.",
+    "waitingReview": "Document received. We will notify you by email once it is approved.",
+    "rejected": "Submission rejected"
   },
   "help": {
     "title": "Help & Support",

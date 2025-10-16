@@ -46,6 +46,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         endDate: null,
         status: 'active',
         remainingWeeks: type === 'loan' && weeks ? Number(weeks) : null,
+        processedRecords: [],
         // Campos de comprovante (serão adicionados depois via upload)
         proofUrl: null,
         proofFileName: null,

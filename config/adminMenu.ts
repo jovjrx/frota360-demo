@@ -61,6 +61,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: false, // Fica no dropdown "Mais"
     },
     {
+        id: 'contracts',
+        label: 'contracts', // Traduzido via t('menu.contracts')
+        href: '/admin/contracts',
+        icon: FiFileText,
+        description: 'contracts_management', // Traduzido via t('menu.contracts_management')
+        showInMainMenu: false,
+    },
+    {
         id: 'monitor',
         label: 'monitor', // Traduzido via t('menu.monitor')
         href: '/admin/monitor',

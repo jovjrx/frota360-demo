@@ -5,6 +5,7 @@
     "drivers": "Drivers",
     "control": "Control & Payments",
     "financing": "Financing",
+    "contracts": "Contracts",
     "monitor": "Monitoring",
     "data": "Data",
     "users": "Users",
@@ -13,6 +14,7 @@
     "drivers_management": "Driver management",
     "weekly_control": "Weekly control",
     "financing_management": "Financing management",
+    "contracts_management": "Contract management",
     "tracking": "Tracking",
     "weekly_data": "Weekly data",
     "user_management": "User management"

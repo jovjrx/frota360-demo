@@ -12,8 +12,9 @@
     "setup": "bash scripts/setup.sh",
     "setup:firebase": "node scripts/setup-firebase.js",
     "add-data": "node scripts/add-data.js",
-    "simulate:import": "tsx -r tsconfig-paths/register scripts/simulate_import_and_process.ts",
-    "add:test-driver": "tsx -r tsconfig-paths/register scripts/add_test_driver.ts"
+  "simulate:import": "tsx -r tsconfig-paths/register scripts/simulate_import_and_process.ts",
+  "add:test-driver": "tsx -r tsconfig-paths/register scripts/add_test_driver.ts",
+  "financing:reconcile": "tsx -r tsconfig-paths/register scripts/reconcileFinancing.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",

@@ -24,6 +24,7 @@ export const FinancingSchema = z.object({
   endDate: z.string().nullable().optional(),
   status: z.enum(['active', 'completed']).default('active'),
   remainingWeeks: z.number().nullable().optional(),
+  processedRecords: z.array(z.string()).optional(),
   // Campos de comprovante de pagamento
   proofUrl: z.string().nullable().optional(),
   proofFileName: z.string().nullable().optional(),

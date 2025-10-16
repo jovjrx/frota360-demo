@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 import {
   DriverWeeklyRecord,
   DriverWeeklyRecordSchema,
@@ -228,6 +229,15 @@ async function createDriverPayment(
 
     let updatedRecord: DriverWeeklyRecord | null = null;
     let persistedPayment: DriverPayment | null = null;
+    let financingLogForResponse: Array<{
+      financingId: string;
+      type: string;
+      amount: number;
+      installmentPaid: number;
+      remainingInstallments: number;
+      completed: boolean;
+      recordId: string;
+    }> = [];
 
     await adminDb.runTransaction(async (transaction) => {
       const recordRef = adminDb.collection('driverWeeklyRecords').doc(record.id);
@@ -262,79 +272,93 @@ async function createDriverPayment(
       transaction.set(paymentRef, sanitizedPayment);
       persistedPayment = sanitizedPayment as DriverPayment;
       
-      // Decrementar remainingWeeks dos financiamentos ativos do motorista (apenas empréstimos)
-      const financingSnapshot = await adminDb
-        .collection('financing')
-        .where('driverId', '==', record.driverId)
-        .where('status', '==', 'active')
-        .where('type', '==', 'loan')
-        .get();
-      
-      const financingUpdates: Array<{
-        id: string;
-        type: string;
-        amount: number;
-        previousRemaining: number;
-        newRemaining: number;
-        completed: boolean;
-      }> = [];
-      
-      financingSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        const currentRemaining = typeof data.remainingWeeks === 'number' ? data.remainingWeeks : 0;
+      const hasFinancingThisWeek = Boolean((record as any)?.financingDetails?.hasFinancing);
+      if (hasFinancingThisWeek) {
+        // Decrementar remainingWeeks dos financiamentos ativos do motorista (apenas empréstimos)
+        const financingSnapshot = await adminDb
+          .collection('financing')
+          .where('driverId', '==', record.driverId)
+          .where('status', '==', 'active')
+          .where('type', '==', 'loan')
+          .get();
         
-        if (currentRemaining > 0) {
-          const newRemaining = currentRemaining - 1;
-          
-          // Se chegou a 0, marcar como completed
+        const financingUpdates: Array<{
+          id: string;
+          type: string;
+          amount: number;
+          previousRemaining: number;
+          newRemaining: number;
+          completed: boolean;
+          recordId: string;
+        }> = [];
+        
+        financingSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const currentRemaining = typeof data.remainingWeeks === 'number' ? data.remainingWeeks : 0;
+          const processedRecords = Array.isArray(data.processedRecords)
+            ? data.processedRecords.filter((value: unknown): value is string => typeof value === 'string')
+            : [];
+
+          if (processedRecords.includes(record.id)) {
+            console.log(`ℹ️ Financiamento ${doc.id} já processado para ${record.id}, ignorando.`);
+            return;
+          }
+
+          if (currentRemaining <= 0) {
+            console.log(`ℹ️ Financiamento ${doc.id} do motorista ${record.driverId} sem semanas restantes, ignorando.`);
+            return;
+          }
+
+          const newRemaining = Math.max(0, currentRemaining - 1);
+          const updatePayload: Record<string, unknown> = {
+            remainingWeeks: newRemaining,
+            updatedAt: nowIso,
+            processedRecords: FieldValue.arrayUnion(record.id),
+          };
+
           if (newRemaining <= 0) {
-            transaction.update(doc.ref, {
-              remainingWeeks: 0,
-              status: 'completed',
-              updatedAt: nowIso,
-            });
-            financingUpdates.push({
-              id: doc.id,
-              type: data.type || 'loan',
-              amount: data.amount || 0,
-              previousRemaining: currentRemaining,
-              newRemaining: 0,
-              completed: true,
-            });
+            updatePayload.status = 'completed';
+            updatePayload.endDate = data.endDate ?? nowIso;
+          }
+
+          transaction.update(doc.ref, updatePayload);
+
+          financingUpdates.push({
+            id: doc.id,
+            type: data.type || 'loan',
+            amount: data.amount || 0,
+            previousRemaining: currentRemaining,
+            newRemaining,
+            completed: newRemaining <= 0,
+            recordId: record.id,
+          });
+
+          if (newRemaining <= 0) {
             console.log(`✅ Financiamento ${doc.id} do motorista ${record.driverId} completado`);
           } else {
-            transaction.update(doc.ref, {
-              remainingWeeks: newRemaining,
-              updatedAt: nowIso,
-            });
-            financingUpdates.push({
-              id: doc.id,
-              type: data.type || 'loan',
-              amount: data.amount || 0,
-              previousRemaining: currentRemaining,
-              newRemaining: newRemaining,
-              completed: false,
-            });
             console.log(`📉 Financiamento ${doc.id} do motorista ${record.driverId}: ${newRemaining} semanas restantes`);
           }
-        }
-      });
-      
-      // Armazenar informações de financiamento processado no documento de pagamento
-      if (financingUpdates.length > 0) {
-        const financingLog = financingUpdates.map(f => ({
-          financingId: f.id,
-          type: f.type,
-          amount: f.amount,
-          installmentPaid: f.previousRemaining - f.newRemaining,
-          remainingInstallments: f.newRemaining,
-          completed: f.completed,
-        }));
-        
-        transaction.update(paymentRef, {
-          financingProcessed: financingLog,
-          updatedAt: nowIso,
         });
+        
+        // Armazenar informações de financiamento processado no documento de pagamento
+        if (financingUpdates.length > 0) {
+          const financingLog = financingUpdates.map(f => ({
+            financingId: f.id,
+            type: f.type,
+            amount: f.amount,
+            installmentPaid: f.previousRemaining - f.newRemaining,
+            remainingInstallments: f.newRemaining,
+            completed: f.completed,
+            recordId: f.recordId,
+          }));
+          
+          financingLogForResponse = financingLog;
+
+          transaction.update(paymentRef, {
+            financingProcessed: financingLog,
+            updatedAt: nowIso,
+          });
+        }
       }
     });
 
@@ -344,6 +368,10 @@ async function createDriverPayment(
 
     if (!persistedPayment) {
       throw new Error('Failed to persist payment record');
+    }
+
+    if (persistedPayment && financingLogForResponse.length > 0) {
+      (persistedPayment as any).financingProcessed = financingLogForResponse;
     }
 
     res.status(200).json({
