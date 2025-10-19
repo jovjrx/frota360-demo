@@ -1,86 +1,52 @@
 {
   "hero": {
-    "title": "Dirija com Propósito",
-    "subtitle": "Ganhe mais que comissões. Construa seu próprio negócio com a Conduz.",
-    "badge": "Modelo Inovador",
-    "cta_primary": "Começar Agora",
-    "cta_secondary": "Falar no WhatsApp",
-    "highlight": {
-      "title": "Transparência Total",
-      "description": "Veja exatamente como funciona o sistema de comissões e ganhos"
-    }
+    "title": "Conduz PT",
+    "subtitle": "A plataforma completa para motoristas TVDE em Portugal",
+    "description": "Junte-se a centenas de motoristas que já confiam na Conduz PT para gerir o seu negócio de transporte. Oferecemos suporte completo para afiliados e locatários.",
+    "ctaPrimary": "Candidatar-me Agora",
+    "ctaSecondary": "Falar no WhatsApp"
   },
-  "how_it_works": {
+  "howItWorks": {
     "title": "Como Funciona",
-    "subtitle": "Processo simples e rápido para começar a ganhar",
-    "feature": "4 PASSOS",
+    "subtitle": "Processo simples e rápido para começar",
     "steps": [
       {
-        "title": "1. Candidatura",
+        "title": "Candidatura",
         "description": "Preencha o formulário com seus dados e informações do veículo"
       },
       {
-        "title": "2. Análise",
+        "title": "Análise",
         "description": "Nossa equipa analisa sua candidatura em 24-48 horas"
       },
       {
-        "title": "3. Aprovação",
+        "title": "Aprovação",
         "description": "Receba a confirmação e acesse sua conta na plataforma"
-      },
-      {
-        "title": "4. Começar",
-        "description": "Inicie suas corridas e comece a ganhar imediatamente"
       }
     ]
   },
   "services": {
-    "title": "Escolha Seu Caminho",
-    "subtitle": "Dois modelos pensados para maximizar seus ganhos",
+    "title": "Tipos de Motorista",
+    "subtitle": "Escolha o modelo que melhor se adapta à sua situação",
     "affiliate": {
-      "title": "Afiliado",
-      "description": "Dirija, recrute e ganhe comissões de toda sua rede",
+      "title": "Motorista Afiliado",
+      "description": "Trabalhe com o seu próprio veículo e tenha total controlo sobre o seu negócio.",
       "benefits": [
-        "Comissões base de 5-10% por corrida",
-        "Comissões de recrutamento de 2-5%",
-        "Sistema de progressão de níveis",
-        "Suporte dedicado",
-        "Acesso a dashboard de performance"
+        "Flexibilidade total de horários",
+        "Receita 100% sua",
+        "Controlo total do veículo",
+        "Suporte técnico completo"
       ]
     },
     "renter": {
-      "title": "Locatário",
-      "description": "Alugue o veículo e dirija com segurança e suporte",
+      "title": "Motorista Locatário",
+      "description": "Alugue um veículo e comece a trabalhar imediatamente com suporte completo.",
       "benefits": [
-        "Aluguel de €650/mês (tudo incluído)",
-        "Seguro e manutenção cobertos",
-        "Comissões por corrida",
+        "Veículo pronto para trabalhar",
+        "Seguro e manutenção inclusos",
         "Suporte 24/7",
-        "Acesso a todas as funcionalidades"
+        "Sem preocupações com documentação"
       ]
     }
-  },
-  "benefits": {
-    "title": "Por Que Conduz",
-    "subtitle": "Benefícios reais que fazem a diferença",
-    "feature": "DIFERENCIAIS",
-    "items": [
-      {
-        "title": "Suporte Especializado",
-        "description": "Equipa dedicada para ajudar você em cada passo da jornada"
-      },
-      {
-        "title": "Pagamentos Garantidos",
-        "description": "Receba suas comissões toda semana, sem atrasos"
-      },
-      {
-        "title": "Plataforma Moderna",
-        "description": "Dashboard intuitivo com dados em tempo real"
-      },
-      {
-        "title": "Compliance Total",
-        "description": "Documentação e conformidade legal garantidas"
-      }
-    ]
   },
   "features": {
     "title": "Recursos da Plataforma",
@@ -102,11 +68,6 @@
         "description": "Contratos e documentos gerados automaticamente"
       }
     ]
-  },
-  "cta": {
-    "title": "Pronto para Começar?",
-    "subtitle": "Junte-se a centenas de motoristas que já ganham mais com a Conduz",
-    "button": "Candidatar-me Agora"
   }
 }
 
