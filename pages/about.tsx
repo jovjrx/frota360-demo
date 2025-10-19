@@ -9,15 +9,17 @@ import {
   Button,
   VStack,
   HStack,
-  Flex,
+  SimpleGrid,
+  Divider,
 } from "@chakra-ui/react";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
 import Hero from "@/components/Hero";
+import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
 import { CheckIcon, ArrowRightIcon } from "@chakra-ui/icons";
-import { COMMON } from "@/translations";
+import { ABOUT } from "@/translations";
 
 const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: any) => {
   if (!fn) return fallback ?? key;
@@ -25,97 +27,95 @@ const makeSafeT = (fn?: (key: string) => any) => (key: string, fallback?: any) =
   return value === undefined || value === null ? fallback ?? key : value;
 };
 
-export default function About({ tPage: rawTPage, tCommon: rawTCommon }: PublicPageProps) {
+export default function About({ tPage: rawTPage }: PublicPageProps) {
   const getLocalizedHref = useLocalizedHref();
   const t = useMemo(() => makeSafeT(rawTPage), [rawTPage]);
-  const tc = useMemo(() => makeSafeT(rawTCommon), [rawTCommon]);
 
   return (
     <>
       {/* Hero */}
       <Hero
-        title={t("hero.title")}
-        subtitle={t("hero.subtitle")}
-        backgroundImage="/img/bg-portugal.jpg"
-        badge={t("hero.badge")}
+        title={t(ABOUT.HERO.TITLE)}
+        subtitle={t(ABOUT.HERO.SUBTITLE)}
+        backgroundImage="/img/about.jpg"
+        badge={t(ABOUT.HERO.BADGE)}
         overlay
-      />
+      >
+        <Highlight
+          title={t(ABOUT.MISSION.CARD.TITLE)}
+          description={t(ABOUT.MISSION.CARD.DESCRIPTION)}
+          bgImage="/img/driver-app.jpg"
+          delayImage={0.5}
+          delayBox={0.8}
+        />
+      </Hero>
 
-      {/* Visão & Missão */}
+      {/* Missão */}
       <Container>
         <Title
-          title={t("vision.title")}
-          description={t("vision.subtitle")}
-          feature={t("vision.feature")}
+          title={t(ABOUT.MISSION.TITLE)}
+          description={t(ABOUT.MISSION.SUBTITLE)}
+          feature={t(ABOUT.MISSION.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
-          {(() => {
-            const items = t("vision.items");
-            if (!Array.isArray(items)) return null;
-
-            return items.map((item: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    px={3}
-                    py={1}
-                    borderRadius="md"
-                    bg="green.100"
-                    color="green.700"
-                    fontWeight="bold"
-                    fontSize="sm"
-                  >
-                    {item.label}
-                  </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {item.title}
-                  </Text>
-                  <Text color="gray.600" flex="1">
-                    {item.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
+        <Card animated borded>
+          <VStack spacing={6} align="start">
+            <Text color="gray.700" fontSize="md" lineHeight="1.8">
+              {t(ABOUT.MISSION.CARD.CONTENT)}
+            </Text>
+            <Divider />
+            <Box w="full">
+              <Text fontWeight="bold" fontSize="lg" mb={4} color="green.600">
+                {t(ABOUT.MISSION.CARD.VALUES.TITLE)}
+              </Text>
+              <VStack spacing={2} align="start">
+                {(() => {
+                  const values = t(ABOUT.MISSION.CARD.VALUES.LIST);
+                  if (!Array.isArray(values)) return null;
+                  return values.map((value: any, i: number) => (
+                    <HStack key={i} spacing={3}>
+                      <CheckIcon color="green.600" w={5} h={5} />
+                      <Text color="gray.700">{value}</Text>
+                    </HStack>
+                  ));
+                })()}
+              </VStack>
+            </Box>
+          </VStack>
+        </Card>
       </Container>
 
-      {/* O Modelo Explicado */}
+      {/* Abordagem */}
       <Container softBg>
         <Title
-          title={t("model.title")}
-          description={t("model.subtitle")}
-          feature={t("model.feature")}
+          title={t(ABOUT.APPROACH.TITLE)}
+          description={t(ABOUT.APPROACH.SUBTITLE)}
+          feature={t(ABOUT.APPROACH.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
           {(() => {
-            const sections = t("model.sections");
-            if (!Array.isArray(sections)) return null;
+            const methods = t(ABOUT.APPROACH.METHODS);
+            if (!Array.isArray(methods)) return null;
 
-            return sections.map((section: any, i: number) => (
+            return methods.map((method: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
                   <Box
-                    w="50px"
-                    h="50px"
+                    w="60px"
+                    h="60px"
                     borderRadius="lg"
                     bg="green.100"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    color="green.600"
-                    fontSize="2xl"
+                    fontSize="3xl"
                   >
-                    {i === 0 ? "🔀" : i === 1 ? "📈" : i === 2 ? "👥" : "🛡️"}
+                    {method.icon}
                   </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {section.title}
-                  </Text>
-                  <Text fontSize="sm" color="gray.500" fontWeight="semibold">
-                    {section.description}
+                  <Text fontSize="lg" fontWeight="bold" color="green.600">
+                    {method.title}
                   </Text>
                   <Text color="gray.600" flex="1">
-                    {section.details}
+                    {method.description}
                   </Text>
                 </VStack>
               </Card>
@@ -124,203 +124,93 @@ export default function About({ tPage: rawTPage, tCommon: rawTCommon }: PublicPa
         </ContainerDivisions>
       </Container>
 
-      {/* Nossa Estrutura */}
+      {/* Experiência */}
       <Container>
         <Title
-          title={t("organization.title")}
-          description={t("organization.subtitle")}
-          feature={t("organization.feature")}
+          title={t(ABOUT.EXPERIENCE.TITLE)}
+          description={t(ABOUT.EXPERIENCE.SUBTITLE)}
+          feature={t(ABOUT.EXPERIENCE.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const departments = t("organization.departments");
-            if (!Array.isArray(departments)) return null;
-
-            return departments.map((dept: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    w="50px"
-                    h="50px"
-                    borderRadius="lg"
-                    bg="green.100"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    color="green.600"
-                    fontSize="2xl"
-                  >
-                    {i === 0 ? "⚙️" : i === 1 ? "💰" : i === 2 ? "💻" : "🤝"}
-                  </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {dept.name}
-                  </Text>
-                  <Text color="gray.600" flex="1">
-                    {dept.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Roadmap 2026 */}
-      <Container softBg>
-        <Title
-          title={t("growth.title")}
-          description={t("growth.subtitle")}
-          feature={t("growth.feature")}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const timeline = t("growth.timeline");
-            if (!Array.isArray(timeline)) return null;
-
-            return timeline.map((q: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    px={3}
-                    py={1}
-                    borderRadius="md"
-                    bg="green.100"
-                    color="green.700"
-                    fontWeight="bold"
-                    fontSize="sm"
-                  >
-                    {q.quarter}
-                  </Box>
-                  <VStack spacing={2} align="start" flex="1" w="full">
-                    <HStack>
-                      <Text color="gray.500" fontSize="sm">Motoristas:</Text>
-                      <Text fontWeight="bold" color="green.600">{q.motoristas}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text color="gray.500" fontSize="sm">Receita:</Text>
-                      <Text fontWeight="bold" color="green.600">{q.receita}</Text>
-                    </HStack>
-                  </VStack>
-                  <VStack spacing={2} align="start" w="full">
-                    <Text fontWeight="bold" color="gray.800" fontSize="sm">
-                      {q.milestone}
-                    </Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {q.description}
-                    </Text>
-                  </VStack>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Nossos Valores */}
-      <Container>
-        <Title
-          title={t("values.title")}
-          description={t("values.subtitle")}
-          feature={t("values.feature")}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const values = t("values.items");
-            if (!Array.isArray(values)) return null;
-
-            return values.map((value: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    w="50px"
-                    h="50px"
-                    borderRadius="lg"
-                    bg="green.100"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    color="green.600"
-                    fontSize="2xl"
-                  >
-                    {i === 0 ? "🔍" : i === 1 ? "⭐" : i === 2 ? "🔒" : "🚀"}
-                  </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {value.title}
-                  </Text>
-                  <Text color="gray.600" flex="1">
-                    {value.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Números que Falam */}
-      <Container softBg>
-        <Title
-          title={t("metrics.title")}
-          description={t("metrics.subtitle")}
-          feature={t("metrics.feature")}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const stats = t("metrics.stats");
-            if (!Array.isArray(stats)) return null;
-
-            return stats.map((stat: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <HStack>
-                    <Text fontSize="3xl" fontWeight="bold" color="green.600">
-                      {stat.value}
-                    </Text>
-                    {stat.unit && (
-                      <Text fontSize="lg" color="green.600" fontWeight="bold">
-                        {stat.unit}
+        <Card animated borded>
+          <VStack spacing={6} align="start">
+            <Text color="gray.700" fontSize="md" lineHeight="1.8">
+              {t(ABOUT.EXPERIENCE.CARD.CONTENT)}
+            </Text>
+            <Divider />
+            <Box w="full">
+              <Text fontWeight="bold" fontSize="lg" mb={6} color="green.600">
+                {t(ABOUT.EXPERIENCE.CARD.STATS.TITLE)}
+              </Text>
+              <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
+                {(() => {
+                  const stats = t(ABOUT.EXPERIENCE.CARD.STATS.LIST);
+                  if (!Array.isArray(stats)) return null;
+                  return stats.map((stat: any, i: number) => (
+                    <VStack key={i} spacing={2} align="center">
+                      <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                        {stat.value}
                       </Text>
-                    )}
-                  </HStack>
-                  <VStack spacing={1} align="start" flex="1">
-                    <Text fontWeight="bold" color="gray.800" fontSize="sm">
-                      {stat.label}
-                    </Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {stat.description}
-                    </Text>
-                  </VStack>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
+                        {stat.label}
+                      </Text>
+                    </VStack>
+                  ));
+                })()}
+              </SimpleGrid>
+            </Box>
+          </VStack>
+        </Card>
       </Container>
 
-      {/* Por que Escolher Conduz */}
-      <Container>
+      {/* Equipa */}
+      <Container softBg>
         <Title
-          title={t("why.title")}
-          description={t("why.subtitle")}
-          feature={t("why.feature")}
+          title={t(ABOUT.TEAM.TITLE)}
+          description={t(ABOUT.TEAM.SUBTITLE)}
+          feature={t(ABOUT.TEAM.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
           {(() => {
-            const items = t("why.items");
-            if (!Array.isArray(items)) return null;
+            const members = t(ABOUT.TEAM.MEMBERS);
+            if (!Array.isArray(members)) return null;
 
-            return items.map((item: any, i: number) => (
+            return members.map((member: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
-                  <HStack spacing={2}>
-                    <CheckIcon color="green.600" w={5} h={5} />
-                    <Text fontSize="lg" fontWeight="bold" color="green.600">
-                      {item.title}
-                    </Text>
-                  </HStack>
-                  <Text color="gray.600" flex="1">
-                    {item.description}
+                  <Box
+                    w="60px"
+                    h="60px"
+                    borderRadius="full"
+                    bg="green.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="green.600"
+                    fontSize="2xl"
+                  >
+                    {i === 0 ? "📋" : i === 1 ? "💬" : "🤝"}
+                  </Box>
+                  <Text fontSize="lg" fontWeight="bold" color="green.600">
+                    {member.name}
                   </Text>
+                  <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                    {member.position}
+                  </Text>
+                  <Text color="gray.600" flex="1" fontSize="sm">
+                    {member.bio}
+                  </Text>
+                  <VStack spacing={1} align="start" w="full">
+                    {(() => {
+                      const expertise = member.expertise;
+                      if (!Array.isArray(expertise)) return null;
+                      return expertise.map((skill: any, j: number) => (
+                        <HStack key={j} spacing={2}>
+                          <CheckIcon color="green.600" w={3} h={3} />
+                          <Text fontSize="xs" color="gray.600">{skill}</Text>
+                        </HStack>
+                      ));
+                    })()}
+                  </VStack>
                 </VStack>
               </Card>
             ));
@@ -329,12 +219,12 @@ export default function About({ tPage: rawTPage, tCommon: rawTCommon }: PublicPa
       </Container>
 
       {/* CTA Final */}
-      <Container softBg>
+      <Container>
         <Title
-          title={t("cta.title")}
-          description={t("cta.subtitle")}
-          feature={t("cta.feature")}
-          ctaText={t("cta.button")}
+          title={t(ABOUT.CTA.TITLE)}
+          description={t(ABOUT.CTA.SUBTITLE)}
+          feature={t(ABOUT.CTA.FEATURE)}
+          ctaText={t(ABOUT.CTA.BUTTON)}
           cta={getLocalizedHref("/request")}
           center
         />

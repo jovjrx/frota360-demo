@@ -9,10 +9,7 @@ import {
   Text,
   Button,
   VStack,
-  SimpleGrid,
-  Image,
   HStack,
-  Icon,
   Flex,
   Accordion,
   AccordionItem,
@@ -23,7 +20,6 @@ import {
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { Progress } from "@/components/Progress";
 import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
@@ -44,7 +40,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
 
   return (
     <>
-      {/* Hero - Diferencial Principal */}
+      {/* Hero */}
       <Hero
         title={t(HOME.HERO.TITLE)}
         subtitle={t(HOME.HERO.SUBTITLE)}
@@ -104,90 +100,21 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         />
       </Hero>
 
-      {/* Seção: Por que Conduz é diferente */}
-      <Container>
-        <Title
-          title={t(HOME.DIFFERENTIATION.TITLE)}
-          description={t(HOME.DIFFERENTIATION.SUBTITLE)}
-          feature={t(HOME.DIFFERENTIATION.FEATURE)}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const items = t(HOME.DIFFERENTIATION.ITEMS);
-            if (!Array.isArray(items)) return null;
-
-            return items.map((item: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    w="50px"
-                    h="50px"
-                    borderRadius="lg"
-                    bg="green.100"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    color="green.600"
-                    fontSize="2xl"
-                  >
-                    {i === 0 ? "🔀" : i === 1 ? "📈" : i === 2 ? "🛡️" : "✨"}
-                  </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {item.title}
-                  </Text>
-                  <Text color="gray.600" flex="1">
-                    {item.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Seção de Benefícios */}
-      <Container softBg>
-        <Title
-          title={t(HOME.BENEFITS.TITLE)}
-          description={t(HOME.BENEFITS.SUBTITLE)}
-          feature={t(HOME.BENEFITS.FEATURE)}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const benefits = t(HOME.BENEFITS.ITEMS);
-            if (!Array.isArray(benefits)) return null;
-
-            return benefits.map((benefit: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {benefit.title}
-                  </Text>
-                  <Text color="gray.600" flex="1">
-                    {benefit.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Como Funciona o Modelo Afiliado */}
+      {/* Como Funciona */}
       <Container>
         <Title
           title={t(HOME.HOW_IT_WORKS.TITLE)}
           description={t(HOME.HOW_IT_WORKS.SUBTITLE)}
           feature={t(HOME.HOW_IT_WORKS.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(3, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(4, 1fr)" }}>
           {(() => {
             const steps = t(HOME.HOW_IT_WORKS.STEPS);
             if (!Array.isArray(steps)) return null;
 
             return steps.map((step: any, i: number) => (
               <Card key={i} animated borded>
-                <VStack spacing={4} align="center" textAlign="center">
+                <VStack spacing={4} align="center" textAlign="center" h="full">
                   <Box
                     w="60px"
                     h="60px"
@@ -202,10 +129,10 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                   >
                     {i + 1}
                   </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="gray.800">
+                  <Text fontSize="lg" fontWeight="bold" color="gray.800">
                     {step.title}
                   </Text>
-                  <Text color="gray.600">
+                  <Text color="gray.600" flex="1">
                     {step.description}
                   </Text>
                 </VStack>
@@ -236,7 +163,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                 color="green.600"
                 fontSize="3xl"
               >
-                🎯
+                👤
               </Box>
               <Text fontSize="xl" fontWeight="bold" color="green.600">
                 {t(HOME.SERVICES.AFFILIATE.TITLE)}
@@ -317,106 +244,19 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Metas de Crescimento 2026 */}
+      {/* Benefícios */}
       <Container>
         <Title
-          title={t(HOME.GROWTH.TITLE)}
-          description={t(HOME.GROWTH.SUBTITLE)}
-          feature={t(HOME.GROWTH.FEATURE)}
+          title={t(HOME.BENEFITS.TITLE)}
+          description={t(HOME.BENEFITS.SUBTITLE)}
+          feature={t(HOME.BENEFITS.FEATURE)}
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
           {(() => {
-            const quarters = t(HOME.GROWTH.QUARTERS);
-            if (!Array.isArray(quarters)) return null;
+            const benefits = t(HOME.BENEFITS.ITEMS);
+            if (!Array.isArray(benefits)) return null;
 
-            return quarters.map((q: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <Box
-                    px={3}
-                    py={1}
-                    borderRadius="md"
-                    bg="green.100"
-                    color="green.700"
-                    fontWeight="bold"
-                    fontSize="sm"
-                  >
-                    {q.quarter}
-                  </Box>
-                  <VStack spacing={2} align="start" flex="1">
-                    <HStack>
-                      <Text color="gray.500" fontSize="sm">Motoristas:</Text>
-                      <Text fontWeight="bold" color="green.600">{q.motoristas}</Text>
-                    </HStack>
-                    <HStack>
-                      <Text color="gray.500" fontSize="sm">Receita:</Text>
-                      <Text fontWeight="bold" color="green.600">{q.receita}</Text>
-                    </HStack>
-                  </VStack>
-                  <Text color="gray.600" fontSize="sm">
-                    {q.description}
-                  </Text>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Métricas */}
-      <Container softBg>
-        <Title
-          title={t(HOME.METRICS.TITLE)}
-          description={t(HOME.METRICS.SUBTITLE)}
-          feature={t(HOME.METRICS.FEATURE)}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const stats = t(HOME.METRICS.STATS);
-
-            if (!Array.isArray(stats)) return null;
-
-            return stats.map((item: any, i: number) => (
-              <Card key={i} animated borded>
-                <VStack spacing={4} align="start" h="full">
-                  <HStack>
-                    <Text fontSize="3xl" fontWeight="bold" color="green.600">
-                      {item.value}
-                    </Text>
-                    {item.unit && (
-                      <Text fontSize="lg" color="green.600" fontWeight="bold">
-                        {item.unit}
-                      </Text>
-                    )}
-                  </HStack>
-                  <VStack spacing={1} align="start" flex="1">
-                    <Text fontWeight="bold" color="gray.800" fontSize="sm">
-                      {item.label}
-                    </Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {item.description}
-                    </Text>
-                  </VStack>
-                </VStack>
-              </Card>
-            ));
-          })()}
-        </ContainerDivisions>
-      </Container>
-
-      {/* Nossos Valores */}
-      <Container>
-        <Title
-          title={t(HOME.VALUES.TITLE)}
-          description={t(HOME.VALUES.SUBTITLE)}
-          feature={t(HOME.VALUES.FEATURE)}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const values = t(HOME.VALUES.ITEMS);
-            if (!Array.isArray(values)) return null;
-
-            return values.map((value: any, i: number) => (
+            return benefits.map((benefit: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
                   <Box
@@ -430,13 +270,54 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                     color="green.600"
                     fontSize="2xl"
                   >
-                    {i === 0 ? "🔍" : i === 1 ? "⭐" : i === 2 ? "🔒" : "🚀"}
+                    {i === 0 ? "📞" : i === 1 ? "💰" : i === 2 ? "💻" : "✅"}
                   </Box>
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
-                    {value.title}
+                  <Text fontSize="lg" fontWeight="bold" color="green.600">
+                    {benefit.title}
                   </Text>
                   <Text color="gray.600" flex="1">
-                    {value.description}
+                    {benefit.description}
+                  </Text>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Recursos */}
+      <Container softBg>
+        <Title
+          title={t(HOME.FEATURES.TITLE)}
+          description="Tudo que você precisa para gerenciar sua atividade"
+          feature="PLATAFORMA"
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
+          {(() => {
+            const features = t(HOME.FEATURES.ITEMS);
+            if (!Array.isArray(features)) return null;
+
+            return features.map((feature: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <Box
+                    w="50px"
+                    h="50px"
+                    borderRadius="lg"
+                    bg="green.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="green.600"
+                    fontSize="2xl"
+                  >
+                    {i === 0 ? "📊" : i === 1 ? "💳" : i === 2 ? "🗺️" : "📄"}
+                  </Box>
+                  <Text fontSize="lg" fontWeight="bold" color="gray.800">
+                    {feature.title}
+                  </Text>
+                  <Text color="gray.600" flex="1">
+                    {feature.description}
                   </Text>
                 </VStack>
               </Card>
@@ -446,7 +327,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
       </Container>
 
       {/* Depoimentos */}
-      <Container softBg>
+      <Container>
         <Title
           title={tc(COMMON.TESTIMONIALS.TITLE)}
           description={tc(COMMON.TESTIMONIALS.SUBTITLE)}
@@ -479,7 +360,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
       </Container>
 
       {/* FAQ */}
-      <Container>
+      <Container softBg>
         <Title
           title={tc(COMMON.FAQ.TITLE)}
           description={tc(COMMON.FAQ.SUBTITLE)}
@@ -510,7 +391,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
       </Container>
 
       {/* CTA Final */}
-      <Container softBg>
+      <Container>
         <Title
           title={t(HOME.CTA.TITLE)}
           description={t(HOME.CTA.SUBTITLE)}

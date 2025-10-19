@@ -1,4 +1,9 @@
 export const ABOUT = {
+  HERO: {
+    TITLE: 'hero.title',
+    SUBTITLE: 'hero.subtitle',
+    BADGE: 'hero.badge',
+  },
   MISSION: {
     TITLE: 'mission.title',
     SUBTITLE: 'mission.subtitle',
@@ -23,23 +28,29 @@ export const ABOUT = {
     FEATURE: 'approach.feature',
     METHODS: 'approach.methods',
   },
+  EXPERIENCE: {
+    TITLE: 'experience.title',
+    SUBTITLE: 'experience.subtitle',
+    FEATURE: 'experience.feature',
+    CARD: {
+      CONTENT: 'experience.card.content',
+      STATS: {
+        TITLE: 'experience.card.stats.title',
+        LIST: 'experience.card.stats.list',
+      },
+    },
+  },
   TEAM: {
     TITLE: 'team.title',
     SUBTITLE: 'team.subtitle',
     FEATURE: 'team.feature',
     MEMBERS: 'team.members',
-    CTA: {
-      TITLE: 'team.cta.title',
-      SUBTITLE: 'team.cta.subtitle',
-      BUTTON: 'team.cta.button',
-    },
   },
-  STATS: {
-    TITLE: 'stats.title',
-    ITEMS: 'stats.items',
-  },
-  PARTNER_SECTION: {
-    TITLE: 'partnerSection.title',
-    SUBTITLE: 'partnerSection.subtitle',
+  CTA: {
+    TITLE: 'cta.title',
+    SUBTITLE: 'cta.subtitle',
+    FEATURE: 'cta.feature',
+    BUTTON: 'cta.button',
   },
 } as const;
+

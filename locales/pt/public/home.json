@@ -1,195 +1,115 @@
 {
   "hero": {
-    "title": "Não é só dirigir. É construir seu próprio negócio.",
-    "subtitle": "Ganhe comissões recrutando motoristas. Quanto melhor você trabalha, mais você ganha.",
-    "description": "Conduz.pt oferece um modelo híbrido único: seja motorista tradicional ou afiliado empreendedor. Escolha como quer ganhar.",
-    "ctaPrimary": "Torne-se Afiliado",
+    "title": "Você conduz, nós cuidamos do resto!",
+    "subtitle": "Plataforma completa para motoristas TVDE em Portugal. Escolha seu caminho: Afiliado ou Locatário.",
+    "badge": "TVDE PORTUGAL",
+    "ctaPrimary": "Candidatar-me",
     "ctaSecondary": "Falar no WhatsApp",
-    "badge": "MODELO MERITOCRÁTICO",
     "highlight": {
-      "title": "Potencial de Crescimento",
-      "description": "Com 10 motoristas na sua rede, você pode ganhar €5.770/mês. Quanto melhor você trabalha, mais você ganha."
+      "title": "Conduz.pt",
+      "description": "A plataforma que simplifica o TVDE"
     }
   },
-  "differentiation": {
-    "title": "Por que Conduz é diferente?",
-    "subtitle": "Um modelo de negócio revolucionário para motoristas TVDE",
-    "feature": "DIFERENCIAL",
-    "items": [
+  "howItWorks": {
+    "title": "Como Funciona",
+    "subtitle": "Entenda o processo simples para começar",
+    "feature": "FUNCIONAMENTO",
+    "steps": [
       {
-        "title": "Modelo Híbrido",
-        "description": "70% Afiliados + 30% Locatários. Escolha como você quer ganhar e crescer."
+        "title": "Candidatura",
+        "description": "Preencha o formulário com seus dados e documentação"
       },
       {
-        "title": "Comissões Progressivas",
-        "description": "Nível 1: 5% | Nível 2: 7,5% | Nível 3: 10%. Quanto melhor, mais você ganha."
+        "title": "Análise",
+        "description": "Nossa equipa avalia sua candidatura em 2-5 dias úteis"
       },
       {
-        "title": "Segurança Financeira",
-        "description": "Reserva Técnica de 25%. Sua renda é protegida mesmo em períodos difíceis."
+        "title": "Aprovação",
+        "description": "Receba confirmação e acesso à plataforma"
       },
       {
-        "title": "Sistema Meritocrático",
-        "description": "Transparência total. Você sabe exatamente como funciona e como crescer."
-      }
-    ]
-  },
-  "benefits": {
-    "title": "O que oferecemos aos nossos motoristas",
-    "subtitle": "Ferramentas e suporte para maximizar os seus ganhos",
-    "feature": "BENEFÍCIOS",
-    "items": [
-      {
-        "title": "Gestão Financeira Completa",
-        "description": "Dashboard intuitivo com relatórios semanais detalhados dos seus ganhos, despesas e repasses"
-      },
-      {
-        "title": "Comissões de Recrutamento",
-        "description": "Ganhe 2-5% da receita dos motoristas que você recrutar. Crescimento exponencial."
-      },
-      {
-        "title": "Pagamentos Semanais Garantidos",
-        "description": "Receba os seus repasses todas as semanas com total transparência e pontualidade"
-      },
-      {
-        "title": "Suporte Especializado",
-        "description": "Equipe dedicada que conhece a realidade do setor e está sempre disponível para ajudar"
+        "title": "Começar",
+        "description": "Inicie sua atividade e ganhe com a Conduz"
       }
     ]
   },
   "services": {
     "title": "Escolha Seu Caminho",
-    "subtitle": "Dois modelos de negócio, um objetivo: maximizar seus ganhos",
+    "subtitle": "Dois modelos pensados para você",
     "affiliate": {
-      "title": "Motorista Afiliado",
-      "description": "Dirija + Recrute + Ganhe Comissões. Construa seu próprio negócio.",
+      "title": "Afiliado",
+      "description": "Use seu próprio veículo e trabalhe com flexibilidade total",
       "benefits": [
-        "Ganhe comissões de base (5-10%)",
-        "Ganhe comissões de recrutamento (2-5%)",
-        "Potencial: €5k-€8k/mês com 10 motoristas",
-        "Suporte completo para crescer"
+        "Seu próprio veículo",
+        "Horários flexíveis",
+        "Comissões competitivas",
+        "Suporte 24/7",
+        "Acesso ao painel de controle",
+        "Integração com Uber e Bolt"
       ]
     },
     "renter": {
-      "title": "Motorista Tradicional",
-      "description": "Dirija e ganhe comissões. Sem responsabilidades adicionais.",
+      "title": "Locatário",
+      "description": "Alugue um veículo nosso e comece a trabalhar imediatamente",
       "benefits": [
-        "Flexibilidade total de horários",
-        "Ganhe 15-25% de comissão",
-        "Sem responsabilidades adicionais",
-        "Suporte técnico completo"
+        "Veículo fornecido",
+        "Seguro incluído",
+        "Manutenção coberta",
+        "Sem preocupações mecânicas",
+        "Suporte técnico incluído",
+        "Flexibilidade de horários"
       ]
     }
   },
-  "howItWorks": {
-    "title": "Como Funciona o Modelo Afiliado",
-    "subtitle": "Crescimento progressivo e estruturado",
-    "feature": "PROCESSO",
-    "steps": [
-      {
-        "number": "1",
-        "title": "Você Recruta",
-        "description": "Convide amigos ou colegas para a plataforma com seu código de convite único"
-      },
-      {
-        "number": "2",
-        "title": "Eles Ganham",
-        "description": "Seus motoristas trabalham e ganham comissões. Quanto melhor, mais ganham."
-      },
-      {
-        "number": "3",
-        "title": "Você Ganha",
-        "description": "Você recebe comissões da receita deles. Crescimento exponencial com sua rede."
-      }
-    ]
-  },
-  "growth": {
-    "title": "Metas Ambiciosas 2026",
-    "subtitle": "Crescimento estruturado e realista",
-    "feature": "ROADMAP",
-    "quarters": [
-      {
-        "quarter": "Q1",
-        "motoristas": 15,
-        "receita": "€5.000/mês",
-        "description": "Fase inicial com motoristas piloto"
-      },
-      {
-        "quarter": "Q2",
-        "motoristas": 25,
-        "receita": "€12.000/mês",
-        "description": "Expansão controlada"
-      },
-      {
-        "quarter": "Q3",
-        "motoristas": 40,
-        "receita": "€25.000/mês",
-        "description": "Crescimento acelerado"
-      },
-      {
-        "quarter": "Q4",
-        "motoristas": 60,
-        "receita": "€45.000/mês",
-        "description": "Consolidação da rede"
-      }
-    ]
-  },
-  "metrics": {
-    "title": "Números que Inspiram",
-    "subtitle": "Indicadores de crescimento e confiabilidade",
-    "feature": "RESULTADOS",
-    "stats": [
-      {
-        "value": "15",
-        "label": "Motoristas Ativos",
-        "description": "Rede em crescimento constante"
-      },
-      {
-        "value": "92",
-        "unit": "%",
-        "label": "Taxa de Retenção",
-        "description": "Motoristas que continuam conosco"
-      },
-      {
-        "value": "€5.770",
-        "label": "Potencial Mensal",
-        "description": "Com 10 motoristas na rede"
-      },
-      {
-        "value": "9",
-        "label": "Break-even",
-        "description": "Motoristas para lucro positivo"
-      }
-    ]
-  },
-  "values": {
-    "title": "Nossos Valores",
-    "subtitle": "O que nos diferencia no mercado",
-    "feature": "PRINCÍPIOS",
+  "benefits": {
+    "title": "Por que Escolher Conduz",
+    "subtitle": "Benefícios que fazem diferença",
+    "feature": "VANTAGENS",
     "items": [
       {
-        "title": "Transparência",
-        "description": "Você sabe exatamente como funciona e como ganha"
+        "title": "Suporte 7 Dias",
+        "description": "Equipa dedicada disponível todos os dias da semana via WhatsApp, telefone e email"
       },
       {
-        "title": "Meritocracia",
-        "description": "Quanto melhor você trabalha, mais você ganha"
+        "title": "Pagamentos Semanais",
+        "description": "Receba seus ganhos toda a semana. Sem atrasos, sem complicações"
       },
       {
-        "title": "Segurança",
-        "description": "Reserva técnica protege sua renda"
+        "title": "Tecnologia Moderna",
+        "description": "Plataforma intuitiva com dados em tempo real, saldo, histórico e relatórios"
       },
       {
-        "title": "Crescimento",
-        "description": "Escalamos juntos, com suporte estruturado"
+        "title": "Compliance Total",
+        "description": "Garantimos conformidade com todas as regulamentações TVDE portuguesas"
+      }
+    ]
+  },
+  "features": {
+    "title": "Recursos da Plataforma",
+    "items": [
+      {
+        "title": "Dashboard Intuitivo",
+        "description": "Visualize seus ganhos, histórico e métricas em tempo real"
+      },
+      {
+        "title": "Controle Financeiro",
+        "description": "Gerencie pagamentos, comissões e extratos com facilidade"
+      },
+      {
+        "title": "Rastreamento de Veículo",
+        "description": "Integração com Cartrack para monitoramento completo"
+      },
+      {
+        "title": "Documentação Digital",
+        "description": "Contratos e documentos gerados automaticamente"
       }
     ]
   },
   "cta": {
-    "title": "Pronto para Começar a Faturar?",
-    "subtitle": "Escolha seu caminho: seja motorista tradicional ou construa seu próprio negócio como afiliado.",
+    "title": "Pronto para Começar?",
+    "subtitle": "Junte-se aos motoristas que já confiam na Conduz PT",
     "feature": "PRÓXIMO PASSO",
-    "button": "Começar agora"
+    "button": "Candidatar-me Agora"
   }
 }
 
