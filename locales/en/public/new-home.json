@@ -1,0 +1,199 @@
+{
+  "hero": {
+    "title": "It's not just driving. It's building your own business.",
+    "subtitle": "Meritocratic system where your performance determines your earnings",
+    "description": "Total transparency. Weekly payments. Specialized support. Choose your path at Conduz.pt",
+    "badge": "TVDE PORTUGAL",
+    "ctaPrimary": "Apply as a Driver",
+    "ctaSecondary": "Chat on WhatsApp"
+  },
+  "differentials": {
+    "title": "Why Drivers Choose Conduz",
+    "subtitle": "Meritocratic system that rewards your performance",
+    "feature": "UNIQUE DIFFERENTIALS",
+    "items": [
+      {
+        "title": "Progressive Commissions",
+        "description": "The better you work, the more you earn. From 5% up to 10% commission.",
+        "badge": "GROWTH",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Recruitment Earnings",
+        "description": "Recruit drivers and earn passive commissions. From 2% to 5%.",
+        "badge": "PASSIVE INCOME",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Weekly Payments",
+        "description": "Every Thursday, no delays. Predictable and guaranteed cash flow.",
+        "badge": "TRUST",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Real-Time Dashboard",
+        "description": "See your numbers: revenue, acceptance, rating, recruitments, and hours.",
+        "badge": "CONTROL",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Specialized TVDE Support",
+        "description": "Team that understands the sector. Onboarding in days, not weeks.",
+        "badge": "SUPPORT",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Multiple Platforms",
+        "description": "Integrated with Uber, Bolt, and Free Now. Multiple income sources.",
+        "badge": "FLEXIBILITY",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Total Transparency",
+        "description": "Access to all calculations. No mysteries. You know exactly how it works.",
+        "badge": "HONESTY",
+        "image": "/img/driver-app.jpg"
+      },
+      {
+        "title": "Financial Security",
+        "description": "25% technical reserve guarantees stability. Even in crises, you get paid.",
+        "badge": "PROTECTION",
+        "image": "/img/driver-app.jpg"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "3 simple steps to get started",
+    "feature": "PROCESS",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Application",
+        "description": "Fill out the online application form"
+      },
+      {
+        "number": "2",
+        "title": "Validation & Training",
+        "description": "Compliance, insurance, welcome kit"
+      },
+      {
+        "number": "3",
+        "title": "Start Earning",
+        "description": "Weekly payments, real-time monitoring and access to loans"
+      }
+    ]
+  },
+  "meritocratic": {
+    "title": "Meritocratic System",
+    "subtitle": "The better you work, the more you earn",
+    "feature": "PROGRESSION",
+    "levels": [
+      {
+        "title": "Level 1",
+        "subtitle": "Initial Affiliate",
+        "commission": "5%",
+        "color": "blue",
+        "description": "Start your journey with competitive commissions",
+        "benefits": [
+          "5% base commission",
+          "2% recruitment commission",
+          "Dashboard access",
+          "Dedicated support"
+        ]
+      },
+      {
+        "title": "Level 2",
+        "subtitle": "Active Affiliate",
+        "commission": "7.5%",
+        "color": "green",
+        "description": "Recognized and rewarded growth",
+        "benefits": [
+          "7.5% base commission",
+          "3.5% recruitment commission",
+          "Advanced reports",
+          "Priority support"
+        ]
+      },
+      {
+        "title": "Level 3",
+        "subtitle": "Premium Affiliate",
+        "commission": "10%",
+        "color": "gold",
+        "description": "Maximum reward for maximum performance",
+        "benefits": [
+          "10% base commission",
+          "5% recruitment commission",
+          "VIP access",
+          "Personal consultant"
+        ]
+      }
+    ]
+  },
+  "driverTypes": {
+    "title": "Choose Your Path",
+    "subtitle": "Two models for two realities",
+    "feature": "FLEXIBILITY",
+    "types": [
+      {
+        "title": "Affiliate Driver",
+        "description": "Work with your own vehicle and have total control over your business.",
+        "color": "green",
+        "image": "/img/service-drivers.jpg",
+        "benefits": [
+          "Total schedule flexibility",
+          "100% your revenue",
+          "Full vehicle control",
+          "Complete technical support"
+        ]
+      },
+      {
+        "title": "Renter Driver",
+        "description": "Rent a vehicle from Conduz PT and start working immediately.",
+        "color": "blue",
+        "image": "/img/service-companies.jpg",
+        "benefits": [
+          "No initial investment",
+          "Always updated vehicles",
+          "Maintenance included",
+          "Complete insurance"
+        ]
+      }
+    ],
+    "cta": "Apply Now"
+  },
+  "trust": {
+    "title": "Trust and Security",
+    "subtitle": "Everything you need to work with peace of mind",
+    "feature": "GUARANTEES",
+    "items": [
+      {
+        "icon": "✓",
+        "title": "95% Approval",
+        "description": "Document approval rate"
+      },
+      {
+        "icon": "⚡",
+        "title": "24h Analysis",
+        "description": "Average analysis time"
+      },
+      {
+        "icon": "⭐",
+        "title": "4.8/5 Satisfaction",
+        "description": "Support rating"
+      },
+      {
+        "icon": "🕐",
+        "title": "7 Days Support",
+        "description": "Support available"
+      }
+    ]
+  },
+  "finalCta": {
+    "title": "Ready to Start Earning?",
+    "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
+    "ctaPrimary": "Apply Now",
+    "ctaSecondary": "Chat on WhatsApp"
+  }
+}
+
