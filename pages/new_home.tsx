@@ -74,7 +74,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       />
 
       {/* DIFERENCIAIS ÚNICOS */}
-      <Container maxW="7xl" py={16}>
+      <Container maxW="7xl">
         <Title
           title={t(NEW_HOME.DIFFERENTIALS.TITLE)}
           description={t(NEW_HOME.DIFFERENTIALS.SUBTITLE)}
@@ -125,7 +125,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       </Container>
 
       {/* COMO FUNCIONA */}
-      <Container maxW="7xl" py={16} bg="white" borderY="1px solid" borderColor="gray.200">
+      <Container maxW="7xl" bg="white" borderY="1px solid" borderColor="gray.200">
         <Title
           title={t(NEW_HOME.HOW_IT_WORKS.TITLE)}
           description={t(NEW_HOME.HOW_IT_WORKS.SUBTITLE)}
@@ -167,7 +167,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       </Container>
 
       {/* SISTEMA MERITOCRÁTICO */}
-      <Container maxW="7xl" py={16}>
+      <Container maxW="7xl">
         <Title
           title={t(NEW_HOME.MERITOCRATIC.TITLE)}
           description={t(NEW_HOME.MERITOCRATIC.SUBTITLE)}
@@ -213,7 +213,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       </Container>
 
       {/* TIPOS DE MOTORISTA */}
-      <Container maxW="7xl" py={16} bg="white" borderY="1px solid" borderColor="gray.200">
+      <Container maxW="7xl" bg="white" borderY="1px solid" borderColor="gray.200">
         <Title
           title={t(NEW_HOME.DRIVER_TYPES.TITLE)}
           description={t(NEW_HOME.DRIVER_TYPES.SUBTITLE)}
@@ -260,7 +260,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       </Container>
 
       {/* TRANSPARÊNCIA E SEGURANÇA */}
-      <Container maxW="7xl" py={16}>
+      <Container maxW="7xl">
         <Title
           title={t(NEW_HOME.TRUST.TITLE)}
           description={t(NEW_HOME.TRUST.SUBTITLE)}
