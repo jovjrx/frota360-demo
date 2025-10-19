@@ -77,6 +77,7 @@ export async function loadTranslations(
       const resolvedCandidate = candidates.find(({ filePath }) => fs.existsSync(filePath));
 
       if (resolvedCandidate) {
+        console.log('Found translation file at:', resolvedCandidate.filePath);
         const fileContent = fs.readFileSync(resolvedCandidate.filePath, 'utf8');
         const parsed = JSON.parse(fileContent);
 
