@@ -4,40 +4,44 @@
     "subtitle": "Earn commissions by recruiting drivers. The better you work, the more you earn.",
     "description": "Conduz.pt offers a unique hybrid model: be a traditional driver or an entrepreneurial affiliate. Choose how you want to earn.",
     "ctaPrimary": "Become an Affiliate",
-    "ctaSecondary": "Chat on WhatsApp",
-    "badge": "MERITOCRATIC MODEL",
-    "highlight": {
-      "title": "Growth Potential",
-      "description": "With 10 drivers in your network, you can earn €5,770/month. The better you work, the more you earn."
-    }
+    "ctaSecondary": "Chat on WhatsApp"
   },
-  "differentiation": {
-    "title": "Why is Conduz different?",
-    "subtitle": "A revolutionary business model for TVDE drivers",
-    "feature": "DIFFERENTIATOR",
-    "items": [
+  "howItWorks": {
+    "title": "How the Affiliate Model Works",
+    "subtitle": "Progressive and structured growth",
+    "steps": [
       {
-        "title": "Hybrid Model",
-        "description": "70% Affiliates + 30% Renters. Choose how you want to earn and grow."
+        "number": "1",
+        "title": "You Recruit",
+        "description": "Invite friends or colleagues to the platform with your unique referral code"
       },
       {
-        "title": "Progressive Commissions",
-        "description": "Level 1: 5% | Level 2: 7.5% | Level 3: 10%. The better, the more you earn."
+        "number": "2",
+        "title": "They Earn",
+        "description": "Your drivers work and earn commissions. The better they work, the more they earn."
       },
       {
-        "title": "Financial Security",
-        "description": "25% Technical Reserve. Your income is protected even in difficult periods."
-      },
-      {
-        "title": "Meritocratic System",
-        "description": "Total transparency. You know exactly how it works and how to grow."
+        "number": "3",
+        "title": "You Earn",
+        "description": "You receive commissions from their revenue. Exponential growth with your network."
       }
     ]
   },
-  "benefits": {
+  "services": {
+    "title": "Choose Your Path",
+    "subtitle": "Two business models, one objective: maximize your earnings",
+    "affiliate": {
+      "title": "Affiliate Driver",
+      "description": "Drive + Recruit + Earn Commissions. Build your own business."
+    },
+    "renter": {
+      "title": "Traditional Driver",
+      "description": "Drive and earn commissions. No additional responsibilities."
+    }
+  },
+  "features": {
     "title": "What we offer our drivers",
     "subtitle": "Tools and support to maximize your earnings",
-    "feature": "BENEFITS",
     "items": [
       {
         "title": "Complete Financial Management",
@@ -56,67 +60,6 @@
         "description": "Dedicated team that understands the reality of the sector and is always available to help"
       }
     ]
-  },
-  "services": {
-    "title": "Choose Your Path",
-    "subtitle": "Two business models, one objective: maximize your earnings",
-    "affiliate": {
-      "title": "Affiliate Driver",
-      "description": "Drive + Recruit + Earn Commissions. Build your own business.",
-      "benefits": [
-        "Earn base commissions (5-10%)",
-        "Earn recruitment commissions (2-5%)",
-        "Potential: €5k-€8k/month with 10 drivers",
-        "Complete support to grow"
-      ]
-    },
-    "renter": {
-      "title": "Traditional Driver",
-      "description": "Drive and earn commissions. No additional responsibilities.",
-      "benefits": [
-        "Total schedule flexibility",
-        "Earn 15-25% commission",
-        "No additional responsibilities",
-        "Complete technical support"
-      ]
-    }
-  },
-  "features": {
-    "title": "Platform Features",
-    "subtitle": "Everything you need to manage your business",
-    "feature": "FEATURES",
-    "items": [
-      {
-        "title": "Advanced Dashboard",
-        "description": "Real-time view of your earnings, performance metrics and growth opportunities"
-      },
-      {
-        "title": "Financial Control",
-        "description": "Detailed reports, automatic calculations and transparent payment tracking"
-      },
-      {
-        "title": "GPS Tracking",
-        "description": "Monitor your vehicle in real-time with integrated Cartrack technology"
-      },
-      {
-        "title": "Digital Documentation",
-        "description": "All contracts and documents in one place, always accessible"
-      }
-    ]
-  },
-  "testimonials": {
-    "title": "What our drivers say",
-    "subtitle": "Real stories from real drivers",
-    "feature": "TESTIMONIALS"
-  },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Find answers to the most common questions",
-    "feature": "FAQ"
-  },
-  "cta": {
-    "title": "Ready to start?",
-    "subtitle": "Join hundreds of drivers already earning with Conduz.pt",
-    "button": "Apply Now"
   }
 }
+
