@@ -44,6 +44,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
 
   return (
     <>
+      {/* Hero - Diferencial Principal */}
       <Hero
         title={t(HOME.HERO.TITLE)}
         subtitle={t(HOME.HERO.SUBTITLE)}
@@ -103,8 +104,49 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         />
       </Hero>
 
-      {/* Seção de Benefícios */}
+      {/* Seção: Por que Conduz é diferente */}
       <Container>
+        <Title
+          title={t(HOME.DIFFERENTIATION.TITLE)}
+          description={t(HOME.DIFFERENTIATION.SUBTITLE)}
+          feature={t(HOME.DIFFERENTIATION.FEATURE)}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
+          {(() => {
+            const items = t(HOME.DIFFERENTIATION.ITEMS);
+            if (!Array.isArray(items)) return null;
+
+            return items.map((item: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <Box
+                    w="50px"
+                    h="50px"
+                    borderRadius="lg"
+                    bg="green.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="green.600"
+                    fontSize="2xl"
+                  >
+                    {i === 0 ? "🔀" : i === 1 ? "📈" : i === 2 ? "🛡️" : "✨"}
+                  </Box>
+                  <Text fontSize="xl" fontWeight="bold" color="green.600">
+                    {item.title}
+                  </Text>
+                  <Text color="gray.600" flex="1">
+                    {item.description}
+                  </Text>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Seção de Benefícios */}
+      <Container softBg>
         <Title
           title={t(HOME.BENEFITS.TITLE)}
           description={t(HOME.BENEFITS.SUBTITLE)}
@@ -131,8 +173,8 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Como Funciona */}
-      <Container softBg>
+      {/* Como Funciona o Modelo Afiliado */}
+      <Container>
         <Title
           title={t(HOME.HOW_IT_WORKS.TITLE)}
           description={t(HOME.HOW_IT_WORKS.SUBTITLE)}
@@ -144,7 +186,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             if (!Array.isArray(steps)) return null;
 
             return steps.map((step: any, i: number) => (
-              <Card key={i} animated borded img={`/img/step-${i + 1}.jpg`}>
+              <Card key={i} animated borded>
                 <VStack spacing={4} align="center" textAlign="center">
                   <Box
                     w="60px"
@@ -173,27 +215,52 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Tipos de Motorista */}
+      {/* Escolha Seu Caminho */}
       <Container softBg>
         <Title
           title={t(HOME.SERVICES.TITLE)}
           description={t(HOME.SERVICES.SUBTITLE)}
-          feature="Tipos de Motorista"
+          feature="MODELOS"
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
-          <Card animated borded img="/img/service-drivers.jpg" color='green'>
-            <VStack spacing={4} align="start">
+          <Card animated borded color='green'>
+            <VStack spacing={4} align="start" h="full">
+              <Box
+                w="60px"
+                h="60px"
+                borderRadius="lg"
+                bg="green.100"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="green.600"
+                fontSize="3xl"
+              >
+                🎯
+              </Box>
               <Text fontSize="xl" fontWeight="bold" color="green.600">
                 {t(HOME.SERVICES.AFFILIATE.TITLE)}
               </Text>
-              <Text color="gray.600">
+              <Text color="gray.600" fontSize="sm">
                 {t(HOME.SERVICES.AFFILIATE.DESCRIPTION)}
               </Text>
+              <VStack spacing={2} align="start" flex="1" w="full">
+                {(() => {
+                  const benefits = t(HOME.SERVICES.AFFILIATE.BENEFITS);
+                  if (!Array.isArray(benefits)) return null;
+                  return benefits.map((benefit: any, i: number) => (
+                    <HStack key={i} spacing={2}>
+                      <CheckIcon color="green.600" w={4} h={4} />
+                      <Text color="gray.600" fontSize="sm">{benefit}</Text>
+                    </HStack>
+                  ));
+                })()}
+              </VStack>
               <Button
                 as={NextLink}
                 href={getLocalizedHref("/request")}
                 colorScheme="green"
-                size="sm"
+                w="full"
                 rightIcon={<ArrowRightIcon />}
                 onClick={() => trackCheckoutStart('Driver Application - Affiliate')}
               >
@@ -202,19 +269,44 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             </VStack>
           </Card>
 
-          <Card animated borded color='blue' img="/img/driver-app.jpg">
-            <VStack spacing={4} align="start">
+          <Card animated borded color='blue'>
+            <VStack spacing={4} align="start" h="full">
+              <Box
+                w="60px"
+                h="60px"
+                borderRadius="lg"
+                bg="blue.100"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="blue.600"
+                fontSize="3xl"
+              >
+                🚗
+              </Box>
               <Text fontSize="xl" fontWeight="bold" color="blue.600">
                 {t(HOME.SERVICES.RENTER.TITLE)}
               </Text>
-              <Text color="gray.600">
+              <Text color="gray.600" fontSize="sm">
                 {t(HOME.SERVICES.RENTER.DESCRIPTION)}
               </Text>
+              <VStack spacing={2} align="start" flex="1" w="full">
+                {(() => {
+                  const benefits = t(HOME.SERVICES.RENTER.BENEFITS);
+                  if (!Array.isArray(benefits)) return null;
+                  return benefits.map((benefit: any, i: number) => (
+                    <HStack key={i} spacing={2}>
+                      <CheckIcon color="blue.600" w={4} h={4} />
+                      <Text color="gray.600" fontSize="sm">{benefit}</Text>
+                    </HStack>
+                  ));
+                })()}
+              </VStack>
               <Button
                 as={NextLink}
                 href={getLocalizedHref("/request")}
                 colorScheme="blue"
-                size="sm"
+                w="full"
                 rightIcon={<ArrowRightIcon />}
                 onClick={() => trackCheckoutStart('Driver Application - Renter')}
               >
@@ -225,8 +317,54 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Métricas */}
+      {/* Metas de Crescimento 2026 */}
       <Container>
+        <Title
+          title={t(HOME.GROWTH.TITLE)}
+          description={t(HOME.GROWTH.SUBTITLE)}
+          feature={t(HOME.GROWTH.FEATURE)}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
+          {(() => {
+            const quarters = t(HOME.GROWTH.QUARTERS);
+            if (!Array.isArray(quarters)) return null;
+
+            return quarters.map((q: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <Box
+                    px={3}
+                    py={1}
+                    borderRadius="md"
+                    bg="green.100"
+                    color="green.700"
+                    fontWeight="bold"
+                    fontSize="sm"
+                  >
+                    {q.quarter}
+                  </Box>
+                  <VStack spacing={2} align="start" flex="1">
+                    <HStack>
+                      <Text color="gray.500" fontSize="sm">Motoristas:</Text>
+                      <Text fontWeight="bold" color="green.600">{q.motoristas}</Text>
+                    </HStack>
+                    <HStack>
+                      <Text color="gray.500" fontSize="sm">Receita:</Text>
+                      <Text fontWeight="bold" color="green.600">{q.receita}</Text>
+                    </HStack>
+                  </VStack>
+                  <Text color="gray.600" fontSize="sm">
+                    {q.description}
+                  </Text>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Métricas */}
+      <Container softBg>
         <Title
           title={t(HOME.METRICS.TITLE)}
           description={t(HOME.METRICS.SUBTITLE)}
@@ -239,17 +377,68 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             if (!Array.isArray(stats)) return null;
 
             return stats.map((item: any, i: number) => (
-              <Card key={i} title={item?.label || "Sem título"}
-                description={item?.description || "Sem descrição"} animated borded>
-                <Progress
-                  currentValue={Number(item?.value) || 0}
-                  totalValue={Number(item?.total) || 100}
-                  unit={item?.unit || ""}
-                  colorScheme="green"
-                  size="lg"
-                  animated
-                  variant={i === 0 ? "gradient" : i === 1 ? "striped" : i === 2 ? "glow" : "default"}
-                />
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <HStack>
+                    <Text fontSize="3xl" fontWeight="bold" color="green.600">
+                      {item.value}
+                    </Text>
+                    {item.unit && (
+                      <Text fontSize="lg" color="green.600" fontWeight="bold">
+                        {item.unit}
+                      </Text>
+                    )}
+                  </HStack>
+                  <VStack spacing={1} align="start" flex="1">
+                    <Text fontWeight="bold" color="gray.800" fontSize="sm">
+                      {item.label}
+                    </Text>
+                    <Text color="gray.600" fontSize="sm">
+                      {item.description}
+                    </Text>
+                  </VStack>
+                </VStack>
+              </Card>
+            ));
+          })()}
+        </ContainerDivisions>
+      </Container>
+
+      {/* Nossos Valores */}
+      <Container>
+        <Title
+          title={t(HOME.VALUES.TITLE)}
+          description={t(HOME.VALUES.SUBTITLE)}
+          feature={t(HOME.VALUES.FEATURE)}
+        />
+        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
+          {(() => {
+            const values = t(HOME.VALUES.ITEMS);
+            if (!Array.isArray(values)) return null;
+
+            return values.map((value: any, i: number) => (
+              <Card key={i} animated borded>
+                <VStack spacing={4} align="start" h="full">
+                  <Box
+                    w="50px"
+                    h="50px"
+                    borderRadius="lg"
+                    bg="green.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="green.600"
+                    fontSize="2xl"
+                  >
+                    {i === 0 ? "🔍" : i === 1 ? "⭐" : i === 2 ? "🔒" : "🚀"}
+                  </Box>
+                  <Text fontSize="xl" fontWeight="bold" color="green.600">
+                    {value.title}
+                  </Text>
+                  <Text color="gray.600" flex="1">
+                    {value.description}
+                  </Text>
+                </VStack>
               </Card>
             ));
           })()}
@@ -269,7 +458,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             if (!Array.isArray(testimonials)) return null;
 
             return testimonials.map((testimonial: any, i: number) => (
-              <Card key={i} animated borded img={`/img/testmonials-${i + 1}.jpg`}>
+              <Card key={i} animated borded>
                 <VStack spacing={4} align="start">
                   <Text fontSize="lg" fontStyle="italic" color="gray.700">
                     "{testimonial.quote}"
@@ -336,3 +525,4 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
 }
 
 export const getServerSideProps = withPublicSSR('home');
+

@@ -1,119 +1,203 @@
 {
-  "mission": {
-    "title": "A Nossa Missão",
-    "subtitle": "Simplificar o TVDE em Portugal com tecnologia avançada, suporte humano e compliance garantido",
-    "feature": "MISSÃO",
-    "card": {
-      "title": "Visão e Valores",
-      "description": "Construindo o futuro da mobilidade TVDE",
-      "content": "A Conduz.pt nasceu para simplificar o TVDE em Portugal. Somos o braço de mobilidade da Alvorada Magistral, combinando mais de 30 anos de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
-      "values": {
-        "title": "Os Nossos Valores Fundamentais",
-        "list": [
-          "Transparência em todas as operações",
-          "Segurança e compliance TVDE garantido",
-          "Serviço de excelência 7 dias por semana",
-          "Tecnologia que simplifica processos",
-          "Escala sustentável e responsável"
-        ]
-      }
-    },
-    "highlight": {
-      "title": "conduz.pt",
-      "description": "Construindo o futuro da mobilidade TVDE"
-    }
+  "hero": {
+    "title": "Sobre a Conduz.pt",
+    "subtitle": "Transformando motoristas em empreendedores através de um modelo meritocrático justo",
+    "badge": "NOSSA HISTÓRIA"
   },
-  "approach": {
-    "title": "A Nossa Abordagem",
-    "subtitle": "Metodologia testada para resultados excepcionais no TVDE",
-    "feature": "ABORDAGEM",
-    "methods": [
+  "vision": {
+    "title": "Visão & Missão",
+    "subtitle": "O que nos move",
+    "feature": "PROPÓSITO",
+    "items": [
       {
-        "title": "Onboarding Rápido",
-        "description": "Processo de entrada em dias, não semanas, com checklist inteligente e validação eficiente",
-        "icon": "🚀"
+        "label": "Visão",
+        "title": "Transformar Motoristas em Empreendedores",
+        "description": "Acreditamos que cada motorista tem potencial para construir seu próprio negócio. Nossa plataforma oferece as ferramentas e suporte necessário para que isso aconteça."
       },
       {
-        "title": "Suporte Humano",
-        "description": "Equipa dedicada disponível 7 dias por semana via WhatsApp, telefone e email",
-        "icon": "🤝"
+        "label": "Missão",
+        "title": "Criar um Modelo de Negócio Justo",
+        "description": "Oferecer um ecossistema transparente onde quanto melhor você trabalha, mais você ganha. Sem exploração, sem surpresas, apenas crescimento meritocrático."
       },
       {
-        "title": "Tecnologia Simples",
-        "description": "Portal do motorista intuitivo com saldo, histórico, faturas e relatórios em tempo real",
-        "icon": "💻"
-      },
-      {
-        "title": "Compliance Total",
-        "description": "Garantimos conformidade com todas as regulamentações TVDE portuguesas",
-        "icon": "✅"
+        "label": "Diferencial",
+        "title": "Não Somos Apenas uma Plataforma",
+        "description": "Somos um ecossistema completo de crescimento. Fornecemos tecnologia, suporte humano, estrutura organizacional e oportunidades de ganho exponencial."
       }
     ]
   },
-  "experience": {
-    "title": "A Nossa Experiência",
-    "subtitle": "Números que comprovam a nossa eficiência e dedicação",
-    "feature": "EXPERIÊNCIA",
-    "card": {
-      "title": "História de Sucesso",
-      "description": "Da gestão empresarial ao TVDE de excelência",
-      "content": "A Alvorada Magistral atua há mais de 30 anos em gestão empresarial em Portugal, Itália, Espanha e outros países. A Conduz.pt representa a nossa entrada no mercado TVDE, trazendo toda esta experiência para revolucionar a mobilidade portuguesa.",
-      "stats": {
-        "title": "Números que da Alvorada Magistral",
-        "list": [
-          {
-            "value": "30+",
-            "label": "Anos de Experiência"
-          },
-          {
-            "value": "95%",
-            "label": "Taxa de Aprovação"
-          },
-          {
-            "value": "<24h",
-            "label": "Tempo de Análise"
-          },
-          {
-            "value": "4.9/5",
-            "label": "Satisfação do Suporte"
-          }
-        ]
+  "model": {
+    "title": "O Modelo Explicado",
+    "subtitle": "Como funciona a estrutura meritocrática",
+    "feature": "ESTRUTURA",
+    "sections": [
+      {
+        "title": "Modelo Híbrido",
+        "description": "70% Afiliados + 30% Locatários",
+        "details": "Oferecemos dois caminhos: motoristas tradicionais que trabalham por comissão, e afiliados empreendedores que constroem suas próprias redes e ganham comissões progressivas."
+      },
+      {
+        "title": "Comissões Progressivas",
+        "description": "Nível 1: 5% | Nível 2: 7,5% | Nível 3: 10%",
+        "details": "Quanto melhor você trabalha, mais você ganha. Os níveis são baseados em performance, não em tempo. Você progride quando merece."
+      },
+      {
+        "title": "Sistema de Recrutamento",
+        "description": "Ganhe 2-5% da receita de quem você recrutar",
+        "details": "Cada motorista que você convida para a plataforma gera comissões recorrentes para você. Sua rede é seu ativo mais valioso."
+      },
+      {
+        "title": "Reserva Técnica",
+        "description": "25% do lucro é reservado para proteger você",
+        "details": "Mesmo em períodos difíceis, sua renda é protegida. A reserva técnica garante estabilidade financeira para toda a rede."
       }
-    },
-    "highlight": {
-      "title": "Resultados Comprovados",
-      "description": "Eficiência operacional e satisfação de clientes"
-    }
+    ]
   },
-  "team": {
-    "title": "A Nossa Equipa",
-    "subtitle": "Profissionais dedicados ao sucesso dos nossos motoristas e parceiros",
-    "feature": "EQUIPA",
-    "members": [
+  "organization": {
+    "title": "Nossa Estrutura",
+    "subtitle": "Você não está sozinho. Temos estrutura para apoiar seu crescimento.",
+    "feature": "EQUIPE",
+    "departments": [
       {
-        "name": "Equipa de Onboarding",
-        "position": "Especialistas em TVDE",
-        "bio": "Responsáveis por garantir um processo de entrada rápido e eficiente, com validação documental e formação completa.",
-        "expertise": ["Compliance TVDE", "Formação"]
+        "name": "Operações",
+        "description": "Gerencia a rede de motoristas, onboarding e suporte operacional"
       },
       {
-        "name": "Suporte ao Motorista",
-        "position": "Atendimento 7/7",
-        "bio": "Equipa dedicada disponível todos os dias da semana para resolver questões e apoiar os nossos motoristas.",
-        "expertise": ["Suporte Técnico", "Resolução de Problemas"]
+        "name": "Financeiro",
+        "description": "Calcula comissões, gerencia pagamentos e reserva técnica"
       },
       {
-        "name": "Gestão de Frotas",
-        "position": "Especialistas B2B",
-        "bio": "Focados em soluções empresariais, gestão de frotas e parcerias estratégicas para maximizar eficiência.",
-        "expertise": ["Gestão B2B", "Parcerias"]
+        "name": "Tecnologia",
+        "description": "Desenvolve e mantém a plataforma com as melhores práticas"
+      },
+      {
+        "name": "Suporte",
+        "description": "Atende motoristas e afiliados 24/7 com dedicação"
+      }
+    ]
+  },
+  "growth": {
+    "title": "Roadmap 2026",
+    "subtitle": "Crescimento ambicioso, mas realista",
+    "feature": "METAS",
+    "timeline": [
+      {
+        "quarter": "Q1 2026",
+        "motoristas": 15,
+        "receita": "€5.000/mês",
+        "milestone": "Fase Piloto",
+        "description": "Validação do modelo com motoristas selecionados"
+      },
+      {
+        "quarter": "Q2 2026",
+        "motoristas": 25,
+        "receita": "€12.000/mês",
+        "milestone": "Expansão Controlada",
+        "description": "Crescimento da rede com suporte estruturado"
+      },
+      {
+        "quarter": "Q3 2026",
+        "motoristas": 40,
+        "receita": "€25.000/mês",
+        "milestone": "Crescimento Acelerado",
+        "description": "Rede consolidada com afiliados ativos"
+      },
+      {
+        "quarter": "Q4 2026",
+        "motoristas": 60,
+        "receita": "€45.000/mês",
+        "milestone": "Consolidação",
+        "description": "Modelo escalável e sustentável"
+      }
+    ]
+  },
+  "values": {
+    "title": "Nossos Valores",
+    "subtitle": "O que nos define como empresa",
+    "feature": "PRINCÍPIOS",
+    "items": [
+      {
+        "title": "Transparência",
+        "description": "Você sabe exatamente como funciona, quanto ganha e como crescer. Sem segredos, sem surpresas."
+      },
+      {
+        "title": "Meritocracia",
+        "description": "Quanto melhor você trabalha, mais você ganha. Sem favoritismo, sem injustiças."
+      },
+      {
+        "title": "Segurança",
+        "description": "Sua renda é protegida por reserva técnica. Você pode contar conosco em qualquer situação."
+      },
+      {
+        "title": "Crescimento",
+        "description": "Escalamos juntos. Seu sucesso é nosso sucesso. Investimos em sua evolução."
+      }
+    ]
+  },
+  "metrics": {
+    "title": "Números que Falam",
+    "subtitle": "Indicadores de saúde e crescimento",
+    "feature": "RESULTADOS",
+    "stats": [
+      {
+        "value": "15",
+        "label": "Motoristas Ativos",
+        "description": "Rede em crescimento constante"
+      },
+      {
+        "value": "92",
+        "unit": "%",
+        "label": "Taxa de Retenção",
+        "description": "Motoristas que continuam conosco"
+      },
+      {
+        "value": "€5.770",
+        "label": "Potencial Mensal",
+        "description": "Com 10 motoristas na sua rede"
+      },
+      {
+        "value": "9",
+        "label": "Break-even",
+        "description": "Motoristas para lucro positivo"
+      }
+    ]
+  },
+  "why": {
+    "title": "Por que Escolher Conduz?",
+    "subtitle": "Diferenciais que nos destacam",
+    "feature": "VANTAGENS",
+    "items": [
+      {
+        "title": "Modelo Justo",
+        "description": "Sem exploração. Você ganha o que merece."
+      },
+      {
+        "title": "Transparência Total",
+        "description": "Saiba exatamente como funciona tudo."
+      },
+      {
+        "title": "Suporte Estruturado",
+        "description": "Equipe dedicada para seu sucesso."
+      },
+      {
+        "title": "Crescimento Exponencial",
+        "description": "Potencial ilimitado com sua rede."
+      },
+      {
+        "title": "Segurança Financeira",
+        "description": "Reserva técnica protege você."
+      },
+      {
+        "title": "Tecnologia Moderna",
+        "description": "Plataforma robusta e intuitiva."
       }
     ]
   },
   "cta": {
-    "title": "Pronto para Fazer Parte da Conduz?",
-    "subtitle": "Junte-se a nós e descubra como podemos simplificar o seu TVDE",
+    "title": "Pronto para Começar?",
+    "subtitle": "Junte-se aos motoristas que já escolheram Conduz e estão construindo seus próprios negócios.",
     "feature": "PRÓXIMO PASSO",
-    "button": "Contactar Agora"
+    "button": "Candidatar-me Agora"
   }
 }
+

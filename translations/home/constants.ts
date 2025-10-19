@@ -53,4 +53,22 @@ export const HOME = {
     TITLE: 'features.title',
     ITEMS: 'features.items',
   },
+  DIFFERENTIATION: {
+    TITLE: 'differentiation.title',
+    SUBTITLE: 'differentiation.subtitle',
+    FEATURE: 'differentiation.feature',
+    ITEMS: 'differentiation.items',
+  },
+  GROWTH: {
+    TITLE: 'growth.title',
+    SUBTITLE: 'growth.subtitle',
+    FEATURE: 'growth.feature',
+    QUARTERS: 'growth.quarters',
+  },
+  VALUES: {
+    TITLE: 'values.title',
+    SUBTITLE: 'values.subtitle',
+    FEATURE: 'values.feature',
+    ITEMS: 'values.items',
+  },
 } as const;
