@@ -44,7 +44,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       <Hero
         title="Não é só dirigir. É construir seu próprio negócio."
         subtitle="Sistema meritocrático onde seu desempenho determina seu ganho"
-        backgroundImage="/img/hero-drivers.jpg"
+        backgroundImage="/img/hero-drivers-new.png"
         badge="TVDE PORTUGAL"
         actions={
           <HStack spacing={4} mt={8}>
@@ -88,49 +88,49 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
                 title: "Comissões Progressivas",
                 description: "Quanto melhor você trabalha, mais você ganha. De 5% até 10% de comissão.",
                 badge: "CRESCIMENTO",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Ganhos por Recrutamento",
                 description: "Recrute motoristas e ganhe comissões passivas. De 2% até 5%.",
                 badge: "RENDA PASSIVA",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Pagamentos Semanais",
                 description: "Toda quinta-feira, sem atrasos. Fluxo de caixa previsível e garantido.",
                 badge: "CONFIANÇA",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Dashboard em Tempo Real",
                 description: "Veja seus números: receita, aceitação, avaliação, recrutamentos e horas.",
                 badge: "CONTROLO",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Suporte Especializado TVDE",
                 description: "Equipe que entende o setor. Onboarding em dias, não semanas.",
                 badge: "SUPORTE",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Múltiplas Plataformas",
                 description: "Integrado com Uber, Bolt e Free Now. Múltiplas fontes de renda.",
                 badge: "FLEXIBILIDADE",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Transparência Total",
                 description: "Acesso a todos os cálculos. Sem mistérios. Você sabe exatamente como funciona.",
                 badge: "HONESTIDADE",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
               {
                 title: "Segurança Financeira",
                 description: "Reserva técnica de 25% garante estabilidade. Mesmo em crises, você recebe.",
                 badge: "PROTEÇÃO",
-                image: "/img/driver-app.jpg",
+                image: "/img/driver-app-new.png",
               },
             ];
             if (!Array.isArray(differentials)) return null;
@@ -202,7 +202,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
             ];
             if (!Array.isArray(steps)) return null;
             return steps.map((step: any, i: number) => (
-              <Card key={i} animated borded img={`/img/step-${i + 1}.jpg`}>
+              <Card key={i} animated borded img={`/img/step-${i + 1}-new.png`}>
                 <VStack spacing={4} align="center" textAlign="center">
                   <Box
                     w="60px"
@@ -332,7 +332,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
                 title: "Motorista Afiliado",
                 description: "Trabalhe com o seu próprio veículo e tenha total controlo sobre o seu negócio.",
                 color: "green",
-                image: "/img/service-drivers.jpg",
+                image: "/img/service-drivers-new.png",
                 benefits: [
                   "Flexibilidade total de horários",
                   "Receita 100% sua",
@@ -344,7 +344,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
                 title: "Motorista Locatário",
                 description: "Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.",
                 color: "blue",
-                image: "/img/service-companies.jpg",
+                image: "/img/service-companies-new.png",
                 benefits: [
                   "Sem investimento inicial",
                   "Veículos sempre atualizados",
