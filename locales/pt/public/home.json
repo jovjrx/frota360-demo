@@ -1,65 +1,149 @@
 {
   "hero": {
-    "title": "Não é só dirigir. É construir seu próprio negócio.",
-    "subtitle": "Ganhe comissões recrutando motoristas. Quanto melhor você trabalha, mais você ganha.",
-    "description": "Conduz.pt oferece um modelo híbrido único: seja motorista tradicional ou afiliado empreendedor. Escolha como quer ganhar.",
-    "ctaPrimary": "Torne-se Afiliado",
-    "ctaSecondary": "Falar no WhatsApp"
-  },
-  "howItWorks": {
-    "title": "Como Funciona o Modelo Afiliado",
-    "subtitle": "Crescimento progressivo e estruturado",
-    "steps": [
-      {
-        "number": "1",
-        "title": "Você Recruta",
-        "description": "Convide amigos ou colegas para a plataforma com seu código de convite único"
-      },
-      {
-        "number": "2",
-        "title": "Eles Ganham",
-        "description": "Seus motoristas trabalham e ganham comissões. Quanto melhor, mais ganham."
-      },
-      {
-        "number": "3",
-        "title": "Você Ganha",
-        "description": "Você recebe comissões da receita deles. Crescimento exponencial com sua rede."
+      "title": "Você conduz, nós cuidamos do resto!",
+      "subtitle": "Gestão 360º para motoristas TVDE — Plataforma certa, apoio real, ganhos garantidos.",
+      "description": "A Conduz.pt é o braço TVDE da Alvorada Magistral. Oferecemos soluções completas para motoristas com tecnologia avançada e suporte humano.",
+      "ctaPrimary": "Candidatar-me como Motorista",
+      "ctaSecondary": "Falar no WhatsApp",
+      "badge": "TVDE PORTUGAL",
+      "highlight": {
+        "title": "Você conduz, nós cuidamos do resto!",
+        "description": "Onboarding em dias, não semanas. Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
       }
-    ]
-  },
-  "services": {
-    "title": "Escolha Seu Caminho",
-    "subtitle": "Dois modelos de negócio, um objetivo: maximizar seus ganhos",
-    "affiliate": {
-      "title": "Motorista Afiliado",
-      "description": "Dirija + Recrute + Ganhe Comissões. Construa seu próprio negócio."
     },
-    "renter": {
-      "title": "Motorista Tradicional",
-      "description": "Dirija e ganhe comissões. Sem responsabilidades adicionais."
-    }
-  },
-  "features": {
-    "title": "O que oferecemos aos nossos motoristas",
-    "subtitle": "Ferramentas e suporte para maximizar os seus ganhos",
-    "items": [
-      {
-        "title": "Gestão Financeira Completa",
-        "description": "Dashboard intuitivo com relatórios semanais detalhados dos seus ganhos, despesas e repasses"
+    "benefits": {
+      "title": "O que oferecemos aos nossos motoristas",
+      "subtitle": "Ferramentas e suporte para maximizar os seus ganhos",
+      "feature": "BENEFÍCIOS",
+      "items": [
+        {
+          "title": "Gestão Financeira Completa",
+          "description": "Dashboard intuitivo com relatórios semanais detalhados dos seus ganhos, despesas e repasses"
+        },
+        {
+          "title": "Empréstimos para Capital de Giro",
+          "description": "Precisa de dinheiro para despesas operacionais ou pessoais? Solicite empréstimos rápidos diretamente pela plataforma"
+        },
+        {
+          "title": "Pagamentos Semanais Garantidos",
+          "description": "Receba os seus repasses todas as semanas com total transparência e pontualidade"
+        },
+        {
+          "title": "Suporte Especializado TVDE",
+          "description": "Equipe dedicada que conhece a realidade do setor e está sempre disponível para ajudar"
+        }
+      ]
+    },
+    "services": {
+      "title": "Tipos de Motorista",
+      "subtitle": "Escolha o modelo que melhor se adapta à sua situação",
+      "affiliate": {
+        "title": "Motorista Afiliado",
+        "description": "Trabalhe com o seu próprio veículo e tenha total controlo sobre o seu negócio.",
+        "benefits": [
+          "Flexibilidade total de horários",
+          "Receita 100% sua",
+          "Controlo total do veículo",
+          "Suporte técnico completo"
+        ]
       },
-      {
-        "title": "Comissões de Recrutamento",
-        "description": "Ganhe 2-5% da receita dos motoristas que você recrutar. Crescimento exponencial."
-      },
-      {
-        "title": "Pagamentos Semanais Garantidos",
-        "description": "Receba os seus repasses todas as semanas com total transparência e pontualidade"
-      },
-      {
-        "title": "Suporte Especializado",
-        "description": "Equipe dedicada que conhece a realidade do setor e está sempre disponível para ajudar"
+      "renter": {
+        "title": "Motorista Locatário",
+        "description": "Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.",
+        "benefits": [
+          "Sem investimento inicial",
+          "Veículos sempre atualizados",
+          "Manutenção incluída",
+          "Seguro completo"
+        ]
       }
-    ]
-  }
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "3 passos simples para começar",
+      "feature": "PROCESSO",
+      "steps": [
+        {
+          "number": "1",
+          "title": "Solicitação",
+          "description": "Preencha o formulário de candidatura online"
+        },
+        {
+          "number": "2",
+          "title": "Validação & formação",
+          "description": "Compliance, seguro, kit de boas-vindas"
+        },
+        {
+          "number": "3",
+          "title": "Comece a faturar",
+          "description": "Pagamentos semanais, monitorização em tempo real e acesso a empréstimos para capital de giro"
+        }
+      ]
+    },
+    "features": {
+      "title": "Porquê Escolher a Conduz PT?",
+      "items": [
+        {
+          "title": "Integração Completa",
+          "description": "Conectamos com todas as principais plataformas de transporte"
+        },
+        {
+          "title": "Suporte 24/7",
+          "description": "Estamos sempre disponíveis para o ajudar"
+        },
+        {
+          "title": "Transparência Total",
+          "description": "Relatórios detalhados e transparentes"
+        },
+        {
+          "title": "Crescimento Garantido",
+          "description": "Ajudamos a maximizar os seus ganhos"
+        },
+        {
+          "title": "Financiamento Rápido",
+          "description": "Empréstimos aprovados em até 24h para suas despesas operacionais"
+        }
+      ]
+    },
+    "metrics": {
+      "title": "Os Nossos Números",
+      "subtitle": "Indicadores que comprovam a nossa eficiência",
+      "feature": "RESULTADOS",
+      "stats": [
+        {
+          "value": "95",
+          "total": "100",
+          "unit": "%",
+          "label": "Taxa de aprovação de documentos",
+          "description": "Mais de 95% de taxa de aprovação de documentos"
+        },
+        {
+          "value": "24",
+          "total": "48",
+          "unit": "h",
+          "label": "Tempo médio para análise",
+          "description": "Menos de 24h tempo médio para análise quando possível"
+        },
+        {
+          "value": "4.8",
+          "total": "5.0",
+          "unit": "/5",
+          "label": "Satisfação do suporte",
+          "description": "4.8/5 satisfação do suporte"
+        },
+        {
+          "value": "7",
+          "total": "7",
+          "unit": "dias",
+          "label": "Suporte disponível",
+          "description": "Suporte 7 dias por semana"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Pronto para Começar a Faturar?",
+      "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz",
+      "feature": "PRÓXIMO PASSO",
+      "button": "Começar agora"
+    }
 }
-

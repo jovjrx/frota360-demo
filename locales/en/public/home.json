@@ -1,65 +1,149 @@
 {
   "hero": {
-    "title": "It's not just driving. It's building your own business.",
-    "subtitle": "Earn commissions by recruiting drivers. The better you work, the more you earn.",
-    "description": "Conduz.pt offers a unique hybrid model: be a traditional driver or an entrepreneurial affiliate. Choose how you want to earn.",
-    "ctaPrimary": "Become an Affiliate",
-    "ctaSecondary": "Chat on WhatsApp"
-  },
-  "howItWorks": {
-    "title": "How the Affiliate Model Works",
-    "subtitle": "Progressive and structured growth",
-    "steps": [
-      {
-        "number": "1",
-        "title": "You Recruit",
-        "description": "Invite friends or colleagues to the platform with your unique referral code"
-      },
-      {
-        "number": "2",
-        "title": "They Earn",
-        "description": "Your drivers work and earn commissions. The better they work, the more they earn."
-      },
-      {
-        "number": "3",
-        "title": "You Earn",
-        "description": "You receive commissions from their revenue. Exponential growth with your network."
+      "title": "You drive, we take care of the rest!",
+      "subtitle": "360º management for TVDE drivers — Right platform, real support, guaranteed earnings.",
+      "description": "Conduz.pt is the TVDE arm of Alvorada Magistral. We offer complete solutions for drivers with advanced technology and human support.",
+      "ctaPrimary": "Apply as Driver",
+      "ctaSecondary": "Talk on WhatsApp",
+      "badge": "TVDE PORTUGAL",
+      "highlight": {
+        "title": "You drive, we take care of the rest!",
+        "description": "Onboarding in days, not weeks. Human and responsive support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
       }
-    ]
-  },
-  "services": {
-    "title": "Choose Your Path",
-    "subtitle": "Two business models, one objective: maximize your earnings",
-    "affiliate": {
-      "title": "Affiliate Driver",
-      "description": "Drive + Recruit + Earn Commissions. Build your own business."
     },
-    "renter": {
-      "title": "Traditional Driver",
-      "description": "Drive and earn commissions. No additional responsibilities."
-    }
-  },
-  "features": {
-    "title": "What we offer our drivers",
-    "subtitle": "Tools and support to maximize your earnings",
-    "items": [
-      {
-        "title": "Complete Financial Management",
-        "description": "Intuitive dashboard with detailed weekly reports of your earnings, expenses and transfers"
+    "benefits": {
+      "title": "What we offer our drivers",
+      "subtitle": "Tools and support to maximize your earnings",
+      "feature": "BENEFITS",
+      "items": [
+        {
+          "title": "Complete Financial Management",
+          "description": "Intuitive dashboard with detailed weekly reports of your earnings, expenses and payouts"
+        },
+        {
+          "title": "Working Capital Loans",
+          "description": "Need money for operational or personal expenses? Request fast loans directly through the platform"
+        },
+        {
+          "title": "Guaranteed Weekly Payments",
+          "description": "Receive your payouts every week with total transparency and punctuality"
+        },
+        {
+          "title": "Specialized TVDE Support",
+          "description": "Dedicated team that knows the sector's reality and is always available to help"
+        }
+      ]
+    },
+    "services": {
+      "title": "Driver Types",
+      "subtitle": "Choose the model that best fits your situation",
+      "affiliate": {
+        "title": "Affiliate Driver",
+        "description": "Work with your own vehicle and have total control over your business.",
+        "benefits": [
+          "Total schedule flexibility",
+          "100% your revenue",
+          "Total vehicle control",
+          "Complete technical support"
+        ]
       },
-      {
-        "title": "Recruitment Commissions",
-        "description": "Earn 2-5% of the revenue of drivers you recruit. Exponential growth."
-      },
-      {
-        "title": "Guaranteed Weekly Payments",
-        "description": "Receive your transfers every week with total transparency and punctuality"
-      },
-      {
-        "title": "Specialized Support",
-        "description": "Dedicated team that understands the reality of the sector and is always available to help"
+      "renter": {
+        "title": "Renter Driver",
+        "description": "Rent a vehicle from Conduz PT and start working immediately.",
+        "benefits": [
+          "No initial investment",
+          "Always updated vehicles",
+          "Maintenance included",
+          "Complete insurance"
+        ]
       }
-    ]
-  }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "3 simple steps to get started",
+      "feature": "PROCESS",
+      "steps": [
+        {
+          "number": "1",
+          "title": "Application",
+          "description": "Fill out the online application form"
+        },
+        {
+          "number": "2",
+          "title": "Validation & training",
+          "description": "Compliance, insurance, welcome kit"
+        },
+        {
+          "number": "3",
+          "title": "Start earning",
+          "description": "Weekly payments, real-time monitoring and access to working capital loans"
+        }
+      ]
+    },
+    "features": {
+      "title": "Why Choose Conduz PT?",
+      "items": [
+        {
+          "title": "Complete Integration",
+          "description": "We connect with all major transport platforms"
+        },
+        {
+          "title": "24/7 Support",
+          "description": "We are always available to help you"
+        },
+        {
+          "title": "Total Transparency",
+          "description": "Detailed and transparent reports"
+        },
+        {
+          "title": "Guaranteed Growth",
+          "description": "We help maximize your earnings"
+        },
+        {
+          "title": "Fast Financing",
+          "description": "Loans approved in up to 24h for your operational expenses"
+        }
+      ]
+    },
+    "metrics": {
+      "title": "Our Numbers",
+      "subtitle": "Indicators that prove our efficiency",
+      "feature": "RESULTS",
+      "stats": [
+        {
+          "value": "95",
+          "total": "100",
+          "unit": "%",
+          "label": "Document approval rate",
+          "description": "More than 95% document approval rate"
+        },
+        {
+          "value": "24",
+          "total": "48",
+          "unit": "h",
+          "label": "Average analysis time",
+          "description": "Less than 24h average analysis time when possible"
+        },
+        {
+          "value": "4.8",
+          "total": "5.0",
+          "unit": "/5",
+          "label": "Support satisfaction",
+          "description": "4.8/5 support satisfaction"
+        },
+        {
+          "value": "7",
+          "total": "7",
+          "unit": "days",
+          "label": "Support available",
+          "description": "Support 7 days a week"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to Start Earning?",
+      "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
+      "feature": "NEXT STEP",
+      "button": "Start now"
+    }
 }
-
