@@ -42,10 +42,10 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
     <Box bg={bgColor} minH="100vh">
       {/* HERO SECTION */}
       <Hero
-        title={t(NEW_HOME.HERO.TITLE)}
-        subtitle={t(NEW_HOME.HERO.SUBTITLE)}
+        title="Não é só dirigir. É construir seu próprio negócio."
+        subtitle="Sistema meritocrático onde seu desempenho determina seu ganho"
         backgroundImage="/img/hero-drivers.jpg"
-        badge={t(NEW_HOME.HERO.BADGE)}
+        badge="TVDE PORTUGAL"
         actions={
           <HStack spacing={4} mt={8}>
             <Button
@@ -56,7 +56,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
               rightIcon={<ArrowRightIcon />}
               onClick={() => trackCheckoutStart("Driver Application - New Home")}
             >
-              {t(NEW_HOME.HERO.CTA_PRIMARY)}
+              "Candidatar-me como Motorista"
             </Button>
             <Button
               as="a"
@@ -67,7 +67,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
               size="lg"
               _hover={{ bg: "whiteAlpha.200" }}
             >
-              {t(NEW_HOME.HERO.CTA_SECONDARY)}
+              "Falar no WhatsApp"
             </Button>
           </HStack>
         }
@@ -76,9 +76,9 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* DIFERENCIAIS ÚNICOS */}
       <Container maxW="7xl">
         <Title
-          title={t(NEW_HOME.DIFFERENTIALS.TITLE)}
-          description={t(NEW_HOME.DIFFERENTIALS.SUBTITLE)}
-          feature={t(NEW_HOME.DIFFERENTIALS.FEATURE)}
+          title="Por que Motoristas Escolhem Conduz"
+          description="Sistema meritocrático que recompensa seu desempenho"
+          feature="DIFERENCIAIS ÚNICOS"
         />
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mt={12}>
@@ -127,9 +127,9 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* COMO FUNCIONA */}
       <Container maxW="7xl" bg="white" borderY="1px solid" borderColor="gray.200">
         <Title
-          title={t(NEW_HOME.HOW_IT_WORKS.TITLE)}
-          description={t(NEW_HOME.HOW_IT_WORKS.SUBTITLE)}
-          feature={t(NEW_HOME.HOW_IT_WORKS.FEATURE)}
+          title="Como Funciona"
+          description="3 passos simples para começar"
+          feature="PROCESSO"
         />
 
         <ContainerDivisions template={{ base: '1fr', md: 'repeat(3, 1fr)' }}>
@@ -169,9 +169,9 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* SISTEMA MERITOCRÁTICO */}
       <Container maxW="7xl">
         <Title
-          title={t(NEW_HOME.MERITOCRATIC.TITLE)}
-          description={t(NEW_HOME.MERITOCRATIC.SUBTITLE)}
-          feature={t(NEW_HOME.MERITOCRATIC.FEATURE)}
+          title="Sistema Meritocrático"
+          description="Quanto melhor você trabalha, mais você ganha"
+          feature="PROGRESSÃO"
         />
 
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mt={12}>
@@ -215,9 +215,9 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* TIPOS DE MOTORISTA */}
       <Container maxW="7xl" bg="white" borderY="1px solid" borderColor="gray.200">
         <Title
-          title={t(NEW_HOME.DRIVER_TYPES.TITLE)}
-          description={t(NEW_HOME.DRIVER_TYPES.SUBTITLE)}
-          feature={t(NEW_HOME.DRIVER_TYPES.FEATURE)}
+          title="Escolha Seu Caminho"
+          description="Dois modelos para duas realidades"
+          feature="FLEXIBILIDADE"
         />
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} mt={12}>
@@ -250,7 +250,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
                     w="full"
                     onClick={() => trackCheckoutStart(`Driver Application - ${type.title}`)}
                   >
-                    {t(NEW_HOME.DRIVER_TYPES.CTA)}
+                    "Candidatar-me"
                   </Button>
                 </VStack>
               </Card>
@@ -262,9 +262,9 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* TRANSPARÊNCIA E SEGURANÇA */}
       <Container maxW="7xl">
         <Title
-          title={t(NEW_HOME.TRUST.TITLE)}
-          description={t(NEW_HOME.TRUST.SUBTITLE)}
-          feature={t(NEW_HOME.TRUST.FEATURE)}
+          title="Confiança e Segurança"
+          description="Tudo que você precisa para trabalhar com tranquilidade"
+          feature="GARANTIAS"
         />
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mt={12}>
@@ -299,10 +299,10 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       <Box bg="green.600" color="white" py={16} textAlign="center">
         <Container maxW="2xl">
           <Heading size="xl" mb={4}>
-            {t(NEW_HOME.FINAL_CTA.TITLE)}
+            "Pronto para Começar a Faturar?"
           </Heading>
           <Text fontSize="lg" mb={8} opacity={0.9}>
-            {t(NEW_HOME.FINAL_CTA.SUBTITLE)}
+            "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz"
           </Text>
           <HStack justify="center" spacing={4}>
             <Button
@@ -315,7 +315,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
               rightIcon={<ArrowRightIcon />}
               onClick={() => trackCheckoutStart("Driver Application - Final CTA")}
             >
-              {t(NEW_HOME.FINAL_CTA.CTA_PRIMARY)}
+              "Candidatar-me Agora"
             </Button>
             <Button
               as="a"
@@ -326,7 +326,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
               size="lg"
               _hover={{ bg: "whiteAlpha.200" }}
             >
-              {t(NEW_HOME.FINAL_CTA.CTA_SECONDARY)}
+              "Falar no WhatsApp"
             </Button>
           </HStack>
         </Container>
