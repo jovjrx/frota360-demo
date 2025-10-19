@@ -7,6 +7,9 @@ import {
     FiSettings,
     FiBarChart2,
     FiUsers,
+    FiDollarSign,
+    FiTarget,
+    FiTrendingUp,
 } from 'react-icons/fi';
 
 export interface AdminMenuItem {
@@ -30,67 +33,99 @@ export interface AdminMenuItem {
 export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     {
         id: 'dashboard',
-        label: 'dashboard', // Traduzido via t('menu.dashboard')
+        label: 'dashboard',
         href: '/admin',
         icon: FiHome,
-        description: 'overview', // Traduzido via t('menu.overview')
+        description: 'overview',
         showInMainMenu: true,
     },
     {
         id: 'drivers',
-        label: 'drivers', // Traduzido via t('menu.drivers')
+        label: 'drivers',
         href: '/admin/drivers',
         icon: FiUsers,
-        description: 'drivers_management', // Traduzido via t('menu.drivers_management')
+        description: 'drivers_management',
         showInMainMenu: true,
     },
     {
         id: 'control',
-        label: 'control', // Traduzido via t('menu.control')
+        label: 'control',
         href: '/admin/weekly',
         icon: FiCalendar,
-        description: 'weekly_control', // Traduzido via t('menu.weekly_control')
+        description: 'weekly_control',
         showInMainMenu: true,
     },
     {
         id: 'financing',
-        label: 'financing', // Traduzido via t('menu.financing')
+        label: 'financing',
         href: '/admin/financing',
         icon: FiActivity,
-        description: 'financing_management', // Traduzido via t('menu.financing_management')
-        showInMainMenu: false, // Fica no dropdown "Mais"
+        description: 'financing_management',
+        showInMainMenu: false,
     },
     {
         id: 'contracts',
-        label: 'contracts', // Traduzido via t('menu.contracts')
+        label: 'contracts',
         href: '/admin/contracts',
         icon: FiFileText,
-        description: 'contracts_management', // Traduzido via t('menu.contracts_management')
+        description: 'contracts_management',
         showInMainMenu: false,
     },
     {
         id: 'monitor',
-        label: 'monitor', // Traduzido via t('menu.monitor')
+        label: 'monitor',
         href: '/admin/monitor',
         icon: FiTruck,
-        description: 'tracking', // Traduzido via t('menu.tracking')
-        showInMainMenu: false, // Movido para "Mais"
+        description: 'tracking',
+        showInMainMenu: false,
     },
     {
         id: 'data',
-        label: 'data', // Traduzido via t('menu.data')
+        label: 'data',
         href: '/admin/data',
         icon: FiBarChart2,
-        description: 'weekly_data', // Traduzido via t('menu.weekly_data')
-        showInMainMenu: false, // Fica no dropdown "Mais"
+        description: 'weekly_data',
+        showInMainMenu: false,
+    },
+    {
+        id: 'commissions',
+        label: 'commissions',
+        href: '/admin/commissions',
+        icon: FiDollarSign,
+        description: 'commissions_management',
+        showInMainMenu: false,
+    },
+    {
+        id: 'kpis',
+        label: 'kpis',
+        href: '/admin/kpis',
+        icon: FiTrendingUp,
+        description: 'kpis_management',
+        showInMainMenu: false,
+    },
+    {
+        id: 'goals',
+        label: 'goals',
+        href: '/admin/goals',
+        icon: FiTarget,
+        description: 'goals_management',
+        showInMainMenu: false,
+    },
+    {
+        id: 'technical_reserve',
+        label: 'technical_reserve',
+        href: '/admin/technical-reserve',
+        icon: FiActivity,
+        description: 'technical_reserve_management',
+        showInMainMenu: false,
     },
     {
         id: 'users',
-        label: 'users', // Traduzido via t('menu.users')
+        label: 'users',
         href: '/admin/users',
         icon: FiUsers,
-        description: 'user_management', // Traduzido via t('menu.user_management')
-        showInMainMenu: false, // Fica no dropdown "Mais"
+        description: 'user_management',
+        showInMainMenu: false,
     },
 ];
 
@@ -124,3 +159,4 @@ export const isMenuItemActive = (itemHref: string, currentPath: string): boolean
     }
     return currentPath.startsWith(itemHref);
 };
+

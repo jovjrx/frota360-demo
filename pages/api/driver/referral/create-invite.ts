@@ -4,9 +4,9 @@
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAuth } from 'firebase-admin/auth';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { createReferralInvite } from '@/lib/services/referral-manager';
+import { getSession } from '@/lib/session/ironSession';
 import { z } from 'zod';
 
 const RequestSchema = z.object({
@@ -16,26 +16,25 @@ const RequestSchema = z.object({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
-    // Validar schema
-    const { email, phone } = RequestSchema.parse(req.body);
-
     // Verificar autenticação
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    const session = await getSession(req, res);
+    if (!session || !session.user) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
-    const token = authHeader.substring(7);
-    const decodedToken = await getAuth().verifyIdToken(token);
+    const userEmail = session.userId;
+
+    // Validar schema
+    const { email, phone } = RequestSchema.parse(req.body);
 
     // Buscar motorista
     const driverSnapshot = await adminDb
       .collection('drivers')
-      .where('uid', '==', decodedToken.uid)
+      .where('email', '==', userEmail)
       .limit(1)
       .get();
 

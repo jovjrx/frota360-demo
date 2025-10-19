@@ -8,6 +8,8 @@ import {
   FiBarChart,
   FiDollarSign,
   FiEdit,
+  FiUsers,
+  FiTarget,
 } from 'react-icons/fi';
 
 export interface DashboardMenuItem {
@@ -25,19 +27,19 @@ export interface DashboardMenuItem {
 export const dashboardMenuItems: DashboardMenuItem[] = [
   {
     id: 'dashboard',
-    label: 'dashboard', // Traduzido via t('menu.dashboard')
+    label: 'dashboard',
     href: '/dashboard',
     icon: FiHome,
   },
   {
     id: 'data',
-    label: 'data', // Traduzido via t('menu.data')
+    label: 'data',
     href: '/dashboard/data',
     icon: FiUser,
   },
   {
     id: 'payslips',
-    label: 'payslips', // Traduzido via t('menu.payslips')
+    label: 'payslips',
     href: '/dashboard/payslips',
     icon: FiFileText,
   },
@@ -49,25 +51,49 @@ export const dashboardMenuItems: DashboardMenuItem[] = [
   },
   {
     id: 'financing',
-    label: 'financing', // Traduzido via t('menu.financing')
+    label: 'financing',
     href: '/dashboard/financing',
     icon: FiDollarSign,
   },
   {
+    id: 'commissions',
+    label: 'commissions',
+    href: '/dashboard/commissions',
+    icon: FiDollarSign,
+  },
+  {
+    id: 'recruitment',
+    label: 'recruitment',
+    href: '/dashboard/recruitment',
+    icon: FiUsers,
+  },
+  {
+    id: 'performance',
+    label: 'performance',
+    href: '/dashboard/performance',
+    icon: FiBarChart,
+  },
+  {
+    id: 'goals',
+    label: 'goals',
+    href: '/dashboard/goals',
+    icon: FiTarget,
+  },
+  {
     id: 'tracking',
-    label: 'tracking', // Traduzido via t('menu.tracking')
+    label: 'tracking',
     href: '/dashboard/tracking',
     icon: FiMapPin,
   },
   {
     id: 'profile',
-    label: 'profile', // Traduzido via t('menu.profile')
+    label: 'profile',
     href: '/dashboard/profile',
     icon: FiUser,
   },
   {
     id: 'help',
-    label: 'help', // Traduzido via t('menu.help')
+    label: 'help',
     href: '/dashboard/help',
     icon: FiHelpCircle,
   },
@@ -88,3 +114,4 @@ export function isDashboardMenuItemActive(itemHref: string, currentPath: string)
 export function getDashboardMenuItems(): DashboardMenuItem[] {
   return dashboardMenuItems;
 }
+

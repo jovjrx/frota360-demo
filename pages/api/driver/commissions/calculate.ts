@@ -1,13 +1,13 @@
 /**
  * API: POST /api/driver/commissions/calculate
  * Calcula comissões para uma semana específica
- * Apenas para afiliados
+ * Apenas para admins
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAuth } from 'firebase-admin/auth';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { calculateWeeklyCommissions, saveWeeklyCommissions } from '@/lib/services/commission-calculator';
+import { getSession } from '@/lib/session/ironSession';
 import { z } from 'zod';
 
 const RequestSchema = z.object({
@@ -18,27 +18,28 @@ const RequestSchema = z.object({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
-    // Validar schema
-    const { weekId, weekStart, weekEnd } = RequestSchema.parse(req.body);
-
-    // Verificar autenticação (admin only)
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    // Verificar autenticação
+    const session = await getSession(req, res);
+    if (!session || !session.user) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
-    const token = authHeader.substring(7);
-    const decodedToken = await getAuth().verifyIdToken(token);
-
     // Verificar se é admin
-    const adminDoc = await adminDb.collection('admins').doc(decodedToken.uid).get();
-    if (!adminDoc.exists) {
-      return res.status(403).json({ error: 'Acesso negado' });
+    if (session.user?.role !== 'admin') {
+      return res.status(403).json({ error: 'Acesso negado - apenas admins' });
     }
+
+    const adminDoc = await adminDb.collection('admins').doc(session.user.id).get();
+    if (!adminDoc.exists) {
+      return res.status(403).json({ error: 'Acesso negado - apenas admins' });
+    }
+
+    // Validar schema
+    const { weekId, weekStart, weekEnd } = RequestSchema.parse(req.body);
 
     // Calcular comissões para todos os afiliados
     const affiliatesSnapshot = await adminDb

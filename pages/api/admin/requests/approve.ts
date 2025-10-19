@@ -6,6 +6,7 @@ import { sessionOptions } from '@/lib/session/ironSession';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { getApprovalEmailTemplate } from '@/lib/email/templates';
+import { initializeNewDriver } from '@/lib/services/driver-initialization';
 
 export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -71,6 +72,19 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       // Add other default driver fields as needed
     });
 
+    // 3.5. Initialize driver structures (commissions, referral, KPIs, goals, technical reserve)
+    const initResult = await initializeNewDriver(
+      firebaseUser.uid,
+      requestData.fullName,
+      requestData.type,
+      requestData.email
+    );
+
+    if (!initResult.success) {
+      console.warn('Warning: Some driver structures failed to initialize:', initResult);
+      // Don't fail the request if initialization partially fails
+    }
+
     // 4. Update request status to 'approved'
     await requestRef.update({
       status: 'approved',
@@ -95,11 +109,20 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       text: emailTemplate.text,
     });
 
-    return res.status(200).json({ success: true, message: 'Driver request approved and user created' });
+    return res.status(200).json({
+      success: true,
+      message: 'Driver request approved and user created',
+      driverId: firebaseUser.uid,
+      initializationResult: initResult,
+    });
   } catch (error: any) {
     console.error('Error approving driver request:', error);
     // If user creation fails, try to clean up the request status if it was updated
-    return res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Internal Server Error',
+      details: error.toString(),
+    });
   }
 }, sessionOptions);
 

@@ -4,29 +4,28 @@
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAuth } from 'firebase-admin/auth';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getDriverKPIs, getLatestKPI } from '@/lib/services/kpi-calculator';
+import { getSession } from '@/lib/session/ironSession';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
     // Verificar autenticação
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    const session = await getSession(req, res);
+    if (!session || !session.user) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
-    const token = authHeader.substring(7);
-    const decodedToken = await getAuth().verifyIdToken(token);
+    const userEmail = session.userId;
 
     // Buscar motorista
     const driverSnapshot = await adminDb
       .collection('drivers')
-      .where('uid', '==', decodedToken.uid)
+      .where('email', '==', userEmail)
       .limit(1)
       .get();
 
