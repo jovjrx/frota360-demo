@@ -49,7 +49,14 @@
     "integrations": "Integrações",
     "integrations_management": "Gestão de integrações",
     "financing_management": "Gestão de financiamento",
-    "monitoring": "Monitoramento"
+    "monitoring": "Monitoramento",
+    "operations": "Operações",
+    "financial": "Financeiro",
+    "operations_management": "Gestão de Operações",
+    "financial_management": "Gestão Financeira",
+    "monitoring_management": "Gestão de Monitoramento",
+    "settings_management": "Gestão de Configurações",
+    "weekly_monitoring": "Monitoramento Semanal"
   },
   "user": {
     "email": "Email",

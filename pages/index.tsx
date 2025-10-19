@@ -16,6 +16,7 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Image,
 } from "@chakra-ui/react";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
@@ -40,7 +41,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
 
   return (
     <>
-      {/* Hero */}
+      {/* Hero Premium */}
       <Hero
         title={t(HOME.HERO.TITLE)}
         subtitle={t(HOME.HERO.SUBTITLE)}
@@ -100,7 +101,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         />
       </Hero>
 
-      {/* Como Funciona */}
+      {/* Como Funciona - Simples e Visual */}
       <Container>
         <Title
           title={t(HOME.HOW_IT_WORKS.TITLE)}
@@ -116,23 +117,24 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
               <Card key={i} animated borded>
                 <VStack spacing={4} align="center" textAlign="center" h="full">
                   <Box
-                    w="60px"
-                    h="60px"
+                    w="70px"
+                    h="70px"
                     borderRadius="full"
-                    bg="green.500"
+                    bg="linear-gradient(135deg, #10b981 0%, #059669 100%)"
                     color="white"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
                     fontSize="2xl"
                     fontWeight="bold"
+                    shadow="md"
                   >
                     {i + 1}
                   </Box>
                   <Text fontSize="lg" fontWeight="bold" color="gray.800">
                     {step.title}
                   </Text>
-                  <Text color="gray.600" flex="1">
+                  <Text color="gray.600" flex="1" fontSize="sm" lineHeight="1.6">
                     {step.description}
                   </Text>
                 </VStack>
@@ -142,7 +144,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Escolha Seu Caminho */}
+      {/* Escolha Seu Caminho - Premium Cards */}
       <Container softBg>
         <Title
           title={t(HOME.SERVICES.TITLE)}
@@ -150,11 +152,12 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
           feature="MODELOS"
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
+          {/* Afiliado */}
           <Card animated borded color='green'>
-            <VStack spacing={4} align="start" h="full">
+            <VStack spacing={5} align="start" h="full">
               <Box
-                w="60px"
-                h="60px"
+                w="70px"
+                h="70px"
                 borderRadius="lg"
                 bg="green.100"
                 display="flex"
@@ -165,20 +168,22 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
               >
                 👤
               </Box>
-              <Text fontSize="xl" fontWeight="bold" color="green.600">
-                {t(HOME.SERVICES.AFFILIATE.TITLE)}
-              </Text>
-              <Text color="gray.600" fontSize="sm">
-                {t(HOME.SERVICES.AFFILIATE.DESCRIPTION)}
-              </Text>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="xl" fontWeight="bold" color="green.600">
+                  {t(HOME.SERVICES.AFFILIATE.TITLE)}
+                </Text>
+                <Text color="gray.600" fontSize="sm" lineHeight="1.6">
+                  {t(HOME.SERVICES.AFFILIATE.DESCRIPTION)}
+                </Text>
+              </VStack>
               <VStack spacing={2} align="start" flex="1" w="full">
                 {(() => {
                   const benefits = t(HOME.SERVICES.AFFILIATE.BENEFITS);
                   if (!Array.isArray(benefits)) return null;
                   return benefits.map((benefit: any, i: number) => (
-                    <HStack key={i} spacing={2}>
-                      <CheckIcon color="green.600" w={4} h={4} />
-                      <Text color="gray.600" fontSize="sm">{benefit}</Text>
+                    <HStack key={i} spacing={3}>
+                      <CheckIcon color="green.600" w={4} h={4} flexShrink={0} />
+                      <Text color="gray.700" fontSize="sm">{benefit}</Text>
                     </HStack>
                   ));
                 })()}
@@ -196,11 +201,12 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             </VStack>
           </Card>
 
+          {/* Locatário */}
           <Card animated borded color='blue'>
-            <VStack spacing={4} align="start" h="full">
+            <VStack spacing={5} align="start" h="full">
               <Box
-                w="60px"
-                h="60px"
+                w="70px"
+                h="70px"
                 borderRadius="lg"
                 bg="blue.100"
                 display="flex"
@@ -211,20 +217,22 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
               >
                 🚗
               </Box>
-              <Text fontSize="xl" fontWeight="bold" color="blue.600">
-                {t(HOME.SERVICES.RENTER.TITLE)}
-              </Text>
-              <Text color="gray.600" fontSize="sm">
-                {t(HOME.SERVICES.RENTER.DESCRIPTION)}
-              </Text>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="xl" fontWeight="bold" color="blue.600">
+                  {t(HOME.SERVICES.RENTER.TITLE)}
+                </Text>
+                <Text color="gray.600" fontSize="sm" lineHeight="1.6">
+                  {t(HOME.SERVICES.RENTER.DESCRIPTION)}
+                </Text>
+              </VStack>
               <VStack spacing={2} align="start" flex="1" w="full">
                 {(() => {
                   const benefits = t(HOME.SERVICES.RENTER.BENEFITS);
                   if (!Array.isArray(benefits)) return null;
                   return benefits.map((benefit: any, i: number) => (
-                    <HStack key={i} spacing={2}>
-                      <CheckIcon color="blue.600" w={4} h={4} />
-                      <Text color="gray.600" fontSize="sm">{benefit}</Text>
+                    <HStack key={i} spacing={3}>
+                      <CheckIcon color="blue.600" w={4} h={4} flexShrink={0} />
+                      <Text color="gray.700" fontSize="sm">{benefit}</Text>
                     </HStack>
                   ));
                 })()}
@@ -244,7 +252,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Benefícios */}
+      {/* Por que Conduz - Benefícios Reais */}
       <Container>
         <Title
           title={t(HOME.BENEFITS.TITLE)}
@@ -256,12 +264,13 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             const benefits = t(HOME.BENEFITS.ITEMS);
             if (!Array.isArray(benefits)) return null;
 
+            const icons = ["📞", "💰", "💻", "✅"];
             return benefits.map((benefit: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
                   <Box
-                    w="50px"
-                    h="50px"
+                    w="60px"
+                    h="60px"
                     borderRadius="lg"
                     bg="green.100"
                     display="flex"
@@ -270,12 +279,12 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                     color="green.600"
                     fontSize="2xl"
                   >
-                    {i === 0 ? "📞" : i === 1 ? "💰" : i === 2 ? "💻" : "✅"}
+                    {icons[i]}
                   </Box>
                   <Text fontSize="lg" fontWeight="bold" color="green.600">
                     {benefit.title}
                   </Text>
-                  <Text color="gray.600" flex="1">
+                  <Text color="gray.600" flex="1" fontSize="sm" lineHeight="1.6">
                     {benefit.description}
                   </Text>
                 </VStack>
@@ -285,11 +294,11 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Recursos */}
+      {/* Recursos - Funcionalidades */}
       <Container softBg>
         <Title
           title={t(HOME.FEATURES.TITLE)}
-          description="Tudo que você precisa para gerenciar sua atividade"
+          description="Tudo que você precisa em um único lugar"
           feature="PLATAFORMA"
         />
         <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)" }}>
@@ -297,12 +306,13 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             const features = t(HOME.FEATURES.ITEMS);
             if (!Array.isArray(features)) return null;
 
+            const icons = ["📊", "💳", "🗺️", "📄"];
             return features.map((feature: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
                   <Box
-                    w="50px"
-                    h="50px"
+                    w="60px"
+                    h="60px"
                     borderRadius="lg"
                     bg="green.100"
                     display="flex"
@@ -311,12 +321,12 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
                     color="green.600"
                     fontSize="2xl"
                   >
-                    {i === 0 ? "📊" : i === 1 ? "💳" : i === 2 ? "🗺️" : "📄"}
+                    {icons[i]}
                   </Box>
                   <Text fontSize="lg" fontWeight="bold" color="gray.800">
                     {feature.title}
                   </Text>
-                  <Text color="gray.600" flex="1">
+                  <Text color="gray.600" flex="1" fontSize="sm" lineHeight="1.6">
                     {feature.description}
                   </Text>
                 </VStack>
@@ -326,7 +336,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* Depoimentos */}
+      {/* Depoimentos - Social Proof */}
       <Container>
         <Title
           title={tc(COMMON.TESTIMONIALS.TITLE)}
@@ -341,17 +351,22 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             return testimonials.map((testimonial: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start">
-                  <Text fontSize="lg" fontStyle="italic" color="gray.700">
+                  <HStack spacing={1}>
+                    {[...Array(5)].map((_, j) => (
+                      <Text key={j} color="yellow.400" fontSize="lg">⭐</Text>
+                    ))}
+                  </HStack>
+                  <Text fontSize="md" fontStyle="italic" color="gray.700" lineHeight="1.6">
                     "{testimonial.quote}"
                   </Text>
-                  <HStack>
-                    <Text fontWeight="bold" color="green.600">
+                  <VStack align="start" spacing={0}>
+                    <Text fontWeight="bold" color="green.600" fontSize="sm">
                       {testimonial.author}
                     </Text>
-                    <Text color="gray.500">
-                      {testimonial.location}
+                    <Text color="gray.500" fontSize="xs">
+                      📍 {testimonial.location}
                     </Text>
-                  </HStack>
+                  </VStack>
                 </VStack>
               </Card>
             ));
@@ -359,7 +374,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </ContainerDivisions>
       </Container>
 
-      {/* FAQ */}
+      {/* FAQ - Respostas Rápidas */}
       <Container softBg>
         <Title
           title={tc(COMMON.FAQ.TITLE)}
@@ -374,13 +389,13 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
 
               return faqItems.map((item: any, i: number) => (
                 <AccordionItem key={i} border="1px" borderColor="gray.200" borderRadius="md" mb={2}>
-                  <AccordionButton py={4}>
-                    <Box flex="1" textAlign="left" fontWeight="semibold">
+                  <AccordionButton py={4} _hover={{ bg: "gray.50" }}>
+                    <Box flex="1" textAlign="left" fontWeight="semibold" color="gray.800">
                       {item.question}
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
-                  <AccordionPanel pb={4} color="gray.600">
+                  <AccordionPanel pb={4} color="gray.700" lineHeight="1.6">
                     {item.answer}
                   </AccordionPanel>
                 </AccordionItem>
@@ -390,16 +405,33 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         </Box>
       </Container>
 
-      {/* CTA Final */}
+      {/* CTA Final - Ação */}
       <Container>
-        <Title
-          title={t(HOME.CTA.TITLE)}
-          description={t(HOME.CTA.SUBTITLE)}
-          feature={t(HOME.CTA.FEATURE)}
-          ctaText={t(HOME.CTA.BUTTON)}
-          cta={getLocalizedHref("/request")}
-          center
-        />
+        <Box textAlign="center" py={{ base: 12, md: 16 }}>
+          <VStack spacing={6}>
+            <VStack spacing={3}>
+              <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold" color="gray.800">
+                {t(HOME.CTA.TITLE)}
+              </Text>
+              <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" maxW="2xl">
+                {t(HOME.CTA.SUBTITLE)}
+              </Text>
+            </VStack>
+            <Button
+              as={NextLink}
+              href={getLocalizedHref("/request")}
+              size="lg"
+              px={8}
+              py={4}
+              colorScheme="green"
+              rightIcon={<ArrowRightIcon />}
+              shadow="lg"
+              onClick={() => trackCheckoutStart('Driver Application - Final CTA')}
+            >
+              {t(HOME.CTA.BUTTON)}
+            </Button>
+          </VStack>
+        </Box>
       </Container>
     </>
   );

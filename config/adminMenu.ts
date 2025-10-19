@@ -11,30 +11,30 @@ import {
     FiTarget,
     FiTrendingUp,
     FiCheckCircle,
+    FiChevronDown,
 } from 'react-icons/fi';
 
 export interface AdminMenuItem {
     id: string;
     label: string;
-    href: string;
+    href?: string;
     icon: any;
     description?: string;
-    section?: string; // Agrupamento por seção
-    /** Se true, aparece no menu principal. Se false, fica apenas no dropdown "Mais" */
+    section?: string;
     showInMainMenu?: boolean;
+    submenu?: AdminMenuItem[]; // Para itens com submenu
+    isSubmenu?: boolean; // Indica se é um item de submenu
 }
 
 /**
- * Configuração centralizada do menu admin com agrupamento por seção
- * Os labels são chaves de tradução que serão traduzidas no componente
- * usando: t(`menu.${item.id}`)
+ * Configuração centralizada do menu admin com submenus agrupados por seção
  * 
- * Seções:
+ * Estrutura:
  * - MAIN: Dashboard
  * - OPERATIONS: Motoristas, Requisições, Usuários
  * - FINANCIAL: Comissões, Pagamentos, Metas, Reserva Técnica
  * - MONITORING: Performance (KPIs), Rastreamento, Monitoramento
- * - SETTINGS: Integrações, Dados
+ * - SETTINGS: Integrações, Dados, Contratos
  */
 export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
     // ========== DASHBOARD ==========
@@ -50,127 +50,154 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
 
     // ========== OPERAÇÕES ==========
     {
-        id: 'drivers',
-        label: 'drivers',
-        href: '/admin/drivers',
+        id: 'operations',
+        label: 'operations',
         icon: FiUsers,
-        description: 'drivers_management',
+        description: 'operations_management',
         section: 'OPERATIONS',
         showInMainMenu: true,
-    },
-    {
-        id: 'requests',
-        label: 'requests',
-        href: '/admin/drivers',
-        icon: FiCheckCircle,
-        description: 'requests_management',
-        section: 'OPERATIONS',
-        showInMainMenu: false,
-    },
-    {
-        id: 'users',
-        label: 'users',
-        href: '/admin/users',
-        icon: FiUsers,
-        description: 'user_management',
-        section: 'OPERATIONS',
-        showInMainMenu: false,
+        submenu: [
+            {
+                id: 'drivers',
+                label: 'drivers',
+                href: '/admin/drivers',
+                icon: FiUsers,
+                description: 'drivers_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'requests',
+                label: 'requests',
+                href: '/admin/drivers',
+                icon: FiCheckCircle,
+                description: 'requests_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'users',
+                label: 'users',
+                href: '/admin/users',
+                icon: FiUsers,
+                description: 'user_management',
+                isSubmenu: true,
+            },
+        ],
     },
 
     // ========== FINANCEIRO ==========
     {
-        id: 'commissions',
-        label: 'commissions',
-        href: '/admin/commissions',
+        id: 'financial',
+        label: 'financial',
         icon: FiDollarSign,
-        description: 'commissions_management',
-        section: 'FINANCIAL',
-        showInMainMenu: false,
-    },
-    {
-        id: 'control',
-        label: 'payments',
-        href: '/admin/weekly',
-        icon: FiCalendar,
-        description: 'payments_control',
+        description: 'financial_management',
         section: 'FINANCIAL',
         showInMainMenu: true,
-    },
-    {
-        id: 'goals',
-        label: 'goals',
-        href: '/admin/goals',
-        icon: FiTarget,
-        description: 'goals_management',
-        section: 'FINANCIAL',
-        showInMainMenu: false,
-    },
-    {
-        id: 'technical_reserve',
-        label: 'technical_reserve',
-        href: '/admin/technical-reserve',
-        icon: FiActivity,
-        description: 'technical_reserve_management',
-        section: 'FINANCIAL',
-        showInMainMenu: false,
+        submenu: [
+            {
+                id: 'commissions',
+                label: 'commissions',
+                href: '/admin/commissions',
+                icon: FiDollarSign,
+                description: 'commissions_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'payments',
+                label: 'payments',
+                href: '/admin/weekly',
+                icon: FiCalendar,
+                description: 'payments_control',
+                isSubmenu: true,
+            },
+            {
+                id: 'goals',
+                label: 'goals',
+                href: '/admin/goals',
+                icon: FiTarget,
+                description: 'goals_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'technical_reserve',
+                label: 'technical_reserve',
+                href: '/admin/technical-reserve',
+                icon: FiActivity,
+                description: 'technical_reserve_management',
+                isSubmenu: true,
+            },
+        ],
     },
 
     // ========== MONITORAMENTO ==========
     {
-        id: 'kpis',
-        label: 'performance',
-        href: '/admin/kpis',
-        icon: FiTrendingUp,
-        description: 'performance_management',
-        section: 'MONITORING',
-        showInMainMenu: false,
-    },
-    {
-        id: 'monitor',
-        label: 'tracking',
-        href: '/admin/monitor',
-        icon: FiTruck,
-        description: 'vehicle_tracking',
-        section: 'MONITORING',
-        showInMainMenu: false,
-    },
-    {
-        id: 'financing',
+        id: 'monitoring',
         label: 'monitoring',
-        href: '/admin/financing',
         icon: FiBarChart2,
-        description: 'weekly_monitoring',
+        description: 'monitoring_management',
         section: 'MONITORING',
         showInMainMenu: false,
+        submenu: [
+            {
+                id: 'performance',
+                label: 'performance',
+                href: '/admin/kpis',
+                icon: FiTrendingUp,
+                description: 'performance_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'tracking',
+                label: 'tracking',
+                href: '/admin/monitor',
+                icon: FiTruck,
+                description: 'vehicle_tracking',
+                isSubmenu: true,
+            },
+            {
+                id: 'weekly_monitoring',
+                label: 'weekly_monitoring',
+                href: '/admin/financing',
+                icon: FiBarChart2,
+                description: 'weekly_monitoring',
+                isSubmenu: true,
+            },
+        ],
     },
 
     // ========== CONFIGURAÇÕES ==========
     {
-        id: 'integrations',
-        label: 'integrations',
-        href: '/admin/data',
+        id: 'settings',
+        label: 'settings',
         icon: FiSettings,
-        description: 'integrations_management',
+        description: 'settings_management',
         section: 'SETTINGS',
         showInMainMenu: false,
-    },
-    {
-        id: 'data',
-        label: 'data',
-        href: '/admin/data',
-        icon: FiBarChart2,
-        description: 'weekly_data',
-        section: 'SETTINGS',
-        showInMainMenu: false,
-    },
-    {
-        id: 'contracts',
-        label: 'contracts',
-        href: '/admin/contracts',
-        icon: FiFileText,
-        description: 'contracts_management',
-        section: 'SETTINGS',
-        showInMainMenu: false,
+        submenu: [
+            {
+                id: 'integrations',
+                label: 'integrations',
+                href: '/admin/data',
+                icon: FiSettings,
+                description: 'integrations_management',
+                isSubmenu: true,
+            },
+            {
+                id: 'data',
+                label: 'data',
+                href: '/admin/data',
+                icon: FiBarChart2,
+                description: 'weekly_data',
+                isSubmenu: true,
+            },
+            {
+                id: 'contracts',
+                label: 'contracts',
+                href: '/admin/contracts',
+                icon: FiFileText,
+                description: 'contracts_management',
+                isSubmenu: true,
+            },
+        ],
     },
 ];
 
@@ -182,15 +209,14 @@ export const getMainMenuItems = () => {
 };
 
 /**
- * Retorna itens do dropdown "Mais" (desktop) agrupados por seção
+ * Retorna itens do dropdown "Mais" (desktop)
  */
 export const getMoreMenuItems = () => {
-    const moreItems = ADMIN_MENU_ITEMS.filter(item => !item.showInMainMenu);
-    return moreItems;
+    return ADMIN_MENU_ITEMS.filter(item => !item.showInMainMenu && !item.isSubmenu);
 };
 
 /**
- * Retorna todos os itens agrupados por seção
+ * Retorna todos os itens
  */
 export const getAllMenuItems = () => {
     return ADMIN_MENU_ITEMS;
@@ -216,10 +242,32 @@ export const getMenuItemsBySection = () => {
 /**
  * Verifica se a rota está ativa
  */
-export const isMenuItemActive = (itemHref: string, currentPath: string): boolean => {
+export const isMenuItemActive = (itemHref: string | undefined, currentPath: string): boolean => {
+    if (!itemHref) return false;
     if (itemHref === '/admin') {
         return currentPath === '/admin';
     }
     return currentPath.startsWith(itemHref);
+};
+
+/**
+ * Encontra um item de menu por ID
+ */
+export const findMenuItemById = (id: string): AdminMenuItem | undefined => {
+    for (const item of ADMIN_MENU_ITEMS) {
+        if (item.id === id) return item;
+        if (item.submenu) {
+            const found = item.submenu.find(sub => sub.id === id);
+            if (found) return found;
+        }
+    }
+    return undefined;
+};
+
+/**
+ * Verifica se um item tem submenu
+ */
+export const hasSubmenu = (item: AdminMenuItem): boolean => {
+    return !!(item.submenu && item.submenu.length > 0);
 };
 

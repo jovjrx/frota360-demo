@@ -1,86 +1,84 @@
 {
   "hero": {
-    "title": "Você conduz, nós cuidamos do resto!",
-    "subtitle": "Plataforma completa para motoristas TVDE em Portugal. Escolha seu caminho: Afiliado ou Locatário.",
-    "badge": "TVDE PORTUGAL",
-    "ctaPrimary": "Candidatar-me",
-    "ctaSecondary": "Falar no WhatsApp",
+    "title": "Dirija com Propósito",
+    "subtitle": "Ganhe mais que comissões. Construa seu próprio negócio com a Conduz.",
+    "badge": "Modelo Inovador",
+    "cta_primary": "Começar Agora",
+    "cta_secondary": "Falar no WhatsApp",
     "highlight": {
-      "title": "Conduz.pt",
-      "description": "A plataforma que simplifica o TVDE"
+      "title": "Transparência Total",
+      "description": "Veja exatamente como funciona o sistema de comissões e ganhos"
     }
   },
-  "howItWorks": {
+  "how_it_works": {
     "title": "Como Funciona",
-    "subtitle": "Entenda o processo simples para começar",
-    "feature": "FUNCIONAMENTO",
+    "subtitle": "Processo simples e rápido para começar a ganhar",
+    "feature": "4 PASSOS",
     "steps": [
       {
-        "title": "Candidatura",
-        "description": "Preencha o formulário com seus dados e documentação"
+        "title": "1. Candidatura",
+        "description": "Preencha o formulário com seus dados e informações do veículo"
       },
       {
-        "title": "Análise",
-        "description": "Nossa equipa avalia sua candidatura em 2-5 dias úteis"
+        "title": "2. Análise",
+        "description": "Nossa equipa analisa sua candidatura em 24-48 horas"
       },
       {
-        "title": "Aprovação",
-        "description": "Receba confirmação e acesso à plataforma"
+        "title": "3. Aprovação",
+        "description": "Receba a confirmação e acesse sua conta na plataforma"
       },
       {
-        "title": "Começar",
-        "description": "Inicie sua atividade e ganhe com a Conduz"
+        "title": "4. Começar",
+        "description": "Inicie suas corridas e comece a ganhar imediatamente"
       }
     ]
   },
   "services": {
     "title": "Escolha Seu Caminho",
-    "subtitle": "Dois modelos pensados para você",
+    "subtitle": "Dois modelos pensados para maximizar seus ganhos",
     "affiliate": {
       "title": "Afiliado",
-      "description": "Use seu próprio veículo e trabalhe com flexibilidade total",
+      "description": "Dirija, recrute e ganhe comissões de toda sua rede",
       "benefits": [
-        "Seu próprio veículo",
-        "Horários flexíveis",
-        "Comissões competitivas",
-        "Suporte 24/7",
-        "Acesso ao painel de controle",
-        "Integração com Uber e Bolt"
+        "Comissões base de 5-10% por corrida",
+        "Comissões de recrutamento de 2-5%",
+        "Sistema de progressão de níveis",
+        "Suporte dedicado",
+        "Acesso a dashboard de performance"
       ]
     },
     "renter": {
       "title": "Locatário",
-      "description": "Alugue um veículo nosso e comece a trabalhar imediatamente",
+      "description": "Alugue o veículo e dirija com segurança e suporte",
       "benefits": [
-        "Veículo fornecido",
-        "Seguro incluído",
-        "Manutenção coberta",
-        "Sem preocupações mecânicas",
-        "Suporte técnico incluído",
-        "Flexibilidade de horários"
+        "Aluguel de €650/mês (tudo incluído)",
+        "Seguro e manutenção cobertos",
+        "Comissões por corrida",
+        "Suporte 24/7",
+        "Acesso a todas as funcionalidades"
       ]
     }
   },
   "benefits": {
-    "title": "Por que Escolher Conduz",
-    "subtitle": "Benefícios que fazem diferença",
-    "feature": "VANTAGENS",
+    "title": "Por Que Conduz",
+    "subtitle": "Benefícios reais que fazem a diferença",
+    "feature": "DIFERENCIAIS",
     "items": [
       {
-        "title": "Suporte 7 Dias",
-        "description": "Equipa dedicada disponível todos os dias da semana via WhatsApp, telefone e email"
+        "title": "Suporte Especializado",
+        "description": "Equipa dedicada para ajudar você em cada passo da jornada"
       },
       {
-        "title": "Pagamentos Semanais",
-        "description": "Receba seus ganhos toda a semana. Sem atrasos, sem complicações"
+        "title": "Pagamentos Garantidos",
+        "description": "Receba suas comissões toda semana, sem atrasos"
       },
       {
-        "title": "Tecnologia Moderna",
-        "description": "Plataforma intuitiva com dados em tempo real, saldo, histórico e relatórios"
+        "title": "Plataforma Moderna",
+        "description": "Dashboard intuitivo com dados em tempo real"
       },
       {
         "title": "Compliance Total",
-        "description": "Garantimos conformidade com todas as regulamentações TVDE portuguesas"
+        "description": "Documentação e conformidade legal garantidas"
       }
     ]
   },
@@ -88,16 +86,16 @@
     "title": "Recursos da Plataforma",
     "items": [
       {
-        "title": "Dashboard Intuitivo",
-        "description": "Visualize seus ganhos, histórico e métricas em tempo real"
+        "title": "Dashboard Completo",
+        "description": "Acompanhe suas corridas, ganhos e performance em tempo real"
       },
       {
         "title": "Controle Financeiro",
-        "description": "Gerencie pagamentos, comissões e extratos com facilidade"
+        "description": "Visualize todas as suas comissões e extratos detalhados"
       },
       {
-        "title": "Rastreamento de Veículo",
-        "description": "Integração com Cartrack para monitoramento completo"
+        "title": "Rastreamento GPS",
+        "description": "Integração com Cartrack para segurança e eficiência"
       },
       {
         "title": "Documentação Digital",
@@ -107,8 +105,7 @@
   },
   "cta": {
     "title": "Pronto para Começar?",
-    "subtitle": "Junte-se aos motoristas que já confiam na Conduz PT",
-    "feature": "PRÓXIMO PASSO",
+    "subtitle": "Junte-se a centenas de motoristas que já ganham mais com a Conduz",
     "button": "Candidatar-me Agora"
   }
 }
