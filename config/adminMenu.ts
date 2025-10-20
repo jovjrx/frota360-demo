@@ -94,14 +94,6 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
         showInMainMenu: true,
         submenu: [
             {
-                id: 'commissions',
-                label: 'commissions',
-                href: '/admin/commissions',
-                icon: FiDollarSign,
-                description: 'commissions_management',
-                isSubmenu: true,
-            },
-            {
                 id: 'payments',
                 label: 'payments',
                 href: '/admin/weekly',
@@ -109,6 +101,15 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 description: 'payments_control',
                 isSubmenu: true,
             },
+            {
+                id: 'commissions',
+                label: 'commissions',
+                href: '/admin/commissions',
+                icon: FiDollarSign,
+                description: 'commissions_management',
+                isSubmenu: true,
+            },
+
             {
                 id: 'goals',
                 label: 'goals',
@@ -227,7 +228,7 @@ export const getAllMenuItems = () => {
  */
 export const getMenuItemsBySection = () => {
     const grouped: { [key: string]: AdminMenuItem[] } = {};
-    
+
     ADMIN_MENU_ITEMS.forEach(item => {
         const section = item.section || 'OTHER';
         if (!grouped[section]) {
@@ -235,7 +236,7 @@ export const getMenuItemsBySection = () => {
         }
         grouped[section].push(item);
     });
-    
+
     return grouped;
 };
 
