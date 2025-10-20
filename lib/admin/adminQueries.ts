@@ -47,6 +47,7 @@ export interface DashboardData {
   totalRepasseThisWeek: number;
   totalEarningsThisWeek: number; // Receita (despesasAdm + aluguel + financiamento)
   totalPaymentsPending: number;
+  totalPaymentsPaid: number;
   
   // Semana anterior (para comparação)
   totalGrossEarningsLastWeek: number;
@@ -56,6 +57,15 @@ export interface DashboardData {
   // Metadados
   latestWeekId: string;
   previousWeekId: string;
+
+  // Contagens e métricas complementares
+  totalDrivers: number;
+  activeDrivers: number;
+  pendingRequests: number;
+  averageEarningsPerDriver: number;
+  profitCommissions: number;
+  profitRentals: number;
+  profitDiscounts: number;
 }
 
 // ============================================================================
@@ -95,6 +105,18 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     const previousWeekId = weekIds[1] || '';
     
     console.log(`[getDashboardStats] Semanas: ${latestWeekId} (atual) e ${previousWeekId} (anterior)`);
+
+    // Buscar contagens auxiliares em paralelo
+    const [driversSnapshot, pendingRequestsSnapshot, paymentsSnapshot] = await Promise.all([
+      adminDb.collection('drivers').get(),
+      adminDb.collection('driver_requests').where('status', '==', 'pending').get(),
+      adminDb.collection('driverPayments').get(),
+    ]);
+
+    const totalDrivers = driversSnapshot.size;
+    const activeDrivers = driversSnapshot.docs.filter(doc => (doc.data().status || '').toLowerCase() === 'active').length;
+    const pendingRequests = pendingRequestsSnapshot.size;
+    const totalPaymentsPaid = paymentsSnapshot.docs.reduce((acc, doc) => acc + (doc.data().totalAmount || 0), 0);
     
     // Inicializar totais
     let totalGrossEarningsThisWeek = 0;
@@ -103,6 +125,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     let profitCommissions = 0;
     let profitRentals = 0;
     let profitFinancing = 0;
+    let driversWithRecords = 0;
     
     let totalGrossEarningsLastWeek = 0;
     let totalRepasseLastWeek = 0;
@@ -116,6 +139,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
       const records = await getAllDriversWeekData(latestWeekId, false);
       
       console.log(`[getDashboardStats] ${records.length} registros na semana atual`);
+  driversWithRecords = new Set(records.map(rec => rec.driverId)).size;
       
       records.forEach(rec => {
         totalGrossEarningsThisWeek += rec.ganhosTotal || 0;
@@ -158,6 +182,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     // Calcular receita da empresa (despesasAdm + aluguel + financiamento)
     const totalEarningsThisWeek = profitCommissions + profitRentals + profitFinancing;
     const totalEarningsLastWeek = profitCommissionsLastWeek + profitRentalsLastWeek + profitFinancingLastWeek;
+    const averageEarningsPerDriver = driversWithRecords > 0 ? totalRepasseThisWeek / driversWithRecords : 0;
     
     console.log(`[getDashboardStats] Receita semana atual: €${totalEarningsThisWeek.toFixed(2)}`);
     console.log(`[getDashboardStats] Receita semana anterior: €${totalEarningsLastWeek.toFixed(2)}`);
@@ -167,6 +192,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
       totalRepasseThisWeek,
       totalEarningsThisWeek,
       totalPaymentsPending,
+      totalPaymentsPaid,
       
       totalGrossEarningsLastWeek,
       totalRepasseLastWeek,
@@ -174,6 +200,13 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
       
       latestWeekId,
       previousWeekId,
+      totalDrivers,
+      activeDrivers,
+      pendingRequests,
+      averageEarningsPerDriver,
+      profitCommissions,
+      profitRentals,
+      profitDiscounts: profitFinancing,
     };
     
   } catch (error) {
@@ -188,11 +221,19 @@ function getEmptyDashboardData(): DashboardData {
     totalRepasseThisWeek: 0,
     totalEarningsThisWeek: 0,
     totalPaymentsPending: 0,
+    totalPaymentsPaid: 0,
     totalGrossEarningsLastWeek: 0,
     totalRepasseLastWeek: 0,
     totalEarningsLastWeek: 0,
     latestWeekId: '',
     previousWeekId: '',
+    totalDrivers: 0,
+    activeDrivers: 0,
+    pendingRequests: 0,
+    averageEarningsPerDriver: 0,
+    profitCommissions: 0,
+    profitRentals: 0,
+    profitDiscounts: 0,
   };
 }
 
