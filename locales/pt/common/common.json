@@ -50,13 +50,13 @@
     "integrations_management": "Gestão de integrações",
     "financing_management": "Gestão de financiamento",
     "monitoring": "Monitoramento",
+    "settings": "Configurações",
     "operations": "Operações",
     "financial": "Financeiro",
     "operations_management": "Gestão de Operações",
     "financial_management": "Gestão Financeira",
     "monitoring_management": "Gestão de Monitoramento",
-    "settings_management": "Gestão de Configurações",
-    "weekly_monitoring": "Monitoramento Semanal"
+    "settings_management": "Gestão de Configurações"
   },
   "user": {
     "email": "Email",

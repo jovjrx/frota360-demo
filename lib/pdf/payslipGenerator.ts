@@ -73,12 +73,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         doc.fontSize(24).fillColor('#48BB78').text('CONDUZ.PT', leftMargin, currentY, { width: contentWidth, align: 'center' });
         currentY += 25;
       }
-      
-      // Conduz PT LDA
-      doc.fontSize(9).fillColor("#666666")
-        .text("Conduz PT LDA", leftMargin, currentY, { width: contentWidth, align: "center" });
-      currentY += 10;
-      
+
       // Website
       doc.fontSize(8).fillColor("#4472C4")
         .text("conduz.pt", leftMargin, currentY, { width: contentWidth, align: "center" });
