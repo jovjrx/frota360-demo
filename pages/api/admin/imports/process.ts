@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { WeeklyDataSources, createWeeklyDataSources, updateDataSource } from '@/schemas/weekly-data-sources';
+import { DataSourceStatus, WeeklyDataSources, createWeeklyDataSources, updateDataSource } from '@/schemas/weekly-data-sources';
 import { RawFileArchiveEntry } from '@/schemas/raw-file-archive';
 import { createWeeklyDriverPlatformData, WeeklyDriverPlatformData } from '@/schemas/weekly-driver-platform-data';
 import { createWeeklyNormalizedData, WeeklyNormalizedData } from '@/schemas/data-weekly';
@@ -42,6 +42,12 @@ interface AggregationResult {
   warnings: string[];
 }
 
+interface PlatformProcessingStats {
+  records: number;
+  driverMatches: number;
+  warnings: Set<string>;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
@@ -81,6 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const dataWeeklyEntries: WeeklyNormalizedData[] = [];
     const platformsProcessed = new Set<Platform>();
+    const platformStats: Partial<Record<Platform, PlatformProcessingStats>> = {};
+    const platformArchiveRefs: Partial<Record<Platform, Set<string>>> = {};
     const platformAggregates: { [driver_platform_week_key: string]: WeeklyDriverPlatformData } = {};
 
     for (const entry of rawFileEntries) {
@@ -95,27 +103,58 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         continue;
       }
 
+      if (!platformArchiveRefs[platform]) {
+        platformArchiveRefs[platform] = new Set<string>();
+      }
+      if (entry.id) {
+        platformArchiveRefs[platform]!.add(entry.id);
+      }
+
       const aggregation = aggregatePlatformData(platform, rawDataRows, driverMaps);
 
-      if (aggregation.warnings.length > 0) {
-        aggregation.warnings.forEach((warning) => console.warn(`⚠️  ${platform.toUpperCase()}: ${warning}`));
-      }
+      const platformStat = platformStats[platform] ?? {
+        records: 0,
+        driverMatches: 0,
+        warnings: new Set<string>(),
+      };
+      const warningsBefore = new Set(platformStat.warnings);
+      platformStat.records += aggregation.entries.length;
+      platformStat.driverMatches += aggregation.entries.reduce(
+        (total, aggregated) => (aggregated.driver ? total + 1 : total),
+        0,
+      );
+      aggregation.warnings.forEach((warning) => platformStat.warnings.add(warning));
+      platformStats[platform] = platformStat;
+
+      aggregation.warnings
+        .filter((warning) => !warningsBefore.has(warning))
+        .forEach((warning) => console.warn(`⚠️  ${platform.toUpperCase()}: ${warning}`));
 
       aggregation.entries.forEach((aggregated) => {
         const driverKey = aggregated.driver?.id ?? aggregated.referenceId;
         const aggregateId = `${platform}-${driverKey}`;
 
+        const aggregateDocId = `${driverKey}_${weekId}_${platform}`;
+
         if (!platformAggregates[aggregateId]) {
-          platformAggregates[aggregateId] = createWeeklyDriverPlatformData({
+          const aggregateData = createWeeklyDriverPlatformData({
             driverId: driverKey,
             weekId,
             platform,
             rawDataRef: entry.id,
           });
+          aggregateData.id = aggregateDocId;
+          platformAggregates[aggregateId] = aggregateData;
         }
 
-        platformAggregates[aggregateId].totalValue += aggregated.totalValue;
-        platformAggregates[aggregateId].totalTrips += aggregated.totalTrips;
+        const aggregateData = platformAggregates[aggregateId];
+        const now = new Date().toISOString();
+        aggregateData.totalValue = Number((aggregateData.totalValue + aggregated.totalValue).toFixed(2));
+        aggregateData.totalTrips += aggregated.totalTrips;
+        if (entry.id) {
+          aggregateData.rawDataRef = mergeRawDataRefs(aggregateData.rawDataRef, entry.id);
+        }
+        aggregateData.updatedAt = now;
 
         const dataWeeklyEntry = createWeeklyNormalizedData({
           id: buildDataWeeklyId(weekId, platform, aggregated.referenceId),
@@ -137,6 +176,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    const consolidatedDataWeeklyEntries = consolidateDataWeeklyEntries(dataWeeklyEntries);
+
     for (const platform of platformsProcessed) {
       await deleteExistingDataWeekly(weekId, platform);
     }
@@ -145,28 +186,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const batch = adminDb.batch();
     for (const key in platformAggregates) {
       const aggregate = platformAggregates[key];
-      const docRef = adminDb.collection("weeklyDriverPlatformData").doc(`${aggregate.driverId}_${aggregate.weekId}_${aggregate.platform}`);
-      batch.set(docRef, aggregate, { merge: true });
+      const aggregateId = aggregate.id ?? `${aggregate.driverId}_${aggregate.weekId}_${aggregate.platform}`;
+      const docRef = adminDb.collection('weeklyDriverPlatformData').doc(aggregateId);
+      batch.set(docRef, { ...aggregate, id: aggregateId }, { merge: true });
     }
 
-    // Atualizar o status das fontes de dados na coleção 'weeklyReports'
-    let weeklyReportDoc = await adminDb.collection('weeklyReports').doc(weekId).get();
-    let currentWeeklyReport: WeeklyDataSources; // Reutilizando a interface por enquanto
+    // Atualizar o status das fontes de dados na coleção 'weeklyDataSources'
+    const weeklyDataSourcesRef = adminDb.collection('weeklyDataSources').doc(weekId);
+    const weeklyDataSourcesDoc = await weeklyDataSourcesRef.get();
+    let currentWeeklyDataSources: WeeklyDataSources;
 
-    if (!weeklyReportDoc.exists) {
-      currentWeeklyReport = createWeeklyDataSources(weekId, weekStart, weekEnd);
+    if (!weeklyDataSourcesDoc.exists) {
+      currentWeeklyDataSources = createWeeklyDataSources(weekId, weekStart, weekEnd);
     } else {
-      currentWeeklyReport = { id: weeklyReportDoc.id, ...weeklyReportDoc.data() as WeeklyDataSources };
+      currentWeeklyDataSources = {
+        id: weeklyDataSourcesDoc.id,
+        ...(weeklyDataSourcesDoc.data() as WeeklyDataSources),
+      };
     }
 
-    for (const entry of rawFileEntries) {
-      currentWeeklyReport = updateDataSource(currentWeeklyReport, entry.platform as any, {
-        status: 'complete',        origin: 'manual',
-        importedAt: new Date().toISOString(),
-        archiveRef: entry.id,
-      });
-    }
-    batch.set(adminDb.collection('weeklyReports').doc(weekId), currentWeeklyReport, { merge: true });
+    Object.entries(platformStats).forEach(([platformKey, stats]) => {
+      if (!stats) {
+        return;
+      }
+      const platform = platformKey as Platform;
+      const archiveRefs = Array.from(platformArchiveRefs[platform] ?? new Set<string>());
+      const archiveRef = archiveRefs.length > 0 ? archiveRefs.join(',') : undefined;
+
+      const updatePayload: Partial<DataSourceStatus> = {
+        status: 'complete',
+        origin: 'manual',
+        recordsCount: stats.records,
+        driversCount: stats.driverMatches,
+      };
+
+      if (archiveRef) {
+        updatePayload.archiveRef = archiveRef;
+      }
+
+      currentWeeklyDataSources = updateDataSource(currentWeeklyDataSources, platform, updatePayload);
+    });
+
+    batch.set(weeklyDataSourcesRef, currentWeeklyDataSources, { merge: true });
 
     // Marcar entradas de rawFileArchive como processadas
     for (const entry of rawFileEntries) {
@@ -175,10 +236,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await batch.commit();
 
-  await saveDataWeeklyEntries(dataWeeklyEntries);
+    await saveDataWeeklyEntries(consolidatedDataWeeklyEntries);
 
-    console.log('🎉 Processamento de dados brutos para agregados de plataforma concluído com sucesso!');
-    return res.status(200).json({ message: 'Raw data processed to platform aggregates successfully', weekId });
+    const warnings = Object.entries(platformStats)
+      .filter(([, stats]) => stats && stats.warnings.size > 0)
+      .flatMap(([platformKey, stats]) => {
+        if (!stats) {
+          return [];
+        }
+        const platformLabel = platformKey.toUpperCase();
+        return Array.from(stats.warnings).map((warning) => `${platformLabel}: ${warning}`);
+      });
+
+    const responseSummary = {
+      weekId,
+      platformsProcessed: Array.from(platformsProcessed),
+      dataWeeklyDocs: consolidatedDataWeeklyEntries.length,
+      warnings,
+    };
+
+    console.log('🎉 Processamento de dados brutos para agregados de plataforma concluído com sucesso!', responseSummary);
+    return res.status(200).json({
+      message: 'Raw data processed to platform aggregates successfully',
+      ...responseSummary,
+    });
   } catch (error: any) {
     console.error('❌ Erro no processamento da importação:', error);
     return res.status(500).json({ message: 'Internal Server Error', error: error.message, stack: error.stack });
@@ -537,6 +618,72 @@ function buildDataWeeklyId(weekId: string, platform: Platform, referenceId: stri
     .replace(/^-+|-+$/g, '');
   const safeRef = sanitized.length > 0 ? sanitized : `ref-${Date.now()}`;
   return `${weekId}_${platform}_${safeRef}`;
+}
+
+function consolidateDataWeeklyEntries(entries: WeeklyNormalizedData[]): WeeklyNormalizedData[] {
+  if (entries.length === 0) {
+    return [];
+  }
+
+  const merged = new Map<string, WeeklyNormalizedData>();
+
+  entries.forEach((entry) => {
+    const existing = merged.get(entry.id);
+    if (!existing) {
+      merged.set(entry.id, entry);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const totalValue = Number((existing.totalValue + entry.totalValue).toFixed(2));
+    const totalTrips = existing.totalTrips + entry.totalTrips;
+    const mergedEntry: WeeklyNormalizedData = {
+      ...existing,
+      totalValue,
+      totalTrips,
+      updatedAt: now,
+    };
+
+    if (!mergedEntry.driverId && entry.driverId) {
+      mergedEntry.driverId = entry.driverId;
+    }
+    if (!mergedEntry.driverName && entry.driverName) {
+      mergedEntry.driverName = entry.driverName;
+    }
+    if (!mergedEntry.vehiclePlate && entry.vehiclePlate) {
+      mergedEntry.vehiclePlate = entry.vehiclePlate;
+    }
+    if (!mergedEntry.referenceLabel && entry.referenceLabel) {
+      mergedEntry.referenceLabel = entry.referenceLabel;
+    }
+
+    const mergedRawDataRef = mergeRawDataRefs(existing.rawDataRef, entry.rawDataRef);
+    if (mergedRawDataRef) {
+      mergedEntry.rawDataRef = mergedRawDataRef;
+    } else {
+      delete (mergedEntry as any).rawDataRef;
+    }
+
+    merged.set(entry.id, mergedEntry);
+  });
+
+  return Array.from(merged.values());
+}
+
+function mergeRawDataRefs(existing?: string, next?: string): string | undefined {
+  const refs = new Set<string>();
+  [existing, next].forEach((value) => {
+    if (!value) {
+      return;
+    }
+    value
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0)
+      .forEach((part) => refs.add(part));
+  });
+
+  return refs.size > 0 ? Array.from(refs).join(',') : undefined;
 }
 
 async function deleteExistingDataWeekly(weekId: string, platform: Platform) {
