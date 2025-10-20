@@ -6,7 +6,7 @@
     "card": {
       "title": "Vision and Values",
       "description": "Building the future of TVDE mobility",
-      "content": "Conduz.pt was born to simplify TVDE in Portugal. We are the mobility arm of Alvorada Magistral, combining over 30 years of management experience with cutting‑edge technology to offer complete solutions for drivers, companies and fleet managers.",
+  "content": "Conduz.pt was born to simplify TVDE in Portugal. We are a mobility-focused operation that combines decades of management experience with cutting-edge technology to deliver complete solutions for drivers, companies and fleet managers.",
       "values": {
         "title": "Our Core Values",
         "list": [
@@ -57,9 +57,9 @@
     "card": {
       "title": "Success Story",
       "description": "From business management to excellent TVDE",
-      "content": "Alvorada Magistral has been operating for over 30 years in business management in Portugal, Italy, Spain and other countries. Conduz.pt represents our entry into the TVDE market, bringing all this experience to revolutionize Portuguese mobility.",
+      "content": "Conduz.pt brings together specialists with more than 30 years of experience in business management and fleet operations across Portugal, Italy, Spain and beyond. That expertise powers a complete, scalable and results-driven TVDE solution.",
       "stats": {
-        "title": "Alvorada Magistral in numbers",
+        "title": "Conduz PT in numbers",
         "list": [
           { "value": "30+", "label": "Years of Experience" },
           { "value": "95%", "label": "Approval Rate" },

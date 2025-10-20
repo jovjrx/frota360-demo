@@ -166,7 +166,7 @@ export default function Footer({ t, panel = false }: FooterProps) {
 
         <Stack spacing={2} flexDirection={{ base: "column", md: "row" }} justify={{ base: "center", md: "space-between" }}>
           <Text color={colorSoft} fontSize="sm" textAlign="center">
-            © {year} Conduz.pt, uma empresa Alvorada Magistral LDA. {t("company.nipc")}.
+            © {year} Conduz.pt. {t("company.nipc")}.
           </Text>
           <Text color={colorSoft} fontSize="sm" textAlign="center">
             {t("footer.copyright")}

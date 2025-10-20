@@ -25,6 +25,8 @@ type Language = {
   flag: React.ComponentType<any>;
 };
 
+const LOCAL_STORAGE_KEY = "conduz-locale";
+
 export const languages: Language[] = [
   { code: "pt", name: "Portuguese", nativeName: "Português", flag: PT },
   { code: "en", name: "English", nativeName: "English", flag: GB }
@@ -114,8 +116,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const initializeLanguage = () => {
       try {
         const urlLocale = detectLocaleFromUrl();
-        setLocaleState(urlLocale);
-        localStorage.setItem('alvorada-locale', urlLocale);
+  setLocaleState(urlLocale);
+  localStorage.setItem(LOCAL_STORAGE_KEY, urlLocale);
       } catch (error) {
         console.warn('Erro ao detectar idioma:', error);
         setLocaleState('pt');
@@ -127,8 +129,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     // Listener para mudanças na URL
     const handleRouteChange = () => {
       const urlLocale = detectLocaleFromUrl();
-      setLocaleState(urlLocale);
-      localStorage.setItem('alvorada-locale', urlLocale);
+  setLocaleState(urlLocale);
+  localStorage.setItem(LOCAL_STORAGE_KEY, urlLocale);
     };
 
     // Adicionar listener para mudanças na URL
@@ -148,7 +150,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
       try {
         // Salvar preferência no localStorage
-        localStorage.setItem('alvorada-locale', code);
+  localStorage.setItem(LOCAL_STORAGE_KEY, code);
         
         // Get current path
         const currentPath = router.asPath;

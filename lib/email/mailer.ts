@@ -269,7 +269,7 @@ class EmailService {
           <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 30px;">
               <h1 style="color: #48BB78; margin: 0;">🚗 Conduz</h1>
-              <p style="color: #718096; margin: 5px 0;">Alvorada Magistral</p>
+              <p style="color: #718096; margin: 5px 0;">Conduz PT</p>
             </div>
             
             <h2 style="color: #2D3748; margin-bottom: 20px;">Olá ${driverName}!</h2>
@@ -316,13 +316,13 @@ class EmailService {
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
               <p style="color: #A0AEC0; font-size: 12px; margin: 0;">
                 Bem-vindo à equipe Conduz!<br/>
-                Alvorada Magistral - Gestão de Motoristas TVDE
+                Conduz PT - Gestão de Motoristas TVDE
               </p>
             </div>
           </div>
         </div>
       `,
-      text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nAlvorada Magistral - Gestão de Motoristas TVDE`,
+  text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nConduz PT - Gestão de Motoristas TVDE`,
     };
   }
 
@@ -378,14 +378,14 @@ class EmailService {
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
               <p style="color: #A0AEC0; font-size: 12px; margin: 0;">
-                Conduz - Alvorada Magistral<br/>
+                Conduz PT<br/>
                 Gestão de Motoristas TVDE
               </p>
             </div>
           </div>
         </div>
       `,
-      text: `Recuperação de Senha - Conduz\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nConduz - Alvorada Magistral\nGestão de Motoristas TVDE`,
+  text: `Recuperação de Senha - Conduz\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nConduz PT\nGestão de Motoristas TVDE`,
     };
   }
 }

@@ -80,9 +80,9 @@
     "passwordsDontMatch": "Passwords don't match"
   },
   "company": {
-    "name": "Alvorada Magistral",
+    "name": "Conduz PT",
     "description": "You drive, we take care of the rest!",
-    "email": "conduz@alvoradamagistral.eu",
+  "email": "contacto@conduz.pt",
     "emailDescription": "Support and information",
     "phone": "+351 913 415 670",
     "phoneDescription": "Support 7 days/week",
@@ -106,7 +106,7 @@
     "copyright": "All rights reserved",
     "madeWith": "Made with",
     "by": "by",
-    "company": "Alvorada Magistral",
+    "company": "Conduz PT",
     "developerBy": "Developed by",
     "developer": "Jose Junior",
     "privacy": "Privacy Policy",

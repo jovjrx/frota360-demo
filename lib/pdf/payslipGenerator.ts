@@ -74,9 +74,9 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         currentY += 25;
       }
       
-      // Alvorada Magistral LDA
+      // Conduz PT LDA
       doc.fontSize(9).fillColor("#666666")
-        .text("Alvorada Magistral LDA", leftMargin, currentY, { width: contentWidth, align: "center" });
+        .text("Conduz PT LDA", leftMargin, currentY, { width: contentWidth, align: "center" });
       currentY += 10;
       
       // Website

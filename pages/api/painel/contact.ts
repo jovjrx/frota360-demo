@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `;
 
     await sendEmail({
-      to: 'conduz@alvoradamagistral.eu',
+      to: 'contacto@conduz.pt',
       subject: `[Painel Motorista] ${subject}`,
       html: emailContent,
       text: `Nova mensagem de ${driverName} (${driverEmail})\n\nAssunto: ${subject}\n\nMensagem:\n${message}`,
@@ -85,7 +85,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       <p>Caso seja urgente, você também pode entrar em contato através:</p>
       <ul>
         <li>WhatsApp: +351 91 234 5678</li>
-        <li>Email: conduz@alvoradamagistral.eu</li>
+  <li>Email: suporte@conduz.pt</li>
       </ul>
       
       <p>Atenciosamente,<br><strong>Equipe CONDUZ.PT</strong></p>

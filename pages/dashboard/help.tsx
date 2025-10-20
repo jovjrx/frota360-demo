@@ -36,8 +36,8 @@ const CONTACT_INFO = {
   phone: '+351 91 234 5678',
   phoneFormatted: '+351 91 234 5678',
   whatsappLink: 'https://wa.me/351912345678',
-  email: 'conduz@alvoradamagistral.eu',
-  emailLink: 'mailto:conduz@alvoradamagistral.eu',
+  email: 'contacto@conduz.pt',
+  emailLink: 'mailto:contacto@conduz.pt',
 };
 
 const EXTERNAL_LINKS = {

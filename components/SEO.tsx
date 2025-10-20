@@ -183,7 +183,7 @@ export default function SEO({
               "contactPoint": {
                 "@type": "ContactPoint",
                 "contactType": "customer service",
-                "email": "conduz@alvoradamagistral.eu",
+                "email": "contacto@conduz.pt",
                 "telephone": "+351 913 415 670",
                 "areaServed": "PT",
                 "availableLanguage": ["pt-PT", "en-GB"]

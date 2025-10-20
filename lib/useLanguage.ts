@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 // Idiomas suportados
 const SUPPORTED_LOCALES = ['pt', 'en', 'it', 'fr', 'es', 'de'];
 const DEFAULT_LOCALE = 'pt';
+const LANGUAGE_STORAGE_KEY = 'conduz-locale';
 
 export function useLanguage() {
   const router = useRouter();
@@ -64,7 +65,7 @@ export function useLanguage() {
         // 1. Detectar idioma baseado na URL atual
         const urlLocale = detectLocaleFromUrl();
         setCurrentLocale(urlLocale);
-        localStorage.setItem('alvorada-locale', urlLocale);
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, urlLocale);
         setIsDetecting(false);
         
       } catch (error) {
@@ -80,7 +81,7 @@ export function useLanguage() {
     const handleRouteChange = () => {
       const urlLocale = detectLocaleFromUrl();
       setCurrentLocale(urlLocale);
-      localStorage.setItem('alvorada-locale', urlLocale);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, urlLocale);
     };
 
     // Adicionar listener para mudanças na URL
@@ -101,7 +102,7 @@ export function useLanguage() {
 
     try {
       setCurrentLocale(newLocale);
-      localStorage.setItem('alvorada-locale', newLocale);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, newLocale);
       
       // Get current path
       const currentPath = router.asPath;

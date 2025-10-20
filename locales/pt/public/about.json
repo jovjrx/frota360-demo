@@ -11,7 +11,7 @@
     "card": {
       "title": "Visão e Valores",
       "description": "Construindo o futuro da mobilidade TVDE",
-      "content": "A Conduz.pt nasceu para simplificar o TVDE em Portugal. Somos o braço de mobilidade da Alvorada Magistral, combinando mais de 30 anos de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
+  "content": "A Conduz.pt nasceu para simplificar o TVDE em Portugal. Somos uma operação dedicada à mobilidade, combinando décadas de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
       "values": {
         "title": "Os Nossos Valores Fundamentais",
         "list": [
@@ -62,9 +62,9 @@
     "card": {
       "title": "História de Sucesso",
       "description": "Da gestão empresarial ao TVDE de excelência",
-      "content": "A Alvorada Magistral atua há mais de 30 anos em gestão empresarial em Portugal, Itália, Espanha e outros países. A Conduz.pt representa a nossa entrada no mercado TVDE, trazendo toda esta experiência para revolucionar a mobilidade portuguesa.",
+      "content": "A Conduz.pt reúne especialistas com mais de 30 anos de experiência em gestão empresarial e operação de frotas em Portugal, Itália, Espanha e outros países. Essa bagagem permite entregar uma solução TVDE completa, escalável e centrada em resultados.",
       "stats": {
-        "title": "Números da Alvorada Magistral",
+        "title": "Números da Conduz PT",
         "list": [
           {
             "value": "30+",

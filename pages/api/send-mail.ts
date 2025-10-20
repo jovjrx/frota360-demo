@@ -36,7 +36,7 @@ export default async function handler(
     // Gmail-only transport with fallbacks
     const gmailUser = process.env.EMAIL_USER || "conduzcontacto@gmail.com";
     const gmailAppPassword = process.env.EMAIL_PASSWORD || "mogu muee ptnp ebbs"; // Fallback para produção
-    const fromEmail = process.env.EMAIL_FROM || "conduz@alvoradamagistral.eu";
+  const fromEmail = process.env.EMAIL_FROM || "contacto@conduz.pt";
     
     console.log('📧 Usando configuração de email:', { user: gmailUser, hasPassword: !!gmailAppPassword });
 
@@ -62,12 +62,12 @@ export default async function handler(
       });
     }
 
-    // Email para a empresa Alvorada Magistral
+  // Email para a equipe Conduz PT
     const senderAddress = fromEmail || gmailUser;
     const companyEmail = {
       from: senderAddress,
       sender: gmailUser,
-      to: process.env.COMPANY_EMAIL || 'conduz@alvoradamagistral.eu',
+  to: process.env.COMPANY_EMAIL || 'suporte@conduz.pt',
       subject: `🆕 Conduz.pt - Novo Contacto: ${interest} - ${name}`,
       replyTo: email,
       html: `
@@ -165,7 +165,7 @@ export default async function handler(
               <p style="color: #6c757d; font-size: 14px; margin: 0;">
                 Atenciosamente,<br>
                 <strong>Equipa Conduz.pt</strong><br>
-                📧 conduz@alvoradamagistral.eu<br>
+                📧 suporte@conduz.pt<br>
                 🌐 conduz.pt
               </p>
             </div>
