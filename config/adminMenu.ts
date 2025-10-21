@@ -94,6 +94,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 isSubmenu: true,
             },
             {
+                id: 'financing',
+                label: 'financing', // Traduzido via t('menu.financing')
+                href: '/admin/financing',
+                icon: FiActivity,
+                description: 'financing_management', // Traduzido via t('menu.financing_management')
+                isSubmenu: true,
+            },
+            {
                 id: 'commissions',
                 label: 'commissions',
                 href: '/admin/commissions',
