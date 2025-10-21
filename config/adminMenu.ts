@@ -102,30 +102,13 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 isSubmenu: true,
             },
             {
-                id: 'commissions',
-                label: 'commissions',
-                href: '/admin/commissions',
-                icon: FiDollarSign,
-                description: 'commissions_management',
-                isSubmenu: true,
-            },
-
-            {
                 id: 'goals',
                 label: 'goals',
                 href: '/admin/goals',
                 icon: FiTarget,
                 description: 'goals_management',
                 isSubmenu: true,
-            },
-            {
-                id: 'technical_reserve',
-                label: 'technical_reserve',
-                href: '/admin/technical-reserve',
-                icon: FiActivity,
-                description: 'technical_reserve_management',
-                isSubmenu: true,
-            },
+            }
         ],
     },
 
