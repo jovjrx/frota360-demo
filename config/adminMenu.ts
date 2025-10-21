@@ -136,15 +136,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 icon: FiTruck,
                 description: 'vehicle_tracking',
                 isSubmenu: true,
-            },
-            {
-                id: 'weekly_monitoring',
-                label: 'weekly_monitoring',
-                href: '/admin/financing',
-                icon: FiBarChart2,
-                description: 'weekly_monitoring',
-                isSubmenu: true,
-            },
+            }
         ],
     },
 
