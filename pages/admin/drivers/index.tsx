@@ -147,6 +147,7 @@ function DriversPageContent({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [sendingAccessId, setSendingAccessId] = useState<string | null>(null);
+  const [changingStatusId, setChangingStatusId] = useState<string | null>(null);
   
   // Solicitações com filtro de status
   const [requestStatusFilter, setRequestStatusFilter] = useState('pending');
@@ -337,6 +338,42 @@ function DriversPageContent({
       });
     } finally {
       setSendingAccessId(null);
+    }
+  };
+
+  const updateDriverStatus = async (driver: Driver, status: 'active' | 'inactive' | 'suspended' | 'pending') => {
+    if (!driver?.id) return;
+
+    setChangingStatusId(driver.id);
+    try {
+      const response = await fetch('/api/admin/drivers/activate', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: driver.id, status }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Falha ao atualizar status');
+      }
+
+      toast({
+        title: t('drivers.list.toasts.statusUpdated', 'Status atualizado'),
+        description: t('drivers.list.toasts.statusUpdatedDesc', 'O status do motorista foi atualizado com sucesso.'),
+        status: 'success',
+        duration: 3000,
+      });
+      await fetchDrivers();
+    } catch (error: any) {
+      toast({
+        title: t('drivers.list.toasts.statusUpdateError', 'Erro ao atualizar status'),
+        description: error?.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setChangingStatusId(null);
     }
   };
 
@@ -675,6 +712,31 @@ function DriversPageContent({
                                 onClick={() => handleSendAccess(driver)}
                               />
                             </Tooltip>
+                            {driver.status === 'active' ? (
+                              <Tooltip label={t('drivers.list.actions.deactivate', 'Desativar motorista')}>
+                                <IconButton
+                                  aria-label={t('drivers.list.actions.deactivate', 'Desativar motorista')}
+                                  icon={<Icon as={FiXCircle} />}
+                                  size="sm"
+                                  variant="outline"
+                                  colorScheme="red"
+                                  isLoading={changingStatusId === driver.id}
+                                  onClick={() => updateDriverStatus(driver, 'inactive')}
+                                />
+                              </Tooltip>
+                            ) : (
+                              <Tooltip label={t('drivers.list.actions.activate', 'Ativar motorista')}>
+                                <IconButton
+                                  aria-label={t('drivers.list.actions.activate', 'Ativar motorista')}
+                                  icon={<Icon as={FiCheckCircle} />}
+                                  size="sm"
+                                  variant="outline"
+                                  colorScheme="green"
+                                  isLoading={changingStatusId === driver.id}
+                                  onClick={() => updateDriverStatus(driver, 'active')}
+                                />
+                              </Tooltip>
+                            )}
                             <Tooltip label={t('drivers.list.actions.edit', 'Editar motorista')}>
                               <IconButton
                                 aria-label={t('drivers.list.actions.edit', 'Editar motorista')}

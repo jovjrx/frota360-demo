@@ -244,8 +244,9 @@ export async function getDriverWeekData(
 
     let latestPayment: DriverPayment | null = null;
     
-    // 3. Criar se não existe
-    if (!savedRecord || forceRefresh) {
+    // 3. Criar somente se NÃO existe
+    //    Importante: não recriar em forceRefresh para não sobrescrever paymentStatus 'paid'
+    if (!savedRecord) {
       console.log(`[getDriverWeekData] Criando record para ${driverId} semana ${weekId}`);
       savedRecord = await createDriverRecord(driverId, weekId);
     }

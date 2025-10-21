@@ -3,10 +3,12 @@ import { SessionRequest } from '@/lib/session/ironSession';
 import { withIronSessionApiRoute } from '@/lib/session/ironSession';
 import { sessionOptions } from '@/lib/session/ironSession';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { UpdateDriverAdminSchema } from '@/schemas/driver';
 import { z } from 'zod';
 import { getPortugalTimestamp } from '@/lib/timezone';
+import { emailService } from '@/lib/email/mailer';
 
 export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   const user = req.session.user;
@@ -48,6 +50,9 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       
       // Veículo (objeto flexível)
       vehicle: z.any().optional(),
+      
+      // Alteração de senha (admin)
+      newPassword: z.string().min(6).optional(),
     });
 
     const validationResult = FlexibleUpdateSchema.safeParse(req.body);
@@ -62,7 +67,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       });
     }
     
-    const validatedData = validationResult.data;
+  const validatedData = validationResult.data;
     const now = getPortugalTimestamp();
 
     // Check if driver exists
@@ -85,6 +90,46 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       updateFields.statusUpdatedBy = user.id;
     }
 
+    // Caso o admin tenha solicitado alteração de senha
+    if (validatedData.newPassword) {
+      const adminAuth = getAuth(firebaseAdmin);
+      let firebaseUid: string | undefined = (existingDriver as any)?.firebaseUid;
+      const driverEmail: string | undefined = (existingDriver as any)?.email;
+      const driverName: string = (existingDriver as any)?.fullName || (existingDriver as any)?.name || 'Motorista';
+
+      try {
+        if (!firebaseUid && driverEmail) {
+          const userRecord = await adminAuth.getUserByEmail(driverEmail);
+          firebaseUid = userRecord.uid;
+        }
+      } catch (lookupErr) {
+        // Se não encontrou o usuário no Auth, não podemos alterar a senha
+        return res.status(404).json({ success: false, error: 'Usuário de autenticação não encontrado para este motorista' });
+      }
+
+      if (!firebaseUid) {
+        return res.status(404).json({ success: false, error: 'Usuário de autenticação não encontrado para este motorista' });
+      }
+
+      await adminAuth.updateUser(firebaseUid, { password: validatedData.newPassword });
+
+      // Notificar por email com a nova senha
+      if (driverEmail) {
+        try {
+          // Reutiliza template de credenciais para enviar a nova senha
+          await emailService.sendDriverCredentialsEmail(driverEmail, driverName, validatedData.newPassword);
+        } catch (emailErr) {
+          // prosseguir mesmo se falhar o email
+          console.warn('Falha ao enviar email de alteração de senha:', emailErr);
+        }
+      }
+    }
+
+    // Remover chave sensível do payload antes de salvar no Firestore
+    if (updateFields.newPassword) {
+      delete updateFields.newPassword;
+    }
+
     await driverRef.update(updateFields);
 
     // Log audit trail
@@ -100,7 +145,8 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
 
     res.status(200).json({ 
       success: true,
-      message: 'Driver updated successfully' 
+      message: 'Driver updated successfully',
+      passwordChanged: Boolean(validatedData.newPassword),
     });
   } catch (error: any) {
     console.error('Update driver admin fields error:', error);

@@ -135,6 +135,16 @@ class EmailService {
     });
   }
 
+  async sendPasswordChangedEmail(driverEmail: string, driverName: string, newPassword: string): Promise<void> {
+    const template = this.getPasswordChangedTemplate(driverName, newPassword);
+    await this.sendEmail({
+      to: driverEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  }
+
   private getDriverWelcomeTemplate(driverName: string): EmailTemplate {
     return {
       subject: 'Bem-vindo à Conduz.pt!',
@@ -386,6 +396,41 @@ class EmailService {
         </div>
       `,
   text: `Recuperação de Senha - Conduz\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nConduz PT\nGestão de Motoristas TVDE`,
+    };
+  }
+
+  private getPasswordChangedTemplate(driverName: string, newPassword: string): EmailTemplate {
+    return {
+      subject: 'Sua senha foi atualizada - Conduz',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
+          <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="color: #48BB78; margin: 0;">🔐 Senha atualizada</h1>
+            <p style="color: #4A5568; line-height: 1.6;">Olá ${driverName},</p>
+            <p style="color: #4A5568; line-height: 1.6;">Sua senha foi alterada com sucesso por um administrador.</p>
+            <div style="background-color: #F7FAFC; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #48BB78;">
+              <p style="margin: 0;">
+                <strong style="color: #2D3748;">Nova Senha:</strong><br/>
+                <code style="background-color: #EDF2F7; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 5px; font-size: 14px;">${newPassword}</code>
+              </p>
+            </div>
+            <div style="background-color: #FFF5F5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #F56565;">
+              <p style="margin: 0; color: #742A2A; font-size: 14px;">
+                <strong>Importante:</strong> Por segurança, recomendamos que você altere esta senha após o primeiro login.
+              </p>
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel" 
+                 style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+                Acessar Painel do Motorista
+              </a>
+            </div>
+            <p style="color: #718096; font-size: 12px;">Se você não solicitou esta alteração, entre em contato com o suporte imediatamente.</p>
+            <p style="color: #718096; font-size: 12px;">Conduz PT - Gestão de Motoristas TVDE</p>
+          </div>
+        </div>
+      `,
+      text: `Senha atualizada\n\nOlá ${driverName},\n\nSua senha foi alterada com sucesso por um administrador.\n\nNova senha: ${newPassword}\n\nImportante: Por segurança, recomendamos que você altere esta senha após o primeiro login.\n\nAcesse o painel: ${(process.env.NEXTAUTH_URL || 'https://conduz.pt') + '/painel'}\n\nSe você não solicitou esta alteração, contate o suporte imediatamente.\n\nConduz PT - Gestão de Motoristas TVDE`,
     };
   }
 }

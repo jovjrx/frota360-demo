@@ -37,16 +37,14 @@ export default function ResetPasswordPage({ tPage }: PublicPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [oobCode, setOobCode] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     // Verificar se há código de recuperação na URL
-    const { oobCode: code } = router.query;
-    if (code && typeof code === 'string') {
-      setOobCode(code);
-    } else {
-      // Se não há código, redirecionar para login
-      router.push('/login?error=invalid-reset-link');
-    }
+    const { oobCode: code, token: customToken } = router.query as Record<string, string>;
+    if (code && typeof code === 'string') setOobCode(code);
+    if (customToken && typeof customToken === 'string') setToken(customToken);
+    if (!code && !customToken) router.push('/login?error=invalid-reset-link');
   }, [router]);
 
   const validatePassword = (password: string) => {
@@ -82,16 +80,28 @@ export default function ResetPasswordPage({ tPage }: PublicPageProps) {
       return;
     }
 
-    if (!oobCode) {
+    if (!oobCode && !token) {
       setError(tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE));
       setIsLoading(false);
       return;
     }
 
     try {
-      // Confirmar redefinição de senha
-      await confirmPasswordReset(auth, oobCode, password);
-      setSuccess(true);
+      if (oobCode) {
+        // Fluxo Firebase (oobCode)
+        await confirmPasswordReset(auth, oobCode, password);
+        setSuccess(true);
+      } else if (token) {
+        // Fluxo customizado (API própria)
+        const resp = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, newPassword: password })
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data?.error || 'Erro ao redefinir senha');
+        setSuccess(true);
+      }
     } catch (err: any) {
       console.error('Erro ao redefinir senha:', err);
       if (err.code === 'auth/expired-action-code') {
