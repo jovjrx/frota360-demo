@@ -125,7 +125,8 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
     );
   }
 
-  const { summary, goals } = data;
+  const { summary, goals, year } = data as any;
+  const displayYear = goals?.[0]?.year || year; // no mocked fallback
 
   // Filtrar metas
   let filtered = goals;
@@ -144,7 +145,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
 
   return (
     <AdminLayout
-      title="Metas 2026"
+      title={displayYear ? `Metas ${displayYear}` : 'Metas'}
       subtitle="Acompanhe o progresso das metas estratégicas"
       translations={translations}
       side={
@@ -179,7 +180,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
               {summary.totalGoals}
             </StatNumber>
             <StatHelpText fontSize="xs">
-              Todas as metas 2026
+              Todas as metas{displayYear ? ` ${displayYear}` : ''}
             </StatHelpText>
           </Stat>
         </Box>
@@ -191,7 +192,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
               {summary.completedGoals}
             </StatNumber>
             <StatHelpText fontSize="xs">
-              {((summary.completedGoals / summary.totalGoals) * 100).toFixed(0)}% do total
+              {summary.totalGoals > 0 ? ((summary.completedGoals / summary.totalGoals) * 100).toFixed(0) : 0}% do total
             </StatHelpText>
           </Stat>
         </Box>
@@ -241,10 +242,10 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
             maxW="150px"
           >
             <option value="all">Todos Trimestres</option>
-            <option value="Q1">Q1 2026</option>
-            <option value="Q2">Q2 2026</option>
-            <option value="Q3">Q3 2026</option>
-            <option value="Q4">Q4 2026</option>
+            <option value="Q1">Q1 {displayYear ?? ''}</option>
+            <option value="Q2">Q2 {displayYear ?? ''}</option>
+            <option value="Q3">Q3 {displayYear ?? ''}</option>
+            <option value="Q4">Q4 {displayYear ?? ''}</option>
           </Select>
           <Select
             value={filterStatus}
@@ -301,7 +302,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
                       </Td>
                       <Td>
                         <Badge colorScheme="blue" fontSize="xs">
-                          {goal.quarter} 2026
+                          {goal.quarter} {displayYear ?? ''}
                         </Badge>
                       </Td>
                       <Td fontSize="sm" color="gray.600">
@@ -345,10 +346,8 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
       <Alert status="info" borderRadius="lg" bg="blue.50" borderColor="blue.200" mt={6}>
         <AlertIcon />
         <VStack align="start" spacing={1}>
-          <AlertTitle>Sobre Metas 2026</AlertTitle>
-          <AlertDescription fontSize="sm">
-            As metas representam os objetivos estratégicos: Q1 (15 motoristas), Q2 (25), Q3 (40) e Q4 (60). O progresso é baseado no número de motoristas ativos em cada rede.
-          </AlertDescription>
+          <AlertTitle>Sobre Metas{displayYear ? ` ${displayYear}` : ''}</AlertTitle>
+          <AlertDescription fontSize="sm">As metas são definidas pela administração e medem a evolução de motoristas ativos por trimestre.</AlertDescription>
         </VStack>
       </Alert>
     </AdminLayout>

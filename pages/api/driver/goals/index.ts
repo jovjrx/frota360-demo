@@ -1,6 +1,7 @@
 import type { NextApiResponse } from 'next';
 import { SessionRequest, withIronSessionApiRoute, sessionOptions } from '@/lib/session/ironSession';
 import { buildGoalsForYear } from '@/lib/goals/service';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -13,11 +14,37 @@ async function handler(req: SessionRequest, res: NextApiResponse) {
   }
 
   try {
-    const year = Number(req.query.year) || 2026;
-    const { goals, summary } = await buildGoalsForYear(year);
+    let yearParam = Number(req.query.year);
+    let resolvedYear: number | undefined = Number.isFinite(yearParam) ? yearParam : undefined;
+    if (!resolvedYear) {
+      try {
+        const snap = await adminDb.doc('settings/goals').get();
+        const data = snap.exists ? (snap.data() as any) : null;
+        const ay = Number(data?.activeYear);
+        resolvedYear = Number.isFinite(ay) ? ay : undefined;
+      } catch {
+        resolvedYear = undefined;
+      }
+    }
+
+    if (!resolvedYear) {
+      return res.status(200).json({
+        success: true,
+        driver: {
+          id: user.id,
+          name: user.name || '',
+          type: 'driver',
+        },
+        goals: [],
+        summary: { totalGoals: 0, completedGoals: 0, overallProgress: 0, averageProgress: 0 },
+      });
+    }
+
+    const { goals, summary } = await buildGoalsForYear(resolvedYear);
 
     return res.status(200).json({
       success: true,
+      year: resolvedYear,
       driver: {
         id: user.id,
         name: user.name || '',

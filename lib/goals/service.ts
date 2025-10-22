@@ -1,5 +1,4 @@
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getDefault2026Goals, QuarterlyGoal } from '@/schemas/goals';
 
 export interface GoalRecordDto {
   id: string;
@@ -45,8 +44,8 @@ export async function countActiveDrivers(asOf?: Date): Promise<number> {
   return count;
 }
 
-export async function buildGoalsForYear(year: number): Promise<{ goals: GoalRecordDto[]; summary: GoalsSummaryDto; }>{
-  // Try to read configured targets; fallback to defaults
+export async function buildGoalsForYear(year: number): Promise<{ goals: GoalRecordDto[]; summary: GoalsSummaryDto; }> {
+  // Read configured targets; do NOT fallback to mocked defaults
   let configuredTargets: { [q: number]: number } | null = null;
   try {
     const cfgSnap = await adminDb.doc('settings/goals').get();
@@ -61,11 +60,9 @@ export async function buildGoalsForYear(year: number): Promise<{ goals: GoalReco
       };
     }
   } catch (e) {
-    // ignore and use defaults
+    // ignore and treat as no config
   }
 
-  // For MVP, use default 2026 targets when not configured
-  const defaults = getDefault2026Goals();
   const companyName = 'Conduz.pt';
   const companyId = 'company';
 
@@ -73,11 +70,19 @@ export async function buildGoalsForYear(year: number): Promise<{ goals: GoalReco
   const progresses: number[] = [];
   let completedGoals = 0;
 
-  for (const qStr of Object.keys(defaults)) {
-    const q = Number(qStr);
-    const def: QuarterlyGoal = defaults[q];
-    const configured = configuredTargets && Number.isFinite(configuredTargets[q]) ? configuredTargets[q] : undefined;
-    const target = configured ?? def.targets.totalDrivers;
+  // If no configured targets, return empty dataset
+  if (!configuredTargets) {
+    return {
+      goals: [],
+      summary: { totalGoals: 0, completedGoals: 0, overallProgress: 0, averageProgress: 0 },
+    };
+  }
+
+  // Only include quarters that have a valid numeric target
+  for (const q of [1, 2, 3, 4]) {
+    const target = Number.isFinite(configuredTargets[q]) ? Number(configuredTargets[q]) : NaN;
+    if (!Number.isFinite(target) || target < 0) continue;
+
     const endDate = getQuarterEndDate(year, q);
     const current = await countActiveDrivers(endDate);
     const progressPct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
@@ -85,7 +90,6 @@ export async function buildGoalsForYear(year: number): Promise<{ goals: GoalReco
     let status: GoalRecordDto['status'] = 'not_started';
     if (progressPct >= 100) status = 'completed';
     else if (progressPct > 0) status = 'in_progress';
-    // overdue if now past quarter end and not completed
     if (now() > endDate && status !== 'completed') status = 'overdue';
 
     if (status === 'completed') completedGoals++;
@@ -106,7 +110,7 @@ export async function buildGoalsForYear(year: number): Promise<{ goals: GoalReco
     });
   }
 
-  const overall = progresses.length > 0 ? (progresses.reduce((a,b)=>a+b,0) / progresses.length) : 0;
+  const overall = progresses.length > 0 ? (progresses.reduce((a, b) => a + b, 0) / progresses.length) : 0;
 
   return {
     goals,
@@ -115,6 +119,6 @@ export async function buildGoalsForYear(year: number): Promise<{ goals: GoalReco
       completedGoals,
       overallProgress: overall,
       averageProgress: overall,
-    }
+    },
   };
 }

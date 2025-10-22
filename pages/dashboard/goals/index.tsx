@@ -78,7 +78,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Metas 2026" translations={translations}>
+      <DashboardLayout title="Metas" translations={translations}>
         <Center minH="400px">
           <Spinner size="lg" color="green.500" />
         </Center>
@@ -88,7 +88,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
 
   if (error || !data?.success) {
     return (
-      <DashboardLayout title="Metas 2026" translations={translations}>
+      <DashboardLayout title="Metas" translations={translations}>
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
           <AlertTitle>Erro ao carregar metas</AlertTitle>
@@ -100,11 +100,12 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
     );
   }
 
-  const { goals, summary } = data;
+  const { goals, summary, year } = data as any;
+  const displayYear = goals?.[0]?.year || year; // no fallback to mocked year
 
   return (
     <DashboardLayout
-      title="Metas 2026"
+      title={displayYear ? `Metas ${displayYear}` : 'Metas'}
       subtitle="Acompanhe as metas estratégicas da Conduz.pt"
       translations={translations}
     >
@@ -151,9 +152,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
             </Text>
             <Icon as={FiClock} color="purple.500" boxSize={5} />
           </HStack>
-          <Text fontSize="2xl" fontWeight="bold" color="purple.600">
-            2026
-          </Text>
+          <Text fontSize="2xl" fontWeight="bold" color="purple.600">{displayYear ?? '—'}</Text>
           <Text fontSize="xs" color="gray.500" mt={1}>
             4 trimestres
           </Text>
@@ -168,7 +167,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
               Metas Trimestrais
             </Text>
             <Text fontSize="sm" color="gray.500">
-              Objetivos de crescimento para 2026
+              Objetivos de crescimento configurados pela administração
             </Text>
           </VStack>
 
@@ -179,7 +178,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
               <AlertIcon />
               <AlertTitle>Sem metas definidas</AlertTitle>
               <AlertDescription>
-                As metas para 2026 serão definidas em breve.
+                As metas ainda não foram configuradas. Aguarde a definição pela administração.
               </AlertDescription>
             </Alert>
           ) : (
@@ -202,7 +201,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
                         <HStack spacing={2}>
                           <Icon as={FiTarget} color={`${statusColor}.500`} />
                           <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                            {goal.quarter} 2026
+                            {goal.quarter} {displayYear ? displayYear : ''}
                           </Text>
                         </HStack>
                         <Text fontSize="xs" color="gray.600" pl={6}>
@@ -248,9 +247,9 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
       <Alert status="info" borderRadius="lg" bg="blue.50" borderColor="blue.200">
         <AlertIcon />
         <VStack align="start" spacing={1}>
-          <AlertTitle>Sobre as Metas 2026</AlertTitle>
+          <AlertTitle>Sobre as Metas{displayYear ? ` ${displayYear}` : ''}</AlertTitle>
           <AlertDescription fontSize="sm">
-            As metas representam os objetivos estratégicos da Conduz.pt para 2026. Seu progresso é baseado no número de motoristas ativos em sua rede.
+            As metas representam os objetivos estratégicos da Conduz.pt. Seu progresso é baseado no número de motoristas ativos em sua rede.
           </AlertDescription>
         </VStack>
       </Alert>
