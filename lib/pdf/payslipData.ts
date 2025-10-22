@@ -67,6 +67,8 @@ export function buildPayslipDataFromRecord(
     ganhosTotal - ivaValor
   ) ?? ganhosTotal - ivaValor;
   const despesasAdm = pickNumber(record.despesasAdm, ganhosMenosIVA * 0.07) ?? ganhosMenosIVA * 0.07;
+  // Nova comissão extra (se existir no record)
+  const extraCommissionAmount = pickNumber((record as any).commissionAmount, 0) ?? 0;
 
   const aluguel = pickNumber(record.aluguel) ?? 0;
 
@@ -91,8 +93,8 @@ export function buildPayslipDataFromRecord(
 
   const repasse = pickNumber(
     record.repasse,
-    ganhosMenosIVA - despesasAdm - combustivelValue - viaverdeValue - aluguel - financingTotalCost
-  ) ?? ganhosMenosIVA - despesasAdm - combustivelValue - viaverdeValue - aluguel - financingTotalCost;
+    ganhosMenosIVA - despesasAdm - combustivelValue - viaverdeValue - aluguel - financingTotalCost + extraCommissionAmount
+  ) ?? ganhosMenosIVA - despesasAdm - combustivelValue - viaverdeValue - aluguel - financingTotalCost + extraCommissionAmount;
 
   const resolvedDriverType = overrides.driverType
     || ((record as any).driverType === 'renter' || (record as any).isLocatario ? 'renter' : 'affiliate');
@@ -114,7 +116,11 @@ export function buildPayslipDataFromRecord(
     ganhosTotal,
     ivaValor,
     ganhosMenosIva: ganhosMenosIVA,
-    comissao: despesasAdm,
+  comissao: despesasAdm, // Mantém nome legado: comissao = Taxa Adm (7%)
+  extraCommission: extraCommissionAmount,
+    extraCommissionDetails: Array.isArray((record as any).affiliateBonusDetails)
+      ? (record as any).affiliateBonusDetails.map((d: any) => ({ level: d?.level, bonusAmount: d?.bonusAmount, referredDriverId: d?.referredDriverId }))
+      : undefined,
     combustivel: combustivelValue,
     viaverde: viaverdeValue,
     aluguel,

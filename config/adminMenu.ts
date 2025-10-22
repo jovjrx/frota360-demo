@@ -94,6 +94,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 isSubmenu: true,
             },
             {
+                id: 'commissions',
+                label: 'commissions',
+                href: '/admin/commissions',
+                icon: FiDollarSign,
+                description: 'commissions_management',
+                isSubmenu: true,
+            },
+            {
                 id: 'financing',
                 label: 'financing', // Traduzido via t('menu.financing')
                 href: '/admin/financing',
@@ -163,6 +171,22 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 href: '/admin/data',
                 icon: FiBarChart2,
                 description: 'weekly_data',
+                isSubmenu: true,
+            },
+            {
+                id: 'finance-settings',
+                label: 'finance_settings',
+                href: '/admin/settings/finance',
+                icon: FiSettings,
+                description: 'finance_settings',
+                isSubmenu: true,
+            },
+            {
+                id: 'commission-settings',
+                label: 'commission_settings',
+                href: '/admin/settings/commissions',
+                icon: FiSettings,
+                description: 'commissions_settings',
                 isSubmenu: true,
             },
             {

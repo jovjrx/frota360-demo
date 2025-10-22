@@ -43,7 +43,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { key: 'ganhosTotal', width: 14 },
       { key: 'ivaValor', width: 12 },
       { key: 'ganhosMenosIVA', width: 14 },
-      { key: 'despesasAdm', width: 12 },
+  { key: 'commissionAmount', width: 12 },
+  { key: 'despesasAdm', width: 12 },
       { key: 'combustivel', width: 12 },
       { key: 'viaverde', width: 12 },
       { key: 'aluguel', width: 12 },
@@ -94,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const categoryRow = worksheet.addRow([
       'MOTORISTA', '', '', 
       'RECEITAS', '', '', '', '', 
-      'DESPESAS', '', '', '', '', '', '',
+      'DESPESAS', '', '', '', '', '', '', '',
       'LÍQUIDO', '', '', '',
       'PAGAMENTO', '', '', ''
     ]);
@@ -117,21 +118,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         fgColor: { argb: 'FF48BB78' }, // Verde
       };
     });
-    ['J4', 'K4', 'L4', 'M4', 'N4', 'O4', 'P4'].forEach(cell => {
+    ['J4', 'K4', 'L4', 'M4', 'N4', 'O4', 'P4', 'Q4'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFED8936' }, // Laranja
       };
     });
-    ['Q4', 'R4', 'S4', 'T4'].forEach(cell => {
+    ['R4', 'S4', 'T4', 'U4'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF9F7AEA' }, // Roxo
       };
     });
-    ['U4', 'V4', 'W4', 'X4'].forEach(cell => {
+    ['V4', 'W4', 'X4', 'Y4'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -149,6 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Ganhos Total',
       'IVA (6%)',
       'Ganhos - IVA',
+  'Commission',
       'Taxa Adm (7%)',
       'Combustível',
       'Portagens',
@@ -184,21 +186,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         fgColor: { argb: 'FF2F855A' }, // Verde escuro
       };
     });
-    ['J5', 'K5', 'L5', 'M5', 'N5', 'O5', 'P5'].forEach(cell => {
+    ['J5', 'K5', 'L5', 'M5', 'N5', 'O5', 'P5', 'Q5'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFC05621' }, // Laranja escuro
       };
     });
-    ['Q5', 'R5', 'S5', 'T5'].forEach(cell => {
+    ['R5', 'S5', 'T5', 'U5'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF6B46C1' }, // Roxo escuro
       };
     });
-    ['U5', 'V5', 'W5', 'X5'].forEach(cell => {
+    ['V5', 'W5', 'X5', 'Y5'].forEach(cell => {
       worksheet.getCell(cell).fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -215,6 +217,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     records.forEach((record: DriverRecord, index: number) => {
       const financing = (record as any).financingDetails || {};
+      const commissionAmount = (record as any).commissionAmount || 0;
       
       const row = worksheet.addRow([
         record.driverName,
@@ -225,6 +228,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         record.ganhosTotal || 0,
         record.ivaValor || 0,
         record.ganhosMenosIVA || 0,
+        commissionAmount,
         record.despesasAdm || 0,
         record.combustivel || 0,
         record.viaverde || 0,
@@ -261,7 +265,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Status com cor
-      const statusCell = worksheet.getCell(`U${row.number}`);
+  const statusCell = worksheet.getCell(`V${row.number}`);
       if (record.paymentStatus === 'paid') {
         statusCell.font = { color: { argb: 'FF22543D' }, bold: true };
         statusCell.fill = {
@@ -283,7 +287,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Totais
       totalGanhos += record.ganhosTotal || 0;
       totalIVA += record.ivaValor || 0;
-      totalDespesas += (record.combustivel || 0) + (record.viaverde || 0) + (record.aluguel || 0) + (financing.totalCost || 0);
+  totalDespesas += (record.combustivel || 0) + (record.viaverde || 0) + (record.aluguel || 0) + (financing.totalCost || 0);
       totalRepasse += record.repasse || 0;
       totalPago += record.paymentInfo?.totalAmount || record.repasse || 0;
     });
@@ -299,6 +303,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalIVA,
       '', // Ganhos - IVA (calculado)
       '', // Taxa Adm (calculado)
+      '', // Comissão (individual)
       '', // Combustível individual
       '', // Portagens individual
       '', // Aluguel individual
@@ -325,7 +330,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     totalRow.alignment = { vertical: 'middle', horizontal: 'right' };
 
     // Formatar valores dos totais
-    ['F', 'G', 'P', 'S'].forEach(col => {
+    ['F', 'G', 'Q', 'T'].forEach(col => {
       const cell = worksheet.getCell(`${col}${totalRow.number}`);
       cell.numFmt = '€#,##0.00';
       cell.alignment = { horizontal: 'right', vertical: 'middle' };

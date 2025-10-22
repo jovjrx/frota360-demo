@@ -7,6 +7,7 @@ import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { getApprovalEmailTemplate } from '@/lib/email/templates';
 import { initializeNewDriver } from '@/lib/services/driver-initialization';
+import { acceptReferralInvite } from '@/lib/services/referral-manager';
 
 export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -70,7 +71,24 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         cartrack: { enabled: false, key: '' },
       },
       // Add other default driver fields as needed
+      // Se existir referrerId na solicitação, já vincula a cadeia de comissões
+      referredBy: requestData.referrerId || undefined,
     });
+
+    // 3.2. Se existir referralInviteCode, marcar convite como aceito (atualiza rede e contadores)
+    try {
+      if (requestData.referralInviteCode) {
+        await acceptReferralInvite(
+          requestData.referralInviteCode,
+          firebaseUser.uid,
+          requestData.fullName,
+          requestData.email
+        );
+      }
+    } catch (err) {
+      console.error('[approve] Falha ao aceitar convite de referência:', err);
+      // Não falhar aprovação por isso
+    }
 
     // 3.5. Initialize driver structures (commissions, referral, KPIs, goals, technical reserve)
     const initResult = await initializeNewDriver(

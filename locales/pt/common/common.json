@@ -56,7 +56,9 @@
     "operations_management": "Gestão de Operações",
     "financial_management": "Gestão Financeira",
     "monitoring_management": "Gestão de Monitoramento",
-    "settings_management": "Gestão de Configurações"
+    "settings_management": "Gestão de Configurações",
+    "finance-settings": "Config. Financeira",
+    "commission-settings": "Config. Comissões"
   },
   "user": {
     "email": "Email",

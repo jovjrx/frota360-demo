@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Verificar autenticação
     const session = await getSession(req, res);
-    if (!session || !session.user) {
+    if (!session || !session.userId) {
       return res.status(401).json({ error: 'Não autenticado' });
     }
 
@@ -51,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id: driverId,
         name: driver.fullName || driver.name,
         affiliateLevel: driver.affiliateLevel || 1,
+        refSlug: driver.refSlug || null,
       },
       network: network ? {
         totalRecruitments: network.totalRecruitments,

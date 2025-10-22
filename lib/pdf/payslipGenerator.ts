@@ -21,6 +21,9 @@ export interface PayslipData {
   ivaValor: number;
   ganhosMenosIva: number;
   comissao: number;
+  // Nova comissão extra (opcional)
+  extraCommission?: number;
+  extraCommissionDetails?: Array<{ level?: number; bonusAmount?: number; referredDriverId?: string }>;
   
   // Descontos
   combustivel: number;
@@ -152,6 +155,31 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       doc.text(`${data.ganhosMenosIva.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
       currentY += 14;
       
+      // Comissão (ganho adicional do motorista)
+      if (data.extraCommission && data.extraCommission > 0) {
+        doc.font("Helvetica");
+        doc.text("Comissão", leftMargin, currentY);
+        doc.text(`+${data.extraCommission.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+        currentY += 14;
+        // Detalhes por nível (opcional)
+        if (Array.isArray(data.extraCommissionDetails) && data.extraCommissionDetails.length > 0) {
+          const maxLines = Math.min(5, data.extraCommissionDetails.length);
+          doc.fontSize(9);
+          for (let i = 0; i < maxLines; i++) {
+            const det = data.extraCommissionDetails[i];
+            const label = typeof det.level === 'number' ? `  • Nível ${det.level}` : `  • Comissão`;
+            const value = typeof det.bonusAmount === 'number' ? det.bonusAmount : 0;
+            doc.text(label, leftMargin, currentY);
+            doc.text(`+${value.toFixed(2)} EUR`, rightMargin - 100, currentY, { width: 100, align: "right" });
+            currentY += 12;
+          }
+          doc.fontSize(10);
+          currentY += 6;
+        } else {
+          currentY += 8;
+        }
+      }
+      
       // Despesas Administrativas
       doc.font("Helvetica");
       doc.text("Despesas Administrativas (7%)", leftMargin, currentY);
@@ -231,6 +259,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
       const obs = [
         "OBSERVAÇÕES:",
         "- IVA de 6% aplicado sobre ganhos totais | Despesas administrativas de 7% fixo sobre (Ganhos - IVA)",
+        data.extraCommission && data.extraCommission > 0 ? `- Comissão adicional aplicada: ${data.extraCommission.toFixed(2)} EUR` : "",
         data.aluguel > 0 ? "- Aluguel semanal incluído (Locatário)" : "- Sem aluguel (Afiliado)",
         data.viaverde > 0
           ? `- Portagens (ViaVerde) descontadas nesta semana (total: ${data.viaverde.toFixed(2)} EUR)`

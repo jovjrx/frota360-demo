@@ -173,7 +173,8 @@ export async function getProcessedWeeklyRecords(weekId: string): Promise<DriverW
       const ivaValor = ganhosTotal * 0.06;
       const ganhosMenosIVA = ganhosTotal - ivaValor;
 
-      let despesasAdm = ganhosMenosIVA * 0.07; // 7% base
+  let despesasAdm = ganhosMenosIVA * 0.07; // 7% base (Taxa Adm)
+  let commissionAmount = 0; // Nova Comissão (extra)
       let totalFinancingInterestPercent = 0;
       let totalInstallment = 0;
 
@@ -184,11 +185,10 @@ export async function getProcessedWeeklyRecords(weekId: string): Promise<DriverW
         if (f.weeklyAmount) totalInstallment += f.weeklyAmount;
       });
 
-      // Adicionar juros ao despesasAdm
-      if (totalFinancingInterestPercent > 0) {
-        const additionalInterest = ganhosMenosIVA * (totalFinancingInterestPercent / 100);
-        despesasAdm += additionalInterest;
-      }
+      // Não incluir juros na Taxa Adm; juros entram no financiamento
+
+      // Comissão Extra (global opcional) - por padrão 0
+      // NOTA: este processor não lê config por design; a comissão é melhor aplicada nas rotas modernas
 
       const aluguel = t.driver.type === 'renter' ? t.driver.rentalFee : 0;
       
@@ -199,7 +199,7 @@ export async function getProcessedWeeklyRecords(weekId: string): Promise<DriverW
       const totalDespesas = t.combustivel + viaverdeDesconto + aluguel;
       
       // Repasse = ganhos - IVA - despesasAdm - totalDespesas
-      let repasse = ganhosMenosIVA - despesasAdm - totalDespesas;
+  let repasse = ganhosMenosIVA - despesasAdm - totalDespesas + commissionAmount;
       
       // Subtrair parcela do repasse
       if (totalInstallment > 0) {
@@ -215,7 +215,8 @@ export async function getProcessedWeeklyRecords(weekId: string): Promise<DriverW
         driverName: t.driver.name,
         ganhosTotal,
         ivaValor,
-        despesasAdm,
+  despesasAdm,
+  commissionAmount,
         combustivel: t.combustivel,
         viaverde: t.viaverde,
         aluguel,

@@ -87,10 +87,11 @@ export async function acceptReferralInvite(
       acceptedByDriverName: driverName,
     });
 
-    // 5. Atualizar dados do motorista
+    // 5. Atualizar dados do motorista (inclui referredBy para cadeia de comissões)
     await adminDb.collection('drivers').doc(driverId).update({
       recruitedBy: invite.referrerId,
       recruitedAt: now,
+      referredBy: invite.referrerId,
     });
 
     // 6. Incrementar contadores do recrutador

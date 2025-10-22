@@ -8,6 +8,9 @@
  */
 
 import { adminDb } from '@/lib/firebaseAdmin';
+import { APP_CONFIG } from '@/lib/config';
+import { getFinancialConfig, isWeekEligibleByStart } from '@/lib/finance/config';
+import { getBonusForDriverWeek } from '@/lib/commissions/compute';
 import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import type { DriverPayment } from '@/schemas/driver-payment';
 
@@ -118,7 +121,10 @@ async function getActiveFinancing(driverId: string): Promise<FinancingEntry[]> {
       amount: data.amount,
       weeks: data.weeks,
       weeklyInterest: data.weeklyInterest || 0,
-      remainingWeeks: data.remainingWeeks
+      remainingWeeks: data.remainingWeeks,
+      // manter referência mínima para elegibilidade
+      startDate: data.startDate,
+      status: data.status,
     };
   });
 }
@@ -233,7 +239,7 @@ export async function getDriverWeekData(
       return null;
     }
     
-    // 2. Registro salvo (dados fixos)
+  // 2. Registro salvo (dados fixos)
     const recordId = `${driverId}_${weekId}`;
     const savedRecordDoc = await adminDb
       .collection('driverWeeklyRecords')
@@ -282,12 +288,16 @@ export async function getDriverWeekData(
     }
     
     // 3.5 Buscar dados do motorista para driverType e vehicle
-    const driverDoc = await adminDb.collection('drivers').doc(driverId).get();
+  const driverDoc = await adminDb.collection('drivers').doc(driverId).get();
     const driverData = driverDoc.exists ? driverDoc.data() : null;
     const driverType = driverData?.type === 'renter' ? 'renter' : 'affiliate';
     const vehicle = driverData?.vehicle?.plate || driverData?.integrations?.viaverde?.key || '';
     
-    // 4. JUNTAR dados
+  // 3.9 Configuração financeira (taxa adm)
+  const financialCfg = await getFinancialConfig().catch(() => ({ adminFeePercent: 7 }));
+  const configuredAdminFee = Math.max(0, Number(financialCfg.adminFeePercent || 7));
+
+  // 4. JUNTAR dados
     const completeRecord: any = {
       id: recordId,
       driverId: savedRecord.driverId,
@@ -312,11 +322,15 @@ export async function getDriverWeekData(
       ganhosTotal: dataWeeklyValues.ganhosTotal,
       ivaValor: dataWeeklyValues.ivaValor,
       ganhosMenosIVA: dataWeeklyValues.ganhosMenosIVA,
-      despesasAdm: dataWeeklyValues.despesasAdm,
+  // Aplicaremos a taxa adm configurada ao final (pode diferir de 7%)
+  despesasAdm: dataWeeklyValues.despesasAdm,
+  // Comissão extra (nova): calculada conforme configuração global (pode evoluir para override por motorista)
+  commissionPercent: 0,
+  commissionAmount: 0,
       
       // DO RECORD (fixos)
       aluguel: savedRecord.aluguel || 0,
-      financingDetails: savedRecord.financingDetails,
+  financingDetails: savedRecord.financingDetails,
       totalDespesas:
         dataWeeklyValues.combustivel
         + dataWeeklyValues.viaverde
@@ -324,6 +338,7 @@ export async function getDriverWeekData(
         + (savedRecord.financingDetails?.totalCost || 0),
 
       // Repasse considera todas as despesas do motorista, incluindo portagens
+      // Comissão (se existir) será adicionada mais abaixo
       repasse: dataWeeklyValues.ganhosMenosIVA
         - dataWeeklyValues.despesasAdm
         - dataWeeklyValues.combustivel
@@ -344,8 +359,136 @@ export async function getDriverWeekData(
       ...(savedRecord.notes && { notes: savedRecord.notes }),
     };
 
+    // Aplicar cálculo dinâmico do financiamento por semana (feature flag)
+    try {
+      const financialCfg = await getFinancialConfig();
+      const dyn = financialCfg.financing?.dynamicCalculation ?? true;
+      const eligibilityPolicy = financialCfg.financing?.eligibilityPolicy || 'startDateToWeekEnd';
+
+      if (dyn) {
+        const activeFinancings = await adminDb
+          .collection('financing')
+          .where('driverId', '==', driverId)
+          .where('status', '==', 'active')
+          .get();
+
+        let totalInstallment = 0;
+        let totalInterestAmount = 0;
+        let hasAny = false;
+
+        activeFinancings.docs.forEach((doc) => {
+          const f = doc.data() as any;
+          const eligible = isWeekEligibleByStart(f.startDate, savedRecord.weekStart, savedRecord.weekEnd, eligibilityPolicy);
+          if (!eligible) return;
+          if (f.type === 'loan') {
+            const weeks = Number(f.weeks || 0);
+            const remaining = Number(f.remainingWeeks || 0);
+            if (weeks > 0 && remaining > 0) {
+              const installment = Number(f.amount || 0) / weeks;
+              const interest = installment * (Number(f.weeklyInterest || 0) / 100);
+              totalInstallment += installment;
+              totalInterestAmount += interest;
+              hasAny = true;
+            }
+          } else if (f.type === 'discount') {
+            const installment = Number(f.amount || 0);
+            const interest = installment * (Number(f.weeklyInterest || 0) / 100);
+            totalInstallment += installment;
+            totalInterestAmount += interest;
+            hasAny = true;
+          }
+        });
+
+        const totalFinancingCost = totalInstallment + totalInterestAmount;
+
+        completeRecord.financingDetails = {
+          interestPercent: 0, // percentual agregado não é crucial; manter 0 para não confundir
+          installment: totalInstallment,
+          interestAmount: totalInterestAmount,
+          totalCost: totalFinancingCost,
+          hasFinancing: hasAny,
+        };
+
+        // Atualizar despesas totais e repasse conforme novo financiamento
+        completeRecord.totalDespesas = dataWeeklyValues.combustivel
+          + dataWeeklyValues.viaverde
+          + (savedRecord.aluguel || 0)
+          + totalFinancingCost;
+
+        completeRecord.repasse = dataWeeklyValues.ganhosMenosIVA
+          - completeRecord.despesasAdm
+          - dataWeeklyValues.combustivel
+          - dataWeeklyValues.viaverde
+          - (savedRecord.aluguel || 0)
+          - totalFinancingCost;
+      }
+    } catch (e) {
+      console.warn('[getDriverWeekData] Falha no cálculo dinâmico de financiamento:', e);
+    }
+
+    // Aplicar Taxa Adm configurada
+    try {
+      const desiredAdm = completeRecord.ganhosMenosIVA * (configuredAdminFee / 100);
+      const delta = desiredAdm - completeRecord.despesasAdm;
+      if (Math.abs(delta) > 0.0001) {
+        completeRecord.despesasAdm = desiredAdm;
+        completeRecord.repasse = completeRecord.repasse - delta; // aumentar taxa adm diminui repasse
+      }
+    } catch (e) {
+      console.warn('[getDriverWeekData] Falha ao aplicar taxa adm configurada:', e);
+    }
+
+    // Aplicar comissão extra se habilitada em config
+    try {
+      const cfg = APP_CONFIG.finance?.commission;
+      const apply = !!(cfg && (cfg as any).enabled);
+      const driverApplies = (() => {
+        if (!driverType || !cfg) return false;
+        if (cfg.applyTo === 'all') return true;
+        return cfg.applyTo === driverType;
+      })();
+      if (apply && driverApplies) {
+        const base = cfg.base === 'repasseBeforeCommission'
+          ? (completeRecord.ganhosMenosIVA
+              - completeRecord.despesasAdm
+              - completeRecord.combustivel
+              - completeRecord.viaverde
+              - (completeRecord.aluguel || 0)
+              - (completeRecord.financingDetails?.totalCost || 0))
+          : completeRecord.ganhosMenosIVA;
+
+        let commissionAmount = 0;
+        if (cfg.mode === 'fixed') {
+          commissionAmount = Math.max(0, Number(cfg.fixedAmount || 0));
+        } else {
+          const pct = Math.max(0, Number(cfg.percent || 0));
+          commissionAmount = base * (pct / 100);
+        }
+
+        completeRecord.commissionPercent = cfg.mode === 'percent' ? Number(cfg.percent || 0) : 0;
+        completeRecord.commissionAmount = commissionAmount;
+        // Comissão é bônus do motorista: soma ao repasse (não altera despesas)
+        completeRecord.repasse = completeRecord.repasse + commissionAmount;
+      }
+    } catch (e) {
+      console.warn('[getDriverWeekData] Falha ao aplicar comissão extra:', e);
+    }
+
     if (latestPayment) {
       completeRecord.paymentInfo = latestPayment;
+    }
+
+    // Comissão de afiliados (multinível): busca total de bônus e adiciona ao repasse
+    try {
+      const affiliateBonus = await getBonusForDriverWeek(driverId, weekId);
+      if (affiliateBonus && affiliateBonus.total > 0) {
+        completeRecord.commissionAmount = (completeRecord.commissionAmount || 0) + affiliateBonus.total;
+        completeRecord.repasse = completeRecord.repasse + affiliateBonus.total;
+        // opcional: anexar detalhes para UI/exports
+        (completeRecord as any).affiliateBonusDetails = affiliateBonus.details;
+      }
+    } catch (e) {
+      console.warn('[getDriverWeekData] Falha ao obter bônus de afiliados:', e);
     }
     
     return completeRecord;

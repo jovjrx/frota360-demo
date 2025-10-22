@@ -18,6 +18,10 @@ export default async function handler(
     // Validar dados
     const validatedData = requestSchema.parse(req.body);
 
+    // Capturar referência (se veio de link de convite / slug)
+    const referralReferrerId = req.cookies?.['referral_referrer_id'] || null;
+    const referralInviteCode = req.cookies?.['referral_invite_code'] || null;
+
     // Converter para formato do admin (driver_requests)
     const requestData = {
       fullName: validatedData.fullName,
@@ -32,6 +36,9 @@ export default async function handler(
       status: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      // Dados de referência (se existentes)
+      referrerId: referralReferrerId,
+      referralInviteCode: referralInviteCode,
     };
 
     // ✅ CORREÇÃO: Salvar em driver_requests (mesma collection que o admin usa)

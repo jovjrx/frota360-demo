@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('   Semana anterior:', previousWeekId);
 
     // Buscar dados processados diretamente do Firestore
-    let statsThisWeek = { ganhos: 0, repasse: 0, lucro: 0, despesasAdm: 0, aluguel: 0, financiamento: 0 };
+  let statsThisWeek = { ganhos: 0, repasse: 0, lucro: 0, despesasAdm: 0, aluguel: 0, financiamento: 0, comissoesPagas: 0 };
     let statsLastWeek = { ganhos: 0, repasse: 0, lucro: 0 };
     
     if (latestWeekId) {
@@ -43,7 +43,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         statsThisWeek.despesasAdm += rec.despesasAdm || 0;
         statsThisWeek.aluguel += rec.aluguel || 0;
         statsThisWeek.financiamento += (rec as any).financingDetails?.installment || 0;
+        statsThisWeek.comissoesPagas += (rec as any).commissionAmount || 0;
       });
+      // Comissão é paga ao motorista (custo para a empresa). Não soma no lucro.
       statsThisWeek.lucro = statsThisWeek.despesasAdm + statsThisWeek.aluguel + statsThisWeek.financiamento;
     }
     
@@ -96,6 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           profitCommissions: statsThisWeek.despesasAdm,
           profitRentals: statsThisWeek.aluguel,
           profitDiscounts: statsThisWeek.financiamento,
+          commissionsPaid: statsThisWeek.comissoesPagas,
         },
         recentDrivers,
         recentRequests,

@@ -97,8 +97,9 @@ async function createWorkbook(
     { header: 'Bolt Total', key: 'boltTotal', width: 14 },
     { header: 'Ganhos Total', key: 'ganhosTotal', width: 16 },
     { header: 'IVA 6%', key: 'ivaValor', width: 14 },
-    { header: 'Ganhos - IVA', key: 'ganhosMenosIVA', width: 16 },
-    { header: 'Taxa Adm 7%', key: 'despesasAdm', width: 16 },
+  { header: 'Ganhos - IVA', key: 'ganhosMenosIVA', width: 16 },
+  { header: 'Commission', key: 'commissionAmount', width: 14 },
+  { header: 'Taxa Adm 7%', key: 'despesasAdm', width: 16 },
     { header: 'Combustível', key: 'combustivel', width: 14 },
     { header: 'Portagens', key: 'viaverde', width: 14 },
     { header: 'Aluguel', key: 'aluguel', width: 14 },
@@ -126,7 +127,8 @@ async function createWorkbook(
     'ganhosTotal',
     'ivaValor',
     'ganhosMenosIVA',
-    'despesasAdm',
+  'commissionAmount',
+  'despesasAdm',
     'combustivel',
     'viaverde',
     'aluguel',
@@ -149,7 +151,8 @@ async function createWorkbook(
     ganhosTotal: 0,
     ivaValor: 0,
     ganhosMenosIVA: 0,
-    despesasAdm: 0,
+  commissionAmount: 0,
+  despesasAdm: 0,
     combustivel: 0,
     viaverde: 0,
     aluguel: 0,
@@ -176,7 +179,8 @@ async function createWorkbook(
       ganhosTotal: record.ganhosTotal || 0,
       ivaValor: record.ivaValor || 0,
       ganhosMenosIVA: (record as any).ganhosMenosIVA || (record as any).ganhosMenosIva || 0,
-      despesasAdm: record.despesasAdm || 0,
+  commissionAmount: (record as any).commissionAmount || 0,
+  despesasAdm: record.despesasAdm || 0,
       combustivel: record.combustivel || record.prio || 0,
       viaverde: record.viaverde || 0,
       aluguel: record.aluguel || 0,
@@ -194,6 +198,7 @@ async function createWorkbook(
     totals.ivaValor += record.ivaValor || 0;
     totals.ganhosMenosIVA += (record as any).ganhosMenosIVA || (record as any).ganhosMenosIva || 0;
     totals.despesasAdm += record.despesasAdm || 0;
+  totals.commissionAmount += (record as any).commissionAmount || 0;
     totals.combustivel += record.combustivel || record.prio || 0;
     totals.viaverde += record.viaverde || 0;
     totals.aluguel += record.aluguel || 0;
@@ -213,6 +218,7 @@ async function createWorkbook(
     ivaValor: totals.ivaValor,
     ganhosMenosIVA: totals.ganhosMenosIVA,
     despesasAdm: totals.despesasAdm,
+  commissionAmount: totals.commissionAmount,
     combustivel: totals.combustivel,
     viaverde: totals.viaverde,
     aluguel: totals.aluguel,

@@ -44,7 +44,7 @@ import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import useSWR from 'swr';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface RecruitedDriver {
   driverId: string;
@@ -61,6 +61,7 @@ interface NetworkData {
     id: string;
     name: string;
     affiliateLevel: number;
+    refSlug?: string | null;
   };
   network: {
     totalRecruitments: number;
@@ -89,12 +90,72 @@ export default function RecruitmentPage({ translations, locale }: DashboardPageP
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slug, setSlug] = useState('');
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [savingSlug, setSavingSlug] = useState(false);
 
   const { data, isLoading, error, mutate } = useSWR<NetworkData>(
     '/api/driver/referral/my-network',
     fetcher,
     { revalidateOnFocus: false }
   );
+
+  // Prefill slug from API
+  useEffect(() => {
+    if (data && typeof data.driver.refSlug === 'string') {
+      setSlug(data.driver.refSlug || '');
+    }
+  }, [data?.driver?.refSlug]);
+
+  // Check slug availability when changes
+  const checkSlug = async (value: string) => {
+    if (!value || value.trim().length < 2) {
+      setSlugAvailable(null);
+      return;
+    }
+    setCheckingSlug(true);
+    try {
+      const resp = await fetch(`/api/driver/referral/check-slug?slug=${encodeURIComponent(value)}`, { credentials: 'include' });
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        setSlugAvailable(result.available || (data?.driver.refSlug === value));
+      } else {
+        setSlugAvailable(null);
+      }
+    } catch (e) {
+      setSlugAvailable(null);
+    } finally {
+      setCheckingSlug(false);
+    }
+  };
+
+  const handleSaveSlug = async () => {
+    if (!slug || slug.length < 2) {
+      toast({ title: 'Slug inválido', description: 'Use pelo menos 2 caracteres', status: 'error', duration: 2500 });
+      return;
+    }
+    setSavingSlug(true);
+    try {
+      const resp = await fetch('/api/driver/referral/set-slug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ slug })
+      });
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        toast({ title: 'Slug atualizado', description: 'Seu link de indicação foi definido', status: 'success', duration: 2500 });
+        mutate();
+      } else {
+        toast({ title: 'Erro', description: result.error || 'Não foi possível salvar o slug', status: 'error', duration: 3000 });
+      }
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e?.message || 'Não foi possível salvar o slug', status: 'error', duration: 3000 });
+    } finally {
+      setSavingSlug(false);
+    }
+  };
 
   const handleCreateInvite = async () => {
     if (!email && !phone) {
@@ -120,7 +181,7 @@ export default function RecruitmentPage({ translations, locale }: DashboardPageP
       if (result.success) {
         toast({
           title: 'Sucesso',
-          description: 'Convite criado com sucesso!',
+          description: email ? 'Convite criado e email enviado!' : 'Convite criado com sucesso!',
           status: 'success',
           duration: 3000,
         });
@@ -194,6 +255,36 @@ export default function RecruitmentPage({ translations, locale }: DashboardPageP
         </Button>
       }
     >
+      {/* Meu link de indicação (Slug) */}
+      <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="gray.200" mb={6}>
+        <VStack align="stretch" spacing={3}>
+          <VStack align="start" spacing={0}>
+            <Text fontSize="lg" fontWeight="bold" color="gray.700">
+              Seu link de indicação
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              Defina um identificador único (slug) para compartilhar seu link: {typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt'}/r/&lt;slug&gt;
+            </Text>
+          </VStack>
+          <HStack>
+            <Input
+              placeholder="ex: joao-silva"
+              value={slug}
+              onChange={(e) => { setSlug(e.target.value.toLowerCase()); checkSlug(e.target.value.toLowerCase()); }}
+            />
+            <Button onClick={() => checkSlug(slug)} isLoading={checkingSlug} variant="outline">Verificar</Button>
+            <Button colorScheme="green" onClick={handleSaveSlug} isLoading={savingSlug} isDisabled={slugAvailable === false}>Salvar</Button>
+          </HStack>
+          {slug && (
+            <HStack fontSize="sm">
+              {slugAvailable === true && <Badge colorScheme="green">Disponível</Badge>}
+              {slugAvailable === false && <Badge colorScheme="red">Indisponível</Badge>}
+              <Text color="gray.600">Link: {(typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt') + '/r/' + slug}</Text>
+              <Button size="sm" variant="ghost" leftIcon={<Icon as={FiCopy} />} onClick={() => navigator.clipboard.writeText((typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt') + '/r/' + slug)}>Copiar</Button>
+            </HStack>
+          )}
+        </VStack>
+      </Box>
       {/* KPIs */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={6}>
         <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="green.200">

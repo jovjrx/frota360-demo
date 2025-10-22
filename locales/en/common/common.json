@@ -56,7 +56,9 @@
     "operations_management": "Operations management",
     "financial_management": "Financial management",
     "monitoring_management": "Monitoring management",
-    "settings_management": "Settings management"
+    "settings_management": "Settings management",
+    "finance-settings": "Finance Settings",
+    "commission-settings": "Commission Settings"
   },
   "user": {
     "email": "Email",

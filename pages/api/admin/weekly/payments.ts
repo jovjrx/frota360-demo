@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getFinancialConfig, isWeekEligibleByStart } from '@/lib/finance/config';
 import { FieldValue } from 'firebase-admin/firestore';
 import {
   DriverWeeklyRecord,
@@ -272,9 +273,23 @@ async function createDriverPayment(
       transaction.set(paymentRef, sanitizedPayment);
       persistedPayment = sanitizedPayment as DriverPayment;
       
-      const hasFinancingThisWeek = Boolean((record as any)?.financingDetails?.hasFinancing);
-      if (hasFinancingThisWeek) {
-        // Decrementar remainingWeeks dos financiamentos ativos do motorista (apenas empréstimos)
+      // Decidir se processa ônus bancário usando elegibilidade dinâmica (ignora snapshot de record)
+      let shouldProcessFinancing = Boolean((record as any)?.financingDetails?.hasFinancing);
+      let useDynamicDecrement = false;
+      let eligibilityPolicy: any = 'startDateToWeekEnd';
+      try {
+        const finCfg = await getFinancialConfig();
+        useDynamicDecrement = finCfg.financing?.paymentDecrementDynamic ?? true;
+        eligibilityPolicy = finCfg.financing?.eligibilityPolicy || 'startDateToWeekEnd';
+      } catch {}
+
+      if (useDynamicDecrement) {
+        // Se dinâmico, vamos decidir somente com base nos financiamentos ativos e na janela da semana
+        shouldProcessFinancing = true;
+      }
+
+      if (shouldProcessFinancing) {
+        // Buscar financiamentos ativos de empréstimo
         const financingSnapshot = await adminDb
           .collection('financing')
           .where('driverId', '==', record.driverId)
@@ -307,6 +322,22 @@ async function createDriverPayment(
           if (currentRemaining <= 0) {
             console.log(`ℹ️ Financiamento ${doc.id} do motorista ${record.driverId} sem semanas restantes, ignorando.`);
             return;
+          }
+
+          // Se usando elegibilidade dinâmica, respeitar startDate vs janela da semana
+          if (useDynamicDecrement) {
+            const eligible = isWeekEligibleByStart(data.startDate, (record as any)?.weekStart, (record as any)?.weekEnd, eligibilityPolicy);
+            if (!eligible) {
+              console.log(`ℹ️ Financiamento ${doc.id} não elegível para a semana ${record.weekId} pelo startDate.`);
+              return;
+            }
+          } else {
+            // Caso não dinâmico, ainda fazemos uma verificação básica se há installment>0 no record
+            const installment = Number((record as any)?.financingDetails?.installment || 0);
+            if (installment <= 0) {
+              console.log(`ℹ️ Financiamento ${doc.id} ignorado pois installment no record é 0.`);
+              return;
+            }
           }
 
           const newRemaining = Math.max(0, currentRemaining - 1);

@@ -74,6 +74,21 @@ export const APP_CONFIG = {
     enableLogs: process.env.NODE_ENV === 'development',
     enableDebug: process.env.NODE_ENV === 'development',
   },
+
+  // Configurações financeiras
+  finance: {
+    // Taxa administrativa (já implementada no cálculo como 7%)
+    adminFeePercent: 7,
+    // Nova Comissão (item adicional, separado da Taxa Adm). Por padrão, desativada.
+    commission: {
+      enabled: false,             // Se true, aplica comissão ao cálculo do repasse
+      mode: 'percent' as 'percent' | 'fixed', // Modo de cálculo
+      percent: 0,                 // Percentual aplicado sobre a base escolhida
+      fixedAmount: 0,             // Valor fixo (se mode === 'fixed')
+      base: 'ganhosMenosIVA' as 'ganhosMenosIVA' | 'repasseBeforeCommission', // Base da comissão
+      applyTo: 'all' as 'all' | 'affiliate' | 'renter', // Público-alvo da comissão
+    },
+  },
 } as const;
 
 // Funções utilitárias

@@ -47,6 +47,9 @@ export const DriverWeeklyRecordSchema = z.object({
   ivaValor: z.number().default(0),           // ganhosTotal × 0.06
   ganhosMenosIVA: z.number().default(0),     // ganhosTotal × 0.94
   despesasAdm: z.number().default(0),        // ganhosMenosIVA × 0.07
+  // Comissão extra (nova), separada da Taxa Adm
+  commissionPercent: z.number().default(0).optional(),
+  commissionAmount: z.number().default(0).optional(),
   totalDespesas: z.number().default(0),      // combustivel + viaverde + aluguel
   repasse: z.number().default(0),            // ganhosMenosIVA - despesasAdm - totalDespesas
   
@@ -88,6 +91,9 @@ export function createDriverWeeklyRecord(
   const ivaValor = ganhosTotal * 0.06;
   const ganhosMenosIVA = ganhosTotal - ivaValor;
   const despesasAdm = ganhosMenosIVA * 0.07;
+  // Comissão extra é opcional e, por padrão, 0. O cálculo detalhado deve ser feito em camada de serviço
+  const commissionPercent = isFiniteNumber((data as any).commissionPercent) ? (data as any).commissionPercent as number : 0;
+  const commissionAmount = isFiniteNumber((data as any).commissionAmount) ? (data as any).commissionAmount as number : 0;
 
   let resolvedAluguel = pickNumber(data.aluguel);
   if (resolvedAluguel === undefined && driver?.type === 'renter' && isFiniteNumber(driver.rentalFee)) {
@@ -97,7 +103,8 @@ export function createDriverWeeklyRecord(
 
   const viaverdeDesconto = resolvedViaverdeValue;
   const totalDespesas = resolvedPrioValue + viaverdeDesconto + resolvedAluguel;
-  const repasse = ganhosMenosIVA - despesasAdm - totalDespesas;
+  // Comissão é um ganho adicional do motorista
+  const repasse = ganhosMenosIVA - despesasAdm - totalDespesas + commissionAmount;
 
   const now = new Date().toISOString();
 
@@ -126,6 +133,8 @@ export function createDriverWeeklyRecord(
     ivaValor,
     ganhosMenosIVA,
     despesasAdm,
+  commissionPercent,
+  commissionAmount,
     totalDespesas,
     repasse,
     
