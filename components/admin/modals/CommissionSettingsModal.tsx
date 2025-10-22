@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, Stack, FormControl, FormLabel, Input, Select, SimpleGrid, useToast, Box } from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, Stack, FormControl, FormLabel, Input, Select, SimpleGrid, useToast, Box, Grid } from '@chakra-ui/react';
 
 type BaseOption = 'repasse' | 'ganhosMenosIVA';
 
@@ -84,22 +84,18 @@ export default function CommissionSettingsModal({ isOpen, onClose }: Props) {
         <ModalCloseButton />
         <ModalBody>
           <Stack spacing={4}>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            <Grid templateColumns={{ base: '1fr', md: '3fr 1fr' }} gap={4}>
               <FormControl>
                 <FormLabel>Elegibilidade (EUR/Semana)</FormLabel>
                 <Input type="number" step="1" min={0} value={cfg.minWeeklyRevenueForEligibility}
                   onChange={(e) => setCfg({ ...cfg, minWeeklyRevenueForEligibility: Math.max(0, Number(e.target.value)) })} />
               </FormControl>
               <FormControl>
-                <FormLabel>Base</FormLabel>
-                <Input value="Repasse (após despesas)" isReadOnly />
-              </FormControl>
-              <FormControl>
                 <FormLabel>Níveis Máximos</FormLabel>
                 <Input type="number" min={1} max={10} value={cfg.maxLevels}
                   onChange={(e) => setCfg({ ...cfg, maxLevels: Math.max(1, Math.min(10, Number(e.target.value))) })} />
               </FormControl>
-            </SimpleGrid>
+            </Grid>
 
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={3}>
               {Array.from({ length: cfg.maxLevels }, (_, i) => i + 1).map(level => (
