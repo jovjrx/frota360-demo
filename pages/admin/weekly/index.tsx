@@ -53,6 +53,9 @@ import EditableNumberField from '@/components/admin/EditableNumberField';
 import StatCard from '@/components/admin/StatCard';
 import WeeklyRecordCard from '@/components/admin/WeeklyRecordCard';
 import { useDisclosure } from '@chakra-ui/react';
+import PageSettingsMenu from '@/components/admin/PageSettingsMenu';
+import FinanceSettingsModal from '@/components/admin/modals/FinanceSettingsModal';
+import CommissionSettingsModal from '@/components/admin/modals/CommissionSettingsModal';
 import { FiDownload, FiMail } from 'react-icons/fi';
 import { storage } from '@/lib/firebase';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -113,6 +116,9 @@ export default function WeeklyPage({
   const [bonusValue, setBonusValue] = useState<string>('0');
   const [discountValue, setDiscountValue] = useState<string>('0');
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  // Settings modals controls
+  const financeDisclosure = useDisclosure();
+  const commissionDisclosure = useDisclosure();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const MAX_PROOF_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   const toast = useToast();
@@ -821,6 +827,14 @@ export default function WeeklyPage({
       subtitle={t('weekly.control.subtitle', 'Gestão semanal de dados TVDE')}
       breadcrumbs={[{ label: t('weekly.control.title', 'Controle Semanal') }]}
       translations={translations}
+      side={
+        <PageSettingsMenu
+          items={[
+            { label: 'Configurações Financeiras', onClick: financeDisclosure.onOpen },
+            { label: 'Configurações de Comissões', onClick: commissionDisclosure.onOpen },
+          ]}
+        />
+      }
     >
       {/* Filtros e Ações */}
       <Card>
@@ -877,6 +891,8 @@ export default function WeeklyPage({
           </HStack>
         </CardBody>
       </Card>
+  <FinanceSettingsModal isOpen={financeDisclosure.isOpen} onClose={financeDisclosure.onClose} />
+  <CommissionSettingsModal isOpen={commissionDisclosure.isOpen} onClose={commissionDisclosure.onClose} />
 
       {/* Resumo - Linha 1 */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>

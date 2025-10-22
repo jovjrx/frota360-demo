@@ -41,6 +41,9 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import useSWR from 'swr';
 import { useState } from 'react';
+import PageSettingsMenu from '@/components/admin/PageSettingsMenu';
+import CommissionSettingsModal from '@/components/admin/modals/CommissionSettingsModal';
+import { useDisclosure } from '@chakra-ui/react';
 
 interface CommissionRecord {
   driverId: string;
@@ -74,6 +77,7 @@ export default function AdminCommissionsPage({ translations, locale }: AdminPage
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLevel, setFilterLevel] = useState('all');
+  const settingsDisclosure = useDisclosure();
 
   const { data, isLoading, error } = useSWR<AdminCommissionsData>(
     '/api/admin/commissions',
@@ -93,7 +97,7 @@ export default function AdminCommissionsPage({ translations, locale }: AdminPage
 
   if (error || !data?.success) {
     return (
-      <AdminLayout title="Comissões" translations={translations}>
+      <AdminLayout title="Comissões" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Comissões', onClick: settingsDisclosure.onOpen }]} />}>
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
           <AlertTitle>Erro ao carregar comissões</AlertTitle>
@@ -124,25 +128,11 @@ export default function AdminCommissionsPage({ translations, locale }: AdminPage
       title="Comissões"
       subtitle="Visualize e gerencie todas as comissões de motoristas"
       translations={translations}
-      side={
-        <Button
-          leftIcon={<Icon as={FiDownload} />}
-          colorScheme="red"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            toast({
-              title: 'Exportação',
-              description: 'Funcionalidade em desenvolvimento',
-              status: 'info',
-              duration: 3000,
-            });
-          }}
-        >
-          Exportar
-        </Button>
-      }
+      side={<HStack spacing={2}><PageSettingsMenu items={[{ label: 'Configurações de Comissões', onClick: settingsDisclosure.onOpen }]} />
+        <Button leftIcon={<Icon as={FiDownload} />} colorScheme="red" variant="outline" size="sm" onClick={() => { toast({ title: 'Exportação', description: 'Funcionalidade em desenvolvimento', status: 'info', duration: 3000, }); }}>Exportar</Button>
+      </HStack>}
     >
+      <CommissionSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
       {/* KPIs */}
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={6} mb={6}>
         <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="red.200">

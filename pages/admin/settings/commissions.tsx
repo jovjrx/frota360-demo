@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Select, Stack, Text, useToast, SimpleGrid } from '@chakra-ui/react';
+import AdminLayout from '@/components/layouts/AdminLayout';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 
 type BaseOption = 'repasse' | 'ganhosMenosIVA';
 
@@ -17,7 +19,7 @@ const DEFAULT_CFG: CommissionConfigDto = {
   levels: { 1: 0.02, 2: 0.01, 3: 0.005 },
 };
 
-export default function CommissionSettingsPage() {
+function CommissionSettingsPageContent() {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [cfg, setCfg] = useState<CommissionConfigDto>(DEFAULT_CFG);
@@ -71,7 +73,7 @@ export default function CommissionSettingsPage() {
   };
 
   return (
-    <Flex p={8} maxW="920px" mx="auto" direction="column" gap={6}>
+    <Flex p={0} maxW="920px" mx="auto" direction="column" gap={6}>
       <Heading size="lg">Commission Settings</Heading>
       <Text color="gray.600">Configure multi-level driver commissions. Levels use decimal percentages (e.g., 0.02 = 2%).</Text>
 
@@ -121,3 +123,13 @@ export default function CommissionSettingsPage() {
     </Flex>
   );
 }
+
+export default function CommissionSettingsPage({ translations }: AdminPageProps) {
+  return (
+    <AdminLayout title="Configurações de Comissões" translations={translations}>
+      <CommissionSettingsPageContent />
+    </AdminLayout>
+  );
+}
+
+export const getServerSideProps = withAdminSSR(async () => ({ }));

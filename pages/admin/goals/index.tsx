@@ -42,6 +42,9 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import useSWR from 'swr';
 import { useState } from 'react';
+import PageSettingsMenu from '@/components/admin/PageSettingsMenu';
+import GoalsSettingsModal from '@/components/admin/modals/GoalsSettingsModal';
+import { useDisclosure } from '@chakra-ui/react';
 
 interface GoalRecord {
   id: string;
@@ -90,6 +93,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
   const [searchTerm, setSearchTerm] = useState('');
   const [filterQuarter, setFilterQuarter] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const settingsDisclosure = useDisclosure();
 
   const { data, isLoading, error } = useSWR<AdminGoalsData>(
     '/api/admin/goals',
@@ -99,7 +103,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
 
   if (isLoading) {
     return (
-      <AdminLayout title="Metas" translations={translations}>
+      <AdminLayout title="Metas" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />}>
         <Center minH="400px">
           <Spinner size="lg" color="red.500" />
         </Center>
@@ -109,7 +113,7 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
 
   if (error || !data?.success) {
     return (
-      <AdminLayout title="Metas" translations={translations}>
+      <AdminLayout title="Metas" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />}>
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
           <AlertTitle>Erro ao carregar metas</AlertTitle>
@@ -144,24 +148,28 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
       subtitle="Acompanhe o progresso das metas estratégicas"
       translations={translations}
       side={
-        <Button
-          leftIcon={<Icon as={FiDownload} />}
-          colorScheme="red"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            toast({
-              title: 'Exportação',
-              description: 'Funcionalidade em desenvolvimento',
-              status: 'info',
-              duration: 3000,
-            });
-          }}
-        >
-          Exportar
-        </Button>
+        <HStack spacing={2}>
+          <PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />
+          <Button
+            leftIcon={<Icon as={FiDownload} />}
+            colorScheme="red"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              toast({
+                title: 'Exportação',
+                description: 'Funcionalidade em desenvolvimento',
+                status: 'info',
+                duration: 3000,
+              });
+            }}
+          >
+            Exportar
+          </Button>
+        </HStack>
       }
     >
+      <GoalsSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
       {/* KPIs Resumo */}
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={6} mb={6}>
         <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="red.200">

@@ -173,22 +173,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 description: 'weekly_data',
                 isSubmenu: true,
             },
-            {
-                id: 'finance-settings',
-                label: 'finance_settings',
-                href: '/admin/settings/finance',
-                icon: FiSettings,
-                description: 'finance_settings',
-                isSubmenu: true,
-            },
-            {
-                id: 'commission-settings',
-                label: 'commission_settings',
-                href: '/admin/settings/commissions',
-                icon: FiSettings,
-                description: 'commissions_settings',
-                isSubmenu: true,
-            },
+            
             {
                 id: 'users',
                 label: 'users',

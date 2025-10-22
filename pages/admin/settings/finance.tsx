@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Select, Stack, Switch, Text, useToast } from '@chakra-ui/react';
+import AdminLayout from '@/components/layouts/AdminLayout';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 
 interface FinancialConfigDto {
   adminFeePercent: number;
@@ -10,7 +12,7 @@ interface FinancialConfigDto {
   };
 }
 
-export default function FinanceSettingsPage() {
+function FinanceSettingsPageContent() {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [cfg, setCfg] = useState<FinancialConfigDto>({ adminFeePercent: 7, financing: { dynamicCalculation: true, eligibilityPolicy: 'startDateToWeekEnd', paymentDecrementDynamic: true } });
@@ -59,7 +61,7 @@ export default function FinanceSettingsPage() {
   };
 
   return (
-    <Flex p={8} maxW="720px" mx="auto" direction="column" gap={6}>
+    <Flex p={0} maxW="720px" mx="auto" direction="column" gap={6}>
       <Heading size="lg">Finance Settings</Heading>
       <Text color="gray.600">Configure the company Admin Fee (applies over Net after VAT) and other financial settings.</Text>
       <Box borderWidth="1px" borderRadius="md" p={6}>
@@ -117,3 +119,13 @@ export default function FinanceSettingsPage() {
     </Flex>
   );
 }
+
+export default function FinanceSettingsPage({ translations }: AdminPageProps) {
+  return (
+    <AdminLayout title="Configurações Financeiras" translations={translations}>
+      <FinanceSettingsPageContent />
+    </AdminLayout>
+  );
+}
+
+export const getServerSideProps = withAdminSSR(async () => ({ }));
