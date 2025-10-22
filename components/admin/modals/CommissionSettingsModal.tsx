@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, Stack, FormControl, FormLabel, Input, Select, SimpleGrid, useToast } from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, Stack, FormControl, FormLabel, Input, Select, SimpleGrid, useToast, Box } from '@chakra-ui/react';
 
 type BaseOption = 'repasse' | 'ganhosMenosIVA';
 
@@ -51,7 +51,8 @@ export default function CommissionSettingsModal({ isOpen, onClose }: Props) {
     try {
       const payload = {
         ...cfg,
-        levels: Object.fromEntries(Array.from({ length: cfg.maxLevels }, (_, i) => {
+        maxLevels: Math.max(1, Math.min(10, cfg.maxLevels)),
+        levels: Object.fromEntries(Array.from({ length: Math.max(1, Math.min(10, cfg.maxLevels)) }, (_, i) => {
           const level = i + 1;
           return [String(level), cfg.levels[level] || 0];
         })),
@@ -76,25 +77,22 @@ export default function CommissionSettingsModal({ isOpen, onClose }: Props) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" closeOnOverlayClick={!loading}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Configurações de Comissões</ModalHeader>
+        <ModalHeader>Configuração de Comissões</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Stack spacing={4}>
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               <FormControl>
                 <FormLabel>Elegibilidade (EUR/Semana)</FormLabel>
-                <Input type="number" step="1" value={cfg.minWeeklyRevenueForEligibility}
-                  onChange={(e) => setCfg({ ...cfg, minWeeklyRevenueForEligibility: Number(e.target.value) })} />
+                <Input type="number" step="1" min={0} value={cfg.minWeeklyRevenueForEligibility}
+                  onChange={(e) => setCfg({ ...cfg, minWeeklyRevenueForEligibility: Math.max(0, Number(e.target.value)) })} />
               </FormControl>
               <FormControl>
                 <FormLabel>Base</FormLabel>
-                <Select value={cfg.base} onChange={(e) => setCfg({ ...cfg, base: e.target.value as BaseOption })}>
-                  <option value="repasse">Repasse (após despesas)</option>
-                  <option value="ganhosMenosIVA">Ganhos - IVA (6%)</option>
-                </Select>
+                <Input value="Repasse (após despesas)" isReadOnly />
               </FormControl>
               <FormControl>
                 <FormLabel>Níveis Máximos</FormLabel>
@@ -107,17 +105,20 @@ export default function CommissionSettingsModal({ isOpen, onClose }: Props) {
               {Array.from({ length: cfg.maxLevels }, (_, i) => i + 1).map(level => (
                 <FormControl key={level}>
                   <FormLabel>Nível {level}</FormLabel>
-                  <Input type="number" step="0.001" min={0} max={1}
-                    value={cfg.levels[level] ?? 0}
-                    onChange={(e) => onChangeLevel(level, Number(e.target.value))}
+                  <Input type="number" step="1" min={0} max={100}
+                    value={cfg.levels[level] !== undefined ? Math.round(cfg.levels[level] * 100) : 0}
+                    onChange={(e) => onChangeLevel(level, Math.max(0, Math.min(100, Number(e.target.value))) / 100)}
                   />
                 </FormControl>
               ))}
             </SimpleGrid>
           </Stack>
+          <Box mt={6} p={4} bg="gray.50" borderRadius="md" borderWidth="1px" borderColor="gray.200">
+            Motorista X indicou Motorista Y. Se Y atingir a elegibilidade, X recebe {cfg.levels[1] ? `${Math.round(cfg.levels[1] * 100)}%` : '0%'} do repasse de Y. Se houver Nível 2, o indicador do X recebe {cfg.levels[2] ? `${Math.round(cfg.levels[2] * 100)}%` : '0%'} e assim por diante.
+          </Box>
         </ModalBody>
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={onClose}>Cancelar</Button>
+          <Button variant="ghost" mr={3} onClick={onClose} isDisabled={loading}>Cancelar</Button>
           <Button colorScheme="blue" onClick={save} isLoading={loading}>Salvar</Button>
         </ModalFooter>
       </ModalContent>

@@ -41,7 +41,6 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
 import useSWR from 'swr';
 import { useState } from 'react';
-import PageSettingsMenu from '@/components/admin/PageSettingsMenu';
 import CommissionSettingsModal from '@/components/admin/modals/CommissionSettingsModal';
 import { useDisclosure } from '@chakra-ui/react';
 
@@ -97,7 +96,8 @@ export default function AdminCommissionsPage({ translations, locale }: AdminPage
 
   if (error || !data?.success) {
     return (
-      <AdminLayout title="Comissões" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Comissões', onClick: settingsDisclosure.onOpen }]} />}>
+      <AdminLayout title="Comissões" translations={translations}>
+        <CommissionSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
           <AlertTitle>Erro ao carregar comissões</AlertTitle>
@@ -128,10 +128,9 @@ export default function AdminCommissionsPage({ translations, locale }: AdminPage
       title="Comissões"
       subtitle="Visualize e gerencie todas as comissões de motoristas"
       translations={translations}
-      side={<HStack spacing={2}><PageSettingsMenu items={[{ label: 'Configurações de Comissões', onClick: settingsDisclosure.onOpen }]} />
-        <Button leftIcon={<Icon as={FiDownload} />} colorScheme="red" variant="outline" size="sm" onClick={() => { toast({ title: 'Exportação', description: 'Funcionalidade em desenvolvimento', status: 'info', duration: 3000, }); }}>Exportar</Button>
-      </HStack>}
+      side={<Button leftIcon={<Icon as={FiDollarSign} />} colorScheme="blue" variant="outline" size="sm" onClick={settingsDisclosure.onOpen}>Configurações de Comissões</Button>}
     >
+      <CommissionSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
       <CommissionSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
       {/* KPIs */}
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={6} mb={6}>
