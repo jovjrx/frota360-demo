@@ -10,7 +10,7 @@ export default function BadgesValue({ t }: BadgesValueProps) {
     {
       icon: FiPercent,
       value: t('hero.badges.iva.value', '6% IVA'),
-      label: t('hero.badges.iva.label', 'Reembolso'),
+      label: t('hero.badges.iva.label', 'Repasse'),
       color: 'blue',
     },
     {

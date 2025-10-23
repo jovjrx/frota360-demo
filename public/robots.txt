@@ -1,9 +1,13 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /painel
+Disallow: /api
 
 # Host
-Host: https://www.conduz.pt
+Host: https://conduz.pt
 
 # Sitemaps
-Sitemap: https://www.conduz.pt/sitemap.xml
+Sitemap: https://conduz.pt/sitemap.xml
