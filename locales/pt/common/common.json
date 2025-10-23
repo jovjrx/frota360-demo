@@ -69,7 +69,41 @@
   "seo": {
     "default": {
       "title": "TVDE Portugal | Conduz - Você conduz, nós cuidamos do resto!",
-      "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais."
+      "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
+      "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, mobilidade urbana, transporte privado, empresa TVDE, frota TVDE, licença TVDE",
+      "image": "/img/conduz.png"
+    },
+    "pages": {
+      "home": {
+        "title": "Você conduz, nós cuidamos do resto!",
+        "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
+        "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, gestão motoristas, plataforma TVDE"
+      },
+      "drivers": {
+        "title": "Seja Motorista TVDE",
+        "description": "Comece a faturar em dias, não semanas. Gestão completa, suporte 24/7 e tecnologia que simplifica.",
+        "keywords": "ser motorista TVDE, motorista TVDE Portugal, trabalhar motorista, cadastro TVDE"
+      },
+      "about": {
+        "title": "Sobre a Conduz",
+        "description": "Conheça a Conduz, a plataforma completa de TVDE em Portugal. Nossa missão, valores e o que nos diferencia.",
+        "keywords": "sobre Conduz, empresa TVDE Portugal, gestão TVDE, quem somos"
+      },
+      "contact": {
+        "title": "Contacto",
+        "description": "Entre em contacto com a Conduz. Estamos disponíveis para ajudar com qualquer dúvida ou suporte.",
+        "keywords": "contacto Conduz, suporte TVDE, ajuda TVDE Portugal, atendimento"
+      },
+      "login": {
+        "title": "Entrar",
+        "description": "Acesse sua conta Conduz e gerencie sua atividade TVDE.",
+        "keywords": "login Conduz, acesso motorista, acesso plataforma TVDE"
+      },
+      "signup": {
+        "title": "Criar Conta",
+        "description": "Crie sua conta na Conduz e comece sua jornada como motorista TVDE em Portugal.",
+        "keywords": "criar conta Conduz, cadastro, registo TVDE"
+      }
     }
   },
   "actions": {

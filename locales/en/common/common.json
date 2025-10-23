@@ -69,7 +69,41 @@
   "seo": {
     "default": {
       "title": "TVDE Portugal | Conduz - You drive, we take care of the rest!",
-      "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more."
+      "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more.",
+      "keywords": "TVDE Portugal, TVDE driver, Uber Portugal, Bolt Portugal, urban mobility, private transport, TVDE company, TVDE fleet, TVDE license",
+      "image": "/img/conduz.png"
+    },
+    "pages": {
+      "home": {
+        "title": "You drive, we take care of the rest!",
+        "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more.",
+        "keywords": "TVDE Portugal, TVDE driver, Uber Portugal, Bolt Portugal, driver management, TVDE platform"
+      },
+      "drivers": {
+        "title": "Become a TVDE Driver",
+        "description": "Start earning in days, not weeks. Complete management, 24/7 support and technology that simplifies.",
+        "keywords": "become TVDE driver, TVDE driver Portugal, work as driver, TVDE registration"
+      },
+      "about": {
+        "title": "About Conduz",
+        "description": "Learn about Conduz, the complete TVDE platform in Portugal. Our mission, values and what sets us apart.",
+        "keywords": "about Conduz, TVDE company Portugal, TVDE management, who we are"
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Get in touch with Conduz. We are available to help with any questions or support.",
+        "keywords": "contact Conduz, TVDE support, help TVDE Portugal, customer service"
+      },
+      "login": {
+        "title": "Login",
+        "description": "Access your Conduz account and manage your TVDE activity.",
+        "keywords": "login Conduz, driver access, TVDE platform access"
+      },
+      "signup": {
+        "title": "Sign Up",
+        "description": "Create your account on Conduz and start your journey as a TVDE driver in Portugal.",
+        "keywords": "sign up Conduz, create account, TVDE registration"
+      }
     }
   },
   "actions": {
