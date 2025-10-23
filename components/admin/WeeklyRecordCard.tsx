@@ -19,11 +19,14 @@ import { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import { WeeklyNormalizedData } from '@/schemas/data-weekly';
 import { DriverPayment } from '@/schemas/driver-payment';
 
+import { DriverGoalStatus } from '@/lib/goals/service';
+
 interface DriverRecord extends DriverWeeklyRecord {
   driverType: 'affiliate' | 'renter';
   vehicle: string;
   platformData: WeeklyNormalizedData[];
   paymentInfo?: DriverPayment | null;
+  goals?: DriverGoalStatus[];
 }
 
 interface WeeklyRecordCardProps {
@@ -62,12 +65,12 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
   // Use valores diretamente do record (nova arquitetura)
   const uberTotal = record.uberTotal || 0;
   const boltTotal = record.boltTotal || 0;
-  
-    // Calcular valores de ônus bancário se existir
+
+  // Calcular valores de ônus bancário se existir
   const financingInstallment = record.financingDetails?.installment || 0;
   const financingInterest = record.financingDetails?.interestAmount || 0;
   const financingTotal = record.financingDetails?.totalCost || 0;
-
+  const goals = Array.isArray(record.goals) ? record.goals : [];
   const bankChargeBreakdownLabel = t(
     'weekly.control.records.labels.bankChargeBreakdown',
     'Parcela: {{installment}} | Ônus bancário: {{interest}}'
@@ -105,6 +108,44 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
           </Flex>
 
           <Divider />
+
+          {/* Metas/Recompensas Semanais */}
+          {goals.length > 0 && (
+            <Box>
+              <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.700">
+                {t('weekly.control.records.sections.goals', 'Metas/Recompensas da Semana')}
+              </Text>
+              <VStack align="stretch" spacing={1}>
+                {goals.map((goal, idx) => (
+                  <Flex key={goal.id || idx} justify="space-between" align="center" p={1} borderRadius="md" bg={goal.atingido ? 'green.50' : 'gray.50'}>
+                    <Box>
+                      <Text fontSize="sm" fontWeight="bold" color={goal.atingido ? 'green.700' : 'gray.700'}>
+                        {goal.descricao}
+                      </Text>
+                      <Text fontSize="xs" color="gray.600">
+                        {t('weekly.control.records.goals.criterio', 'Critério')}: {goal.criterio === 'ganho' ? t('weekly.control.records.goals.criterio_ganho', 'Ganho Bruto') : t('weekly.control.records.goals.criterio_viagens', 'Viagens')} | {t('weekly.control.records.goals.tipo', 'Tipo')}: {goal.tipo === 'valor' ? t('weekly.control.records.goals.tipo_valor', 'Valor Fixo') : t('weekly.control.records.goals.tipo_percentual', 'Percentual')} | {t('weekly.control.records.goals.nivel', 'Nível')}: {goal.nivel}
+                      </Text>
+                      <Text fontSize="xs" color="gray.600">
+                        {t('weekly.control.records.goals.valor', 'Valor')}: {goal.tipo === 'percentual' ? `${goal.valor}%` : formatCurrency(goal.valor)}
+                        {goal.dataInicio ? ` | ${t('weekly.control.records.goals.dataInicio', 'Vigente desde')}: ${new Date(goal.dataInicio).toLocaleDateString(locale)}` : ''}
+                      </Text>
+                    </Box>
+                    <VStack align="end" spacing={0} minW="90px">
+                      <Badge colorScheme={goal.atingido ? 'green' : 'gray'} fontSize="xs">
+                        {goal.atingido ? t('weekly.control.records.goals.atingido', 'Atingido') : t('weekly.control.records.goals.nao_atingido', 'Não atingido')}
+                      </Badge>
+                      <Text fontSize="xs" color={goal.atingido ? 'green.700' : 'gray.700'} fontWeight="bold">
+                        {t('weekly.control.records.goals.valorGanho', 'Valor ganho')}: {goal.atingido ? formatCurrency(goal.valorGanho) : '—'}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        {t('weekly.control.records.goals.base', 'Base')}: {goal.criterio === 'ganho' ? formatCurrency(goal.valorBase) : `${goal.valorBase} viagens`}
+                      </Text>
+                    </VStack>
+                  </Flex>
+                ))}
+              </VStack>
+            </Box>
+          )}
 
           {/* Plataformas */}
           <Box>
@@ -182,7 +223,7 @@ const WeeklyRecordCard: React.FC<WeeklyRecordCardProps> = ({
               {financingTotal > 0 && (
                 <Flex justify="space-between">
                   <Text fontSize="sm" color="gray.600">
-                      {t('weekly.control.records.columns.bankCharge', 'Financiamento')}
+                    {t('weekly.control.records.columns.bankCharge', 'Financiamento')}
                   </Text>
                   <Text fontSize="sm" fontWeight="medium" color="purple.600">
                     -{formatCurrency(financingTotal)}

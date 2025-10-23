@@ -26,15 +26,18 @@ import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { withDashboardSSR, DashboardPageProps } from '@/lib/ssr';
 import useSWR from 'swr';
 
-interface Goal {
+
+interface DriverGoalStatus {
   id: string;
-  quarter: string;
-  target: number;
-  description: string;
-  current: number;
-  status: string;
-  weight: number;
-  createdAt: string;
+  descricao: string;
+  criterio: 'ganho' | 'viagens';
+  tipo: 'valor' | 'percentual';
+  valor: number;
+  nivel: number;
+  atingido: boolean;
+  valorGanho: number;
+  valorBase: number;
+  dataInicio?: number;
 }
 
 interface GoalsData {
@@ -44,12 +47,7 @@ interface GoalsData {
     name: string;
     type: string;
   };
-  goals: Goal[];
-  summary: {
-    totalGoals: number;
-    completedGoals: number;
-    overallProgress: number;
-  };
+  goals: DriverGoalStatus[];
 }
 
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then((res) => res.json());
@@ -76,6 +74,7 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
     { revalidateOnFocus: false }
   );
 
+
   if (isLoading) {
     return (
       <DashboardLayout title="Metas" translations={translations}>
@@ -93,81 +92,29 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
           <AlertIcon />
           <AlertTitle>Erro ao carregar metas</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar suas metas para 2026.
+            Não foi possível carregar suas metas/recompensas.
           </AlertDescription>
         </Alert>
       </DashboardLayout>
     );
   }
 
-  const { goals, summary, year } = data as any;
-  const displayYear = goals?.[0]?.year || year; // no fallback to mocked year
+  const { goals } = data;
 
   return (
     <DashboardLayout
-      title={displayYear ? `Metas ${displayYear}` : 'Metas'}
-      subtitle="Acompanhe as metas estratégicas da Conduz.pt"
+      title="Metas/Recompensas da Semana"
+      subtitle="Veja as metas/recompensas válidas para você nesta semana."
       translations={translations}
     >
-      {/* Resumo Geral */}
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={6}>
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="green.200">
-          <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" color="gray.600" fontWeight="bold">
-              Metas Concluídas
-            </Text>
-            <Icon as={FiCheckCircle} color="green.500" boxSize={5} />
-          </HStack>
-          <Text fontSize="2xl" fontWeight="bold" color="green.600">
-            {summary.completedGoals}/{summary.totalGoals}
-          </Text>
-          <Text fontSize="xs" color="gray.500" mt={1}>
-            {((summary.completedGoals / summary.totalGoals) * 100).toFixed(0)}% completo
-          </Text>
-        </Box>
-
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="blue.200">
-          <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" color="gray.600" fontWeight="bold">
-              Progresso Geral
-            </Text>
-            <Icon as={FiTrendingUp} color="blue.500" boxSize={5} />
-          </HStack>
-          <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-            {summary.overallProgress.toFixed(0)}%
-          </Text>
-          <Progress
-            value={summary.overallProgress}
-            size="sm"
-            colorScheme="blue"
-            borderRadius="md"
-            mt={2}
-          />
-        </Box>
-
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="purple.200">
-          <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" color="gray.600" fontWeight="bold">
-              Ano
-            </Text>
-            <Icon as={FiClock} color="purple.500" boxSize={5} />
-          </HStack>
-          <Text fontSize="2xl" fontWeight="bold" color="purple.600">{displayYear ?? '—'}</Text>
-          <Text fontSize="xs" color="gray.500" mt={1}>
-            4 trimestres
-          </Text>
-        </Box>
-      </SimpleGrid>
-
-      {/* Metas por Trimestre */}
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="gray.200">
         <VStack align="stretch" spacing={4}>
           <VStack align="start" spacing={0}>
             <Text fontSize="lg" fontWeight="bold" color="gray.700">
-              Metas Trimestrais
+              Metas/Recompensas Ativas
             </Text>
             <Text fontSize="sm" color="gray.500">
-              Objetivos de crescimento configurados pela administração
+              As metas/recompensas são calculadas semanalmente com base nos seus ganhos e viagens.
             </Text>
           </VStack>
 
@@ -176,80 +123,57 @@ export default function GoalsPage({ translations, locale }: DashboardPageProps) 
           {goals.length === 0 ? (
             <Alert status="info" borderRadius="lg">
               <AlertIcon />
-              <AlertTitle>Sem metas definidas</AlertTitle>
+              <AlertTitle>Sem metas/recompensas ativas</AlertTitle>
               <AlertDescription>
-                As metas ainda não foram configuradas. Aguarde a definição pela administração.
+                Nenhuma meta/recompensa está ativa para esta semana.
               </AlertDescription>
             </Alert>
           ) : (
             <VStack spacing={4} align="stretch">
-              {goals.map((goal) => {
-                const progress = (goal.current / goal.target) * 100;
-                const statusColor = statusColors[goal.status] || 'gray';
-
-                return (
-                  <Box
-                    key={goal.id}
-                    p={4}
-                    borderRadius="md"
-                    borderWidth="1px"
-                    borderColor={statusColor === 'green' ? 'green.200' : 'gray.200'}
-                    bg={statusColor === 'green' ? 'green.50' : 'gray.50'}
-                  >
-                    <HStack justify="space-between" mb={3}>
-                      <VStack align="start" spacing={1}>
-                        <HStack spacing={2}>
-                          <Icon as={FiTarget} color={`${statusColor}.500`} />
-                          <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                            {goal.quarter} {displayYear ? displayYear : ''}
-                          </Text>
-                        </HStack>
-                        <Text fontSize="xs" color="gray.600" pl={6}>
-                          {goal.description}
-                        </Text>
-                      </VStack>
-                      <Badge colorScheme={statusColor} fontSize="xs">
-                        {statusLabels[goal.status] || goal.status}
-                      </Badge>
-                    </HStack>
-
-                    <VStack align="stretch" spacing={2} pl={6}>
-                      <HStack justify="space-between" fontSize="xs">
-                        <Text color="gray.600">
-                          {goal.current} / {goal.target} motoristas
-                        </Text>
-                        <Text fontWeight="bold" color={statusColor === 'green' ? 'green.600' : 'gray.700'}>
-                          {progress.toFixed(0)}%
-                        </Text>
-                      </HStack>
-                      <Progress
-                        value={Math.min(progress, 100)}
-                        size="sm"
-                        colorScheme={statusColor}
-                        borderRadius="md"
-                      />
-                    </VStack>
-
-                    {goal.weight && (
-                      <Text fontSize="xs" color="gray.500" mt={2} pl={6}>
-                        Peso: {goal.weight}% do objetivo geral
+              {goals.map((goal) => (
+                <Box
+                  key={goal.id}
+                  p={4}
+                  borderRadius="md"
+                  borderWidth="1px"
+                  borderColor={goal.atingido ? 'green.200' : 'gray.200'}
+                  bg={goal.atingido ? 'green.50' : 'gray.50'}
+                >
+                  <HStack justify="space-between" mb={2}>
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="md" fontWeight="bold" color="gray.700">
+                        {goal.descricao}
                       </Text>
-                    )}
-                  </Box>
-                );
-              })}
+                      <Text fontSize="xs" color="gray.600">
+                        Critério: {goal.criterio === 'ganho' ? 'Ganho Bruto' : 'Viagens'} | Tipo: {goal.tipo === 'valor' ? 'Valor Fixo' : 'Percentual'} | Nível: {goal.nivel}
+                      </Text>
+                      <Text fontSize="xs" color="gray.600">
+                        Valor: {goal.tipo === 'percentual' ? `${goal.valor}%` : `R$ ${goal.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                        {goal.dataInicio ? ` | Vigente desde: ${new Date(goal.dataInicio).toLocaleDateString('pt-BR')}` : ''}
+                      </Text>
+                    </VStack>
+                    <Badge colorScheme={goal.atingido ? 'green' : 'gray'} fontSize="sm">
+                      {goal.atingido ? 'Atingido' : 'Não atingido'}
+                    </Badge>
+                  </HStack>
+                  <HStack spacing={6} mt={2} fontSize="sm">
+                    <Text color="gray.700">Base: {goal.criterio === 'ganho' ? `R$ ${goal.valorBase.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : `${goal.valorBase} viagens`}</Text>
+                    <Text color={goal.atingido ? 'green.700' : 'gray.700'} fontWeight="bold">
+                      Valor ganho: {goal.atingido ? (goal.tipo === 'percentual' ? `R$ ${goal.valorGanho.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : `R$ ${goal.valorGanho.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`) : '—'}
+                    </Text>
+                  </HStack>
+                </Box>
+              ))}
             </VStack>
           )}
         </VStack>
       </Box>
-
-      {/* Info Box */}
-      <Alert status="info" borderRadius="lg" bg="blue.50" borderColor="blue.200">
+      <Alert status="info" borderRadius="lg" bg="blue.50" borderColor="blue.200" mt={6}>
         <AlertIcon />
         <VStack align="start" spacing={1}>
-          <AlertTitle>Sobre as Metas{displayYear ? ` ${displayYear}` : ''}</AlertTitle>
+          <AlertTitle>Sobre as Metas/Recompensas</AlertTitle>
           <AlertDescription fontSize="sm">
-            As metas representam os objetivos estratégicos da Conduz.pt. Seu progresso é baseado no número de motoristas ativos em sua rede.
+            As metas/recompensas são definidas pela administração e aplicadas a todos os motoristas a partir da data de início. O cálculo é feito semanalmente.
           </AlertDescription>
         </VStack>
       </Alert>

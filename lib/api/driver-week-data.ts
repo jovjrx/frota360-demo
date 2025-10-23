@@ -11,6 +11,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { APP_CONFIG } from '@/lib/config';
 import { getFinancialConfig, isWeekEligibleByStart } from '@/lib/finance/config';
 import { getBonusForDriverWeek } from '@/lib/commissions/compute';
+import { computeDriverGoals } from '@/lib/goals/service';
 import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
 import type { DriverPayment } from '@/schemas/driver-payment';
 
@@ -438,6 +439,7 @@ export async function getDriverWeekData(
       console.warn('[getDriverWeekData] Falha ao aplicar taxa adm configurada:', e);
     }
 
+
     // Aplicar comissão extra se habilitada em config
     try {
       const cfg = APP_CONFIG.finance?.commission;
@@ -472,6 +474,20 @@ export async function getDriverWeekData(
       }
     } catch (e) {
       console.warn('[getDriverWeekData] Falha ao aplicar comissão extra:', e);
+    }
+
+    // Adicionar metas/recompensas semanais (rewards/goals)
+    try {
+      // Para cálculo correto, usar ganhos brutos e viagens da semana
+      const ganhosBrutos = completeRecord.ganhosTotal || 0;
+      // Se viagens não está disponível, pode ser necessário buscar de outro campo
+      const viagens = completeRecord.viagens || completeRecord.totalViagens || 0;
+      // Timestamp da semana (usar início da semana)
+      const dataSemana = completeRecord.weekStart ? new Date(completeRecord.weekStart).getTime() : Date.now();
+      completeRecord.goals = await computeDriverGoals(driverId, completeRecord.driverName || '', ganhosBrutos, viagens, dataSemana);
+    } catch (e) {
+      console.warn('[getDriverWeekData] Falha ao calcular metas/recompensas semanais:', e);
+      completeRecord.goals = [];
     }
 
     if (latestPayment) {
