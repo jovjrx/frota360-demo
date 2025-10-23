@@ -40,11 +40,11 @@ import {
 import { useRouter } from 'next/router';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
-import useSWR from 'swr';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import PageSettingsMenu from '@/components/admin/PageSettingsMenu';
 import GoalsSettingsModal from '@/components/admin/modals/GoalsSettingsModal';
 import { useDisclosure } from '@chakra-ui/react';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
 
 
 interface RewardConfig {
@@ -61,96 +61,66 @@ interface AdminGoalsData {
   rewards: RewardConfig[];
 }
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then((res) => res.json());
+interface AdminGoalsPageProps extends AdminPageProps {
+  goalsData: AdminGoalsData;
+}
 
-const statusColors: Record<string, string> = {
-  not_started: 'gray',
-  in_progress: 'blue',
-  completed: 'green',
-  overdue: 'red',
-};
-
-const statusLabels: Record<string, string> = {
-  not_started: 'Não Iniciado',
-  in_progress: 'Em Progresso',
-  completed: 'Concluído',
-  overdue: 'Atrasado',
-};
-
-export default function AdminGoalsPage({ translations, locale }: AdminPageProps) {
+export default function AdminGoalsPage({ translations, locale, goalsData, tPage, tCommon }: AdminGoalsPageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterQuarter, setFilterQuarter] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
   const settingsDisclosure = useDisclosure();
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
 
-  const { data, isLoading, error } = useSWR<AdminGoalsData>(
-    '/api/admin/goals',
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-
-  if (isLoading) {
+  if (!goalsData?.success) {
     return (
-      <AdminLayout title="Metas" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />}>
-        <Center minH="400px">
-          <Spinner size="lg" color="red.500" />
-        </Center>
-      </AdminLayout>
-    );
-  }
-
-  if (error || !data?.success) {
-    return (
-      <AdminLayout title="Metas" translations={translations} side={<PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />}>
+      <AdminLayout title={t('goals.title', 'Metas')} translations={translations} side={<PageSettingsMenu items={[{ label: t('goals.settings', 'Configurações de Metas'), onClick: settingsDisclosure.onOpen }]} />}>
         <Alert status="error" borderRadius="lg">
           <AlertIcon />
-          <AlertTitle>Erro ao carregar metas</AlertTitle>
+          <AlertTitle>{t('goals.error_title', 'Erro ao carregar metas')}</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar os dados de metas.
+            {t('goals.error_description', 'Não foi possível carregar os dados de metas.')}
           </AlertDescription>
         </Alert>
       </AdminLayout>
     );
   }
 
-  const rewards = data.rewards || [];
+  const rewards = goalsData.rewards || [];
 
   return (
     <AdminLayout
-      title="Metas/Recompensas Ativas"
-      subtitle="Veja as metas/recompensas configuradas atualmente para todos os motoristas."
+      title={t('goals.title', 'Metas/Recompensas Ativas')}
+      subtitle={t('goals.subtitle', 'Veja as metas/recompensas configuradas atualmente para todos os motoristas.')}
       translations={translations}
-      side={<PageSettingsMenu items={[{ label: 'Configurações de Metas', onClick: settingsDisclosure.onOpen }]} />}
+      side={<PageSettingsMenu items={[{ label: t('goals.settings', 'Configurações de Metas'), onClick: settingsDisclosure.onOpen }]} />}
     >
       <GoalsSettingsModal isOpen={settingsDisclosure.isOpen} onClose={settingsDisclosure.onClose} />
       <Box bg="white" borderRadius="lg" shadow="sm" borderWidth="1px" borderColor="gray.200" overflow="hidden" mt={6}>
         {rewards.length === 0 ? (
           <Alert status="info" borderRadius="0" m={0}>
             <AlertIcon />
-            <AlertTitle>Nenhuma meta/recompensa ativa</AlertTitle>
+            <AlertTitle>{t('goals.no_goals_title', 'Nenhuma meta/recompensa ativa')}</AlertTitle>
           </Alert>
         ) : (
           <TableContainer>
             <Table size="sm">
               <Thead bg="gray.50" borderBottomWidth="1px" borderColor="gray.200">
                 <Tr>
-                  <Th>Descrição</Th>
-                  <Th>Critério</Th>
-                  <Th>Tipo</Th>
-                  <Th isNumeric>Valor</Th>
-                  <Th isNumeric>Nível</Th>
-                  <Th>Data Início</Th>
+                  <Th>{t('goals.columns.descricao', 'Descrição')}</Th>
+                  <Th>{t('goals.columns.criterio', 'Critério')}</Th>
+                  <Th>{t('goals.columns.tipo', 'Tipo')}</Th>
+                  <Th isNumeric>{t('goals.columns.valor', 'Valor')}</Th>
+                  <Th isNumeric>{t('goals.columns.nivel', 'Nível')}</Th>
+                  <Th>{t('goals.columns.data_inicio', 'Data Início')}</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {rewards.map((reward, idx) => (
                   <Tr key={idx} _hover={{ bg: 'gray.50' }}>
                     <Td fontSize="sm">{reward.descricao}</Td>
-                    <Td fontSize="sm">{reward.criterio === 'ganho' ? 'Ganho Bruto' : 'Viagens'}</Td>
-                    <Td fontSize="sm">{reward.tipo === 'valor' ? 'Valor Fixo' : 'Percentual'}</Td>
+                    <Td fontSize="sm">{reward.criterio === 'ganho' ? t('goals.criterio_ganho', 'Ganho Bruto') : t('goals.criterio_viagens', 'Viagens')}</Td>
+                    <Td fontSize="sm">{reward.tipo === 'valor' ? t('goals.tipo_valor', 'Valor Fixo') : t('goals.tipo_percentual', 'Percentual')}</Td>
                     <Td isNumeric fontSize="sm">{reward.tipo === 'percentual' ? `${reward.valor}%` : `R$ ${reward.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}</Td>
                     <Td isNumeric fontSize="sm">{reward.nivel}</Td>
                     <Td fontSize="sm">{reward.dataInicio ? new Date(reward.dataInicio).toLocaleDateString('pt-BR') : '-'}</Td>
@@ -173,6 +143,25 @@ export default function AdminGoalsPage({ translations, locale }: AdminPageProps)
 }
 
 export const getServerSideProps = withAdminSSR(async (context, user) => {
-  return {};
+  try {
+    const { getActiveRewards } = await import('@/lib/goals/service');
+    
+    const rewards = await getActiveRewards();
+    
+    return {
+      goalsData: {
+        success: true,
+        rewards,
+      },
+    };
+  } catch (error) {
+    console.error('[admin/goals SSR] error:', error);
+    return {
+      goalsData: {
+        success: false,
+        rewards: [],
+      },
+    };
+  }
 });
 

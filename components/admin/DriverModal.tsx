@@ -81,6 +81,11 @@ interface Driver {
     model?: string;
     year?: number;
   };
+  adminFee?: {
+    mode?: 'percent' | 'fixed';
+    percentValue?: number;
+    fixedValue?: number;
+  };
 }
 
 interface DriverModalProps {
@@ -123,6 +128,9 @@ export default function DriverModal({
     birthDate: '',
     city: '',
     rentalFee: 0,
+    adminFeeMode: 'percent' as 'percent' | 'fixed',
+    adminFeePercentValue: undefined as number | undefined,
+    adminFeeFixedValue: undefined as number | undefined,
     iban: '',
     accountHolder: '',
     vehiclePlate: '',
@@ -151,6 +159,9 @@ export default function DriverModal({
           birthDate: driver.birthDate || '',
           city: driver.city || '',
           rentalFee: driver.rentalFee || 0,
+          adminFeeMode: (driver.adminFee?.mode as 'percent' | 'fixed') || 'percent',
+          adminFeePercentValue: driver.adminFee?.percentValue,
+          adminFeeFixedValue: driver.adminFee?.fixedValue,
           iban: driver.banking?.iban || '',
           accountHolder: driver.banking?.accountHolder || '',
           vehiclePlate: driver.vehicle?.plate || '',
@@ -176,6 +187,9 @@ export default function DriverModal({
           birthDate: '',
           city: '',
           rentalFee: 0,
+          adminFeeMode: 'percent',
+          adminFeePercentValue: undefined,
+          adminFeeFixedValue: undefined,
           iban: '',
           accountHolder: '',
           vehiclePlate: '',
@@ -242,6 +256,12 @@ export default function DriverModal({
           make: formData.vehicleMake || undefined,
           model: formData.vehicleModel || undefined,
           year: formData.vehicleYear ? parseInt(formData.vehicleYear) : undefined,
+        },
+        // Taxa Administrativa
+        adminFee: {
+          mode: formData.adminFeeMode,
+          percentValue: formData.adminFeePercentValue,
+          fixedValue: formData.adminFeeFixedValue,
         },
         // Senha (apenas para edição)
         ...(isEditMode && newPassword ? { newPassword } : {}),
@@ -427,6 +447,58 @@ export default function DriverModal({
                       </Text>
                     </FormControl>
                   )}
+
+                  {/* Configuração de Taxa Administrativa */}
+                  <Box w="full" p={4} borderWidth={1} borderRadius="md" bg="blue.50" borderColor="blue.200">
+                    <Heading size="sm" mb={3}>{t('drivers.form.adminFee.title', 'Taxa Administrativa (Despesas Adm.)')}</Heading>
+                    
+                    <FormControl mb={3}>
+                      <FormLabel fontSize="sm">{t('drivers.form.adminFee.modeLabel', 'Tipo de Taxa')}</FormLabel>
+                      <Select
+                        value={formData.adminFeeMode}
+                        onChange={(e) => handleChange('adminFeeMode', e.target.value)}
+                        bg="white"
+                      >
+                        <option value="percent">{t('drivers.form.adminFee.modePercent', 'Taxa Percentual (usar padrão global ou customizar)')}</option>
+                        <option value="fixed">{t('drivers.form.adminFee.modeFixed', 'Valor Fixo (€)')}</option>
+                      </Select>
+                    </FormControl>
+
+                    {formData.adminFeeMode === 'percent' ? (
+                      <FormControl>
+                        <FormLabel fontSize="sm">{t('drivers.form.adminFee.percentLabel', 'Percentual Customizado (%)')}</FormLabel>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          value={formData.adminFeePercentValue ?? ''}
+                          onChange={(e) => handleChange('adminFeePercentValue', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          placeholder={t('drivers.form.adminFee.percentPlaceholder', 'Deixe vazio para usar padrão global (7%)')}
+                          bg="white"
+                        />
+                        <Text fontSize="xs" color="gray.700" mt={1}>
+                          {t('drivers.form.adminFee.percentDescription', 'Se não definido, usa o percentual padrão configurado no sistema (geralmente 7%).')}
+                        </Text>
+                      </FormControl>
+                    ) : (
+                      <FormControl>
+                        <FormLabel fontSize="sm">{t('drivers.form.adminFee.fixedLabel', 'Valor Fixo (€)')}</FormLabel>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.adminFeeFixedValue ?? ''}
+                          onChange={(e) => handleChange('adminFeeFixedValue', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          placeholder={t('drivers.form.adminFee.fixedPlaceholder', 'Ex: 25.00')}
+                          bg="white"
+                        />
+                        <Text fontSize="xs" color="gray.700" mt={1}>
+                          {t('drivers.form.adminFee.fixedDescription', 'Valor fixo em euros a ser cobrado semanalmente como despesa administrativa. Se não definido, usa o valor padrão configurado (geralmente €25).')}
+                        </Text>
+                      </FormControl>
+                    )}
+                  </Box>
                 </VStack>
               </TabPanel>
 

@@ -12,5 +12,31 @@
     "tracking": "Rastreamento",
     "my_data": "Dados",
     "download_payslip": "Baixar Resumo"
+  },
+  "goals": {
+    "title": "Metas/Recompensas da Semana",
+    "subtitle": "Veja as metas/recompensas válidas para você nesta semana.",
+    "error_title": "Erro ao carregar metas",
+    "error_description": "Não foi possível carregar suas metas/recompensas.",
+    "no_goals_title": "Sem metas/recompensas ativas",
+    "no_goals_description": "Nenhuma meta/recompensa está ativa para esta semana.",
+    "active_goals": "Metas/Recompensas Ativas",
+    "active_goals_subtitle": "As metas/recompensas são calculadas semanalmente com base nos seus ganhos e viagens.",
+    "criterio": "Critério",
+    "criterio_ganho": "Ganho Bruto",
+    "criterio_viagens": "Viagens",
+    "tipo": "Tipo",
+    "tipo_valor": "Valor Fixo",
+    "tipo_percentual": "Percentual",
+    "nivel": "Nível",
+    "valor": "Valor",
+    "vigente_desde": "Vigente desde",
+    "atingido": "Atingido",
+    "nao_atingido": "Não atingido",
+    "valor_ganho": "Valor ganho",
+    "base": "Base",
+    "viagens": "viagens",
+    "info_title": "Sobre as Metas/Recompensas",
+    "info_description": "As metas/recompensas são definidas pela administração e aplicadas a todos os motoristas a partir da data de início. O cálculo é feito semanalmente."
   }
 }

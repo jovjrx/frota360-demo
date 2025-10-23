@@ -295,7 +295,7 @@ export async function getDriverWeekData(
     const vehicle = driverData?.vehicle?.plate || driverData?.integrations?.viaverde?.key || '';
     
   // 3.9 Configuração financeira (taxa adm)
-  const financialCfg = await getFinancialConfig().catch(() => ({ adminFeePercent: 7 }));
+  const financialCfg = await getFinancialConfig().catch(() => ({ adminFeePercent: 7, adminFeeFixedDefault: 25 }));
   const configuredAdminFee = Math.max(0, Number(financialCfg.adminFeePercent || 7));
 
   // 4. JUNTAR dados
@@ -427,12 +427,29 @@ export async function getDriverWeekData(
       console.warn('[getDriverWeekData] Falha no cálculo dinâmico de financiamento:', e);
     }
 
-    // Aplicar Taxa Adm configurada
+    // Aplicar Taxa Adm (customizada por motorista ou padrão global)
     try {
-      const desiredAdm = completeRecord.ganhosMenosIVA * (configuredAdminFee / 100);
-      const delta = desiredAdm - completeRecord.despesasAdm;
+      let finalAdminFee = 0;
+      
+      // Verificar se motorista tem taxa customizada
+      if (driverData?.adminFee) {
+        if (driverData.adminFee.mode === 'fixed') {
+          // Taxa fixa em euros (ex: 25€)
+          const fixedValue = driverData.adminFee.fixedValue ?? financialCfg.adminFeeFixedDefault ?? 25;
+          finalAdminFee = Math.max(0, Number(fixedValue));
+        } else {
+          // Taxa percentual customizada
+          const customPercent = driverData.adminFee.percentValue ?? configuredAdminFee;
+          finalAdminFee = completeRecord.ganhosMenosIVA * (customPercent / 100);
+        }
+      } else {
+        // Usar taxa padrão global (percentual)
+        finalAdminFee = completeRecord.ganhosMenosIVA * (configuredAdminFee / 100);
+      }
+      
+      const delta = finalAdminFee - completeRecord.despesasAdm;
       if (Math.abs(delta) > 0.0001) {
-        completeRecord.despesasAdm = desiredAdm;
+        completeRecord.despesasAdm = finalAdminFee;
         completeRecord.repasse = completeRecord.repasse - delta; // aumentar taxa adm diminui repasse
       }
     } catch (e) {

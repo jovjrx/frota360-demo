@@ -116,6 +116,14 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 icon: FiTarget,
                 description: 'goals_management',
                 isSubmenu: true,
+            },
+            {
+                id: 'financial_settings',
+                label: 'financial_settings',
+                href: '/admin/financial-settings',
+                icon: FiSettings,
+                description: 'financial_settings_management',
+                isSubmenu: true,
             }
         ],
     },

@@ -102,6 +102,13 @@ export const DriverAdminFieldsSchema = z.object({
     percent: z.number().min(0).max(100).optional(),
   }).optional(),
   
+  // Taxa Administrativa (despesasAdm)
+  adminFee: z.object({
+    mode: z.enum(['percent', 'fixed']).default('percent'),  // Taxa percentual ou valor fixo
+    percentValue: z.number().min(0).max(100).optional(),    // % customizado (se não definido, usa o padrão global)
+    fixedValue: z.number().min(0).optional(),               // Valor fixo em euros (ex: 25)
+  }).optional(),
+  
   // Notas administrativas
   notes: z.string().default(''),
   

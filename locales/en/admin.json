@@ -131,6 +131,28 @@
         "status": "Status"
       }
     }
+  },
+  "goals": {
+    "title": "Active Goals/Rewards",
+    "subtitle": "View the goals/rewards currently configured for all drivers.",
+    "settings": "Goals Settings",
+    "error_title": "Error loading goals",
+    "error_description": "Could not load goals data.",
+    "no_goals_title": "No active goals/rewards",
+    "columns": {
+      "descricao": "Description",
+      "criterio": "Criteria",
+      "tipo": "Type",
+      "valor": "Value",
+      "nivel": "Level",
+      "dataInicio": "Start Date"
+    },
+    "criterio_ganho": "Gross Earnings",
+    "criterio_viagens": "Trips",
+    "tipo_valor": "Fixed Amount",
+    "tipo_percentual": "Percentage",
+    "info_title": "About Goals/Rewards",
+    "info_description": "Goals/rewards are configured by management and apply to all drivers from the defined start date."
   }
 }
 

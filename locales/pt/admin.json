@@ -131,6 +131,28 @@
         "status": "Status"
       }
     }
+  },
+  "goals": {
+    "title": "Metas/Recompensas Ativas",
+    "subtitle": "Veja as metas/recompensas configuradas atualmente para todos os motoristas.",
+    "settings": "Configurações de Metas",
+    "error_title": "Erro ao carregar metas",
+    "error_description": "Não foi possível carregar os dados de metas.",
+    "no_goals_title": "Nenhuma meta/recompensa ativa",
+    "columns": {
+      "descricao": "Descrição",
+      "criterio": "Critério",
+      "tipo": "Tipo",
+      "valor": "Valor",
+      "nivel": "Nível",
+      "dataInicio": "Data Início"
+    },
+    "criterio_ganho": "Ganho Bruto",
+    "criterio_viagens": "Viagens",
+    "tipo_valor": "Valor Fixo",
+    "tipo_percentual": "Percentual",
+    "info_title": "Sobre as Metas/Recompensas",
+    "info_description": "As metas/recompensas são configuradas pela administração e aplicadas a todos os motoristas a partir da data de início definida."
   }
 }
 

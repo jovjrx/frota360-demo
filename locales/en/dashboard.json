@@ -12,5 +12,31 @@
     "tracking": "Tracking",
     "my_data": "My Data",
     "download_payslip": "Download Payslip"
+  },
+  "goals": {
+    "title": "Weekly Goals/Rewards",
+    "subtitle": "View the goals/rewards valid for you this week.",
+    "error_title": "Error loading goals",
+    "error_description": "Could not load your goals/rewards.",
+    "no_goals_title": "No active goals/rewards",
+    "no_goals_description": "No goals/rewards are active for this week.",
+    "active_goals": "Active Goals/Rewards",
+    "active_goals_subtitle": "Goals/rewards are calculated weekly based on your earnings and trips.",
+    "criterio": "Criteria",
+    "criterio_ganho": "Gross Earnings",
+    "criterio_viagens": "Trips",
+    "tipo": "Type",
+    "tipo_valor": "Fixed Amount",
+    "tipo_percentual": "Percentage",
+    "nivel": "Level",
+    "valor": "Value",
+    "vigente_desde": "Active since",
+    "atingido": "Achieved",
+    "nao_atingido": "Not achieved",
+    "valor_ganho": "Amount earned",
+    "base": "Base",
+    "viagens": "trips",
+    "info_title": "About Goals/Rewards",
+    "info_description": "Goals/rewards are set by management and apply to all drivers from the start date. Calculations are done weekly."
   }
 }

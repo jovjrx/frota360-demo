@@ -62,6 +62,20 @@ export const DriverWeeklyRecordSchema = z.object({
   // Origem dos dados
   dataSource: z.enum(['manual', 'auto']).default('manual'),
   
+  // Metas/Recompensas semanais (calculadas dinamicamente)
+  goals: z.array(z.object({
+    id: z.string(),
+    descricao: z.string(),
+    criterio: z.enum(['ganho', 'viagens']),
+    tipo: z.enum(['valor', 'percentual']),
+    valor: z.number(),
+    nivel: z.number(),
+    dataInicio: z.union([z.string(), z.number()]).optional(),
+    atingido: z.boolean(),
+    valorGanho: z.number(),
+    valorBase: z.number(),
+  })).optional(),
+  
   // Metadados
   createdAt: z.string(),
   updatedAt: z.string(),

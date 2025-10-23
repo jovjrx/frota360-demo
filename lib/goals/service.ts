@@ -19,7 +19,7 @@ export interface DriverGoalStatus {
   atingido: boolean;
   valorGanho: number;
   valorBase: number;
-  dataInicio?: number;
+  dataInicio?: number | string;
 }
 
 // Função para buscar as metas/recompensas ativas

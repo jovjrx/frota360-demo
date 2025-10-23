@@ -4,6 +4,7 @@ export type FinancingEligibilityPolicy = 'startDateToWeekEnd' | 'startDateToWeek
 
 export interface FinancialConfig {
   adminFeePercent: number; // e.g., 7
+  adminFeeFixedDefault: number; // e.g., 25 (valor fixo padrão em euros)
   financing?: {
     // Recalcular financiamento por semana de forma dinâmica (não confiar no snapshot salvo)
     dynamicCalculation?: boolean;
@@ -16,6 +17,7 @@ export interface FinancialConfig {
 
 const DEFAULT_FINANCIAL_CONFIG: FinancialConfig = {
   adminFeePercent: 7,
+  adminFeeFixedDefault: 25,
   financing: {
     dynamicCalculation: true,
     eligibilityPolicy: 'startDateToWeekEnd',
@@ -30,6 +32,7 @@ export async function getFinancialConfig(): Promise<FinancialConfig> {
     const data = (doc.data() || {}) as any;
     return {
       adminFeePercent: Number(data.adminFeePercent ?? DEFAULT_FINANCIAL_CONFIG.adminFeePercent),
+      adminFeeFixedDefault: Number(data.adminFeeFixedDefault ?? DEFAULT_FINANCIAL_CONFIG.adminFeeFixedDefault),
       financing: {
         dynamicCalculation: typeof data.financing?.dynamicCalculation === 'boolean'
           ? data.financing.dynamicCalculation
@@ -51,6 +54,7 @@ export async function updateFinancialConfig(partial: Partial<FinancialConfig>): 
   const current = await getFinancialConfig();
   const next: FinancialConfig = {
     adminFeePercent: typeof partial.adminFeePercent === 'number' ? partial.adminFeePercent : current.adminFeePercent,
+    adminFeeFixedDefault: typeof partial.adminFeeFixedDefault === 'number' ? partial.adminFeeFixedDefault : current.adminFeeFixedDefault,
     financing: {
       dynamicCalculation: typeof partial.financing?.dynamicCalculation === 'boolean'
         ? partial.financing.dynamicCalculation
