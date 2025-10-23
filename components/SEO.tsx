@@ -31,7 +31,9 @@ export default function SEO({
   const siteUrl = "https://conduz.pt";
   const fullTitle = `${title} - Conduz`;
 
-  const fullCanonical = new URL(canonical || "/", siteUrl).toString();
+  // Limpar canonical removendo /en se presente
+  const cleanCanonical = canonical?.replace(/^\/en/, '') || "/";
+  const fullCanonical = new URL(cleanCanonical, siteUrl).toString();
   const fullOgImage = ogImage.startsWith("http") ? ogImage : new URL(ogImage, siteUrl).toString();
     
   const ogLocaleMap: Record<string, string> = {
@@ -50,8 +52,9 @@ export default function SEO({
       loc === "pt" ? "pt-PT" :
       loc === "en" ? "en-GB" : loc;
 
-    const sep = (canonical && canonical.includes("?")) ? "&" : "?";
-    const href = new URL(`${canonical || "/"}${sep}locale=${loc}`, siteUrl).toString();
+    const href = loc === 'en' 
+      ? new URL(`/en${cleanCanonical === '/' ? '' : cleanCanonical}`, siteUrl).toString()
+      : new URL(cleanCanonical, siteUrl).toString();
 
     return { rel: "alternate", hrefLang: lang, href };
   });
