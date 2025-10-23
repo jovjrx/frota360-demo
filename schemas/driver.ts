@@ -103,10 +103,12 @@ export const DriverAdminFieldsSchema = z.object({
   }).optional(),
   
   // Taxa Administrativa (despesasAdm)
+  // PADRÃO: €25 fixo por semana (mode: 'fixed', fixedValue: 25)
+  // Pode ser alterado para percentual para semanas antigas se necessário
   adminFee: z.object({
-    mode: z.enum(['percent', 'fixed']).default('percent'),  // Taxa percentual ou valor fixo
-    percentValue: z.number().min(0).max(100).optional(),    // % customizado (se não definido, usa o padrão global)
-    fixedValue: z.number().min(0).optional(),               // Valor fixo em euros (ex: 25)
+    mode: z.enum(['percent', 'fixed']).default('fixed'),    // PADRÃO: Taxa fixa
+    percentValue: z.number().min(0).max(100).optional(),    // % customizado (para semanas antigas)
+    fixedValue: z.number().min(0).default(25),              // PADRÃO: €25 por semana
   }).optional(),
   
   // Notas administrativas

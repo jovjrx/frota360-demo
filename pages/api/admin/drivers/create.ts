@@ -189,7 +189,14 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
     }
 
     // Criar documento no Firestore
-    const driverRef = await db.collection('drivers').add(driverData);
+    // Garantir taxa administrativa padrão: €25 fixo
+    const driverRef = await db.collection('drivers').add({
+      ...driverData,
+      adminFee: driverData.adminFee || {
+        mode: 'fixed',
+        fixedValue: 25,
+      },
+    });
     const driverId = driverRef.id;
 
     // Atualizar custom claim com driverId

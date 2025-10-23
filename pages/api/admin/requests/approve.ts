@@ -55,6 +55,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
     await auth.setCustomUserClaims(firebaseUser.uid, { role: 'driver' });
 
     // 3. Save driver data to Firestore 'drivers' collection
+    // Garantir taxa administrativa padrão: €25 fixo
     await db.collection('drivers').doc(firebaseUser.uid).set({
       userId: firebaseUser.uid,
       fullName: requestData.fullName,
@@ -69,6 +70,10 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
         myprio: { enabled: false, key: '' },
         viaverde: { enabled: false, key: '' },
         cartrack: { enabled: false, key: '' },
+      },
+      adminFee: {
+        mode: 'fixed',
+        fixedValue: 25,
       },
       // Add other default driver fields as needed
       // Se existir referrerId na solicitação, já vincula a cadeia de comissões

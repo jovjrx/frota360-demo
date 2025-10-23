@@ -44,8 +44,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Criar documento do motorista
+    // Garantir que novos motoristas tenham taxa administrativa padrão: €25 fixo
     const driverDocRef = await adminDb.collection('drivers').add({
       ...validatedData,
+      adminFee: validatedData.adminFee || {
+        mode: 'fixed',
+        fixedValue: 25,
+      },
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

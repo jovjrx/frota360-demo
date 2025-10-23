@@ -38,10 +38,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Criar documento do motorista usando adminDb (server-side)
+    // Garantir taxa administrativa padrão: €25 fixo
     const driverDocRef = await adminDb.collection('drivers').add({
       ...driverData,
       uid: uid,
       userId: uid,
+      adminFee: driverData.adminFee || {
+        mode: 'fixed',
+        fixedValue: 25,
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     });

@@ -69,6 +69,10 @@ class FirestoreProvider implements StorageProvider {
     async create(data: any): Promise<string> {
       const docRef = await adminDb.collection('drivers').add({
         ...data,
+        adminFee: data.adminFee || {
+          mode: 'fixed',
+          fixedValue: 25,
+        },
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });

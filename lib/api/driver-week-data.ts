@@ -443,8 +443,10 @@ export async function getDriverWeekData(
           finalAdminFee = completeRecord.ganhosMenosIVA * (customPercent / 100);
         }
       } else {
-        // Usar taxa padrão global (percentual)
-        finalAdminFee = completeRecord.ganhosMenosIVA * (configuredAdminFee / 100);
+        // PADRÃO: Taxa fixa de €25 (não mais percentual)
+        // Isso faz com que novos motoristas usem €25 fixo por semana
+        const fixedDefault = financialCfg.adminFeeFixedDefault ?? 25;
+        finalAdminFee = Math.max(0, Number(fixedDefault));
       }
       
       const delta = finalAdminFee - completeRecord.despesasAdm;
