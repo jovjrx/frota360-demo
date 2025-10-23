@@ -68,6 +68,7 @@ export default function Hero({
                 fontWeight="semibold"
                 lineHeight="1.15"
                 fontSize={{ base: "3xl", sm: "4xl", lg: "5xl" }}
+                whiteSpace="pre-line"
               >
                 {title}
               </Heading>

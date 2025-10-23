@@ -55,6 +55,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const currentPage = getCurrentPage();
   const pageSEO = tCommon(`seo.pages.${currentPage}`);
+  
+  // Detectar locale atual baseado na URL
+  const currentLocale = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.startsWith('/en')) return 'en';
+    }
+    return (pageProps as any)?.locale || 'pt';
+  }, [pageProps, router.asPath]);
 
   return (
     <>
@@ -74,8 +83,8 @@ export default function App({ Component, pageProps }: AppProps) {
               description={(pageSEO as any)?.description || tCommon("seo.default.description")}
               keywords={(pageSEO as any)?.keywords || tCommon("seo.default.keywords")}
               ogImage={tCommon("seo.default.image")}
-              canonical={router.asPath}
-              locale={router.locale ?? "pt"}
+              canonical={router.asPath.replace('/en', '')}
+              locale={currentLocale}
             />
 
             <Header
