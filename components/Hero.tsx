@@ -61,7 +61,7 @@ export default function Hero({
               </HStack>
             )}
 
-            <VStack spacing={2} align="center" justify="center" textAlign={{ base: 'center', lg: 'left' }}>
+            <VStack spacing={2} align={{ base: 'center', lg: 'flex-start' }} justify="center" textAlign={{ base: 'center', lg: 'left' }} w="full">
               <Heading
                 as="h1"
                 color="whiteAlpha.900"
@@ -75,7 +75,7 @@ export default function Hero({
               <Text
                 color="whiteAlpha.900"
                 fontSize={{ base: "md", sm: "lg", lg: "xl" }}
-                maxW={isCenter ? "4xl" : "3xl"}
+                maxW={{ base: "full", lg: "3xl" }}
                 mt={2}
               >
                 {subtitle}

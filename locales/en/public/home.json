@@ -1,14 +1,59 @@
 {
   "hero": {
-      "title": "You drive, we take care of the rest!",
+      "title": "You drive.\nWe take care of the rest!",
       "subtitle": "360º management for TVDE drivers — Right platform, real support, guaranteed earnings.",
   "description": "Conduz.pt is a full TVDE platform. We provide end-to-end driver solutions powered by advanced technology and human support.",
-      "ctaPrimary": "Apply as Driver",
+      "ctaPrimary": "Submit application",
       "ctaSecondary": "Talk on WhatsApp",
       "badge": "TVDE PORTUGAL",
+      "badges": {
+        "iva": {
+          "value": "6% VAT",
+          "label": "Refund"
+        },
+        "fee": {
+          "value": "€25",
+          "label": "Fixed fee/week"
+        },
+        "payment": {
+          "value": "Monday",
+          "label": "Payments"
+        },
+        "hidden": {
+          "value": "€0",
+          "label": "Hidden fees"
+        }
+      },
       "highlight": {
         "title": "You drive, we take care of the rest!",
         "description": "Onboarding in days, not weeks. Human and responsive support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
+      }
+    },
+    "proof": {
+      "title": "Guarantees that make the difference",
+      "subtitle": "Real commitments we fulfill every week",
+      "feature": "GUARANTEES",
+      "counters": {
+        "payment_guarantee": {
+          "value": "100%",
+          "label": "Guaranteed Payment",
+          "description": "Every Monday, no delays"
+        },
+        "activation_time": {
+          "value": "24h",
+          "label": "Fast Approval",
+          "description": "Start earning tomorrow"
+        },
+        "transparency": {
+          "value": "€0",
+          "label": "Hidden Fees",
+          "description": "Everything clear and transparent"
+        },
+        "support": {
+          "value": "24/7",
+          "label": "Real Support",
+          "description": "Real person, quick response"
+        }
       }
     },
     "benefits": {
@@ -36,26 +81,14 @@
     },
     "services": {
       "title": "Driver Types",
-      "subtitle": "Choose the model that best fits your situation",
+      "subtitle": "Choose the model that best suits you",
       "affiliate": {
-        "title": "Affiliate Driver",
-        "description": "Work with your own vehicle and have total control over your business.",
-        "benefits": [
-          "Total schedule flexibility",
-          "100% your revenue",
-          "Total vehicle control",
-          "Complete technical support"
-        ]
+        "title": "Affiliated Driver",
+        "description": "You have your own car and want to maximize your earnings. We offer complete management, 6% VAT refund, and a fixed fee of €25/week."
       },
       "renter": {
-        "title": "Renter Driver",
-        "description": "Rent a vehicle from Conduz PT and start working immediately.",
-        "benefits": [
-          "No initial investment",
-          "Always updated vehicles",
-          "Maintenance included",
-          "Complete insurance"
-        ]
+        "title": "Rental Driver",
+        "description": "Don't have a car? No problem. We offer complete TVDE vehicle rentals, ready to work, with insurance included and guaranteed maintenance."
       }
     },
     "howItWorks": {
@@ -140,10 +173,93 @@
         }
       ]
     },
+    "payments": {
+      "title": "Guaranteed Monday payments",
+      "subtitle": "Receive your payouts with full transparency and punctuality",
+      "feature": "PAYMENTS",
+      "badge": "GUARANTEED PAYMENTS",
+      "description": "Every Monday, no delays. Real-time dashboard shows earnings, expenses and what you'll receive. Zero surprises.",
+      "highlights": [
+        "Payout within 24h after weekly closing",
+        "Detailed statement by platform",
+        "6% VAT included in payment",
+        "Complete history available"
+      ],
+      "features": [
+        {
+          "title": "Monday payments",
+          "description": "Receive your earnings every Monday"
+        },
+        {
+          "title": "Fast processing",
+          "description": "Previous week's earnings directly to your account"
+        },
+        {
+          "title": "Fixed fee of €25/week",
+          "description": "No surprises, you know exactly what you'll pay"
+        },
+        {
+          "title": "100% of your earnings",
+          "description": "No hidden fees or unexpected deductions"
+        }
+      ],
+      "stats": {
+        "reliability": "Reliability",
+        "hidden": "Hidden fees",
+        "processing": "Processing"
+      },
+      "cta": "Submit application"
+    },
+    "referral": {
+      "title": "Multi-level commission system",
+      "subtitle": "Earn recurring commissions from drivers you refer",
+      "feature": "COMMISSIONS",
+      "description": "Refer drivers and earn commissions on their earnings. The more active drivers in your network, the more you earn - every week, automatically.",
+      "howItWorks": [
+        "Share the platform with other drivers",
+        "They register and start working",
+        "You earn weekly commission on their earnings",
+        "Build your network and earn passive income"
+      ],
+      "cta": "Join now",
+      "ctaAuth": "View my commissions"
+    },
+    "financing": {
+      "title": "Financing and advances",
+      "subtitle": "Working capital when you need it",
+      "feature": "FINANCING",
+      "badge": "FINANCING",
+      "description": "Need money? We offer earnings advances, working capital loans and insurance installments. Fast approval, weekly installments deducted from your payout.",
+      "benefits": [
+        "Competitive rates",
+        "Flexible installments",
+        "Fast approval"
+      ],
+      "note": "Conditions subject to credit analysis. Contact us for more information.",
+      "options": [
+        {
+          "title": "Earnings advance",
+          "description": "Advance part of your weekly earnings",
+          "fee": "Competitive rates"
+        },
+        {
+          "title": "Quick loan",
+          "description": "Working capital for operational expenses",
+          "fee": "Flexible weekly installments"
+        },
+        {
+          "title": "Insurance installments",
+          "description": "Finance your TVDE insurance in installments",
+          "fee": "Automatic deduction from payout"
+        }
+      ],
+      "cta": "Learn more",
+      "ctaSecondary": "Talk to specialist"
+    },
     "cta": {
       "title": "Ready to Start Earning?",
       "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
       "feature": "NEXT STEP",
-      "button": "Start now"
+      "button": "Submit application"
     }
 }

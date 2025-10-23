@@ -62,7 +62,10 @@ export function withAdminSSR<P extends Record<string, any> = {}>(
       }
 
       // 2. Carregar traduções (common/common + admin/admin)
-      const locale = (context.locale || context.defaultLocale || 'pt') as string;
+      // Pegar locale do header x-locale (definido pelo middleware) ou usar padrão 'pt'
+      const localeHeader = context.req.headers['x-locale'] as string | undefined;
+      const locale = localeHeader || context.locale || context.defaultLocale || 'pt';
+      
       const translations = await loadTranslations(locale, ['common/common', 'admin/admin']);
       const adminTranslations = translations['admin/admin'] || {};
 

@@ -127,7 +127,10 @@ export function withDashboardSSR<P extends Record<string, any> = {}>(
       }
 
       // 4. Carregar traduções (common/common + dashboard/dashboard)
-      const locale = (context.locale || context.defaultLocale || 'pt') as string;
+      // Pegar locale do header x-locale (definido pelo middleware) ou usar padrão 'pt'
+      const localeHeader = context.req.headers['x-locale'] as string | undefined;
+      const locale = localeHeader || context.locale || context.defaultLocale || 'pt';
+      
   const translations = await loadTranslations(locale, ['common/common', 'dashboard/dashboard']);
   const dashboardTranslations = translations['dashboard/dashboard'] || {};
 

@@ -27,6 +27,12 @@ import { Progress } from "@/components/Progress";
 import Hero from "@/components/Hero";
 import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
+import { ValueBadges } from "@/components/ValueBadges";
+import ProofSection from "@/components/public/ProofSection";
+import PaymentsCallout from "@/components/public/PaymentsCallout";
+import ReferralSection from "@/components/public/ReferralSection";
+import FinancingTeaser from "@/components/public/FinancingTeaser";
+import BadgesValue from "@/components/public/BadgesValue";
 import { CheckIcon, ArrowRightIcon } from "@chakra-ui/icons";
 import { COMMON, HOME } from "@/translations";
 
@@ -51,7 +57,10 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         badge={t(HOME.HERO.BADGE)}
         overlay
         actions={
-          <VStack spacing={{ base: 3, md: 0 }} w="full">
+          <VStack spacing={{ base: 3, md: 4 }} w="full">
+            {/* Value Badges */}
+            <BadgesValue t={t} />
+
             <HStack
               spacing={{ base: 2, md: 4 }}
               flexDirection={{ base: "column", md: "row" }}
@@ -103,6 +112,9 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
         />
       </Hero>
 
+      {/* Pagamentos Garantidos */}
+      <PaymentsCallout t={t} />
+
       {/* Seção de Benefícios */}
       <Container>
         <Title
@@ -110,7 +122,7 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
           description={t(HOME.BENEFITS.SUBTITLE)}
           feature={t(HOME.BENEFITS.FEATURE)}
         />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
+        <ContainerDivisions template={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}>
           {(() => {
             const benefits = t(HOME.BENEFITS.ITEMS);
             if (!Array.isArray(benefits)) return null;
@@ -118,10 +130,11 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
             return benefits.map((benefit: any, i: number) => (
               <Card key={i} animated borded>
                 <VStack spacing={4} align="start" h="full">
-                  <Text fontSize="xl" fontWeight="bold" color="green.600">
+                  <Icon as={CheckIcon} boxSize={6} color="green.600" />
+                  <Text fontSize="lg" fontWeight="bold" color="gray.800">
                     {benefit.title}
                   </Text>
-                  <Text color="gray.600" flex="1">
+                  <Text fontSize="sm" color="gray.600" flex="1">
                     {benefit.description}
                   </Text>
                 </VStack>
@@ -130,6 +143,9 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
           })()}
         </ContainerDivisions>
       </Container>
+
+      {/* Indique e Ganhe */}
+      <ReferralSection t={t} />
 
       {/* Como Funciona */}
       <Container softBg>
@@ -222,37 +238,6 @@ export default function Home({ tPage: rawTPage, tCommon: rawTCommon }: PublicPag
               </Button>
             </VStack>
           </Card>
-        </ContainerDivisions>
-      </Container>
-
-      {/* Métricas */}
-      <Container>
-        <Title
-          title={t(HOME.METRICS.TITLE)}
-          description={t(HOME.METRICS.SUBTITLE)}
-          feature={t(HOME.METRICS.FEATURE)}
-        />
-        <ContainerDivisions template={{ base: "1fr", md: "repeatPage(2, 1fr)", lg: "repeatPage(4, 1fr)" }}>
-          {(() => {
-            const stats = t(HOME.METRICS.STATS);
-
-            if (!Array.isArray(stats)) return null;
-
-            return stats.map((item: any, i: number) => (
-              <Card key={i} title={item?.label || "Sem título"}
-                description={item?.description || "Sem descrição"} animated borded>
-                <Progress
-                  currentValue={Number(item?.value) || 0}
-                  totalValue={Number(item?.total) || 100}
-                  unit={item?.unit || ""}
-                  colorScheme="green"
-                  size="lg"
-                  animated
-                  variant={i === 0 ? "gradient" : i === 1 ? "striped" : i === 2 ? "glow" : "default"}
-                />
-              </Card>
-            ));
-          })()}
         </ContainerDivisions>
       </Container>
 

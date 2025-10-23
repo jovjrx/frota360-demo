@@ -333,6 +333,43 @@
     "feature": "PRÓXIMO PASSO",
     "button": "Candidatar-me Agora",
     "link": "/request"
+  },
+  "payments": {
+    "badge": "PAGAMENTOS GARANTIDOS",
+    "title": "Receba toda segunda-feira, sem falta",
+    "subtitle": "Esqueça atrasos e incertezas. Com a Conduz, seus pagamentos são processados automaticamente toda segunda-feira.",
+    "features": [
+      {
+        "title": "Pagamentos às segundas",
+        "description": "Receba seus ganhos toda segunda-feira"
+      },
+      {
+        "title": "Processamento rápido",
+        "description": "Ganhos da semana anterior direto na conta"
+      },
+      {
+        "title": "Taxa fixa de €25/semana",
+        "description": "Sem surpresas, você sabe exatamente quanto vai pagar"
+      },
+      {
+        "title": "100% dos seus ganhos",
+        "description": "Sem taxas escondidas ou descontos inesperados"
+      }
+    ]
+  },
+  "referral": {
+    "feature": "COMISSÕES",
+    "title": "Sistema de comissões multinível",
+    "subtitle": "Ganhe comissões recorrentes pelos motoristas que indicar",
+    "description": "Indique motoristas e ganhe comissões sobre os ganhos deles. Quanto mais motoristas ativos na sua rede, mais você ganha - toda semana, automaticamente.",
+    "howItWorks": [
+      "Receba seu link de indicação exclusivo",
+      "Compartilhe com motoristas interessados em TVDE",
+      "Ganhe comissões quando eles se cadastrarem e começarem a trabalhar",
+      "Receba pagamentos semanais automáticos das suas comissões"
+    ],
+    "cta": "Juntar-se agora",
+    "ctaAuth": "Ver minhas comissões"
   }
 }
 

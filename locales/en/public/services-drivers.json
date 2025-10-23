@@ -317,6 +317,43 @@
     "feature": "NEXT STEP",
     "button": "Apply Now",
     "link": "/request"
+  },
+  "payments": {
+    "badge": "GUARANTEED PAYMENTS",
+    "title": "Get paid every Monday, without fail",
+    "subtitle": "Forget delays and uncertainties. With Conduz, your payments are processed automatically every Monday.",
+    "features": [
+      {
+        "title": "Monday payments",
+        "description": "Receive your earnings every Monday"
+      },
+      {
+        "title": "Fast processing",
+        "description": "Previous week's earnings straight to your account"
+      },
+      {
+        "title": "Fixed €25/week fee",
+        "description": "No surprises, you know exactly what you'll pay"
+      },
+      {
+        "title": "100% of your earnings",
+        "description": "No hidden fees or unexpected deductions"
+      }
+    ]
+  },
+  "referral": {
+    "feature": "COMMISSIONS",
+    "title": "Multi-level commission system",
+    "subtitle": "Earn recurring commissions from drivers you refer",
+    "description": "Refer drivers and earn commissions on their earnings. The more active drivers in your network, the more you earn - every week, automatically.",
+    "howItWorks": [
+      "Get your exclusive referral link",
+      "Share it with drivers interested in TVDE",
+      "Earn commissions when they sign up and start working",
+      "Receive automatic weekly payments of your commissions"
+    ],
+    "cta": "Join now",
+    "ctaAuth": "View my commissions"
   }
 }
 

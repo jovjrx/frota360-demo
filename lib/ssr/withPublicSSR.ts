@@ -84,7 +84,10 @@ export function withPublicSSR<P extends Record<string, any> = {}>(
       }
 
       // 2. Carregar traduções (common/common + public/pageName)
-      const locale = (context.locale || context.defaultLocale || 'pt') as string;
+      // Pegar locale do header x-locale (definido pelo middleware) ou usar padrão 'pt'
+      const localeHeader = context.req.headers['x-locale'] as string | undefined;
+      const locale = localeHeader || context.locale || context.defaultLocale || 'pt';
+      
       const namespaces = pageName === 'common' 
         ? ['common/common'] 
         : ['common/common', `public/${pageName}`];

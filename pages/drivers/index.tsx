@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import NextLink from 'next/link';
 import {
   Box,
   Text,
@@ -7,16 +8,23 @@ import {
   Button,
   Icon,
   Link,
+  Heading,
+  SimpleGrid,
+  Badge,
 } from "@chakra-ui/react";
 import { Card } from "@/components/Card";
 import { Title } from "@/components/Title";
 import { Container } from "@/components/Container";
-import { Highlight } from "@/components/Highlight";
 import { ContainerDivisions } from "@/components/ContainerDivisions";
-import { FaCheckCircle, FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
+import PaymentsCallout from "@/components/public/PaymentsCallout";
+import ReferralSection from "@/components/public/ReferralSection";
+import FinancingTeaser from "@/components/public/FinancingTeaser";
+import { FaCheckCircle, FaWhatsapp, FaPhone, FaEnvelope, FaRocket, FaChartLine, FaShieldAlt } from "react-icons/fa";
+import { FiArrowRight } from "react-icons/fi";
 import { withPublicSSR, PublicPageProps } from "@/lib/ssr";
 import { SERVICES } from "@/translations/services/constants";
 import { useFacebookTracking } from "@/hooks/useFacebookTracking";
+import { useLocalizedHref } from "@/lib/linkUtils";
 
 interface ServiceItem {
   title: string;
@@ -29,7 +37,8 @@ interface ServiceItem {
 export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
   const pageT = (tPage as ((key: string) => unknown) | undefined) ?? ((key: string) => key);
   const commonT = (tCommon as ((key: string) => string) | undefined) ?? ((key: string) => key);
-  const { trackContentView } = useFacebookTracking();
+  const { trackContentView, trackCheckoutStart } = useFacebookTracking();
+  const getLocalizedHref = useLocalizedHref();
 
   // Track ViewContent ao carregar a página
   useEffect(() => {
@@ -42,6 +51,11 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
   const servicesData = pageT(SERVICES.SERVICES.LIST);
   const servicesList = Array.isArray(servicesData) ? (servicesData as ServiceItem[]) : [];
 
+  const t = (key: string, fallback?: string): string => {
+    const value = pageT(key);
+    return typeof value === 'string' ? value : (fallback || key);
+  };
+
   const phoneNumber = commonT("company.phone");
   const sanitizedPhone = typeof phoneNumber === "string" ? phoneNumber.replace(/\s+/g, "") : "";
   const whatsappCandidate = commonT("company.whatsapp");
@@ -51,58 +65,220 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
   const phoneDescription = commonT("company.phoneDescription");
   const emailAddress = commonT("company.email");
   const emailDescription = commonT("company.emailDescription");
-
   const ctaValue = pageT(SERVICES.CTA.LINK);
   const ctaLink = typeof ctaValue === "string" ? ctaValue : undefined;
 
   return (
     <>
+      {/* Header Section */}
       <Container softBg>
         <Title
-          title={pageT(SERVICES.BENEFITS.TITLE) as string}
-          description={pageT(SERVICES.BENEFITS.SUBTITLE) as string}
-          feature={pageT(SERVICES.BENEFITS.FEATURE) as string}
+          title="Seja Motorista TVDE"
+          description="Comece a faturar em dias, não semanas. Gestão completa, suporte 24/7 e tecnologia que simplifica."
+          feature="PARA MOTORISTAS"
         />
-        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
-          <Card
-            title={pageT(SERVICES.BENEFITS.CARD.TITLE) as string}
-            description={pageT(SERVICES.BENEFITS.CARD.DESCRIPTION) as string}
-            animated
-            borded
-          >
-            <VStack spacing={6} align="stretch">
-              <Text fontSize="lg" color="gray.700">
-                {pageT(SERVICES.BENEFITS.CARD.CONTENT) as string}
-              </Text>
-              <Box>
-                <Text fontWeight="semibold" color="green.600" mb={3}>
-                  {pageT(SERVICES.BENEFITS.CARD.LIST_TITLE) as string}
-                </Text>
-                <VStack spacing={2} align="stretch">
-                  {benefitsList.map((benefit, index) => (
-                    <HStack key={index} spacing={3}>
-                      <Icon as={FaCheckCircle} color="green.500" />
-                      <Text>{benefit}</Text>
-                    </HStack>
-                  ))}
-                </VStack>
+      </Container>
+
+      {/* 3 Cards de Valor */}
+      <Container>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 6, md: 8 }}>
+          <Card animated borded>
+            <VStack spacing={4} align="center" textAlign="center">
+              <Box
+                p={4}
+                borderRadius="full"
+                bg="green.100"
+                color="green.600"
+              >
+                <Icon as={FaRocket} boxSize={8} />
               </Box>
+              <Heading as="h3" fontSize="xl" fontWeight="bold">
+                Comece Rápido
+              </Heading>
+              <Text fontSize="sm" color="gray.600">
+                Aprovação em 24h. Documentos validados rapidamente e você começa a trabalhar já amanhã.
+              </Text>
             </VStack>
           </Card>
 
-          <Highlight
-            title={pageT(SERVICES.BENEFITS.HIGHLIGHT.TITLE) as string}
-            description={pageT(SERVICES.BENEFITS.HIGHLIGHT.DESCRIPTION) as string}
-            bgImage="/img/service-drivers.jpg"
-            bgSizePersonalized="cover"
-            overlayPos="bl"
-            delayImage={0.2}
-            delayBox={0.5}
-          />
+          <Card animated borded>
+            <VStack spacing={4} align="center" textAlign="center">
+              <Box
+                p={4}
+                borderRadius="full"
+                bg="blue.100"
+                color="blue.600"
+              >
+                <Icon as={FaChartLine} boxSize={8} />
+              </Box>
+              <Heading as="h3" fontSize="xl" fontWeight="bold">
+                Maximize Ganhos
+              </Heading>
+              <Text fontSize="sm" color="gray.600">
+                Repasse IVA 6%, taxa fixa €25/semana. Você sabe exatamente quanto vai ganhar.
+              </Text>
+            </VStack>
+          </Card>
+
+          <Card animated borded>
+            <VStack spacing={4} align="center" textAlign="center">
+              <Box
+                p={4}
+                borderRadius="full"
+                bg="purple.100"
+                color="purple.600"
+              >
+                <Icon as={FaShieldAlt} boxSize={8} />
+              </Box>
+              <Heading as="h3" fontSize="xl" fontWeight="bold">
+                Total Suporte
+              </Heading>
+              <Text fontSize="sm" color="gray.600">
+                Suporte 24/7 via WhatsApp. Pessoa real para resolver seus problemas rapidamente.
+              </Text>
+            </VStack>
+          </Card>
+        </SimpleGrid>
+      </Container>
+
+      {/* Tipos de Motorista - DESTAQUE */}
+      <Container softBg>
+        <Title
+          title="Tipos de Motorista"
+          description="Escolha o modelo que se adapta melhor a você e comece a ganhar hoje"
+          feature="ESCOLHA SEU MODELO"
+        />
+        <ContainerDivisions template={{ base: "1fr", lg: "repeatPage(2, 1fr)" }}>
+          <Card
+            title="🚗 Motorista Afiliado"
+            description="Tem carro próprio e quer maximizar ganhos"
+            animated
+            borded
+            img="/img/service-drivers.jpg"
+            color="green"
+          >
+            <VStack spacing={5} align="start">
+              <Badge colorScheme="green" fontSize="sm" px={3} py={1}>
+                MAIS POPULAR
+              </Badge>
+              <Text fontSize="md" color="gray.700" lineHeight="1.7">
+                Você tem seu próprio carro e quer maximizar seus ganhos. Oferecemos gestão completa, repasse de IVA 6%, e taxa fixa de €25/semana.
+              </Text>
+              <Box w="full">
+                <Text fontWeight="bold" color="green.700" mb={3} fontSize="lg">
+                  ✓ Benefícios Incluídos:
+                </Text>
+                <VStack spacing={3} align="stretch">
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Repasse IVA 6%</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Taxa fixa €25/semana</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Pagamentos toda segunda-feira</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Gestão administrativa completa</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Suporte 24/7 via WhatsApp</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="green.500" boxSize={5} />
+                    <Text fontWeight="medium">Aprovação em 24h</Text>
+                  </HStack>
+                </VStack>
+              </Box>
+              <Button
+                as={NextLink}
+                href={getLocalizedHref("/request")}
+                colorScheme="green"
+                size="lg"
+                w="full"
+                rightIcon={<FiArrowRight />}
+                onClick={() => trackCheckoutStart('Driver Application - Affiliate')}
+              >
+                Candidatar-me como Afiliado
+              </Button>
+            </VStack>
+          </Card>
+
+          <Card
+            title="🚙 Motorista Locatário"
+            description="Não tem carro? Alugue uma viatura TVDE"
+            animated
+            borded
+            img="/img/driver-app.jpg"
+            color="blue"
+          >
+            <VStack spacing={5} align="start">
+              <Badge colorScheme="blue" fontSize="sm" px={3} py={1}>
+                SEM INVESTIMENTO INICIAL
+              </Badge>
+              <Text fontSize="md" color="gray.700" lineHeight="1.7">
+                Não tem carro? Sem problema. Oferecemos aluguel de viaturas TVDE completas, prontas para trabalhar, com seguro incluído e manutenção garantida.
+              </Text>
+              <Box w="full">
+                <Text fontWeight="bold" color="blue.700" mb={3} fontSize="lg">
+                  ✓ Benefícios Incluídos:
+                </Text>
+                <VStack spacing={3} align="stretch">
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Viatura TVDE completa</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Seguro incluído</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Manutenção garantida</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Comece já amanhã</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Sem custos de manutenção</Text>
+                  </HStack>
+                  <HStack spacing={3}>
+                    <Icon as={FaCheckCircle} color="blue.500" boxSize={5} />
+                    <Text fontWeight="medium">Flexibilidade de contrato</Text>
+                  </HStack>
+                </VStack>
+              </Box>
+              <Button
+                as={NextLink}
+                href={getLocalizedHref("/request")}
+                colorScheme="blue"
+                size="lg"
+                w="full"
+                rightIcon={<FiArrowRight />}
+                onClick={() => trackCheckoutStart('Driver Application - Renter')}
+              >
+                Candidatar-me como Locatário
+              </Button>
+            </VStack>
+          </Card>
         </ContainerDivisions>
       </Container>
 
-      <Container>
+      {/* Pagamentos Garantidos */}
+      <PaymentsCallout t={t} />
+
+      {/* Sistema de Comissões */}
+      <ReferralSection t={t} />
+
+      {/* Módulos Funcionais */}
+      <Container softBg>
         <Title
           title={pageT(SERVICES.SERVICES.TITLE) as string}
           description={pageT(SERVICES.SERVICES.SUBTITLE) as string}
@@ -140,42 +316,6 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
               </Card>
             ))}
         </ContainerDivisions>
-      </Container>
-
-      {/* Seção de Explicação de Ganhos */}
-      <Container softBg>
-        <Title
-          title={pageT(SERVICES.EARNINGS.TITLE) as string}
-          description={pageT(SERVICES.EARNINGS.SUBTITLE) as string}
-          feature={pageT(SERVICES.EARNINGS.FEATURE) as string}
-        />
-        <Card
-          title={pageT(SERVICES.EARNINGS.CARD.TITLE) as string}
-          description={pageT(SERVICES.EARNINGS.CARD.DESCRIPTION) as string}
-          animated
-          borded
-        >
-          <VStack spacing={3} align="stretch">
-            {(() => {
-              const items = pageT(SERVICES.EARNINGS.CARD.ITEMS);
-              if (!Array.isArray(items)) return null;
-
-              return items.map((item: any, index: number) => (
-                <HStack key={index} spacing={3} align="start" p={3} bg={index % 2 === 0 ? 'gray.50' : 'white'} borderRadius="md">
-                  <Box w="2px" h="full" bg={item.label.startsWith('-') ? 'red.400' : item.label.startsWith('=') ? 'green.500' : 'blue.400'} />
-                  <VStack align="start" spacing={1} flex="1">
-                    <Text fontWeight="bold" color={item.label.startsWith('=') ? 'green.600' : 'gray.800'}>
-                      {item.label}
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {item.description}
-                    </Text>
-                  </VStack>
-                </HStack>
-              ));
-            })()}
-          </VStack>
-        </Card>
       </Container>
 
       {/* Seção de Financiamento */}
@@ -378,15 +518,56 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
         </ContainerDivisions>
       </Container>
 
+      {/* CTA Final */}
       <Container softBg>
-        <Title
-          title={pageT(SERVICES.CTA.TITLE) as string}
-          description={pageT(SERVICES.CTA.SUBTITLE) as string}
-          feature={pageT(SERVICES.CTA.FEATURE) as string}
-          ctaText={pageT(SERVICES.CTA.BUTTON) as string}
-          cta={ctaLink}
-          center
-        />
+        <VStack spacing={8} py={{ base: 12, md: 16 }} align="center" textAlign="center">
+          <Badge colorScheme="green" fontSize="md" px={4} py={2}>
+            COMECE HOJE
+          </Badge>
+          <Heading as="h2" fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }} fontWeight="bold">
+            Pronto para começar a ganhar?
+          </Heading>
+          <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" maxW="3xl">
+            Junte-se aos motoristas que já escolheram a Conduz.pt. Aprovação rápida, pagamentos garantidos e suporte 24/7.
+          </Text>
+          <HStack spacing={4} flexWrap="wrap" justify="center">
+            <Button
+              as={NextLink}
+              href={getLocalizedHref("/request")}
+              size="lg"
+              colorScheme="green"
+              px={8}
+              py={6}
+              fontSize="lg"
+              rightIcon={<FiArrowRight />}
+              shadow="lg"
+              _hover={{ transform: 'translateY(-2px)', shadow: 'xl' }}
+              transition="all 0.3s"
+              onClick={() => trackCheckoutStart('Driver Application - Final CTA')}
+            >
+              Realizar Solicitação
+            </Button>
+            <Button
+              as={Link}
+              href={typeof whatsappLink === "string" ? whatsappLink : undefined}
+              isExternal
+              size="lg"
+              variant="outline"
+              colorScheme="green"
+              px={8}
+              py={6}
+              fontSize="lg"
+              leftIcon={<FaWhatsapp />}
+            >
+              Falar no WhatsApp
+            </Button>
+          </HStack>
+          <Box pt={4}>
+            <Text fontSize="sm" color="gray.500">
+              ✓ Aprovação em 24h • ✓ Sem taxas escondidas • ✓ Suporte 7 dias por semana
+            </Text>
+          </Box>
+        </VStack>
       </Container>
     </>
   );

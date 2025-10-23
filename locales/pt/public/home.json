@@ -1,149 +1,236 @@
 {
   "hero": {
-      "title": "Você conduz, nós cuidamos do resto!",
-      "subtitle": "Gestão 360º para motoristas TVDE — Plataforma certa, apoio real, ganhos garantidos.",
-  "description": "A Conduz.pt é uma plataforma TVDE completa. Oferecemos soluções integradas para motoristas com tecnologia avançada e suporte humano.",
-      "ctaPrimary": "Candidatar-me como Motorista",
-      "ctaSecondary": "Falar no WhatsApp",
-      "badge": "TVDE PORTUGAL",
-      "highlight": {
-        "title": "Você conduz, nós cuidamos do resto!",
-        "description": "Onboarding em dias, não semanas. Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
-      }
-    },
-    "benefits": {
-      "title": "O que oferecemos aos nossos motoristas",
-      "subtitle": "Ferramentas e suporte para maximizar os seus ganhos",
-      "feature": "BENEFÍCIOS",
-      "items": [
-        {
-          "title": "Gestão Financeira Completa",
-          "description": "Dashboard intuitivo com relatórios semanais detalhados dos seus ganhos, despesas e repasses"
-        },
-        {
-          "title": "Empréstimos para Capital de Giro",
-          "description": "Precisa de dinheiro para despesas operacionais ou pessoais? Solicite empréstimos rápidos diretamente pela plataforma"
-        },
-        {
-          "title": "Pagamentos Semanais Garantidos",
-          "description": "Receba os seus repasses todas as semanas com total transparência e pontualidade"
-        },
-        {
-          "title": "Suporte Especializado TVDE",
-          "description": "Equipe dedicada que conhece a realidade do setor e está sempre disponível para ajudar"
-        }
-      ]
-    },
-    "services": {
-      "title": "Tipos de Motorista",
-      "subtitle": "Escolha o modelo que melhor se adapta à sua situação",
-      "affiliate": {
-        "title": "Motorista Afiliado",
-        "description": "Trabalhe com o seu próprio veículo e tenha total controlo sobre o seu negócio.",
-        "benefits": [
-          "Flexibilidade total de horários",
-          "Receita 100% sua",
-          "Controlo total do veículo",
-          "Suporte técnico completo"
-        ]
+    "title": "Você conduz.\nNós tratamos do resto.",
+    "subtitle": "Gestão 360° para motoristas TVDE em Portugal",
+    "ctaPrimary": "Realizar solicitação",
+    "ctaSecondary": "Falar no WhatsApp",
+    "badge": "TVDE PORTUGAL",
+    "badges": {
+      "iva": {
+        "value": "6% IVA",
+        "label": "Reembolso"
       },
-      "renter": {
-        "title": "Motorista Locatário",
-        "description": "Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.",
-        "benefits": [
-          "Sem investimento inicial",
-          "Veículos sempre atualizados",
-          "Manutenção incluída",
-          "Seguro completo"
-        ]
+      "fee": {
+        "value": "€25",
+        "label": "Taxa fixa/semana"
+      },
+      "payment": {
+        "value": "2ª feira",
+        "label": "Pagamentos"
+      },
+      "hidden": {
+        "value": "€0",
+        "label": "Taxas escondidas"
       }
     },
-    "howItWorks": {
-      "title": "Como funciona",
-      "subtitle": "3 passos simples para começar",
-      "feature": "PROCESSO",
-      "steps": [
-        {
-          "number": "1",
-          "title": "Solicitação",
-          "description": "Preencha o formulário de candidatura online"
-        },
-        {
-          "number": "2",
-          "title": "Validação & formação",
-          "description": "Compliance, seguro, kit de boas-vindas"
-        },
-        {
-          "number": "3",
-          "title": "Comece a faturar",
-          "description": "Pagamentos semanais, monitorização em tempo real e acesso a empréstimos para capital de giro"
-        }
-      ]
-    },
-    "features": {
-      "title": "Porquê Escolher a Conduz PT?",
-      "items": [
-        {
-          "title": "Integração Completa",
-          "description": "Conectamos com todas as principais plataformas de transporte"
-        },
-        {
-          "title": "Suporte 24/7",
-          "description": "Estamos sempre disponíveis para o ajudar"
-        },
-        {
-          "title": "Transparência Total",
-          "description": "Relatórios detalhados e transparentes"
-        },
-        {
-          "title": "Crescimento Garantido",
-          "description": "Ajudamos a maximizar os seus ganhos"
-        },
-        {
-          "title": "Financiamento Rápido",
-          "description": "Empréstimos aprovados em até 24h para suas despesas operacionais"
-        }
-      ]
-    },
-    "metrics": {
-      "title": "Os Nossos Números",
-      "subtitle": "Indicadores que comprovam a nossa eficiência",
-      "feature": "RESULTADOS",
-      "stats": [
-        {
-          "value": "95",
-          "total": "100",
-          "unit": "%",
-          "label": "Taxa de aprovação de documentos",
-          "description": "Mais de 95% de taxa de aprovação de documentos"
-        },
-        {
-          "value": "24",
-          "total": "48",
-          "unit": "h",
-          "label": "Tempo médio para análise",
-          "description": "Menos de 24h tempo médio para análise quando possível"
-        },
-        {
-          "value": "4.8",
-          "total": "5.0",
-          "unit": "/5",
-          "label": "Satisfação do suporte",
-          "description": "4.8/5 satisfação do suporte"
-        },
-        {
-          "value": "7",
-          "total": "7",
-          "unit": "dias",
-          "label": "Suporte disponível",
-          "description": "Suporte 7 dias por semana"
-        }
-      ]
-    },
-    "cta": {
-      "title": "Pronto para Começar a Faturar?",
-      "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz",
-      "feature": "PRÓXIMO PASSO",
-      "button": "Começar agora"
+    "highlight": {
+      "title": "Onboarding em dias, não semanas",
+      "description": "Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido."
     }
+  },
+  "proof": {
+    "title": "Garantias que fazem a diferença",
+    "subtitle": "Compromissos reais que cumprimos todas as semanas",
+    "feature": "GARANTIAS",
+    "counters": {
+      "payment_guarantee": {
+        "value": "100%",
+        "label": "Pagamento Garantido",
+        "description": "Todas as segundas-feiras, sem atrasos"
+      },
+      "activation_time": {
+        "value": "24h",
+        "label": "Aprovação Rápida",
+        "description": "Comece a ganhar já amanhã"
+      },
+      "transparency": {
+        "value": "€0",
+        "label": "Taxas Escondidas",
+        "description": "Tudo claro e transparente"
+      },
+      "support": {
+        "value": "24/7",
+        "label": "Suporte Real",
+        "description": "Pessoa real, resposta rápida"
+      }
+    }
+  },
+  "benefits": {
+    "title": "O que oferecemos",
+    "subtitle": "Tudo incluído para o seu sucesso como motorista TVDE",
+    "feature": "BENEFÍCIOS",
+    "items": [
+      {
+        "icon": "💰",
+        "title": "Repasse IVA 6%",
+        "description": "Receba de volta o IVA retido pelas plataformas",
+        "anchor": "repasse-iva"
+      },
+      {
+        "icon": "💳",
+        "title": "Tarifa fixa 25€/semana",
+        "description": "Sem percentagens. Valor fixo, ganhe quanto ganhar.",
+        "anchor": "tarifa-fixa"
+      },
+      {
+        "icon": "📅",
+        "title": "Pagamentos à segunda",
+        "description": "Pagamentos garantidos todas as segundas-feiras",
+        "anchor": "pagamentos"
+      },
+      {
+        "icon": "🎁",
+        "title": "Indique e ganhe 50€",
+        "description": "Traga amigos e ganhe por cada motorista ativo",
+        "anchor": "indicacoes"
+      },
+      {
+        "icon": "🛣️",
+        "title": "Via Verde",
+        "description": "Portagens e combustível com cartão de frota",
+        "anchor": "via-verde"
+      },
+      {
+        "icon": "⛽",
+        "title": "Cartão de frota",
+        "description": "Abasteça sem preocupações, descontado no repasse",
+        "anchor": "cartao-frota"
+      },
+      {
+        "icon": "💵",
+        "title": "Adiantamentos",
+        "description": "Antecipe seus ganhos quando precisar",
+        "anchor": "adiantamento"
+      },
+      {
+        "icon": "🛡️",
+        "title": "Seguro financiado",
+        "description": "Pague o seguro em parcelas semanais",
+        "anchor": "seguro"
+      }
+    ]
+  },
+  "payments": {
+    "title": "Pagamentos garantidos à segunda",
+    "subtitle": "Receba seus repasses com total transparência e pontualidade",
+    "feature": "PAGAMENTOS",
+    "badge": "PAGAMENTOS GARANTIDOS",
+    "description": "Todas as segundas-feiras, sem atrasos. Dashboard em tempo real mostra ganhos, despesas e o que vai receber. Zero surpresas.",
+    "highlights": [
+      "Repasse em 24h após fecho semanal",
+      "Extrato detalhado por plataforma",
+      "IVA 6% incluído no pagamento",
+      "Histórico completo disponível"
+    ],
+    "features": [
+      {
+        "title": "Pagamentos às segundas",
+        "description": "Receba seus ganhos toda segunda-feira"
+      },
+      {
+        "title": "Processamento rápido",
+        "description": "Ganhos da semana anterior direto na conta"
+      },
+      {
+        "title": "Taxa fixa de €25/semana",
+        "description": "Sem surpresas, você sabe exatamente quanto vai pagar"
+      },
+      {
+        "title": "100% dos seus ganhos",
+        "description": "Sem taxas escondidas ou descontos inesperados"
+      }
+    ],
+    "stats": {
+      "reliability": "Confiabilidade",
+      "hidden": "Taxas escondidas",
+      "processing": "Processamento"
+    },
+    "cta": "Realizar solicitação"
+  },
+  "referral": {
+    "title": "Sistema de comissões multinível",
+    "subtitle": "Ganhe comissões recorrentes pelos motoristas que indicar",
+    "feature": "COMISSÕES",
+    "description": "Indique motoristas e ganhe comissões sobre os ganhos deles. Quanto mais motoristas ativos na sua rede, mais você ganha - toda semana, automaticamente.",
+    "howItWorks": [
+      "Compartilhe a plataforma com outros motoristas",
+      "Eles se cadastram e começam a trabalhar",
+      "Você ganha comissão semanal sobre os ganhos deles",
+      "Construa sua rede e ganhe rendimento passivo"
+    ],
+    "cta": "Juntar-se agora",
+    "ctaAuth": "Ver minhas comissões"
+  },
+  "financing": {
+    "title": "Financiamento e adiantamentos",
+    "subtitle": "Capital de giro quando você precisa",
+    "feature": "FINANCIAMENTO",
+    "badge": "FINANCIAMENTO",
+    "description": "Precisou de dinheiro? Oferecemos adiantamentos de ganhos, empréstimos para capital de giro e parcelamento de seguro. Aprovação rápida, parcelas descontadas semanalmente do seu repasse.",
+    "benefits": [
+      "Taxas competitivas",
+      "Prestações flexíveis",
+      "Aprovação rápida"
+    ],
+    "note": "Condições sujeitas a análise de crédito. Consulte-nos para mais informações.",
+    "options": [
+      {
+        "title": "Adiantamento de ganhos",
+        "description": "Antecipe parte dos seus ganhos da semana",
+        "fee": "Taxas competitivas"
+      },
+      {
+        "title": "Empréstimo rápido",
+        "description": "Capital de giro para despesas operacionais",
+        "fee": "Parcelas semanais flexíveis"
+      },
+      {
+        "title": "Seguro parcelado",
+        "description": "Financie seu seguro TVDE em parcelas",
+        "fee": "Desconto automático no repasse"
+      }
+    ],
+    "cta": "Saber mais",
+    "ctaSecondary": "Falar com especialista"
+  },
+  "services": {
+    "title": "Tipos de Motorista",
+    "subtitle": "Escolha o modelo que se adapta melhor a você",
+    "affiliate": {
+      "title": "Motorista Afiliado",
+      "description": "Você tem seu próprio carro e quer maximizar seus ganhos. Oferecemos gestão completa, repasse de IVA 6%, e taxa fixa de €25/semana."
+    },
+    "renter": {
+      "title": "Motorista Locatário",
+      "description": "Não tem carro? Sem problema. Oferecemos aluguel de viaturas TVDE completas, prontas para trabalhar, com seguro incluído e manutenção garantida."
+    }
+  },
+  "howItWorks": {
+    "title": "Como funciona",
+    "subtitle": "3 passos simples para começar a faturar",
+    "feature": "PROCESSO",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Cadastro rápido",
+        "description": "Preencha o formulário online em 5 minutos"
+      },
+      {
+        "number": "2",
+        "title": "Validação express",
+        "description": "Documentos validados em 24-48h"
+      },
+      {
+        "number": "3",
+        "title": "Comece a ganhar",
+        "description": "Kit de boas-vindas + suporte WhatsApp 7/7"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Pronto para começar?",
+    "subtitle": "Junte-se aos motoristas que já escolheram a Conduz.pt",
+    "feature": "PRÓXIMO PASSO",
+    "button": "Realizar solicitação"
+  }
 }

@@ -6,17 +6,22 @@ export const HOME = {
     CTA_PRIMARY: 'hero.ctaPrimary',
     CTA_SECONDARY: 'hero.ctaSecondary',
     BADGE: 'hero.badge',
+    BADGES: 'hero.badges',
     HIGHLIGHT: {
       TITLE: 'hero.highlight.title',
       DESCRIPTION: 'hero.highlight.description',
     },
   },
+  PROOF: 'proof',
   BENEFITS: {
     TITLE: 'benefits.title',
     SUBTITLE: 'benefits.subtitle',
     FEATURE: 'benefits.feature',
     ITEMS: 'benefits.items',
   },
+  PAYMENTS: 'payments',
+  REFERRAL: 'referral',
+  FINANCING: 'financing',
   HOW_IT_WORKS: {
     TITLE: 'howItWorks.title',
     SUBTITLE: 'howItWorks.subtitle',
