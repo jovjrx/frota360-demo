@@ -34,9 +34,57 @@ export default function ReferralSection({ t, isAuthenticated = false }: Referral
         opacity={0.3}
         filter="blur(80px)"
       />
-      
+
       <Container maxW="7xl" position="relative">
         <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={{ base: 12, lg: 16 }} alignItems="center">
+          <VStack align="start" spacing={6}>
+            <Text
+              fontSize="sm"
+              fontWeight="bold"
+              letterSpacing="wider"
+              color="blue.600"
+              textTransform="uppercase"
+            >
+              {t('referral.feature', 'COMISSÕES')}
+            </Text>
+
+            <Heading
+              as="h2"
+              fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
+              fontWeight="bold"
+              lineHeight="1.2"
+            >
+              {t('referral.title', 'Sistema de comissões multinível')}
+            </Heading>
+
+            <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.700">
+              {t('referral.subtitle', 'Ganhe comissões recorrentes pelos motoristas que indicar')}
+            </Text>
+
+            <Text fontSize="md" color="gray.600" lineHeight="1.7">
+              {t('referral.description', 'Indique motoristas e ganhe comissões sobre os ganhos deles. Quanto mais motoristas ativos na sua rede, mais você ganha - toda semana, automaticamente.')}
+            </Text>
+
+            <HStack spacing={4} pt={4}>
+              <Icon as={FiUsers} w={6} h={6} color="blue.500" />
+              <Icon as={FiTrendingUp} w={6} h={6} color="green.500" />
+            </HStack>
+
+            <Button
+              size="lg"
+              colorScheme="blue"
+              onClick={handleCTA}
+              rightIcon={<FiCheckCircle />}
+              shadow="md"
+              _hover={{ transform: 'translateY(-2px)', shadow: 'lg' }}
+              transition="all 0.3s"
+            >
+              {isAuthenticated
+                ? t('referral.ctaAuth', 'Ver minhas comissões')
+                : t('referral.cta', 'Juntar-se agora')
+              }
+            </Button>
+          </VStack>
           {/* Left: How it works */}
           <Box
             bg="white"
@@ -49,7 +97,7 @@ export default function ReferralSection({ t, isAuthenticated = false }: Referral
             <Heading as="h3" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="bold" mb={6} color="gray.900">
               Como funciona
             </Heading>
-            
+
             <List spacing={4}>
               {steps.map((index) => (
                 <ListItem key={index} display="flex" alignItems="flex-start">
@@ -75,54 +123,7 @@ export default function ReferralSection({ t, isAuthenticated = false }: Referral
           </Box>
 
           {/* Right: Content */}
-          <VStack align="start" spacing={6}>
-            <Text
-              fontSize="sm"
-              fontWeight="bold"
-              letterSpacing="wider"
-              color="blue.600"
-              textTransform="uppercase"
-            >
-              {t('referral.feature', 'COMISSÕES')}
-            </Text>
-            
-            <Heading
-              as="h2"
-              fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
-              fontWeight="bold"
-              lineHeight="1.2"
-            >
-              {t('referral.title', 'Sistema de comissões multinível')}
-            </Heading>
-            
-            <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.700">
-              {t('referral.subtitle', 'Ganhe comissões recorrentes pelos motoristas que indicar')}
-            </Text>
-            
-            <Text fontSize="md" color="gray.600" lineHeight="1.7">
-              {t('referral.description', 'Indique motoristas e ganhe comissões sobre os ganhos deles. Quanto mais motoristas ativos na sua rede, mais você ganha - toda semana, automaticamente.')}
-            </Text>
 
-            <HStack spacing={4} pt={4}>
-              <Icon as={FiUsers} w={6} h={6} color="blue.500" />
-              <Icon as={FiTrendingUp} w={6} h={6} color="green.500" />
-            </HStack>
-
-            <Button
-              size="lg"
-              colorScheme="blue"
-              onClick={handleCTA}
-              rightIcon={<FiCheckCircle />}
-              shadow="md"
-              _hover={{ transform: 'translateY(-2px)', shadow: 'lg' }}
-              transition="all 0.3s"
-            >
-              {isAuthenticated 
-                ? t('referral.ctaAuth', 'Ver minhas comissões')
-                : t('referral.cta', 'Juntar-se agora')
-              }
-            </Button>
-          </VStack>
         </SimpleGrid>
       </Container>
     </Box>
