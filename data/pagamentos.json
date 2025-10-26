@@ -1,0 +1,107 @@
+{
+  "pagamentos": [
+    {
+      "id": "PAG001",
+      "motorista_id": "MOT001",
+      "semana": "2025-10-20",
+      "status": "Pago",
+      "data_pagamento": "2025-10-21",
+      "repasse": 1125.45,
+      "comissao": 125.05,
+      "bonus_metas": 50.00,
+      "total": 1300.50,
+      "detalhes": {
+        "corridas": 45,
+        "ganho_bruto": 1250.50,
+        "taxa_admin": 5.00,
+        "retencao": 120.05
+      }
+    },
+    {
+      "id": "PAG002",
+      "motorista_id": "MOT001",
+      "semana": "2025-10-13",
+      "status": "Pago",
+      "data_pagamento": "2025-10-14",
+      "repasse": 1100.00,
+      "comissao": 110.00,
+      "bonus_metas": 0,
+      "total": 1210.00,
+      "detalhes": {
+        "corridas": 42,
+        "ganho_bruto": 1200.00,
+        "taxa_admin": 5.00,
+        "retencao": 95.00
+      }
+    },
+    {
+      "id": "PAG003",
+      "motorista_id": "MOT002",
+      "semana": "2025-10-20",
+      "status": "Pendente",
+      "data_pagamento": null,
+      "repasse": 855.67,
+      "comissao": 85.57,
+      "bonus_metas": 0,
+      "total": 941.24,
+      "detalhes": {
+        "corridas": 38,
+        "ganho_bruto": 950.75,
+        "taxa_admin": 5.00,
+        "retencao": 90.08
+      }
+    },
+    {
+      "id": "PAG004",
+      "motorista_id": "MOT002",
+      "semana": "2025-10-13",
+      "status": "Pago",
+      "data_pagamento": "2025-10-14",
+      "repasse": 820.00,
+      "comissao": 82.00,
+      "bonus_metas": 0,
+      "total": 902.00,
+      "detalhes": {
+        "corridas": 36,
+        "ganho_bruto": 900.00,
+        "taxa_admin": 5.00,
+        "retencao": 75.00
+      }
+    },
+    {
+      "id": "PAG005",
+      "motorista_id": "MOT003",
+      "semana": "2025-10-20",
+      "status": "Pago",
+      "data_pagamento": "2025-10-21",
+      "repasse": 1305.00,
+      "comissao": 145.00,
+      "bonus_metas": 100.00,
+      "total": 1550.00,
+      "detalhes": {
+        "corridas": 52,
+        "ganho_bruto": 1450.00,
+        "taxa_admin": 5.00,
+        "retencao": 140.00
+      }
+    },
+    {
+      "id": "PAG006",
+      "motorista_id": "MOT005",
+      "semana": "2025-10-20",
+      "status": "Pendente",
+      "data_pagamento": null,
+      "repasse": 765.23,
+      "comissao": 85.03,
+      "bonus_metas": 0,
+      "total": 850.26,
+      "detalhes": {
+        "corridas": 35,
+        "ganho_bruto": 850.25,
+        "taxa_admin": 5.00,
+        "retencao": 80.02
+      }
+    }
+  ]
+}
+

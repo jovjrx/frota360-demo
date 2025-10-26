@@ -7,19 +7,31 @@ const config: ThemeConfig = {
   disableTransitionOnChange: true
 };
 
-// Paleta "brand" (verde Portugal). 500 é o tom principal.
+// Paleta "brand" (azul Frota360). 500 é o tom principal.
 const colors = {
   brand: {
-    50:  "#E8F5E8",
-    100: "#C6E6C6",
-    200: "#9DD49D",
-    300: "#74C274",
-    400: "#4BB04B",
-    500: "#228B22", // verde principal da bandeira portuguesa
-    600: "#1E7A1E",
-    700: "#1A691A",
-    800: "#165816",
-    900: "#124712",
+    50:  "#F0F4FF",
+    100: "#D9E5FF",
+    200: "#B3CBFF",
+    300: "#8DB2FF",
+    400: "#6799FF",
+    500: "#0066FF", // azul principal Frota360
+    600: "#0052CC",
+    700: "#003D99",
+    800: "#002966",
+    900: "#001433",
+  },
+  accent: {
+    50:  "#F0FFFE",
+    100: "#D9FFFC",
+    200: "#B3FFF9",
+    300: "#8DFFF5",
+    400: "#67FFF1",
+    500: "#00D4FF", // ciano Frota360
+    600: "#00A8CC",
+    700: "#007C99",
+    800: "#005066",
+    900: "#002433",
   }
 };
 
@@ -70,3 +82,4 @@ export const theme = extendTheme({
     },
   },
 });
+
