@@ -122,7 +122,7 @@ export default function ResetPasswordPage({ tPage }: PublicPageProps) {
     return (
       <>
         <Head>
-          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_TITLE)} - Conduz.pt</title>
+          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_TITLE)} - Frota360.pt</title>
           <meta name="description" content={tPage(PUBLIC.AUTH.RESET_PASSWORD.SUCCESS_DESCRIPTION)} />
         </Head>
 
@@ -180,7 +180,7 @@ export default function ResetPasswordPage({ tPage }: PublicPageProps) {
     return (
       <>
         <Head>
-          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE)} - Conduz.pt</title>
+          <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.ERROR_INVALID_CODE)} - Frota360.pt</title>
         </Head>
         <Container softBg maxW="md">
           <Title
@@ -218,7 +218,7 @@ export default function ResetPasswordPage({ tPage }: PublicPageProps) {
   return (
     <>
       <Head>
-        <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.TITLE)} - Conduz.pt</title>
+        <title>{tPage(PUBLIC.AUTH.RESET_PASSWORD.TITLE)} - Frota360.pt</title>
         <meta name="description" content={tPage(PUBLIC.AUTH.RESET_PASSWORD.DESCRIPTION)} />
       </Head>
 

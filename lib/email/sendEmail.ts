@@ -22,7 +22,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 
     // Enviar email
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Conduz.pt" <noreply@conduz.pt>',
+      from: process.env.SMTP_FROM || '"Frota360.pt" <noreply@conduz.pt>',
       to: options.to,
       subject: options.subject,
       html: options.html,

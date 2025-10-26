@@ -2,7 +2,7 @@
   "hero": {
       "title": "You drive.\nWe take care of the rest!",
       "subtitle": "360º management for TVDE drivers — Right platform, real support, guaranteed earnings.",
-  "description": "Conduz.pt is a full TVDE platform. We provide end-to-end driver solutions powered by advanced technology and human support.",
+  "description": "Frota360.pt is a full TVDE platform. We provide end-to-end driver solutions powered by advanced technology and human support.",
       "ctaPrimary": "Submit application",
       "ctaSecondary": "Talk on WhatsApp",
       "badge": "TVDE PORTUGAL",
@@ -114,7 +114,7 @@
       ]
     },
     "features": {
-      "title": "Why Choose Conduz PT?",
+      "title": "Why Choose Frota360 PT?",
       "items": [
         {
           "title": "Complete Integration",
@@ -258,7 +258,7 @@
     },
     "cta": {
       "title": "Ready to Start Earning?",
-      "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
+      "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Frota360",
       "feature": "NEXT STEP",
       "button": "Submit application"
     }

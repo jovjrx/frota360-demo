@@ -2,13 +2,13 @@
   "hero": {
     "title": "It's not just driving. It's building your own business.",
     "subtitle": "Meritocratic system where your performance determines your earnings",
-    "description": "Total transparency. Weekly payments. Specialized support. Choose your path at Conduz.pt",
+    "description": "Total transparency. Weekly payments. Specialized support. Choose your path at Frota360.pt",
     "badge": "TVDE PORTUGAL",
     "ctaPrimary": "Apply as a Driver",
     "ctaSecondary": "Chat on WhatsApp"
   },
   "differentials": {
-    "title": "Why Drivers Choose Conduz",
+    "title": "Why Drivers Choose Frota360",
     "subtitle": "Meritocratic system that rewards your performance",
     "feature": "UNIQUE DIFFERENTIALS",
     "items": [
@@ -149,7 +149,7 @@
       },
       {
         "title": "Renter Driver",
-        "description": "Rent a vehicle from Conduz PT and start working immediately.",
+        "description": "Rent a vehicle from Frota360 PT and start working immediately.",
         "color": "blue",
         "image": "/img/service-companies.jpg",
         "benefits": [
@@ -191,7 +191,7 @@
   },
   "finalCta": {
     "title": "Ready to Start Earning?",
-    "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Conduz",
+    "subtitle": "You drive, we take care of the rest! Join the drivers who have already chosen Frota360",
     "ctaPrimary": "Apply Now",
     "ctaSecondary": "Chat on WhatsApp"
   }

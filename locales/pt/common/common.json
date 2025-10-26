@@ -68,7 +68,7 @@
   },
   "seo": {
     "default": {
-      "title": "TVDE Portugal | Conduz - Você conduz, nós cuidamos do resto!",
+      "title": "TVDE Portugal | Frota360 - Você conduz, nós cuidamos do resto!",
       "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
       "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, mobilidade urbana, transporte privado, empresa TVDE, frota TVDE, licença TVDE",
       "image": "/img/conduz.png"
@@ -85,24 +85,24 @@
         "keywords": "ser motorista TVDE, motorista TVDE Portugal, trabalhar motorista, cadastro TVDE"
       },
       "about": {
-        "title": "Sobre a Conduz",
-        "description": "Conheça a Conduz, a plataforma completa de TVDE em Portugal. Nossa missão, valores e o que nos diferencia.",
-        "keywords": "sobre Conduz, empresa TVDE Portugal, gestão TVDE, quem somos"
+        "title": "Sobre a Frota360",
+        "description": "Conheça a Frota360, a plataforma completa de TVDE em Portugal. Nossa missão, valores e o que nos diferencia.",
+        "keywords": "sobre Frota360, empresa TVDE Portugal, gestão TVDE, quem somos"
       },
       "contact": {
         "title": "Contacto",
-        "description": "Entre em contacto com a Conduz. Estamos disponíveis para ajudar com qualquer dúvida ou suporte.",
-        "keywords": "contacto Conduz, suporte TVDE, ajuda TVDE Portugal, atendimento"
+        "description": "Entre em contacto com a Frota360. Estamos disponíveis para ajudar com qualquer dúvida ou suporte.",
+        "keywords": "contacto Frota360, suporte TVDE, ajuda TVDE Portugal, atendimento"
       },
       "login": {
         "title": "Entrar",
-        "description": "Acesse sua conta Conduz e gerencie sua atividade TVDE.",
-        "keywords": "login Conduz, acesso motorista, acesso plataforma TVDE"
+        "description": "Acesse sua conta Frota360 e gerencie sua atividade TVDE.",
+        "keywords": "login Frota360, acesso motorista, acesso plataforma TVDE"
       },
       "signup": {
         "title": "Criar Conta",
-        "description": "Crie sua conta na Conduz e comece sua jornada como motorista TVDE em Portugal.",
-        "keywords": "criar conta Conduz, cadastro, registo TVDE"
+        "description": "Crie sua conta na Frota360 e comece sua jornada como motorista TVDE em Portugal.",
+        "keywords": "criar conta Frota360, cadastro, registo TVDE"
       }
     }
   },
@@ -151,7 +151,7 @@
     "passwordsDontMatch": "As senhas não coincidem"
   },
   "company": {
-    "name": "Conduz PT",
+    "name": "Frota360 PT",
     "description": "Você conduz, nós cuidamos do resto!",
     "email": "contacto@conduz.pt",
     "emailDescription": "Suporte e informações",
@@ -173,11 +173,11 @@
     "description": "A plataforma que transforma motoristas em empresários de sucesso",
     "contactInfo": "Informações de Contacto",
     "quickLinks": "Links Rápidos",
-    "rights": "© {{year}} Conduz PT. Todos os direitos reservados.",
+    "rights": "© {{year}} Frota360 PT. Todos os direitos reservados.",
     "copyright": "Todos os direitos reservados",
     "madeWith": "Feito com",
     "by": "por",
-    "company": "Conduz PT",
+    "company": "Frota360 PT",
     "developerBy": "Desenvolvido por",
     "developer": "Jose Junior",
     "privacy": "Política de Privacidade",
@@ -204,7 +204,7 @@
       },
       {
         "question": "Qual a diferença entre afiliado e locatário?",
-        "answer": "Motoristas afiliados trabalham com os seus próprios veículos, enquanto locatários utilizam veículos da Conduz PT."
+        "answer": "Motoristas afiliados trabalham com os seus próprios veículos, enquanto locatários utilizam veículos da Frota360 PT."
       },
       {
         "question": "Quanto tempo demora a aprovação?",
@@ -218,11 +218,11 @@
   },
   "testimonials": {
     "title": "O Que Dizem os Nossos Motoristas",
-    "subtitle": "Histórias reais de quem já faz parte da Conduz PT",
+    "subtitle": "Histórias reais de quem já faz parte da Frota360 PT",
     "feature": "Depoimentos",
     "items": [
       {
-        "quote": "A Conduz PT facilitou muito a minha vida como motorista. O suporte é excelente e os processos são muito simples.",
+        "quote": "A Frota360 PT facilitou muito a minha vida como motorista. O suporte é excelente e os processos são muito simples.",
         "author": "João Silva",
         "location": "Lisboa"
       },

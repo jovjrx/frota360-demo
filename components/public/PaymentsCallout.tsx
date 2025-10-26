@@ -78,7 +78,7 @@ export default function PaymentsCallout({ t }: PaymentsCalloutProps) {
             maxW="3xl"
             lineHeight="1.7"
           >
-            {t('payments.subtitle', 'Esqueça atrasos e incertezas. Com a Conduz, seus pagamentos são processados automaticamente toda segunda-feira.')}
+            {t('payments.subtitle', 'Esqueça atrasos e incertezas. Com a Frota360, seus pagamentos são processados automaticamente toda segunda-feira.')}
           </Text>
         </VStack>
 

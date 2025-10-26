@@ -62,19 +62,19 @@ export default async function handler(
       });
     }
 
-  // Email para a equipe Conduz PT
+  // Email para a equipe Frota360 PT
     const senderAddress = fromEmail || gmailUser;
     const companyEmail = {
       from: senderAddress,
       sender: gmailUser,
   to: process.env.COMPANY_EMAIL || 'suporte@conduz.pt',
-      subject: `🆕 Conduz.pt - Novo Contacto: ${interest} - ${name}`,
+      subject: `🆕 Frota360.pt - Novo Contacto: ${interest} - ${name}`,
       replyTo: email,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #248C3B 0%, #A31624 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <img src="https://conduz.pt/img/logo.png" alt="Conduz.pt" style="max-width: 140px; height: auto; margin-bottom: 10px;" />
-            <h1 style="margin: 0; font-size: 24px;">🆕 Novo Contacto Recebido - Conduz</h1>
+            <img src="https://conduz.pt/img/logo.png" alt="Frota360.pt" style="max-width: 140px; height: auto; margin-bottom: 10px;" />
+            <h1 style="margin: 0; font-size: 24px;">🆕 Novo Contacto Recebido - Frota360</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
@@ -122,11 +122,11 @@ export default async function handler(
       from: senderAddress,
       sender: gmailUser,
       to: email,
-      subject: '✅ Contacto Recebido - Conduz.pt',
+      subject: '✅ Contacto Recebido - Frota360.pt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #248C3B 0%, #A31624 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <img src="https://conduz.pt/img/logo.png" alt="Conduz.pt" style="max-width: 140px; height: auto; margin-bottom: 10px;" />
+            <img src="https://conduz.pt/img/logo.png" alt="Frota360.pt" style="max-width: 140px; height: auto; margin-bottom: 10px;" />
             <h1 style="margin: 0; font-size: 24px;">✅ Obrigado pelo seu contacto!</h1>
           </div>
           
@@ -137,7 +137,7 @@ export default async function handler(
               </p>
               
               <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                Recebemos sua mensagem e queremos agradecer o seu interesse na Conduz.pt. 
+                Recebemos sua mensagem e queremos agradecer o seu interesse na Frota360.pt. 
                 Nossa equipa especializada analisará suas necessidades e entrará em contacto consigo 
                 no prazo de <strong>24 horas</strong>.
               </p>
@@ -164,7 +164,7 @@ export default async function handler(
             <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;">
               <p style="color: #6c757d; font-size: 14px; margin: 0;">
                 Atenciosamente,<br>
-                <strong>Equipa Conduz.pt</strong><br>
+                <strong>Equipa Frota360.pt</strong><br>
                 📧 suporte@conduz.pt<br>
                 🌐 conduz.pt
               </p>

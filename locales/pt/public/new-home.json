@@ -2,13 +2,13 @@
   "hero": {
     "title": "Não é só dirigir. É construir seu próprio negócio.",
     "subtitle": "Sistema meritocrático onde seu desempenho determina seu ganho",
-    "description": "Transparência total. Pagamentos semanais. Suporte especializado. Escolha seu caminho na Conduz.pt",
+    "description": "Transparência total. Pagamentos semanais. Suporte especializado. Escolha seu caminho na Frota360.pt",
     "badge": "TVDE PORTUGAL",
     "ctaPrimary": "Candidatar-me como Motorista",
     "ctaSecondary": "Falar no WhatsApp"
   },
   "differentials": {
-    "title": "Por que Motoristas Escolhem Conduz",
+    "title": "Por que Motoristas Escolhem Frota360",
     "subtitle": "Sistema meritocrático que recompensa seu desempenho",
     "feature": "DIFERENCIAIS ÚNICOS",
     "items": [
@@ -149,7 +149,7 @@
       },
       {
         "title": "Motorista Locatário",
-        "description": "Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.",
+        "description": "Alugue um veículo da Frota360 PT e comece a trabalhar imediatamente.",
         "color": "blue",
         "image": "/img/service-companies.jpg",
         "benefits": [
@@ -191,7 +191,7 @@
   },
   "finalCta": {
     "title": "Pronto para Começar a Faturar?",
-    "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz",
+    "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Frota360",
     "ctaPrimary": "Candidatar-me Agora",
     "ctaSecondary": "Falar no WhatsApp"
   }

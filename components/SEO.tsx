@@ -23,13 +23,13 @@ export default function SEO({
   ogType = "website",
   twitterCard = "summary_large_image",
   keywords = "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, mobilidade urbana, transporte privado, empresa TVDE, frota TVDE, licença TVDE",
-  author = "Conduz",
+  author = "Frota360",
   publishedTime,
   modifiedTime,
   locale = "pt",
 }: SEOProps) {
   const siteUrl = "https://conduz.pt";
-  const fullTitle = `${title} - Conduz`;
+  const fullTitle = `${title} - Frota360`;
 
   // Limpar canonical removendo /en se presente
   const cleanCanonical = canonical?.replace(/^\/en/, '') || "/";
@@ -60,7 +60,7 @@ export default function SEO({
   });
 
   // Site-wide metadata for structured data
-  const siteName = "Conduz.pt";
+  const siteName = "Frota360.pt";
   const siteDescriptionMap: Record<string, string> = {
     pt: "TVDE sem Fricção | Motoristas e Empresas em Portugal",
     en: "Frictionless TVDE | Drivers & Companies in Portugal",

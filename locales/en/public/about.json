@@ -6,7 +6,7 @@
     "card": {
       "title": "Vision and Values",
       "description": "Building the future of TVDE mobility",
-  "content": "Conduz.pt was born to simplify TVDE in Portugal. We are a mobility-focused operation that combines decades of management experience with cutting-edge technology to deliver complete solutions for drivers, companies and fleet managers.",
+  "content": "Frota360.pt was born to simplify TVDE in Portugal. We are a mobility-focused operation that combines decades of management experience with cutting-edge technology to deliver complete solutions for drivers, companies and fleet managers.",
       "values": {
         "title": "Our Core Values",
         "list": [
@@ -57,9 +57,9 @@
     "card": {
       "title": "Success Story",
       "description": "From business management to excellent TVDE",
-      "content": "Conduz.pt brings together specialists with more than 30 years of experience in business management and fleet operations across Portugal, Italy, Spain and beyond. That expertise powers a complete, scalable and results-driven TVDE solution.",
+      "content": "Frota360.pt brings together specialists with more than 30 years of experience in business management and fleet operations across Portugal, Italy, Spain and beyond. That expertise powers a complete, scalable and results-driven TVDE solution.",
       "stats": {
-        "title": "Conduz PT in numbers",
+        "title": "Frota360 PT in numbers",
         "list": [
           { "value": "30+", "label": "Years of Experience" },
           { "value": "95%", "label": "Approval Rate" },
@@ -99,7 +99,7 @@
     ]
   },
   "cta": {
-    "title": "Ready to be part of Conduz?",
+    "title": "Ready to be part of Frota360?",
     "subtitle": "Join us and discover how we can simplify your TVDE",
     "feature": "NEXT STEP",
     "button": "Contact Now"

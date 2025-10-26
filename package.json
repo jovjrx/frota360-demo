@@ -1,6 +1,7 @@
 {
-  "name": "conduz-pt",
-  "version": "0.2.0",
+  "name": "frota360-demo",
+  "version": "1.0.0",
+  "description": "Frota360 Demo - Gestão TVDE com dados mockados para apresentação",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -68,7 +68,7 @@
   },
   "seo": {
     "default": {
-      "title": "TVDE Portugal | Conduz - You drive, we take care of the rest!",
+      "title": "TVDE Portugal | Frota360 - You drive, we take care of the rest!",
       "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more.",
       "keywords": "TVDE Portugal, TVDE driver, Uber Portugal, Bolt Portugal, urban mobility, private transport, TVDE company, TVDE fleet, TVDE license",
       "image": "/img/conduz.png"
@@ -85,24 +85,24 @@
         "keywords": "become TVDE driver, TVDE driver Portugal, work as driver, TVDE registration"
       },
       "about": {
-        "title": "About Conduz",
-        "description": "Learn about Conduz, the complete TVDE platform in Portugal. Our mission, values and what sets us apart.",
-        "keywords": "about Conduz, TVDE company Portugal, TVDE management, who we are"
+        "title": "About Frota360",
+        "description": "Learn about Frota360, the complete TVDE platform in Portugal. Our mission, values and what sets us apart.",
+        "keywords": "about Frota360, TVDE company Portugal, TVDE management, who we are"
       },
       "contact": {
         "title": "Contact",
-        "description": "Get in touch with Conduz. We are available to help with any questions or support.",
-        "keywords": "contact Conduz, TVDE support, help TVDE Portugal, customer service"
+        "description": "Get in touch with Frota360. We are available to help with any questions or support.",
+        "keywords": "contact Frota360, TVDE support, help TVDE Portugal, customer service"
       },
       "login": {
         "title": "Login",
-        "description": "Access your Conduz account and manage your TVDE activity.",
-        "keywords": "login Conduz, driver access, TVDE platform access"
+        "description": "Access your Frota360 account and manage your TVDE activity.",
+        "keywords": "login Frota360, driver access, TVDE platform access"
       },
       "signup": {
         "title": "Sign Up",
-        "description": "Create your account on Conduz and start your journey as a TVDE driver in Portugal.",
-        "keywords": "sign up Conduz, create account, TVDE registration"
+        "description": "Create your account on Frota360 and start your journey as a TVDE driver in Portugal.",
+        "keywords": "sign up Frota360, create account, TVDE registration"
       }
     }
   },
@@ -145,7 +145,7 @@
     "passwordsDontMatch": "Passwords don't match"
   },
   "company": {
-    "name": "Conduz PT",
+    "name": "Frota360 PT",
     "description": "You drive, we take care of the rest!",
   "email": "contacto@conduz.pt",
     "emailDescription": "Support and information",
@@ -167,11 +167,11 @@
     "description": "The platform that transforms drivers into successful entrepreneurs",
     "contactInfo": "Contact Information",
     "quickLinks": "Quick Links",
-    "rights": "© {{year}} Conduz PT. All rights reserved.",
+    "rights": "© {{year}} Frota360 PT. All rights reserved.",
     "copyright": "All rights reserved",
     "madeWith": "Made with",
     "by": "by",
-    "company": "Conduz PT",
+    "company": "Frota360 PT",
     "developerBy": "Developed by",
     "developer": "Jose Junior",
     "privacy": "Privacy Policy",
@@ -198,7 +198,7 @@
       },
       {
         "question": "What's the difference between affiliate and renter?",
-        "answer": "Affiliate drivers work with their own vehicles, while renters use vehicles from Conduz PT."
+        "answer": "Affiliate drivers work with their own vehicles, while renters use vehicles from Frota360 PT."
       },
       {
         "question": "How long does approval take?",
@@ -212,11 +212,11 @@
   },
   "testimonials": {
     "title": "What Our Drivers Say",
-    "subtitle": "Real stories from those who are already part of Conduz PT",
+    "subtitle": "Real stories from those who are already part of Frota360 PT",
     "feature": "Testimonials",
     "items": [
       {
-        "quote": "Conduz PT made my life as a driver much easier. The support is excellent and the processes are very simple.",
+        "quote": "Frota360 PT made my life as a driver much easier. The support is excellent and the processes are very simple.",
         "author": "João Silva",
         "location": "Lisbon"
       },

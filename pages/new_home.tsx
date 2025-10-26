@@ -76,7 +76,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
       {/* DIFERENCIAIS ÚNICOS */}
       <Container maxW="7xl">
         <Title
-          title="Por que Motoristas Escolhem Conduz"
+          title="Por que Motoristas Escolhem Frota360"
           description="Sistema meritocrático que recompensa seu desempenho"
           feature="DIFERENCIAIS ÚNICOS"
         />
@@ -342,7 +342,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
               },
               {
                 title: "Motorista Locatário",
-                description: "Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.",
+                description: "Alugue um veículo da Frota360 PT e comece a trabalhar imediatamente.",
                 color: "blue",
                 image: "/img/service-companies-new.png",
                 benefits: [
@@ -453,7 +453,7 @@ export default function NewHome({ tPage: rawTPage, tCommon: rawTCommon }: Public
             "Pronto para Começar a Faturar?"
           </Heading>
           <Text fontSize="lg" mb={8} opacity={0.9}>
-            "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Conduz"
+            "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Frota360"
           </Text>
           <HStack justify="center" spacing={4}>
             <Button

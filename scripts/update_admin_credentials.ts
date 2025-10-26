@@ -20,7 +20,7 @@ async function updateAdminCredentials() {
         const newUser = await adminAuth.createUser({
           email: oldEmail,
           password: "123456789", // Usar a senha original para criar, depois atualizar
-          displayName: "Admin Conduz",
+          displayName: "Admin Frota360",
         });
         firebaseUid = newUser.uid;
         console.log(`Admin ${oldEmail} criado no Firebase Auth com UID: ${firebaseUid}`);
@@ -39,7 +39,7 @@ async function updateAdminCredentials() {
       await adminDocRef.set({
         uid: firebaseUid,
         email: oldEmail,
-        name: "Admin Conduz",
+        name: "Admin Frota360",
         role: "admin",
         createdAt: new Date(),
         updatedAt: new Date(),

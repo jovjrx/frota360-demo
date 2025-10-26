@@ -114,7 +114,7 @@ Seu contrato (${contractType === 'affiliate' ? 'Afiliado' : 'Locatário'}) está
 Se tiver dúvidas, responda a este email.
 
 Obrigado,
-Equipe Conduz.pt`,
+Equipe Frota360.pt`,
       html: `<p>Olá ${payload.driverName}!</p>
 <p>Seu contrato (${contractType === 'affiliate' ? 'Afiliado' : 'Locatário'}) está disponível no portal do motorista.</p>
 <ol>
@@ -123,7 +123,7 @@ Equipe Conduz.pt`,
   <li>Assine o documento e envie o PDF pelo próprio dashboard.</li>
 </ol>
 <p>Se tiver qualquer dúvida, responda a este email.</p>
-<p>Obrigado,<br/>Equipe Conduz.pt</p>`,
+<p>Obrigado,<br/>Equipe Frota360.pt</p>`,
     });
 
     return res.status(200).json({ success: true });

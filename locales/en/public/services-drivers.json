@@ -9,13 +9,13 @@
     }
   },
   "benefits": {
-    "title": "Why Choose Conduz?",
+    "title": "Why Choose Frota360?",
     "subtitle": "Exclusive advantages for TVDE drivers in Portugal",
     "feature": "BENEFITS",
     "card": {
       "title": "Unique Benefits",
       "description": "Everything you need to succeed in TVDE",
-      "content": "Conduz.pt offers the best package for TVDE drivers in Portugal. From fast onboarding to ongoing support, we ensure you have everything to maximize your earnings.",
+      "content": "Frota360.pt offers the best package for TVDE drivers in Portugal. From fast onboarding to ongoing support, we ensure you have everything to maximize your earnings.",
       "list": {
         "title": "What we offer:",
         "items": [
@@ -321,7 +321,7 @@
   "payments": {
     "badge": "GUARANTEED PAYMENTS",
     "title": "Get paid every Monday, without fail",
-    "subtitle": "Forget delays and uncertainties. With Conduz, your payments are processed automatically every Monday.",
+    "subtitle": "Forget delays and uncertainties. With Frota360, your payments are processed automatically every Monday.",
     "features": [
       {
         "title": "Monday payments",

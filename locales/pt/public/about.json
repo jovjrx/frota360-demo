@@ -1,6 +1,6 @@
 {
   "hero": {
-    "title": "Sobre a Conduz.pt",
+    "title": "Sobre a Frota360.pt",
     "subtitle": "Simplificando o TVDE em Portugal com tecnologia avançada e suporte humano",
     "badge": "NOSSA HISTÓRIA"
   },
@@ -11,7 +11,7 @@
     "card": {
       "title": "Visão e Valores",
       "description": "Construindo o futuro da mobilidade TVDE",
-  "content": "A Conduz.pt nasceu para simplificar o TVDE em Portugal. Somos uma operação dedicada à mobilidade, combinando décadas de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
+  "content": "A Frota360.pt nasceu para simplificar o TVDE em Portugal. Somos uma operação dedicada à mobilidade, combinando décadas de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
       "values": {
         "title": "Os Nossos Valores Fundamentais",
         "list": [
@@ -62,9 +62,9 @@
     "card": {
       "title": "História de Sucesso",
       "description": "Da gestão empresarial ao TVDE de excelência",
-      "content": "A Conduz.pt reúne especialistas com mais de 30 anos de experiência em gestão empresarial e operação de frotas em Portugal, Itália, Espanha e outros países. Essa bagagem permite entregar uma solução TVDE completa, escalável e centrada em resultados.",
+      "content": "A Frota360.pt reúne especialistas com mais de 30 anos de experiência em gestão empresarial e operação de frotas em Portugal, Itália, Espanha e outros países. Essa bagagem permite entregar uma solução TVDE completa, escalável e centrada em resultados.",
       "stats": {
-        "title": "Números da Conduz PT",
+        "title": "Números da Frota360 PT",
         "list": [
           {
             "value": "30+",
@@ -116,7 +116,7 @@
     ]
   },
   "cta": {
-    "title": "Pronto para Fazer Parte da Conduz?",
+    "title": "Pronto para Fazer Parte da Frota360?",
     "subtitle": "Junte-se a nós e descubra como podemos simplificar o seu TVDE",
     "feature": "PRÓXIMO PASSO",
     "button": "Contactar Agora"

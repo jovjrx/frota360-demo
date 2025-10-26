@@ -9,13 +9,13 @@
     }
   },
   "benefits": {
-    "title": "Porquê Escolher a Conduz?",
+    "title": "Porquê Escolher a Frota360?",
     "subtitle": "Vantagens exclusivas para motoristas TVDE em Portugal",
     "feature": "VANTAGENS",
     "card": {
       "title": "Benefícios Únicos",
       "description": "Tudo o que precisa para ter sucesso no TVDE",
-      "content": "A Conduz.pt oferece o melhor pacote para motoristas TVDE em Portugal. Desde o onboarding rápido até ao suporte contínuo, garantimos que tem tudo para maximizar os seus ganhos.",
+      "content": "A Frota360.pt oferece o melhor pacote para motoristas TVDE em Portugal. Desde o onboarding rápido até ao suporte contínuo, garantimos que tem tudo para maximizar os seus ganhos.",
       "list": {
         "title": "O que oferecemos:",
         "items": [
@@ -337,7 +337,7 @@
   "payments": {
     "badge": "PAGAMENTOS GARANTIDOS",
     "title": "Receba toda segunda-feira, sem falta",
-    "subtitle": "Esqueça atrasos e incertezas. Com a Conduz, seus pagamentos são processados automaticamente toda segunda-feira.",
+    "subtitle": "Esqueça atrasos e incertezas. Com a Frota360, seus pagamentos são processados automaticamente toda segunda-feira.",
     "features": [
       {
         "title": "Pagamentos às segundas",

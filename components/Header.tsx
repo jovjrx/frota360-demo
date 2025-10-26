@@ -124,7 +124,7 @@ export default function Header({ t, tPage, panel = false, serverUser }: HeaderPr
           <Link as={NextLink} href="/" _hover={{ opacity: 0.9 }}>
             <Image
               src="/img/logo.png"
-              alt="Conduz.pt"
+              alt="Frota360.pt"
               h='64px'
               w='160px'
             />

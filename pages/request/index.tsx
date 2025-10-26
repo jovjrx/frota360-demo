@@ -99,7 +99,7 @@ export default function RequestPage({ tPage, tCommon }: PublicPageProps) {
                   Motorista Locatário
                 </Text>
                 <Text fontSize="sm" color="gray.600" mb={3}>
-                  Alugue um veículo da Conduz PT e comece a trabalhar imediatamente.
+                  Alugue um veículo da Frota360 PT e comece a trabalhar imediatamente.
                 </Text>
                 <VStack spacing={2} align="start">
                   <Text fontSize="sm" color="gray.600">✓ Sem investimento inicial</Text>

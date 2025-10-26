@@ -61,7 +61,7 @@ export default function ForgotPasswordPage({ tPage }: PublicPageProps) {
     return (
       <>
         <Head>
-          <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_TITLE)} - Conduz.pt</title>
+          <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_TITLE)} - Frota360.pt</title>
           <meta name="description" content={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.SUCCESS_DESCRIPTION)} />
         </Head>
 
@@ -129,7 +129,7 @@ export default function ForgotPasswordPage({ tPage }: PublicPageProps) {
   return (
     <>
       <Head>
-        <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.TITLE)} - Conduz.pt</title>
+        <title>{tPage(PUBLIC.AUTH.FORGOT_PASSWORD.TITLE)} - Frota360.pt</title>
         <meta name="description" content={tPage(PUBLIC.AUTH.FORGOT_PASSWORD.DESCRIPTION)} />
       </Head>
 

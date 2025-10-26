@@ -9,7 +9,7 @@
     "description": "Fale connosco"
   },
   "benefits": {
-    "title": "Porquê Conduz?",
+    "title": "Porquê Frota360?",
     "description": "As vantagens de se juntar à nossa equipa",
     "list": [
       "Suporte dedicado 7 dias por semana",
@@ -54,7 +54,7 @@
     "city": "Cidade",
     "driverType": "Tipo de Motorista",
     "driverTypeAffiliate": "Afiliado (veículo próprio)",
-    "driverTypeRenter": "Locatário (aluga veículo da Conduz)",
+    "driverTypeRenter": "Locatário (aluga veículo da Frota360)",
     "vehicleInfo": "Informações do Veículo",
     "vehicleMake": "Marca do Veículo",
     "vehicleModel": "Modelo do Veículo",

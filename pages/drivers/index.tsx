@@ -528,7 +528,7 @@ export default function DriversPage({ tPage, tCommon }: PublicPageProps) {
             Pronto para começar a ganhar?
           </Heading>
           <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" maxW="3xl">
-            Junte-se aos motoristas que já escolheram a Conduz.pt. Aprovação rápida, pagamentos garantidos e suporte 24/7.
+            Junte-se aos motoristas que já escolheram a Frota360.pt. Aprovação rápida, pagamentos garantidos e suporte 24/7.
           </Text>
           <HStack spacing={4} flexWrap="wrap" justify="center">
             <Button

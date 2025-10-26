@@ -123,7 +123,7 @@ export default function PainelDados({ motorista, translations }: PainelDadosProp
   return (
     <>
       <Head>
-        <title>Meus Dados - Conduz.pt</title>
+        <title>Meus Dados - Frota360.pt</title>
       </Head>
       
       <PainelLayout

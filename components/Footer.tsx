@@ -50,7 +50,7 @@ export default function Footer({ t, panel = false }: FooterProps) {
             <Link as={NextLink} href="/">
               <Image
                 src="/img/logo.png"
-                alt="Conduz.pt"
+                alt="Frota360.pt"
                 h={'auto'}
                 w={64}
                 filter="brightness(0) invert(1)"
@@ -166,7 +166,7 @@ export default function Footer({ t, panel = false }: FooterProps) {
 
         <Stack spacing={2} flexDirection={{ base: "column", md: "row" }} justify={{ base: "center", md: "space-between" }}>
           <Text color={colorSoft} fontSize="sm" textAlign="center">
-            © {year} Conduz.pt. {t("company.nipc")}.
+            © {year} Frota360.pt. {t("company.nipc")}.
           </Text>
           <Text color={colorSoft} fontSize="sm" textAlign="center">
             {t("footer.copyright")}
