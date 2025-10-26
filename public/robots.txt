@@ -7,7 +7,7 @@ Disallow: /painel
 Disallow: /api
 
 # Host
-Host: https://conduz.pt
+Host: https://demo.frota360.pt
 
 # Sitemaps
-Sitemap: https://conduz.pt/sitemap.xml
+Sitemap: https://demo.frota360.pt/sitemap.xml

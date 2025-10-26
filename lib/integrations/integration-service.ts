@@ -50,19 +50,8 @@ const COLLECTION_NAME = 'integrations';
 // ============================================================================
 
 function initializeFirebase() {
-  if (!admin.apps.length) {
-    try {
-      // Tenta carregar do arquivo JSON
-      const serviceAccount = require('../../conduz-pt.json');
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-      console.log('🔥 Firebase Admin inicializado');
-    } catch (error) {
-      console.warn('⚠️  Não foi possível inicializar Firebase Admin automaticamente');
-      throw new Error('Firebase Admin não inicializado. Configure conduz-pt.json ou inicialize manualmente.');
-    }
-  }
+  // Firebase desabilitado em modo demo
+  console.log('⚠️  Firebase desabilitado em modo demo');
 }
 
 // ============================================================================

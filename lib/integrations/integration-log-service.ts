@@ -55,16 +55,7 @@ const LOG_RETENTION_DAYS = 30; // Manter logs por 30 dias
 // ============================================================================
 
 function initializeFirebase() {
-  if (!admin.apps.length) {
-    try {
-      const serviceAccount = require('../../conduz-pt.json');
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-    } catch (error) {
-      // Firebase já inicializado por outro serviço
-    }
-  }
+  // Firebase desabilitado em modo demo
 }
 
 // ============================================================================

@@ -10,14 +10,14 @@ export interface MockUser {
 
 export const MOCK_USERS = {
   admin: {
-    email: 'admin@frota360-demo.pt',
+    email: 'admin@frota360.pt',
     password: 'Demo@2025',
     uid: 'admin-001',
     name: 'Admin Demo',
     role: 'admin' as const,
   },
   driver: {
-    email: 'motorista@frota360-demo.pt',
+    email: 'motorista@frota360.pt',
     password: 'Demo@2025',
     uid: 'driver-001',
     name: 'João Silva',
