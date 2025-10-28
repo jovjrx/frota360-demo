@@ -80,20 +80,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       referredBy: requestData.referrerId || undefined,
     });
 
-    // 3.2. Se existir referralInviteCode, marcar convite como aceito (atualiza rede e contadores)
-    try {
-      if (requestData.referralInviteCode) {
-        await acceptReferralInvite(
-          requestData.referralInviteCode,
-          firebaseUser.uid,
-          requestData.fullName,
-          requestData.email
-        );
-      }
-    } catch (err) {
-      console.error('[approve] Falha ao aceitar convite de referência:', err);
-      // Não falhar aprovação por isso
-    }
+    // 3.2. Referral invite removido - funcionalidade não utilizada no demo
 
     // 3.5. Initialize driver structures (commissions, referral, KPIs, goals, technical reserve)
     const initResult = await initializeNewDriver(
