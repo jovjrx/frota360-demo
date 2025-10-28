@@ -1,0 +1,17 @@
+{
+  "id": "dtB1UVZ63SYoqX6mPx1B",
+  "fullName": "Junior Carlos Teste",
+  "birthDate": "1991-09-05",
+  "email": "desenvolvedor.jjr@gmail.com",
+  "phone": "+351965811490",
+  "city": "Braga",
+  "nif": "123145646",
+  "licenseNumber": "1231312312312",
+  "type": "renter",
+  "vehicle": null,
+  "createdAt": "2025-10-11T20:09:26.387Z",
+  "rejectedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "rejectionReason": "teste",
+  "status": "rejected",
+  "updatedAt": "2025-10-11T20:44:32.248Z"
+}

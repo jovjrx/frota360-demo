@@ -1,0 +1,40 @@
+{
+  "id": "2025-W40-uber",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "uber",
+  "fileName": "Uber.csv",
+  "importedAt": "2025-10-08T03:49:50.403Z",
+  "importedBy": "system",
+  "processed": true,
+  "processedAt": "2025-10-08T03:49:50.403Z",
+  "rawData": {
+    "headers": [
+      "UUID do motorista",
+      "Pago a si",
+      "Viagens",
+      "Nome do motorista"
+    ],
+    "rows": [
+      {
+        "UUID do motorista": "14f33942-d50c-49ea-aa1f-93e6072c152d",
+        "Pago a si": "€350.06",
+        "Viagens": 0,
+        "Nome do motorista": ""
+      },
+      {
+        "UUID do motorista": "64d1e235-8f1f-4cf2-a862-ef862d443990",
+        "Pago a si": "€-1165.15",
+        "Viagens": 0,
+        "Nome do motorista": ""
+      },
+      {
+        "UUID do motorista": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+        "Pago a si": "€815.09",
+        "Viagens": 0,
+        "Nome do motorista": ""
+      }
+    ]
+  }
+}

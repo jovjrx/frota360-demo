@@ -1,0 +1,15 @@
+{
+  "id": "njidMQBGEJoDDlCx0dtp",
+  "platform": "fonoa",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais configuradas (não implementado)",
+  "timestamp": {
+    "_seconds": 1759703117,
+    "_nanoseconds": 307000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295117,
+    "_nanoseconds": 307000000
+  }
+}

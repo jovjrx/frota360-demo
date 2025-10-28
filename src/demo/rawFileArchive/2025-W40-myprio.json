@@ -1,0 +1,36 @@
+{
+  "id": "2025-W40-myprio",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "myprio",
+  "fileName": "Prio.xlsx",
+  "importedAt": "2025-10-08T03:49:50.624Z",
+  "importedBy": "system",
+  "processed": true,
+  "processedAt": "2025-10-08T03:49:50.624Z",
+  "rawData": {
+    "headers": [
+      "CARTAO",
+      "DESC CARTAO",
+      "TOTAL"
+    ],
+    "rows": [
+      {
+        "CARTAO": "7824736068450000",
+        "DESC CARTAO": ".",
+        "TOTAL": "117.08 €"
+      },
+      {
+        "CARTAO": "7824736068450001",
+        "DESC CARTAO": ".",
+        "TOTAL": "49.73 €"
+      },
+      {
+        "CARTAO": "7824736068450002",
+        "DESC CARTAO": "BX-22-LA",
+        "TOTAL": "75.23 €"
+      }
+    ]
+  }
+}

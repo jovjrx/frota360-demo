@@ -1,0 +1,34 @@
+{
+  "id": "afGpXQbZcqiJdFj4nB4V",
+  "action": "financing_update",
+  "financingId": "lBOJ3KVtgRF943be8wwu",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldData": {
+    "driverId": "0D0dAAaRixi7rmnLg1mN",
+    "type": "discount",
+    "amount": 53,
+    "weeks": null,
+    "weeklyInterest": 4,
+    "startDate": "2025-10-11T20:29:37.436Z",
+    "endDate": null,
+    "status": "active",
+    "remainingWeeks": null,
+    "proofUrl": null,
+    "proofFileName": null,
+    "proofUploadedAt": null,
+    "notes": "Reembolso Seguro TVDE",
+    "createdBy": "info@alvoradamagistral.eu",
+    "approvedBy": null,
+    "approvedAt": null,
+    "createdAt": "2025-10-11T20:29:37.436Z",
+    "updatedAt": "2025-10-11T20:29:37.436Z"
+  },
+  "newData": {
+    "status": "completed",
+    "updatedAt": 1760259583576,
+    "statusUpdatedAt": 1760259583576,
+    "statusUpdatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2"
+  },
+  "timestamp": 1760259583576,
+  "createdAt": 1760259583576
+}

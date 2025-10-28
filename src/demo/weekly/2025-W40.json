@@ -1,0 +1,61 @@
+{
+  "id": "2025-W40",
+  "totalValue": 600,
+  "weekId": "2025-W40",
+  "totalRecords": 11,
+  "totalDrivers": 3,
+  "totalPlatforms": 4,
+  "platforms": {
+    "myprio": {
+      "processed": true,
+      "importedAt": "2025-10-08T03:31:05.340Z",
+      "imported": true,
+      "recordCount": 2,
+      "paid": false,
+      "processedAt": "2025-10-08T03:31:05.340Z",
+      "paidAt": null,
+      "platform": "myprio"
+    },
+    "bolt": {
+      "processed": true,
+      "importedAt": "2025-10-08T03:31:05.340Z",
+      "imported": true,
+      "recordCount": 2,
+      "paid": false,
+      "processedAt": "2025-10-08T03:31:05.340Z",
+      "paidAt": null,
+      "platform": "bolt"
+    },
+    "viaverde": {
+      "processed": true,
+      "importedAt": "2025-10-08T03:31:05.340Z",
+      "imported": true,
+      "recordCount": 2,
+      "paid": false,
+      "processedAt": "2025-10-08T03:31:05.340Z",
+      "paidAt": null,
+      "platform": "viaverde"
+    },
+    "uber": {
+      "processed": true,
+      "importedAt": "2025-10-08T03:31:05.340Z",
+      "imported": true,
+      "recordCount": 3,
+      "paid": false,
+      "processedAt": "2025-10-08T03:31:05.340Z",
+      "paidAt": null,
+      "platform": "uber"
+    }
+  },
+  "createdAt": "2025-10-08T03:31:05.340Z",
+  "totalTrips": 0,
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "processedBy": {
+    "uid": "system",
+    "name": "Automático Sistema",
+    "email": "system@frota360.pt"
+  },
+  "status": "processed",
+  "updatedAt": "2025-10-27T01:18:49.512Z"
+}

@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Candidatura de Motorista TVDE",
-    "subtitle": "Você conduz, nós cuidamos do resto!",
+    "subtitle": "Você frota360, nós cuidamos do resto!",
     "feature": "CANDIDATURA"
   },
   "contactInfo": {
@@ -64,5 +64,30 @@
     "successTitle": "Candidatura Enviada!",
     "successMessage": "A sua candidatura foi enviada com sucesso. A nossa equipa irá analisar e entrar em contacto consigo em breve.",
     "backToHome": "Voltar ao Início"
+  },
+  "driverTypes": {
+    "title": "Tipos de Motorista",
+    "subtitle": "Escolha o modelo que melhor se adapta à sua situação",
+    "feature": "OPÇÕES",
+    "affiliate": {
+      "title": "Motorista Afiliado",
+      "description": "Trabalhe com o seu próprio veículo e tenha total controlo sobre o seu negócio.",
+      "benefits": [
+        "Flexibilidade total de horários",
+        "Receita 100% sua",
+        "Controlo total do veículo",
+        "Suporte técnico completo"
+      ]
+    },
+    "renter": {
+      "title": "Motorista Locatário",
+      "description": "Alugue um veículo da Frota360 e comece a trabalhar imediatamente.",
+      "benefits": [
+        "Sem investimento inicial",
+        "Veículos sempre atualizados",
+        "Manutenção incluída",
+        "Seguro completo"
+      ]
+    }
   }
 }

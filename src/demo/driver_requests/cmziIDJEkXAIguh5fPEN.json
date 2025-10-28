@@ -1,0 +1,20 @@
+{
+  "id": "cmziIDJEkXAIguh5fPEN",
+  "fullName": "Frota360 Teste",
+  "birthDate": "1992-04-05",
+  "email": "teste@teste.com",
+  "phone": "+5511933660458",
+  "city": "Rio",
+  "nif": "121332131",
+  "licenseNumber": "12312313123313",
+  "type": "affiliate",
+  "vehicle": {
+    "make": "Toyota",
+    "model": "Prius",
+    "year": 2025,
+    "plate": "BGGFGFG"
+  },
+  "createdAt": "2025-10-11T20:01:32.194Z",
+  "status": "evaluation",
+  "updatedAt": 1760213410359
+}

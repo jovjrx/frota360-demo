@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.SITE_URL || 'https://demo.frota360.pt',
+  siteUrl: process.env.SITE_URL || 'https://frota360.pt',
   generateRobotsTxt: true,
   generateIndexSitemap: false,
   exclude: [
@@ -25,7 +25,7 @@ module.exports = {
       },
     ],
     additionalSitemaps: [
-      'https://demo.frota360.pt/sitemap.xml',
+      'https://frota360.pt/sitemap.xml',
     ],
   },
   transform: async (config, path) => {
@@ -41,15 +41,15 @@ module.exports = {
           lastmod: new Date().toISOString(),
           alternateRefs: [
             {
-              href: `https://demo.frota360.pt${path}`,
+              href: `https://frota360.pt${path}`,
               hreflang: 'pt-PT',
             },
             {
-              href: `https://demo.frota360.pt/en${path === '/' ? '' : path}`,
+              href: `https://frota360.pt/en${path === '/' ? '' : path}`,
               hreflang: 'en-GB',
             },
             {
-              href: `https://demo.frota360.pt${path}`,
+              href: `https://frota360.pt${path}`,
               hreflang: 'x-default',
             },
           ],
@@ -65,4 +65,3 @@ module.exports = {
     };
   },
 };
-

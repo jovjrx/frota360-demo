@@ -1,0 +1,90 @@
+{
+  "id": "XuO35tSnCfDdZRN2uIKS",
+  "action": "driver_update",
+  "driverId": "JDENF7ayxqaEQy0VegWE",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldData": {
+    "firstName": "Isaías",
+    "lastName": "Junior Motta",
+    "fullName": "Junior Isaías Motta",
+    "email": "isaiasmotta475@gmail.com",
+    "phone": "+351 913 960 218",
+    "birthDate": "1977-01-13",
+    "city": "Teresópolis / RJ /Brasil",
+    "status": "active",
+    "type": "renter",
+    "banking": {
+      "iban": null,
+      "accountHolder": "Isaías Motta Junior"
+    },
+    "firebaseUid": "rirg8SwFEdZEe6sHGjnzK1LtRNE2",
+    "createdAt": "2025-10-19T23:15:24.868Z",
+    "createdBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "activatedAt": "2025-10-19T23:15:24.868Z",
+    "activatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "rentalFee": 272,
+    "vehicle": {
+      "plate": "BX-22-LA",
+      "model": "JOGGER XL"
+    },
+    "integrations": {
+      "uber": {
+        "key": null,
+        "enabled": false
+      },
+      "bolt": {
+        "key": "isaiasmotta475@gmail.com",
+        "enabled": false
+      },
+      "myprio": {
+        "key": null,
+        "enabled": false
+      },
+      "viaverde": {
+        "key": "BX-22-LA",
+        "enabled": false
+      }
+    },
+    "updatedAt": 1760961951457
+  },
+  "newData": {
+    "status": "active",
+    "type": "renter",
+    "fullName": "Junior Isaías Motta",
+    "email": "isaiasmotta475@gmail.com",
+    "phone": "+351 913 960 218",
+    "birthDate": "1977-01-13",
+    "city": "Teresópolis / RJ /Brasil",
+    "rentalFee": 344,
+    "integrations": {
+      "uber": {
+        "key": null,
+        "enabled": false
+      },
+      "bolt": {
+        "key": "isaiasmotta475@gmail.com",
+        "enabled": false
+      },
+      "myprio": {
+        "key": null,
+        "enabled": false
+      },
+      "viaverde": {
+        "key": "BX-22-LA",
+        "enabled": false
+      }
+    },
+    "banking": {
+      "iban": null,
+      "accountHolder": "Isaías Motta Junior"
+    },
+    "vehicle": {
+      "plate": "BX-22-LA",
+      "model": "JOGGER XL"
+    },
+    "updatedAt": 1761577984419
+  },
+  "timestamp": 1761577984419,
+  "createdAt": 1761577984419,
+  "driverName": "Oliveira Martins Pedro"
+}

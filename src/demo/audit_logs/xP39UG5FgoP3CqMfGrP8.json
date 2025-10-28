@@ -1,0 +1,12 @@
+{
+  "id": "xP39UG5FgoP3CqMfGrP8",
+  "action": "driver_status_update",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldStatus": "active",
+  "newStatus": "inactive",
+  "reason": "",
+  "timestamp": 1761317738386,
+  "createdAt": 1761317738386,
+  "driverName": "Pereira Alves Carlos"
+}

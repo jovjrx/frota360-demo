@@ -1,0 +1,110 @@
+{
+  "id": "71iqN0PVdodEGfCbbThD",
+  "action": "driver_update",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldData": {
+    "firstName": "Wedson ",
+    "lastName": "Guarino",
+    "fullName": "Guarino Wedson",
+    "email": "wedsoniris@gmail.com",
+    "phone": "+351917822826",
+    "birthDate": "1983-12-01",
+    "city": "Braga",
+    "status": "active",
+    "type": "renter",
+    "banking": {
+      "iban": "PT50003300004555698867005",
+      "accountHolder": "Wedson Guarino"
+    },
+    "firebaseUid": "xgs3fXHFzFeRBqMvosfSLyhjsdo2",
+    "createdAt": "2025-10-06T21:24:39.209Z",
+    "createdBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "activatedAt": "2025-10-06T21:24:39.209Z",
+    "activatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "rentalFee": 325,
+    "lastPayoutAmount": 0,
+    "monthlyEarnings": 0,
+    "notes": "",
+    "rating": 0,
+    "weeklyEarnings": 0,
+    "isActive": false,
+    "locale": "pt",
+    "vehicle": {
+      "make": "Dacia",
+      "model": "Jogger",
+      "plate": "BX-22-LA",
+      "assignedDate": "2025-10-06T21:24:39.209Z"
+    },
+    "totalTrips": 0,
+    "checkinCount": 0,
+    "isApproved": false,
+    "integrations": {
+      "uber": {
+        "key": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+        "enabled": true,
+        "lastSync": null
+      },
+      "bolt": {
+        "key": "Wedsoniris@gmail.com",
+        "enabled": true,
+        "lastSync": null
+      },
+      "myprio": {
+        "key": "7824736068450002",
+        "enabled": true,
+        "lastSync": null
+      },
+      "viaverde": {
+        "key": "601104560201",
+        "enabled": true,
+        "lastSync": null
+      }
+    },
+    "lastAccessEmailAt": "2025-10-15T05:54:26.703Z",
+    "updatedAt": "2025-10-15T05:54:26.703Z"
+  },
+  "newData": {
+    "status": "inactive",
+    "type": "renter",
+    "fullName": "Guarino Wedson",
+    "email": "wedsoniris@gmail.com",
+    "phone": "+351917822826",
+    "birthDate": "1983-12-01",
+    "city": "Braga",
+    "rentalFee": 366,
+    "integrations": {
+      "uber": {
+        "key": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+        "enabled": true
+      },
+      "bolt": {
+        "key": "Wedsoniris@gmail.com",
+        "enabled": true
+      },
+      "myprio": {
+        "key": "7824736068450002",
+        "enabled": true
+      },
+      "viaverde": {
+        "key": "BX-22-LA",
+        "enabled": true
+      }
+    },
+    "banking": {
+      "iban": "PT50003300004555698867005",
+      "accountHolder": "Wedson Guarino"
+    },
+    "vehicle": {
+      "plate": "BX-22-LA",
+      "make": "Dacia",
+      "model": "Jogger"
+    },
+    "updatedAt": 1760991193290,
+    "statusUpdatedAt": 1760991193290,
+    "statusUpdatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2"
+  },
+  "timestamp": 1760991193290,
+  "createdAt": 1760991193290,
+  "driverName": "Pereira Alves Carlos"
+}

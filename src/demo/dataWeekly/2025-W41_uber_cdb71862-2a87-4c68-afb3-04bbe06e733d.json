@@ -1,0 +1,17 @@
+{
+  "id": "2025-W41_uber_cdb71862-2a87-4c68-afb3-04bbe06e733d",
+  "totalValue": 501,
+  "weekId": "2025-W41",
+  "vehiclePlate": "BX-22-LA",
+  "rawDataRef": "2025-W41-uber-1760324233327",
+  "platform": "uber",
+  "referenceId": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+  "createdAt": "2025-10-13T02:57:14.034Z",
+  "totalTrips": 0,
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "weekStart": "2025-10-06",
+  "weekEnd": "2025-10-12",
+  "driverName": "Pereira Alves Carlos",
+  "updatedAt": "2025-10-13T02:57:14.034Z",
+  "referenceLabel": "Pereira Alves Carlos"
+}

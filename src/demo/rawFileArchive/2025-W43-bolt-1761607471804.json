@@ -1,0 +1,40 @@
+{
+  "id": "2025-W43-bolt-1761607471804",
+  "weekId": "2025-W43",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "platform": "bolt",
+  "fileName": "LDA.csv Ganhos por motorista-20_10_2025-26_10_2025-Braga Fleet Alvorada Magistral",
+  "rawData": {
+    "headers": [
+      "Email",
+      "Ganhos brutos (total)|€",
+      "Viagens (total)",
+      "Motorista"
+    ],
+    "rows": [
+      {
+        "Email": "motorista4@frota360.pt",
+        "Ganhos brutos (total)|€": "8.31",
+        "Viagens (total)": 0,
+        "Motorista": "Eliseu Lauback"
+      },
+      {
+        "Email": "isaiasmotta@sapo.pt",
+        "Ganhos brutos (total)|€": "76.19",
+        "Viagens (total)": 0,
+        "Motorista": "Isaias Motta"
+      },
+      {
+        "Email": "motorista1@frota360.pt",
+        "Ganhos brutos (total)|€": "176.90",
+        "Viagens (total)": 0,
+        "Motorista": "Yuri Conceição"
+      }
+    ]
+  },
+  "importedAt": "2025-10-27T23:24:31.805Z",
+  "importedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "processed": true,
+  "processedAt": "2025-10-28T02:56:14.501Z"
+}

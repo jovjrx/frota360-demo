@@ -1,0 +1,15 @@
+{
+  "id": "XJJMbdntDhCrZcwTcPxq",
+  "platform": "uber",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais atualizadas via script de correção (aguardando OAuth)",
+  "timestamp": {
+    "_seconds": 1759703115,
+    "_nanoseconds": 505000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295115,
+    "_nanoseconds": 505000000
+  }
+}

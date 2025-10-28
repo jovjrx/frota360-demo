@@ -1,0 +1,60 @@
+{
+  "id": "WRfVxgaumbDo6IfD9H36",
+  "firstName": "Carlos",
+  "lastName": "Pereira Alves",
+  "fullName": "Pereira Alves Carlos",
+  "email": "motorista5@frota360.pt",
+  "phone": "+351917822826",
+  "birthDate": "1983-12-01",
+  "type": "renter",
+  "banking": {
+    "iban": "PT50003300004555698867005",
+    "accountHolder": "Pereira Alves Carlos"
+  },
+  "firebaseUid": "xgs3fXHFzFeRBqMvosfSLyhjsdo2",
+  "createdAt": "2025-10-06T21:24:39.209Z",
+  "createdBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "activatedAt": "2025-10-06T21:24:39.209Z",
+  "activatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "rentalFee": 233,
+  "lastPayoutAmount": 0,
+  "monthlyEarnings": 0,
+  "notes": "",
+  "rating": 0,
+  "weeklyEarnings": 0,
+  "isActive": false,
+  "locale": "pt",
+  "totalTrips": 0,
+  "checkinCount": 0,
+  "isApproved": false,
+  "statusUpdatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "integrations": {
+    "uber": {
+      "key": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+      "enabled": true
+    },
+    "bolt": {
+      "key": "Wedsoniris@gmail.com",
+      "enabled": true
+    },
+    "myprio": {
+      "key": "7824736068450002",
+      "enabled": true
+    },
+    "viaverde": {
+      "key": "BX-22-LA",
+      "enabled": true
+    }
+  },
+  "vehicle": {
+    "plate": "BX-22-LA",
+    "make": "Dacia",
+    "model": "Jogger"
+  },
+  "city": "Gaia",
+  "lastAccessEmailAt": "2025-10-21T11:37:16.926Z",
+  "statusUpdatedAt": 1761317738386,
+  "status": "inactive",
+  "updatedAt": 1761317738386,
+  "name": "Pereira Alves Carlos"
+}

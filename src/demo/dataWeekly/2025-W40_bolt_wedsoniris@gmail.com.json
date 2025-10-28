@@ -1,0 +1,17 @@
+{
+  "id": "2025-W40_bolt_wedsoniris@gmail.com",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "bolt",
+  "referenceId": "motorista5@frota360.pt",
+  "vehiclePlate": null,
+  "totalValue": 46,
+  "totalTrips": 0,
+  "rawDataRef": "2025-W40-bolt",
+  "createdAt": "2025-10-08T03:31:05.340Z",
+  "updatedAt": "2025-10-08T03:31:05.340Z",
+  "referenceLabel": "Pereira Alves Carlos",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "driverName": "Pereira Alves Carlos"
+}

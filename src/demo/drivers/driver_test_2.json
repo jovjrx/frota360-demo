@@ -1,0 +1,14 @@
+{
+  "id": "driver_test_2",
+  "fullName": "Teste Maria Santos -",
+  "type": "renter",
+  "isActive": true,
+  "rentalFee": 326,
+  "adminFee": {
+    "mode": "percent",
+    "percentValue": 7
+  },
+  "banking": {
+    "iban": "PT50000000000000000001"
+  }
+}

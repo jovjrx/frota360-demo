@@ -1,0 +1,19 @@
+{
+  "id": "motorista3_frota360",
+  "uid": "motorista3_frota360",
+  "email": "motorista3@frota360.pt",
+  "name": "Motorista 3",
+  "displayName": "Motorista 3",
+  "role": "driver",
+  "active": true,
+  "password": "demo123",
+  "createdAt": {
+    "_seconds": 1735689600,
+    "_nanoseconds": 0
+  },
+  "updatedAt": {
+    "_seconds": 1735689600,
+    "_nanoseconds": 0
+  }
+}
+

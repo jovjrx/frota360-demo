@@ -1,0 +1,35 @@
+{
+  "id": "2025-W42",
+  "weekId": "2025-W42",
+  "status": "draft",
+  "totalRecords": 0,
+  "totalAmount": 0,
+  "totalBonus": 0,
+  "createdAt": "2025-10-27T21:17:13.693Z",
+  "weekStart": "2025-10-13",
+  "weekEnd": "2025-10-19",
+  "platforms": {
+    "uber": {
+      "platform": "uber",
+      "imported": true,
+      "recordsCount": 3,
+      "importedAt": "2025-10-27T23:20:44.422Z"
+    },
+    "bolt": {
+      "platform": "bolt",
+      "imported": false,
+      "recordsCount": 0
+    },
+    "myprio": {
+      "platform": "myprio",
+      "imported": false,
+      "recordsCount": 0
+    },
+    "viaverde": {
+      "platform": "viaverde",
+      "imported": false,
+      "recordsCount": 0
+    }
+  },
+  "updatedAt": "2025-10-27T23:20:44.422Z"
+}

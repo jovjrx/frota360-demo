@@ -1,0 +1,17 @@
+{
+  "id": "2025-W43_uber_704cddea-c607-4bfe-95ea-c673638dc628",
+  "totalValue": 1092,
+  "weekId": "2025-W43",
+  "referenceLabel": "Oliveira Martins Pedro",
+  "vehiclePlate": "BX-22-LA",
+  "rawDataRef": "2025-W43-uber-1761607435802",
+  "platform": "uber",
+  "referenceId": "704cddea-c607-4bfe-95ea-c673638dc628",
+  "createdAt": "2025-10-28T02:56:12.634Z",
+  "totalTrips": 0,
+  "driverId": "JDENF7ayxqaEQy0VegWE",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "driverName": "Oliveira Martins Pedro",
+  "updatedAt": "2025-10-28T02:56:12.634Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "myprio",
+  "name": "myprio",
+  "description": "Integração com myprio para despesas de combustível",
+  "errorMessage": "Failed to authenticate with myprio",
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759703117,
+      "_nanoseconds": 559000000
+    }
+  },
+  "credentials": {
+    "accountId": "606845",
+    "password": "Alvorada25@"
+  },
+  "config": {
+    "baseUrl": "https://www.myprio.pt",
+    "endpoints": {
+      "login": "https://www.myprio.pt/login"
+    }
+  },
+  "enabled": false,
+  "status": "error"
+}

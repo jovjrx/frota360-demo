@@ -1,0 +1,12 @@
+{
+  "id": "referral_1761522709936_tj6fwe0ul",
+  "valueType": "fixed",
+  "value": 50,
+  "criterioType": "after_weeks",
+  "weeksToWait": 4,
+  "minWeeksActive": 1,
+  "descricao": "",
+  "ativo": true,
+  "createdAt": "2025-10-26T23:51:49.936Z",
+  "updatedAt": "2025-10-26T23:51:49.936Z"
+}

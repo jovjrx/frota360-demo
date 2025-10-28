@@ -1,0 +1,15 @@
+{
+  "id": "4j1r8fifKNBvX5Xr8hha",
+  "platform": "myprio",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais configuradas (desabilitado até testar scraper)",
+  "timestamp": {
+    "_seconds": 1759703118,
+    "_nanoseconds": 196000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295118,
+    "_nanoseconds": 196000000
+  }
+}

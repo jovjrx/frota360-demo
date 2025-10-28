@@ -1,0 +1,17 @@
+{
+  "id": "2025-W43_uber_37c63c0d-3eab-462a-9c56-3b01d28b7554",
+  "totalValue": 492,
+  "weekId": "2025-W43",
+  "referenceLabel": "Rodrigues Silva Ana",
+  "vehiclePlate": "BL-81-UR",
+  "rawDataRef": "2025-W43-uber-1761607435802",
+  "platform": "uber",
+  "referenceId": "37c63c0d-3eab-462a-9c56-3b01d28b7554",
+  "createdAt": "2025-10-28T02:56:12.634Z",
+  "totalTrips": 0,
+  "driverId": "V0w09ifVSK6G4ue5Rg5R",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "driverName": "Rodrigues Silva Ana",
+  "updatedAt": "2025-10-28T02:56:12.634Z"
+}

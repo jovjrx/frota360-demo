@@ -1,0 +1,17 @@
+{
+  "id": "2025-W43_viaverde_gp798sh",
+  "totalValue": 4,
+  "weekId": "2025-W43",
+  "referenceLabel": "GP798SH",
+  "vehiclePlate": null,
+  "rawDataRef": "2025-W43-viaverde-1761609280878",
+  "platform": "viaverde",
+  "referenceId": "GP798SH",
+  "createdAt": "2025-10-28T02:56:12.639Z",
+  "totalTrips": 0,
+  "driverId": null,
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "driverName": null,
+  "updatedAt": "2025-10-28T02:56:12.639Z"
+}

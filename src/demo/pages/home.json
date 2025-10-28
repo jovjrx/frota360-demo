@@ -1,0 +1,254 @@
+{
+  "blocks": [
+    {
+      "type": "hero",
+      "title": {
+        "pt": "Sua Frota,\nmerece uma gestão 360°.",
+        "en": "Your Fleet,\ndeserves 360° Management."
+      },
+      "subtitle": {
+        "pt": "Gestão 360° para motoristas TVDE em Portugal",
+        "en": "360º management for TVDE drivers — Right platform, real support, guaranteed earnings."
+      },
+      "badge": {
+        "pt": "TVDE PORTUGAL",
+        "en": "TVDE PORTUGAL"
+      },
+      "backgroundImage": "/img/bg-hero.png",
+      "highlightTitle": {
+        "pt": "Onboarding em dias, não semanas",
+        "en": "You drive, we take care of the rest!"
+      },
+      "highlightDescription": {
+        "pt": "Suporte humano e resolutivo. Tecnologia que reduz custos e burocracia. Compliance TVDE garantido.",
+        "en": "Onboarding in days, not weeks. Human and responsive support. Technology that reduces costs and bureaucracy. TVDE compliance guaranteed."
+      },
+      "highlightImage": "/img/driver-app.jpg",
+      "primaryButtonText": {
+        "pt": "Realizar solicitação",
+        "en": "Submit application"
+      },
+      "primaryButtonLink": "/request",
+      "secondaryButtonText": {
+        "pt": "Falar no WhatsApp",
+        "en": "Talk on WhatsApp"
+      },
+      "secondaryButtonLink": "/whatsapp"
+    },
+    {
+      "type": "payments",
+      "badge": {
+        "pt": "PAGAMENTOS GARANTIDOS",
+        "en": "GUARANTEED PAYMENTS"
+      },
+      "title": {
+        "pt": "Pagamentos garantidos à segunda",
+        "en": "Guaranteed Monday payments"
+      },
+      "subtitle": {
+        "pt": "Receba seus repasses com total transparência e pontualidade",
+        "en": "Receive your payouts with full transparency and punctuality"
+      },
+      "description": {
+        "pt": "Todas as segundas-feiras, sem atrasos. Dashboard em tempo real mostra ganhos, despesas e o que vai receber. Zero surpresas.",
+        "en": "Every Monday, no delays. Real-time dashboard shows earnings, expenses and what you'll receive. Zero surprises."
+      },
+      "features": [
+        {
+          "title": {
+            "pt": "Pagamentos às segundas",
+            "en": "Monday payments"
+          },
+          "description": {
+            "pt": "Receba seus ganhos toda segunda-feira",
+            "en": "Receive your earnings every Monday"
+          },
+          "icon": "FiCalendar",
+          "color": "blue"
+        },
+        {
+          "title": {
+            "pt": "Processamento rápido",
+            "en": "Fast processing"
+          },
+          "description": {
+            "pt": "Ganhos da semana anterior direto na conta",
+            "en": "Previous week's earnings directly to your account"
+          },
+          "icon": "FiClock",
+          "color": "green"
+        },
+        {
+          "title": {
+            "pt": "Taxa fixa de €25/semana",
+            "en": "Fixed fee of €25/week"
+          },
+          "description": {
+            "pt": "Sem surpresas, você sabe exatamente quanto vai pagar",
+            "en": "No surprises, you know exactly what you'll pay"
+          },
+          "icon": "FiDollarSign",
+          "color": "purple"
+        },
+        {
+          "title": {
+            "pt": "100% dos seus ganhos",
+            "en": "100% of your earnings"
+          },
+          "description": {
+            "pt": "Sem taxas escondidas ou descontos inesperados",
+            "en": "No hidden fees or unexpected deductions"
+          },
+          "icon": "FiCheckCircle",
+          "color": "orange"
+        }
+      ],
+      "stats": {
+        "reliability": {
+          "pt": "Confiabilidade",
+          "en": "Reliability"
+        },
+        "hidden": {
+          "pt": "Taxas escondidas",
+          "en": "Hidden fees"
+        },
+        "processing": {
+          "pt": "Processamento",
+          "en": "Processing"
+        }
+      },
+      "highlights": [
+        {
+          "pt": "Repasse em 24h após fecho semanal",
+          "en": "Payout within 24h after weekly closing"
+        },
+        {
+          "pt": "Extrato detalhado por plataforma",
+          "en": "Detailed statement by platform"
+        },
+        {
+          "pt": "IVA 6% incluído no pagamento",
+          "en": "6% VAT included in payment"
+        },
+        {
+          "pt": "Histórico completo disponível",
+          "en": "Complete history available"
+        }
+      ]
+    },
+    {
+      "type": "benefits",
+      "title": {
+        "pt": "O que oferecemos",
+        "en": "What we offer our drivers"
+      },
+      "subtitle": {
+        "pt": "Tudo incluído para o seu sucesso como motorista TVDE",
+        "en": "Tools and support to maximize your earnings"
+      },
+      "feature": {
+        "pt": "BENEFÍCIOS",
+        "en": "BENEFITS"
+      },
+      "items": "benefits.items"
+    },
+    {
+      "type": "how_it_works",
+      "title": {
+        "pt": "Como funciona",
+        "en": "How it works"
+      },
+      "subtitle": {
+        "pt": "3 passos simples para começar a faturar",
+        "en": "3 simple steps to get started"
+      },
+      "feature": {
+        "pt": "PROCESSO",
+        "en": "PROCESS"
+      },
+      "steps": "howItWorks.steps"
+    },
+    {
+      "type": "services",
+      "title": {
+        "pt": "Tipos de Motorista",
+        "en": "Driver Types"
+      },
+      "subtitle": {
+        "pt": "Escolha o modelo que se adapta melhor a você",
+        "en": "Choose the model that best suits you"
+      },
+      "feature": {
+        "pt": "TIPOS",
+        "en": "TYPES"
+      },
+      "services": [
+        {
+          "title": {
+            "pt": "Motorista Afiliado",
+            "en": "Affiliated Driver"
+          },
+          "description": {
+            "pt": "Você tem seu próprio carro e quer maximizar seus ganhos. Oferecemos gestão completa, repasse de IVA 6%, e taxa fixa de €25/semana.",
+            "en": "You have your own car and want to maximize your earnings. We offer complete management, 6% VAT refund, and a fixed fee of €25/week."
+          },
+          "color": "green",
+          "buttonText": "Candidatar-me",
+          "buttonLink": "/request",
+          "image": "/img/service-drivers.jpg"
+        },
+        {
+          "title": {
+            "pt": "Motorista Locatário",
+            "en": "Rental Driver"
+          },
+          "description": {
+            "pt": "Não tem carro? Sem problema. Oferecemos aluguel de viaturas TVDE completas, prontas para trabalhar, com seguro incluído e manutenção garantida.",
+            "en": "Don't have a car? No problem. We offer complete TVDE vehicle rentals, ready to work, with insurance included and guaranteed maintenance."
+          },
+          "color": "blue",
+          "buttonText": "Candidatar-me",
+          "buttonLink": "/request",
+          "image": "/img/driver-app.jpg"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "title": {
+        "pt": "Perguntas Frequentes",
+        "en": "Frequently Asked Questions"
+      },
+      "subtitle": {
+        "pt": "Tire suas dúvidas sobre a Frota360.pt",
+        "en": "Clear your doubts about Frota360.pt"
+      },
+      "feature": {
+        "pt": "FAQ",
+        "en": "FAQ"
+      },
+      "items": "common.faq.items"
+    },
+    {
+      "type": "cta",
+      "title": {
+        "pt": "Pronto para começar?",
+        "en": "Ready to Start Earning?"
+      },
+      "subtitle": {
+        "pt": "Junte-se aos motoristas que já escolheram a Frota360.pt",
+        "en": "You drive, we take care of the rest! Join the drivers who have already chosen Frota360"
+      },
+      "feature": {
+        "pt": "PRÓXIMO PASSO",
+        "en": "NEXT STEP"
+      },
+      "buttonText": {
+        "pt": "Realizar solicitação",
+        "en": "Submit application"
+      },
+      "buttonLink": "/request",
+      "centered": true
+    }
+  ]
+}

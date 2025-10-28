@@ -1,0 +1,17 @@
+{
+  "id": "nmmTXRfHZcDfDzx4GRMS",
+  "fullName": "Júnior José",
+  "birthDate": "1991-09-04",
+  "email": "desenvolvedor.jjr@gmail.com",
+  "phone": "+5511933660458",
+  "city": "São Paulo",
+  "nif": "123132123",
+  "licenseNumber": null,
+  "type": "renter",
+  "vehicle": null,
+  "createdAt": "2025-10-11T19:31:50.660Z",
+  "rejectedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "rejectionReason": "teste",
+  "status": "rejected",
+  "updatedAt": "2025-10-11T20:09:56.132Z"
+}

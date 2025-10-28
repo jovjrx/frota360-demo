@@ -1,0 +1,20 @@
+{
+  "id": "admin_adm_frota360",
+  "uid": "admin_adm_frota360",
+  "email": "adm@frota360.pt",
+  "name": "Administrador",
+  "displayName": "Administrador",
+  "role": "admin",
+  "isAdmin": true,
+  "active": true,
+  "password": "demo123",
+  "createdAt": {
+    "_seconds": 1735689600,
+    "_nanoseconds": 0
+  },
+  "updatedAt": {
+    "_seconds": 1735689600,
+    "_nanoseconds": 0
+  }
+}
+

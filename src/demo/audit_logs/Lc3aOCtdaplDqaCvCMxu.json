@@ -1,0 +1,109 @@
+{
+  "id": "Lc3aOCtdaplDqaCvCMxu",
+  "action": "driver_update",
+  "driverId": "0D0dAAaRixi7rmnLg1mN",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldData": {
+    "firstName": "Yuri",
+    "lastName": "Rocha",
+    "fullName": "Rocha Yuri",
+    "phone": "+351965811490",
+    "birthDate": "2000-04-04",
+    "city": "Braga",
+    "status": "active",
+    "type": "affiliate",
+    "banking": {
+      "iban": "PT50000700000066615972323",
+      "accountHolder": "Yuri Rocha"
+    },
+    "firebaseUid": "VEd3cr3DgzbOXtORZ9E4UJUTy3g1",
+    "createdAt": "2025-10-06T21:27:41.990Z",
+    "createdBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "activatedAt": "2025-10-06T21:27:41.990Z",
+    "activatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "rentalFee": 0,
+    "lastPayoutAmount": 0,
+    "monthlyEarnings": 0,
+    "notes": "",
+    "rating": 0,
+    "weeklyEarnings": 0,
+    "isActive": false,
+    "locale": "pt",
+    "vehicle": {
+      "make": "Citroen",
+      "model": "C3 Aircross",
+      "year": 2023,
+      "plate": "AX-42-DO"
+    },
+    "totalTrips": 0,
+    "checkinCount": 0,
+    "isApproved": false,
+    "email": "yurirsc18@gmail.com",
+    "integrations": {
+      "uber": {
+        "key": "14f33942-d50c-49ea-aa1f-93e6072c152d",
+        "enabled": true,
+        "lastSync": null
+      },
+      "bolt": {
+        "key": "yurirsc18@gmail.com",
+        "enabled": true,
+        "lastSync": null
+      },
+      "myprio": {
+        "key": "7824736068450001",
+        "enabled": true,
+        "lastSync": null
+      },
+      "viaverde": {
+        "key": "AX-42-DO",
+        "enabled": false,
+        "lastSync": null
+      }
+    },
+    "lastAccessEmailAt": "2025-10-15T05:54:20.867Z",
+    "updatedAt": "2025-10-15T05:54:20.867Z"
+  },
+  "newData": {
+    "status": "active",
+    "type": "affiliate",
+    "fullName": "Rocha Yuri",
+    "email": "yurirsc18@gmail.com",
+    "phone": "+351965811490",
+    "birthDate": "2000-04-04",
+    "city": "Braga",
+    "rentalFee": 0,
+    "integrations": {
+      "uber": {
+        "key": "14f33942-d50c-49ea-aa1f-93e6072c152d",
+        "enabled": true
+      },
+      "bolt": {
+        "key": "yurirsc18@gmail.com",
+        "enabled": true
+      },
+      "myprio": {
+        "key": "7824736068450001",
+        "enabled": true
+      },
+      "viaverde": {
+        "key": "AX-42-DO",
+        "enabled": false
+      }
+    },
+    "banking": {
+      "iban": "PT50000700000066615972323",
+      "accountHolder": "Yuri Rocha"
+    },
+    "vehicle": {
+      "plate": "AX-42-DO",
+      "make": "Citroen",
+      "model": "C3 Aircross",
+      "year": 2023
+    },
+    "updatedAt": 1760529369851
+  },
+  "timestamp": 1760529369851,
+  "createdAt": 1760529369851,
+  "driverName": "Silva Santos João"
+}

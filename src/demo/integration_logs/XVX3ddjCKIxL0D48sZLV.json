@@ -1,0 +1,15 @@
+{
+  "id": "XVX3ddjCKIxL0D48sZLV",
+  "platform": "viaverde",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais configuradas (desabilitado até testar scraper)",
+  "timestamp": {
+    "_seconds": 1759703116,
+    "_nanoseconds": 410000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295116,
+    "_nanoseconds": 410000000
+  }
+}

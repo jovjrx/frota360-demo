@@ -1,0 +1,116 @@
+{
+  "id": "WRfVxgaumbDo6IfD9H36_2025-W40",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "driverName": "Pereira Alves Carlos",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "type": "renter",
+  "isLocatario": true,
+  "ganhosTotal": 1245,
+  "uberTotal": 909,
+  "boltTotal": 33,
+  "prio": 123.74,
+  "ivaValor": 51,
+  "ganhosMenosIVA": 1036,
+  "despesasAdm": 68.35430000000001,
+  "aluguel": 290,
+  "totalDespesas": 319,
+  "financingDetails": null,
+  "commissionAmount": 0,
+  "totalBonusAmount": 0,
+  "bonusMetaPending": [],
+  "bonusMetaPaid": [],
+  "referralBonusPending": [],
+  "referralBonusPaid": [],
+  "paymentStatus": "paid",
+  "paymentDate": "2025-10-27T14:44:39.551Z",
+  "dataSource": "reprocessed",
+  "createdAt": "2025-10-27T14:44:39.551Z",
+  "paymentInfo": {
+    "proofs": [
+      {
+        "filename": "1759981766293-document1759873433429.pdf",
+        "url": "gs://frota360-pt.firebasestorage.app/driverPayments/2025-W40/WRfVxgaumbDo6IfD9H36/1759981766293-document1759873433429.pdf",
+        "size": "135877"
+      }
+    ],
+    "proofCount": 1,
+    "uploadedAt": "2025-10-27T14:57:55.814Z"
+  },
+  "platformData": [
+    {
+      "platform": "Uber",
+      "value": 815.09
+    },
+    {
+      "platform": "Bolt",
+      "value": 37.66
+    },
+    {
+      "platform": "MyPrio",
+      "value": 123.74
+    },
+    {
+      "platform": "ViaVerde",
+      "value": 32.1
+    }
+  ],
+  "recordSnapshot": {
+    "id": "WRfVxgaumbDo6IfD9H36_2025-W40",
+    "driverId": "WRfVxgaumbDo6IfD9H36",
+    "driverName": "Pereira Alves Carlos",
+    "weekId": "2025-W40",
+    "weekStart": "2025-09-29",
+    "weekEnd": "2025-10-05",
+    "type": "renter",
+    "isLocatario": true,
+    "ganhosTotal": 1189,
+    "uberTotal": 745,
+    "boltTotal": 48,
+    "prio": 123.74,
+    "ivaValor": 55,
+    "ganhosMenosIVA": 875,
+    "despesasAdm": 68.35430000000001,
+    "combustivel": 0,
+    "aluguel": 290,
+    "totalDespesas": 377,
+    "financingDetails": null,
+    "commissionAmount": 0,
+    "totalBonusAmount": 0,
+    "bonusMetaPending": [],
+    "bonusMetaPaid": [],
+    "referralBonusPending": [],
+    "referralBonusPaid": [],
+    "paymentStatus": "paid",
+    "paymentDate": "2025-10-27T14:44:39.551Z",
+    "dataSource": "reprocessed",
+    "createdAt": "2025-10-27T14:44:39.551Z",
+    "updatedAt": "2025-10-27T14:44:39.551Z",
+    "platformData": [
+      {
+        "platform": "Uber",
+        "value": 815.09
+      },
+      {
+        "platform": "Bolt",
+        "value": 37.66
+      },
+      {
+        "platform": "MyPrio",
+        "value": 123.74
+      },
+      {
+        "platform": "ViaVerde",
+        "value": 32.1
+      }
+    ],
+    "repasse": 573,
+    "viaverde": 32.1
+  },
+  "repasse": 628,
+  "viaverde": 32.1,
+  "updatedAt": "2025-10-27T15:18:51.727Z",
+  "portagens": 32.1,
+  "combustivel": 123.74
+}

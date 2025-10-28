@@ -1,0 +1,24 @@
+{
+  "id": "fonoa",
+  "name": "FONOA",
+  "description": "Integração com FONOA para faturação",
+  "errorMessage": "Failed to authenticate with FONOA",
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759703116,
+      "_nanoseconds": 641000000
+    }
+  },
+  "credentials": {
+    "email": "info@alvoradamagistral.eu",
+    "password": "Muffin@2017"
+  },
+  "config": {
+    "baseUrl": "https://app.fonoa.com",
+    "endpoints": {
+      "login": "https://app.fonoa.com/login"
+    }
+  },
+  "enabled": false,
+  "status": "error"
+}

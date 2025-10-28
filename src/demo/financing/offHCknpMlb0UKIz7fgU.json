@@ -1,0 +1,25 @@
+{
+  "id": "offHCknpMlb0UKIz7fgU",
+  "driverId": "V0w09ifVSK6G4ue5Rg5R",
+  "type": "loan",
+  "amount": 700,
+  "weeks": 12,
+  "weeklyInterest": 4,
+  "startDate": "2025-10-11T20:36:41.594Z",
+  "endDate": null,
+  "status": "active",
+  "notes": "Antecipação Seguro TVDE",
+  "createdBy": "info@alvoradamagistral.eu",
+  "approvedBy": null,
+  "approvedAt": null,
+  "createdAt": "2025-10-11T20:36:41.594Z",
+  "proofStoragePath": "financing-proofs/offHCknpMlb0UKIz7fgU/1760215085404_document1760214913122.pdf",
+  "proofUploadedAt": "2025-10-11T20:38:05.888Z",
+  "proofUrl": "https://storage.googleapis.com/frota360-pt.firebasestorage.app/financing-proofs/offHCknpMlb0UKIz7fgU/1760215085404_document1760214913122.pdf",
+  "proofFileName": "document1760214913122.pdf",
+  "remainingWeeks": 11,
+  "processedRecords": [
+    "V0w09ifVSK6G4ue5Rg5R_2025-W42"
+  ],
+  "updatedAt": "2025-10-20T22:57:20.306Z"
+}

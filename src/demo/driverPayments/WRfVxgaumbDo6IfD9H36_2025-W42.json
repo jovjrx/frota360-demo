@@ -1,0 +1,112 @@
+{
+  "id": "WRfVxgaumbDo6IfD9H36_2025-W42",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "driverName": "Pereira Alves Carlos",
+  "weekId": "2025-W42",
+  "weekStart": "2025-10-13",
+  "weekEnd": "2025-10-19",
+  "type": "renter",
+  "isLocatario": true,
+  "ganhosTotal": 529,
+  "uberTotal": 215,
+  "boltTotal": 243,
+  "prio": 152.41,
+  "ivaValor": 34,
+  "ganhosMenosIVA": 603,
+  "despesasAdm": 41.0634,
+  "aluguel": 290,
+  "totalDespesas": 389,
+  "financingDetails": null,
+  "commissionAmount": 0,
+  "totalBonusAmount": 0,
+  "bonusMetaPending": [],
+  "bonusMetaPaid": [],
+  "referralBonusPending": [],
+  "referralBonusPaid": [],
+  "paymentStatus": "paid",
+  "paymentDate": "2025-10-27T14:44:49.270Z",
+  "dataSource": "reprocessed",
+  "createdAt": "2025-10-27T14:44:49.270Z",
+  "platformData": [
+    {
+      "platform": "Uber",
+      "value": 216.98
+    },
+    {
+      "platform": "Bolt",
+      "value": 217.23
+    },
+    {
+      "platform": "MyPrio",
+      "value": 152.41
+    },
+    {
+      "platform": "ViaVerde",
+      "value": 9.4
+    }
+  ],
+  "recordSnapshot": {
+    "id": "WRfVxgaumbDo6IfD9H36_2025-W42",
+    "driverId": "WRfVxgaumbDo6IfD9H36",
+    "driverName": "Pereira Alves Carlos",
+    "weekId": "2025-W42",
+    "weekStart": "2025-10-13",
+    "weekEnd": "2025-10-19",
+    "type": "renter",
+    "isLocatario": true,
+    "ganhosTotal": 578,
+    "uberTotal": 230,
+    "boltTotal": 272,
+    "prio": 152.41,
+    "ivaValor": 32,
+    "ganhosMenosIVA": 541,
+    "despesasAdm": 41.0634,
+    "combustivel": 0,
+    "aluguel": 290,
+    "totalDespesas": 342,
+    "financingDetails": null,
+    "commissionAmount": 0,
+    "totalBonusAmount": 0,
+    "bonusMetaPending": [],
+    "bonusMetaPaid": [],
+    "referralBonusPending": [],
+    "referralBonusPaid": [],
+    "paymentStatus": "paid",
+    "paymentDate": "2025-10-27T14:44:49.270Z",
+    "dataSource": "reprocessed",
+    "createdAt": "2025-10-27T14:44:49.270Z",
+    "updatedAt": "2025-10-27T14:44:49.270Z",
+    "platformData": [
+      {
+        "platform": "Uber",
+        "value": 216.98
+      },
+      {
+        "platform": "Bolt",
+        "value": 217.23
+      },
+      {
+        "platform": "MyPrio",
+        "value": 152.41
+      },
+      {
+        "platform": "ViaVerde",
+        "value": 9.4
+      }
+    ],
+    "repasse": 258,
+    "viaverde": 9.4
+  },
+  "repasse": 214,
+  "viaverde": 9.4,
+  "portagens": 9.4,
+  "totalAmount": 233,
+  "totalAmountCents": 25034,
+  "adminFeeCents": 4139,
+  "adminFeeValue": 42,
+  "baseAmountCents": 17459,
+  "adminFeePercentage": 8,
+  "baseAmount": 194,
+  "combustivel": 0,
+  "updatedAt": "2025-10-27T17:58:45.078Z"
+}

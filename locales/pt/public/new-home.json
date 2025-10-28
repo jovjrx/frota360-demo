@@ -149,7 +149,7 @@
       },
       {
         "title": "Motorista Locatário",
-        "description": "Alugue um veículo da Frota360 PT e comece a trabalhar imediatamente.",
+        "description": "Alugue um veículo da Frota360 e comece a trabalhar imediatamente.",
         "color": "blue",
         "image": "/img/service-companies.jpg",
         "benefits": [
@@ -191,7 +191,7 @@
   },
   "finalCta": {
     "title": "Pronto para Começar a Faturar?",
-    "subtitle": "Você conduz, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Frota360",
+    "subtitle": "Você frota360, nós cuidamos do resto! Junte-se aos motoristas que já escolheram a Frota360",
     "ctaPrimary": "Candidatar-me Agora",
     "ctaSecondary": "Falar no WhatsApp"
   }

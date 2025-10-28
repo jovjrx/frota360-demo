@@ -1,0 +1,41 @@
+{
+  "id": "2025-W42",
+  "weekId": "2025-W42",
+  "createdAt": "2025-10-27T22:59:49.650Z",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "isComplete": false,
+  "sources": {
+    "myprio": {
+      "driversCount": 0,
+      "recordsCount": 0,
+      "origin": "manual",
+      "strategy": "upload",
+      "status": "pending"
+    },
+    "bolt": {
+      "driversCount": 0,
+      "recordsCount": 0,
+      "origin": "manual",
+      "strategy": "upload",
+      "status": "pending"
+    },
+    "viaverde": {
+      "driversCount": 0,
+      "recordsCount": 0,
+      "origin": "manual",
+      "strategy": "upload",
+      "status": "pending"
+    },
+    "uber": {
+      "recordsCount": 3,
+      "origin": "manual",
+      "strategy": "upload",
+      "status": "complete",
+      "driversCount": 3,
+      "importedAt": "2025-10-27T23:20:44.033Z",
+      "archiveRef": "2025-W42-uber-1761607242568"
+    }
+  },
+  "updatedAt": "2025-10-27T23:20:44.033Z"
+}

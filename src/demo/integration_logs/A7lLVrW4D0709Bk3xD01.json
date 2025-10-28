@@ -1,0 +1,15 @@
+{
+  "id": "A7lLVrW4D0709Bk3xD01",
+  "platform": "cartrack",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais atualizadas via script de correção",
+  "timestamp": {
+    "_seconds": 1759703113,
+    "_nanoseconds": 534000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295113,
+    "_nanoseconds": 534000000
+  }
+}

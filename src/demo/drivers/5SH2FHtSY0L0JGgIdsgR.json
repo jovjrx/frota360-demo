@@ -1,0 +1,20 @@
+{
+  "id": "5SH2FHtSY0L0JGgIdsgR",
+  "uid": "iYs12k2Z8nWpwc5VJudMa4sP0K22",
+  "email": "motorista2@frota360.pt",
+  "firstName": "Maria",
+  "lastName": "Ferreira Costa",
+  "fullName": "Ferreira Costa Maria",
+  "name": "Ferreira Costa Maria",
+  "status": "active",
+  "isActive": true,
+  "type": "affiliate",
+  "createdAt": {
+    "_seconds": 1761434387,
+    "_nanoseconds": 797000000
+  },
+  "updatedAt": {
+    "_seconds": 1761434387,
+    "_nanoseconds": 797000000
+  }
+}

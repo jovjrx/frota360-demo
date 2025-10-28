@@ -1,0 +1,24 @@
+{
+  "id": "viaverde",
+  "name": "ViaVerde",
+  "description": "Integração com ViaVerde para dados de portagens",
+  "errorMessage": "Failed to authenticate with ViaVerde",
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759703115,
+      "_nanoseconds": 726000000
+    }
+  },
+  "credentials": {
+    "email": "info@alvoradamagistral.eu",
+    "password": "Alvorada2025@"
+  },
+  "config": {
+    "baseUrl": "https://www.viaverde.pt",
+    "endpoints": {
+      "login": "https://www.viaverde.pt/particulares/login"
+    }
+  },
+  "enabled": false,
+  "status": "error"
+}

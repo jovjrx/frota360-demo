@@ -1,0 +1,15 @@
+{
+  "id": "rUxKUjiIfEzlNYM6hAeE",
+  "platform": "bolt",
+  "type": "info",
+  "severity": "info",
+  "message": "Credenciais atualizadas via script de correção",
+  "timestamp": {
+    "_seconds": 1759703114,
+    "_nanoseconds": 580000000
+  },
+  "expiresAt": {
+    "_seconds": 1762295114,
+    "_nanoseconds": 580000000
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "2025-W40_uber_64d1e235-8f1f-4cf2-a862-ef862d443990",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "uber",
+  "referenceId": "64d1e235-8f1f-4cf2-a862-ef862d443990",
+  "driverId": null,
+  "driverName": null,
+  "vehiclePlate": null,
+  "totalValue": -1165.15,
+  "totalTrips": 0,
+  "rawDataRef": "2025-W40-uber",
+  "createdAt": "2025-10-08T03:31:06.057Z",
+  "updatedAt": "2025-10-08T03:31:06.057Z"
+}

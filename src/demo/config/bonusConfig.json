@@ -1,0 +1,10 @@
+{
+  "id": "bonusConfig",
+  "maxLevels": 2,
+  "minWeeklyRevenueForEligibility": 684,
+  "levels": {
+    "1": 0.02,
+    "2": 0.01
+  },
+  "base": "repasse"
+}

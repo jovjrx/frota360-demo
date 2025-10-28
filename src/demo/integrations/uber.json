@@ -1,0 +1,24 @@
+{
+  "id": "uber",
+  "name": "Uber",
+  "description": "Integração com Uber para viagens e ganhos",
+  "errorMessage": "Failed to connect",
+  "config": {
+    "baseUrl": "https://api.uber.com/v1",
+    "authUrl": "https://auth.uber.com/oauth/v2/authorize",
+    "tokenUrl": "https://auth.uber.com/oauth/v2/token"
+  },
+  "enabled": true,
+  "credentials": {
+    "clientId": "0W89Kw8QMgGdesno5dBdvNdabnMw8KkL",
+    "clientSecret": "mQdZgiooj9SId57DuR5w9t6TSq10HHfG7acVTq1A",
+    "orgUuid": "2b203f2d-2fbb-4012-b677-7e2b878850d0"
+  },
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759976329,
+      "_nanoseconds": 759000000
+    }
+  },
+  "status": "error"
+}

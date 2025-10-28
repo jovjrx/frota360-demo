@@ -1,0 +1,49 @@
+{
+  "id": "2025-W43",
+  "weekId": "2025-W43",
+  "createdAt": "2025-10-27T23:23:58.473Z",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "isComplete": true,
+  "sources": {
+    "myprio": {
+      "origin": "manual",
+      "strategy": "upload",
+      "driversCount": 3,
+      "recordsCount": 4,
+      "lastError": "Despesa PRIO não mapeada (7824736068450000).",
+      "archiveRef": "2025-W43-myprio-1761609052792",
+      "status": "complete",
+      "importedAt": "2025-10-28T02:56:14.500Z"
+    },
+    "bolt": {
+      "origin": "manual",
+      "strategy": "upload",
+      "driversCount": 3,
+      "recordsCount": 3,
+      "archiveRef": "2025-W43-bolt-1761607471804",
+      "status": "complete",
+      "importedAt": "2025-10-28T02:56:14.500Z"
+    },
+    "viaverde": {
+      "origin": "manual",
+      "strategy": "upload",
+      "recordsCount": 2,
+      "driversCount": 1,
+      "lastError": "Portagem ViaVerde não mapeada (GP798SH).",
+      "archiveRef": "2025-W43-viaverde-1761609280878",
+      "status": "complete",
+      "importedAt": "2025-10-28T02:56:14.500Z"
+    },
+    "uber": {
+      "driversCount": 3,
+      "recordsCount": 3,
+      "archiveRef": "2025-W43-uber-1761607435802",
+      "origin": "manual",
+      "strategy": "upload",
+      "status": "complete",
+      "importedAt": "2025-10-28T02:56:14.500Z"
+    }
+  },
+  "updatedAt": "2025-10-28T02:56:14.500Z"
+}

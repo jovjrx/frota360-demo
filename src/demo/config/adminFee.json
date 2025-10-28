@@ -1,0 +1,17 @@
+{
+  "id": "adminFee",
+  "mode": "fixed",
+  "percentValue": 7,
+  "appliedToBase": "ganhosMenosIVA",
+  "fixedValue": 25,
+  "affiliate": {
+    "mode": "fixed",
+    "value": 25,
+    "base": "ganhosMenosIVA"
+  },
+  "renter": {
+    "mode": "percent",
+    "value": 4,
+    "base": "ganhosMenosIVA"
+  }
+}

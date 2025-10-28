@@ -1,0 +1,17 @@
+{
+  "id": "2025-W40_viaverde_BX22LA",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "viaverde",
+  "referenceId": "BX-22-LA",
+  "vehiclePlate": "BX-22-LA",
+  "totalValue": 41,
+  "totalTrips": 0,
+  "rawDataRef": "2025-W40-viaverde",
+  "createdAt": "2025-10-08T03:31:06.689Z",
+  "updatedAt": "2025-10-08T03:31:06.689Z",
+  "referenceLabel": "Pereira Alves Carlos",
+  "driverId": "WRfVxgaumbDo6IfD9H36",
+  "driverName": "Pereira Alves Carlos"
+}

@@ -11,6 +11,7 @@
   "menu": {
     "dashboard": "Dashboard",
     "data": "My Data",
+    "payments": "Payments",
     "payslips": "Payslips",
     "analytics": "Analytics",
     "tracking": "Tracking",
@@ -20,6 +21,7 @@
     "drivers": "Drivers",
     "control": "Control & Payments",
     "financing": "Financing",
+    "documents": "Documents",
     "monitor": "Monitoring",
     "users": "Users",
     "overview": "Overview",
@@ -29,7 +31,6 @@
     "tracking_desc": "Tracking",
     "weekly_data": "Weekly data",
     "user_management": "User management",
-    "payments": "Payments",
     "requests_management": "Requests management",
     "payments_control": "Payments control",
     "vehicle_tracking": "Vehicle tracking",
@@ -38,10 +39,13 @@
     "commissions_management": "Commissions management",
     "performance": "Performance",
     "performance_management": "Performance management",
+    "recruitment": "Recruitment",
     "kpis": "KPIs",
     "kpis_management": "KPIs management",
     "goals": "Goals",
     "goals_management": "Goals management",
+    "referral": "Referral",
+    "referral_management": "Referral Management",
     "technical_reserve": "Technical Reserve",
     "technical_reserve_management": "Technical reserve management",
     "contracts": "Contracts",
@@ -58,7 +62,10 @@
     "monitoring_management": "Monitoring management",
     "settings_management": "Settings management",
     "finance-settings": "Finance Settings",
-    "commission-settings": "Commission Settings"
+    "commission-settings": "Commission Settings",
+    "financial_performance": "Financial Performance",
+    "financial_performance_management": "Financial Performance Management",
+    "bonus": "Bonus"
   },
   "user": {
     "email": "Email",
@@ -68,10 +75,10 @@
   },
   "seo": {
     "default": {
-      "title": "TVDE Portugal | Frota360 - You drive, we take care of the rest!",
+      "title": "TVDE Portugal | Frota 360 - You drive, we take care of the rest!",
       "description": "Complete platform for TVDE driver management in Portugal. Affiliates and renters. Integration with Uber, Bolt and more.",
       "keywords": "TVDE Portugal, TVDE driver, Uber Portugal, Bolt Portugal, urban mobility, private transport, TVDE company, TVDE fleet, TVDE license",
-      "image": "/img/conduz.png"
+      "image": "/img/frota360.png"
     },
     "pages": {
       "home": {
@@ -103,6 +110,16 @@
         "title": "Sign Up",
         "description": "Create your account on Frota360 and start your journey as a TVDE driver in Portugal.",
         "keywords": "sign up Frota360, create account, TVDE registration"
+      },
+      "referral": {
+        "title": "My Referral",
+        "description": "Manage your driver referrals and track earnings through our referral program.",
+        "keywords": "referral drivers, referral program, extra earnings, affiliate program"
+      },
+      "goals": {
+        "title": "My Goals",
+        "description": "View your weekly goals and available rewards.",
+        "keywords": "goals, rewards, incentives, performance"
       }
     }
   },
@@ -145,35 +162,36 @@
     "passwordsDontMatch": "Passwords don't match"
   },
   "company": {
-    "name": "Frota360 PT",
+    "name": "Frota360",
     "description": "You drive, we take care of the rest!",
-  "email": "contacto@conduz.pt",
+    "email": "demo@frota360.pt",
     "emailDescription": "Support and information",
-    "phone": "+351 913 415 670",
+    "phone": "+351 900 000 000",
     "phoneDescription": "Support 7 days/week",
-    "address": "Rua Engenheiro Arantes de Oliveira 143",
-    "postalCode": "3720-253",
-    "city": "Oliveira de Azeméis",
+    "address": "Av. da Liberdade 123, 3º Andar",
+    "postalCode": "1000-000",
+    "city": "Lisboa",
     "state": "Aveiro",
     "country": "Portugal",
-    "nipc": "517524945",
+    "nipc": "999999999",
     "whatsapp": "http://wa.me/+351913415670",
     "whats": "http://wa.me/+351913415670",
     "whatsDescription": "Fast and efficient support",
-    "website": "conduz.pt"
+    "website": "frota360.pt"
   },
   "footer": {
     "tagline": "You drive, we take care of the rest!",
     "description": "The platform that transforms drivers into successful entrepreneurs",
     "contactInfo": "Contact Information",
     "quickLinks": "Quick Links",
-    "rights": "© {{year}} Frota360 PT. All rights reserved.",
+    "rights": "© {{year}} Frota360. All rights reserved.",
     "copyright": "All rights reserved",
     "madeWith": "Made with",
     "by": "by",
-    "company": "Frota360 PT",
+    "company": "Frota360",
     "developerBy": "Developed by",
-    "developer": "Jose Junior",
+    "developer": "Alvorada Magistral",
+    "developerWebsite": "alvoradamagistral.eu",
     "privacy": "Privacy Policy",
     "terms": "Terms and Conditions",
     "about": "About Us",
@@ -198,7 +216,7 @@
       },
       {
         "question": "What's the difference between affiliate and renter?",
-        "answer": "Affiliate drivers work with their own vehicles, while renters use vehicles from Frota360 PT."
+        "answer": "Affiliate drivers work with their own vehicles, while renters use vehicles from Frota360."
       },
       {
         "question": "How long does approval take?",
@@ -212,11 +230,11 @@
   },
   "testimonials": {
     "title": "What Our Drivers Say",
-    "subtitle": "Real stories from those who are already part of Frota360 PT",
+    "subtitle": "Real stories from those who are already part of Frota360",
     "feature": "Testimonials",
     "items": [
       {
-        "quote": "Frota360 PT made my life as a driver much easier. The support is excellent and the processes are very simple.",
+        "quote": "Frota360 made my life as a driver much easier. The support is excellent and the processes are very simple.",
         "author": "João Silva",
         "location": "Lisbon"
       },

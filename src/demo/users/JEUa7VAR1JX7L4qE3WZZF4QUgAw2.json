@@ -1,0 +1,16 @@
+{
+  "id": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "name": "Administrador",
+  "role": "admin",
+  "active": true,
+  "createdAt": {
+    "_seconds": 1758340800,
+    "_nanoseconds": 127000000
+  },
+  "uid": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "email": "info@alvoradamagistral.eu",
+  "updatedAt": {
+    "_seconds": 1759788519,
+    "_nanoseconds": 543000000
+  }
+}

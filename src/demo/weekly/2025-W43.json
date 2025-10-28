@@ -1,0 +1,38 @@
+{
+  "id": "2025-W43",
+  "weekId": "2025-W43",
+  "totalRecords": 0,
+  "totalAmount": 0,
+  "totalBonus": 0,
+  "createdAt": "2025-10-27T21:41:10.533Z",
+  "weekStart": "2025-10-20",
+  "weekEnd": "2025-10-26",
+  "status": "imported",
+  "platforms": {
+    "uber": {
+      "platform": "uber",
+      "imported": true,
+      "recordsCount": 3,
+      "importedAt": "2025-10-27T23:23:59.351Z"
+    },
+    "bolt": {
+      "platform": "bolt",
+      "imported": true,
+      "recordsCount": 3,
+      "importedAt": "2025-10-27T23:24:33.411Z"
+    },
+    "myprio": {
+      "platform": "myprio",
+      "imported": true,
+      "recordsCount": 4,
+      "importedAt": "2025-10-27T23:50:55.716Z"
+    },
+    "viaverde": {
+      "platform": "viaverde",
+      "imported": true,
+      "recordsCount": 2,
+      "importedAt": "2025-10-27T23:54:45.040Z"
+    }
+  },
+  "updatedAt": "2025-10-27T23:54:45.040Z"
+}

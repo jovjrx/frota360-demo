@@ -1,0 +1,862 @@
+import { useState, useEffect, useMemo } from 'react';
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Card,
+  CardBody,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
+  Button,
+  Select,
+  Input,
+  Icon,
+  IconButton,
+  Tooltip,
+  useToast,
+  useBreakpointValue,
+  Grid,
+  GridItem,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Divider,
+  Textarea,
+  useDisclosure,
+} from '@chakra-ui/react';
+import {
+  FiEdit,
+  FiRefreshCw,
+  FiSearch,
+  FiPlus,
+  FiUsers,
+  FiUserCheck,
+  FiClock,
+  FiUserPlus,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiXCircle,
+  FiPhone,
+  FiSend,
+} from 'react-icons/fi';
+import { useRouter } from 'next/router';
+import AdminLayout from '@/components/layouts/AdminLayout';
+import { withAdminSSR, AdminPageProps } from '@/lib/ssr';
+import { createSafeTranslator } from '@/lib/utils/safeTranslate';
+import { getDrivers, getRequests, getRequestsStats } from '@/lib/admin/adminQueries';
+import { serializeDatasets } from '@/lib/utils/serializeFirestore';
+import DriverModal from '@/components/admin/DriverModal';
+import DriversStats from '@/components/admin/DriversStats';
+import DriversFilters from '@/components/admin/DriversFilters';
+import DriversList from '@/components/admin/DriversList';
+import useSWR, { SWRConfig } from 'swr';
+import StructuredModal from '@/components/admin/StructuredModal';
+
+interface Driver {
+  id: string;
+  name?: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  status?: string;
+  type?: string;
+  rentalFee?: number;
+  birthDate?: string;
+  city?: string;
+  integrations?: {
+    uber?: {
+      key?: string | null;
+      enabled?: boolean;
+    };
+    bolt?: {
+      key?: string | null;
+      enabled?: boolean;
+    };
+    myprio?: {
+      key?: string | null;
+      enabled?: boolean;
+    };
+    viaverde?: {
+      key?: string | null;
+      enabled?: boolean;
+    };
+  };
+  banking?: {
+    iban?: string | null;
+    accountHolder?: string | null;
+  };
+  vehicle?: {
+    plate?: string;
+    make?: string;
+    model?: string;
+    year?: number;
+  };
+}
+
+interface DriverRequest {
+  id: string;
+  fullName: string;
+  birthDate?: string;
+  email: string;
+  phone: string;
+  city?: string;
+  nif?: string;
+  licenseNumber?: string;
+  type: 'affiliate' | 'renter';
+  vehicle?: {
+    make: string;
+    model: string;
+    year: number;
+    plate: string;
+  };
+  status: 'pending' | 'evaluation' | 'approved' | 'rejected';
+  createdAt: string;
+  notes?: string;
+  rejectionReason?: string;
+}
+
+interface DriversPageProps extends AdminPageProps {
+  initialDrivers: Driver[];
+  initialRequests: DriverRequest[];
+}
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+function DriversPageContent({
+  user,
+  locale,
+  initialDrivers,
+  initialRequests,
+  tCommon,
+  tPage,
+  translations,
+}: DriversPageProps) {
+  const router = useRouter();
+  const toast = useToast();
+  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers || []);
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [sendingAccessId, setSendingAccessId] = useState<string | null>(null);
+  const [changingStatusId, setChangingStatusId] = useState<string | null>(null);
+
+  // Solicitações com filtro de status
+  const [requestStatusFilter, setRequestStatusFilter] = useState('pending');
+  const { data: requestsData, mutate: mutateRequests } = useSWR(
+    `/api/admin/requests?status=${requestStatusFilter}`,
+    fetcher
+  );
+  const requests = requestsData?.data || [];
+
+  // Modais de aprovação/rejeição
+  const [selectedRequest, setSelectedRequest] = useState<DriverRequest | null>(null);
+  const { isOpen: isApproveModalOpen, onOpen: onApproveModalOpen, onClose: onApproveModalClose } = useDisclosure();
+  const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [isApproving, setIsApproving] = useState(false);
+
+  const tc = useMemo(() => createSafeTranslator(tCommon), [tCommon]);
+  const t = useMemo(() => createSafeTranslator(tPage), [tPage]);
+
+  // Detectar se é mobile para ajustar abas
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    const total = drivers.length;
+    const active = drivers.filter(d => d.status === 'active').length;
+    const pending = drivers.filter(d => d.status === 'pending').length;
+    const affiliates = drivers.filter(d => d.type === 'affiliate').length;
+    const renters = drivers.filter(d => d.type === 'renter').length;
+
+    return { total, active, pending, affiliates, renters };
+  }, [drivers]);
+
+  const fetchDrivers = async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filterStatus !== 'all') params.append('status', filterStatus);
+      if (filterType !== 'all') params.append('type', filterType);
+      if (searchQuery) params.append('search', searchQuery);
+
+      const response = await fetch(`/api/admin/drivers?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDrivers(data.drivers);
+      }
+    } catch (error) {
+      toast({
+        title: t('drivers.list.toasts.loadError', 'Erro ao carregar motoristas'),
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Só fazer fetch se houver filtros ativos ou busca
+    // Caso contrário, usar os dados do SSR
+    if (filterStatus !== 'all' || filterType !== 'all' || searchQuery) {
+      const delayDebounceFn = setTimeout(() => {
+        fetchDrivers();
+      }, 300);
+
+      return () => clearTimeout(delayDebounceFn);
+    }
+  }, [filterStatus, filterType, searchQuery]);
+
+  const handleEdit = (driver: Driver) => {
+    setSelectedDriver(driver);
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setSelectedDriver(null);
+    setIsEditMode(false);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDriver(null);
+    setIsEditMode(false);
+  };
+
+  // Funções para solicitações
+  const handleApproveRequest = (request: DriverRequest) => {
+    setSelectedRequest(request);
+    onApproveModalOpen();
+  };
+
+  const handleRejectRequest = (request: DriverRequest) => {
+    setSelectedRequest(request);
+    setRejectionReason('');
+    onRejectModalOpen();
+  };
+
+  const handleMarkContact = async (requestId: string) => {
+    try {
+      const response = await fetch('/api/admin/requests/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: 'evaluation' }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.contact.success', 'Status atualizado'),
+          description: t('requests.contact.description', 'Solicitação marcada como "em avaliação"'),
+          status: 'success',
+          duration: 2000,
+        });
+        mutateRequests();
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.contact.error', 'Erro ao atualizar'),
+        status: 'error',
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleSendAccess = async (driver: Driver) => {
+    if (!driver?.id) {
+      return;
+    }
+
+    if (!driver?.email) {
+      toast({
+        title: t('drivers.list.toasts.sendAccessNoEmail', 'Motorista sem email cadastrado.'),
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setSendingAccessId(driver.id);
+
+    try {
+      const response = await fetch('/api/admin/drivers/send-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: driver.id }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to send access');
+      }
+
+      const temporaryPassword = payload?.temporaryPassword as string | undefined;
+      let copiedToClipboard = false;
+
+      if (temporaryPassword && typeof navigator !== 'undefined' && navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(temporaryPassword);
+          copiedToClipboard = true;
+        } catch (clipboardError) {
+          console.warn('Failed to copy password to clipboard:', clipboardError);
+        }
+      }
+
+      const description = temporaryPassword
+        ? t('drivers.list.toasts.sendAccessSuccessDescription', 'Senha temporária: {{password}}', {
+          password: temporaryPassword,
+        }) + (copiedToClipboard ? ' ✅' : '')
+        : undefined;
+
+      toast({
+        title: t('drivers.list.toasts.sendAccessSuccess', 'Acesso enviado!'),
+        description,
+        status: 'success',
+        duration: 8000,
+        isClosable: true,
+      });
+    } catch (error: any) {
+      toast({
+        title: t('drivers.list.toasts.sendAccessError', 'Não foi possível reenviar o acesso. Tente novamente.'),
+        description: error?.message,
+        status: 'error',
+        duration: 6000,
+        isClosable: true,
+      });
+    } finally {
+      setSendingAccessId(null);
+    }
+  };
+
+  const updateDriverStatus = async (driver: Driver, status: 'active' | 'inactive' | 'suspended' | 'pending') => {
+    if (!driver?.id) return;
+
+    setChangingStatusId(driver.id);
+    try {
+      const response = await fetch('/api/admin/drivers/activate', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: driver.id, status }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Falha ao atualizar status');
+      }
+
+      toast({
+        title: t('drivers.list.toasts.statusUpdated', 'Status atualizado'),
+        description: t('drivers.list.toasts.statusUpdatedDesc', 'O status do motorista foi atualizado com sucesso.'),
+        status: 'success',
+        duration: 3000,
+      });
+      await fetchDrivers();
+    } catch (error: any) {
+      toast({
+        title: t('drivers.list.toasts.statusUpdateError', 'Erro ao atualizar status'),
+        description: error?.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setChangingStatusId(null);
+    }
+  };
+
+  const confirmApprove = async () => {
+    if (!selectedRequest) return;
+
+    setIsApproving(true);
+    try {
+      const response = await fetch('/api/admin/requests/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: selectedRequest.id }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.approve.success', 'Solicitação aprovada!'),
+          description: t('requests.approve.description', 'Motorista criado com sucesso'),
+          status: 'success',
+          duration: 3000,
+        });
+        onApproveModalClose();
+        mutateRequests();
+        fetchDrivers(); // Atualizar lista de motoristas
+      } else {
+        throw new Error('Erro ao aprovar');
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.approve.error', 'Erro ao aprovar'),
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!selectedRequest || !rejectionReason) {
+      toast({
+        title: t('requests.reject.reasonRequired', 'Motivo é obrigatório'),
+        status: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsApproving(true);
+    try {
+      const response = await fetch('/api/admin/requests/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: selectedRequest.id,
+          rejectionReason,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: t('requests.reject.success', 'Solicitação rejeitada'),
+          status: 'success',
+          duration: 2000,
+        });
+        onRejectModalClose();
+        mutateRequests();
+      } else {
+        throw new Error('Erro ao rejeitar');
+      }
+    } catch (error) {
+      toast({
+        title: t('requests.reject.error', 'Erro ao rejeitar'),
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleSaveDriver = async (driverData: any) => {
+    try {
+      if (isEditMode && selectedDriver?.id) {
+        // Modo edição
+        const response = await fetch(`/api/admin/drivers/${selectedDriver.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(driverData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar motorista');
+        }
+
+        toast({
+          title: t('drivers.list.toasts.updateSuccess', 'Motorista atualizado'),
+          status: 'success',
+          duration: 2000,
+        });
+      } else {
+        // Modo criação
+        const response = await fetch('/api/admin/drivers/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(driverData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao criar motorista');
+        }
+
+        const result = await response.json();
+
+        toast({
+          title: t('drivers.add.toasts.success.title', 'Motorista criado com sucesso!'),
+          description: t('drivers.add.toasts.success.description', 'Uma senha temporária foi gerada para o motorista.'),
+          status: 'success',
+          duration: 5000,
+        });
+
+        return result; // Retorna para mostrar senha temporária
+      }
+
+      fetchDrivers(); // Re-fetch drivers to update the list
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
+
+  const getStatusColor = (status?: string): string => {
+    const colorMap: Record<string, string> = {
+      active: 'green',
+      pending: 'yellow',
+      inactive: 'gray',
+      suspended: 'red',
+    };
+    return colorMap[status || 'pending'] || 'gray';
+  };
+
+  const getStatusBadge = (status?: string) => {
+    const labelMap: Record<string, string> = {
+      active: tc('status.active', 'Ativo'),
+      pending: tc('status.pending', 'Pendente'),
+      inactive: tc('status.inactive', 'Inativo'),
+      suspended: tc('status.suspended', 'Suspenso'),
+    };
+
+    const currentStatus = status || 'pending';
+
+    return (
+      <Badge colorScheme={getStatusColor(currentStatus)}>
+        {labelMap[currentStatus] || currentStatus || 'N/A'}
+      </Badge>
+    );
+  };
+
+  const getTypeBadge = (type?: string) => (
+    <Badge colorScheme={type === 'renter' ? 'purple' : 'green'}>
+      {type === 'renter'
+        ? t('drivers.type.renter', 'Locatário')
+        : t('drivers.type.affiliate', 'Afiliado')}
+    </Badge>
+  );
+
+  const filteredDrivers = drivers; // Data is already filtered by fetchDrivers
+
+  return (
+    <AdminLayout
+      title={t('drivers.title', 'Controle de Motoristas')}
+      subtitle={t('drivers.subtitle', 'Gestão completa dos motoristas ativos')}
+      breadcrumbs={[
+        { label: t('drivers.title', 'Controle de Motoristas') }
+      ]}
+      translations={translations}
+    >
+      <VStack spacing={4} align="stretch">
+        <DriversStats stats={stats} tc={tc} t={t} />
+
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={4}>
+          <GridItem>
+            <Card>
+              <CardBody>
+                <HStack justify="space-between" align="center" mb={4}>
+                  <Heading size="sm" display="flex" alignItems="center">
+                    <Icon as={FiUsers} mr={2} />
+                    {t('drivers.list.title', 'Motoristas Cadastrados')}
+                  </Heading>
+                  <Button
+                    leftIcon={<Icon as={FiPlus} />}
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={handleAddNew}
+                  >
+                    {t('drivers.addDriver', 'Adicionar')}
+                  </Button>
+                </HStack>
+
+                <VStack spacing={4} align="stretch">
+                  <DriversFilters
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    filterStatus={filterStatus}
+                    setFilterStatus={setFilterStatus}
+                    filterType={filterType}
+                    setFilterType={setFilterType}
+                    fetchDrivers={fetchDrivers}
+                    isLoading={isLoading}
+                    tc={tc}
+                    t={t}
+                  />
+
+                  <DriversList
+                    drivers={filteredDrivers}
+                    getStatusColor={getStatusColor}
+                    handleSendAccess={handleSendAccess}
+                    sendingAccessId={sendingAccessId}
+                    changingStatusId={changingStatusId}
+                    updateDriverStatus={updateDriverStatus}
+                    handleEdit={handleEdit}
+                    t={t}
+                  />
+                </VStack>
+              </CardBody>
+            </Card>
+          </GridItem>
+
+          <GridItem>
+            <Card borderLeft="4px" borderLeftColor="orange.400">
+              <CardBody>
+                <VStack spacing={4} align="stretch">
+                  <HStack justify="space-between" align="center">
+                    <Heading size="sm" display="flex" alignItems="center">
+                      <Icon as={FiAlertCircle} mr={2} color="orange.500" />
+                      {t('drivers.requests.title', 'Solicitações')}
+                      <Badge ml={2} colorScheme="orange">{requests.length}</Badge>
+                    </Heading>
+
+                    <Select
+                      size="sm"
+                      value={requestStatusFilter}
+                      onChange={(e) => setRequestStatusFilter(e.target.value)}
+                      maxW="150px"
+                    >
+                      <option value="pending">{t('requests.status.pending', 'Pendentes')}</option>
+                      <option value="evaluation">{t('requests.status.evaluation', 'Em Avaliação')}</option>
+                      <option value="approved">{t('requests.status.approved', 'Aprovadas')}</option>
+                      <option value="rejected">{t('requests.status.rejected', 'Rejeitadas')}</option>
+                    </Select>
+                  </HStack>
+
+
+                  <Box maxH="600px" overflowY="auto">
+                    {requests.length === 0 ? (
+                      <VStack spacing={2} align="center" py={8}>
+                        <Icon as={FiCheckCircle} fontSize="3xl" color="green.400" />
+                        <Text color="gray.600" fontWeight="semibold">
+                          {t('drivers.requests.empty', 'Nenhuma solicitação')}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {requestStatusFilter === 'pending'
+                            ? t('drivers.requests.emptyDesc', 'Todas as candidaturas foram processadas')
+                            : t('drivers.requests.noResults', 'Nenhum resultado para este filtro')
+                          }
+                        </Text>
+                      </VStack>
+                    ) : (
+                      <VStack spacing={3} align="stretch">
+                        {requests.map((req) => (
+                          <Box
+                            key={req.id}
+                            p={4}
+                            bg="orange.50"
+                            borderRadius="md"
+                            borderWidth={1}
+                            borderColor="orange.200"
+                          >
+                            <HStack justify="space-between" wrap="wrap" spacing={4}>
+                              <VStack align="start" spacing={1} flex="1">
+                                <Text fontWeight="bold">{req.fullName}</Text>
+                                <HStack spacing={2} flexWrap="wrap">
+                                  <Badge colorScheme={req.type === 'affiliate' ? 'blue' : 'purple'}>
+                                    {req.type === 'affiliate' ? t('drivers.type.affiliate', 'Afiliado') : t('drivers.type.renter', 'Locatário')}
+                                  </Badge>
+                                  <Text fontSize="sm" color="gray.600">{req.email}</Text>
+                                  <Text fontSize="sm" color="gray.600">{req.phone}</Text>
+                                  {req.city && <Text fontSize="sm" color="gray.600">📍 {req.city}</Text>}
+                                </HStack>
+                                {req.vehicle && (
+                                  <Text fontSize="sm" color="gray.600">
+                                    🚗 {req.vehicle.make} {req.vehicle.model} ({req.vehicle.year}) - {req.vehicle.plate}
+                                  </Text>
+                                )}
+                              </VStack>
+
+                              <HStack spacing={2}>
+                                <Tooltip label={t('requests.actions.approve', 'Aprovar solicitação')}>
+                                  <IconButton
+                                    aria-label="Aprovar"
+                                    icon={<Icon as={FiCheckCircle} />}
+                                    colorScheme="green"
+                                    size="sm"
+                                    onClick={() => handleApproveRequest(req)}
+                                  />
+                                </Tooltip>
+
+                                <Tooltip label={t('requests.actions.contact', 'Marcar contato feito')}>
+                                  <IconButton
+                                    aria-label="Contato"
+                                    icon={<Icon as={FiPhone} />}
+                                    colorScheme="blue"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleMarkContact(req.id)}
+                                  />
+                                </Tooltip>
+
+                                <Tooltip label={t('requests.actions.reject', 'Rejeitar solicitação')}>
+                                  <IconButton
+                                    aria-label="Rejeitar"
+                                    icon={<Icon as={FiXCircle} />}
+                                    colorScheme="red"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleRejectRequest(req)}
+                                  />
+                                </Tooltip>
+                              </HStack>
+                            </HStack>
+                          </Box>
+                        ))}
+                      </VStack>
+                    )}
+                  </Box>
+                </VStack>
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
+
+        <DriverModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          driver={selectedDriver}
+          onSave={handleSaveDriver}
+          tCommon={tCommon}
+          tPage={tPage}
+        />
+
+        {/* Modal de Aprovação */}
+        <StructuredModal
+          isOpen={isApproveModalOpen}
+          onClose={onApproveModalClose}
+          title={t('requests.approve.title', 'Aprovar Solicitação')}
+          size="md"
+          footer={(
+            <HStack spacing={3} justify="flex-end" w="full">
+              <Button variant="ghost" onClick={onApproveModalClose}>
+                {tc('actions.cancel', 'Cancelar')}
+              </Button>
+              <Button
+                colorScheme="green"
+                onClick={confirmApprove}
+                isLoading={isApproving}
+              >
+                {tc('actions.approve', 'Aprovar')}
+              </Button>
+            </HStack>
+          )}
+        >
+          {selectedRequest && (
+            <VStack spacing={4} align="stretch">
+              <Text>
+                {t('requests.approve.confirm', 'Tem certeza que deseja aprovar a solicitação de')} <strong>{selectedRequest.fullName}</strong>?
+              </Text>
+              <Box p={4} bg="blue.50" borderRadius="md">
+                <VStack align="start" spacing={1}>
+                  <Text fontSize="sm"><strong>Email:</strong> {selectedRequest.email}</Text>
+                  <Text fontSize="sm"><strong>Telefone:</strong> {selectedRequest.phone}</Text>
+                  <Text fontSize="sm"><strong>Cidade:</strong> {selectedRequest.city}</Text>
+                  {selectedRequest.nif && <Text fontSize="sm"><strong>NIF:</strong> {selectedRequest.nif}</Text>}
+                  <Text fontSize="sm"><strong>Tipo:</strong> {selectedRequest.type === 'affiliate' ? 'Afiliado' : 'Locatário'}</Text>
+                </VStack>
+              </Box>
+              <Text fontSize="sm" color="gray.600">
+                {t('requests.approve.note', 'Um motorista será criado automaticamente e receberá uma senha temporária por email.')}
+              </Text>
+            </VStack>
+          )}
+        </StructuredModal>
+
+        {/* Modal de Rejeição */}
+        <StructuredModal
+          isOpen={isRejectModalOpen}
+          onClose={onRejectModalClose}
+          title={t('requests.reject.title', 'Rejeitar Solicitação')}
+          size="md"
+          footer={(
+            <HStack spacing={3} justify="flex-end" w="full">
+              <Button variant="ghost" onClick={onRejectModalClose}>
+                {tc('actions.cancel', 'Cancelar')}
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={confirmReject}
+                isLoading={isApproving}
+              >
+                {tc('actions.reject', 'Rejeitar')}
+              </Button>
+            </HStack>
+          )}
+        >
+          {selectedRequest && (
+            <VStack spacing={4} align="stretch">
+              <Text>
+                {t('requests.reject.confirm', 'Deseja rejeitar a solicitação de')} <strong>{selectedRequest.fullName}</strong>?
+              </Text>
+              <Textarea
+                placeholder={t('requests.reject.reasonPlaceholder', 'Motivo da rejeição...')}
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={4}
+              />
+              <Text fontSize="sm" color="red.600">
+                {t('requests.reject.note', 'O candidato receberá um email com o motivo da rejeição.')}
+              </Text>
+            </VStack>
+          )}
+        </StructuredModal>
+      </VStack>
+    </AdminLayout>
+  );
+}
+
+export default function DriversPage(props: DriversPageProps) {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          '/api/admin/requests?status=pending': {
+            success: true,
+            data: props.initialRequests,
+          },
+        },
+      }}
+    >
+      <DriversPageContent {...props} />
+    </SWRConfig>
+  );
+}
+
+// SSR com autenticação, traduções e dados iniciais
+export const getServerSideProps = withAdminSSR(async (context, user) => {
+  try {
+    // Carregar motoristas e solicitações diretamente do Firestore
+    const [drivers, requests] = await Promise.all([
+      getDrivers(),
+      getRequests({ status: 'pending', limit: 50 }),
+    ]);
+
+    // Serializar todos os Timestamps de forma centralizada
+    const initialData = serializeDatasets({
+      initialDrivers: drivers,
+      initialRequests: requests || [],
+    });
+
+    return initialData;
+  } catch (error) {
+    console.error('Error loading drivers page data:', error);
+
+    // Em caso de erro, retornar dados vazios ao invés de quebrar
+    return {
+      initialDrivers: [],
+      initialRequests: [],
+    };
+  }
+});
+
+

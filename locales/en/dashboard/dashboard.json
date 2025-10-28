@@ -4,6 +4,12 @@
     "data": "My Data",
     "payslips": "Payslips",
     "contracts": "Contracts",
+    "documents": "Documents",
+    "financing": "Financing",
+    "commissions": "Referrals",
+    "recruitment": "Recruitment",
+    "goals": "Goals",
+    "financial_performance": "Financial Performance",
     "analytics": "Analytics",
     "tracking": "Tracking",
     "profile": "Profile",
@@ -63,12 +69,48 @@
       "pending": "Pending"
     }
   },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Payment and transfer history",
+    "breadcrumb": "Payments",
+    "filter": {
+      "all": "All",
+      "paid": "Paid",
+      "pending": "Pending"
+    }
+  },
   "contracts": {
     "title": "My contracts",
     "subtitle": "Download, sign and upload the required contract to stay active.",
     "empty": "There is no contract associated with your account yet. Please wait for the team to contact you.",
     "waitingReview": "Document received. We will notify you by email once it is approved.",
     "rejected": "Submission rejected"
+  },
+  "sections": {
+    "pending_contracts": "Pending Contracts",
+    "no_pending_contracts": "No pending contracts",
+    "pending_documents": "Requested Documents",
+    "no_pending_documents": "No documents requested",
+    "referrals": "Referrals",
+    "no_referrals": "No referrals yet",
+    "goals_rewards": "Goals & Rewards",
+    "no_goals": "No active goals",
+    "view_all": "View All",
+    "received": "Received on",
+    "attempts": "Attempts:",
+    "awaiting_submission": "Awaiting submission",
+    "rejection_reason": "Rejection reason:",
+    "pending_approval": "pending approval",
+    "total": "Total",
+    "approved": "Approved",
+    "earned": "Earnings",
+    "pending": "Pending"
+  },
+  "status": {
+    "pending": "Pending",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected"
   },
   "help": {
     "title": "Help & Support",

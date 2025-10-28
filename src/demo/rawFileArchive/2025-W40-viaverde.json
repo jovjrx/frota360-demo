@@ -1,0 +1,31 @@
+{
+  "id": "2025-W40-viaverde",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "viaverde",
+  "fileName": "ViaVerde.xlsx",
+  "importedAt": "2025-10-08T03:49:50.746Z",
+  "importedBy": "system",
+  "processed": true,
+  "processedAt": "2025-10-08T03:49:50.746Z",
+  "rawData": {
+    "headers": [
+      "Matrícula",
+      "OBU",
+      "Value"
+    ],
+    "rows": [
+      {
+        "Matrícula": "BX-22-LA",
+        "OBU": "BX-22-LA",
+        "Value": "€32.1"
+      },
+      {
+        "Matrícula": "GP798SH",
+        "OBU": "GP798SH",
+        "Value": "€178.35"
+      }
+    ]
+  }
+}

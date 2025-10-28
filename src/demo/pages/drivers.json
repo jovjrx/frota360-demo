@@ -1,0 +1,572 @@
+{
+  "blocks": [
+    {
+      "type": "title_only",
+      "title": {
+        "pt": "Seja Motorista TVDE",
+        "en": "Become a TVDE Driver"
+      },
+      "subtitle": {
+        "pt": "Comece a faturar em dias, não semanas. Onboarding rápido, suporte 7/7 e tecnologia que simplifica.",
+        "en": "Start earning in days, not weeks. Fast onboarding, 7/7 support and technology that simplifies."
+      },
+      "feature": {
+        "pt": "PARA MOTORISTAS",
+        "en": "FOR DRIVERS"
+      }
+    },
+    {
+      "type": "value_cards",
+      "items": [
+        {
+          "title": {
+            "pt": "Comece Rápido",
+            "en": "Start Fast"
+          },
+          "description": {
+            "pt": "Aprovação em 24h. Documentos validados rapidamente e você começa a trabalhar já amanhã.",
+            "en": "Approval in 24h. Documents validated quickly and you start working tomorrow."
+          },
+          "icon": "FaRocket",
+          "color": "green"
+        },
+        {
+          "title": {
+            "pt": "Maximize Ganhos",
+            "en": "Maximize Earnings"
+          },
+          "description": {
+            "pt": "Repasse IVA 6%, taxa fixa €25/semana. Você sabe exatamente quanto vai ganhar.",
+            "en": "6% VAT refund, fixed fee €25/week. You know exactly how much you'll earn."
+          },
+          "icon": "FaChartLine",
+          "color": "blue"
+        },
+        {
+          "title": {
+            "pt": "Total Suporte",
+            "en": "Total Support"
+          },
+          "description": {
+            "pt": "Suporte 24/7 via WhatsApp. Pessoa real para resolver seus problemas rapidamente.",
+            "en": "24/7 support via WhatsApp. Real person to quickly solve your problems."
+          },
+          "icon": "FaShieldAlt",
+          "color": "purple"
+        }
+      ]
+    },
+    {
+      "type": "services",
+      "title": {
+        "pt": "Tipos de Motorista",
+        "en": "Driver Types"
+      },
+      "subtitle": {
+        "pt": "Escolha o modelo que se adapta melhor a você e comece a ganhar hoje",
+        "en": "Choose the model that best suits you and start earning today"
+      },
+      "feature": {
+        "pt": "ESCOLHA SEU MODELO",
+        "en": "CHOOSE YOUR MODEL"
+      },
+      "services": [
+        {
+          "title": {
+            "pt": "Motorista Afiliado",
+            "en": "Affiliated Driver"
+          },
+          "description": {
+            "pt": "Tem carro próprio e quer maximizar ganhos",
+            "en": "Have your own car and want to maximize earnings"
+          },
+          "color": "green",
+          "buttonText": "Candidatar-me como Afiliado",
+          "buttonLink": "/request",
+          "image": "/img/service-drivers.jpg"
+        },
+        {
+          "title": {
+            "pt": "Motorista Locatário",
+            "en": "Rental Driver"
+          },
+          "description": {
+            "pt": "Não tem carro? Alugue uma viatura TVDE",
+            "en": "Don't have a car? Rent a TVDE vehicle"
+          },
+          "color": "blue",
+          "buttonText": "Candidatar-me como Locatário",
+          "buttonLink": "/request",
+          "image": "/img/driver-app.jpg"
+        }
+      ]
+    },
+    {
+      "type": "payments",
+      "badge": {
+        "pt": "PAGAMENTOS GARANTIDOS",
+        "en": "GUARANTEED PAYMENTS"
+      },
+      "title": {
+        "pt": "Receba toda segunda-feira, sem falta",
+        "en": "Get paid every Monday, without fail"
+      },
+      "subtitle": {
+        "pt": "Esqueça atrasos e incertezas. Com a Frota360, seus pagamentos são processados automaticamente toda segunda-feira.",
+        "en": "Forget delays and uncertainties. With Frota360, your payments are processed automatically every Monday."
+      },
+      "features": [
+        {
+          "title": {
+            "pt": "Pagamentos às segundas",
+            "en": "Monday payments"
+          },
+          "description": {
+            "pt": "Receba seus ganhos toda segunda-feira",
+            "en": "Receive your earnings every Monday"
+          },
+          "icon": "FiCalendar",
+          "color": "blue"
+        },
+        {
+          "title": {
+            "pt": "Processamento rápido",
+            "en": "Fast processing"
+          },
+          "description": {
+            "pt": "Ganhos da semana anterior direto na conta",
+            "en": "Previous week's earnings straight to your account"
+          },
+          "icon": "FiClock",
+          "color": "green"
+        },
+        {
+          "title": {
+            "pt": "Taxa fixa de €25/semana",
+            "en": "Fixed €25/week fee"
+          },
+          "description": {
+            "pt": "Sem surpresas, você sabe exatamente quanto vai pagar",
+            "en": "No surprises, you know exactly what you'll pay"
+          },
+          "icon": "FiDollarSign",
+          "color": "purple"
+        },
+        {
+          "title": {
+            "pt": "100% dos seus ganhos",
+            "en": "100% of your earnings"
+          },
+          "description": {
+            "pt": "Sem taxas escondidas ou descontos inesperados",
+            "en": "No hidden fees or unexpected deductions"
+          },
+          "icon": "FiCheckCircle",
+          "color": "orange"
+        }
+      ],
+      "stats": {
+        "reliability": {
+          "pt": "Confiabilidade",
+          "en": "Reliability"
+        },
+        "hidden": {
+          "pt": "Taxas escondidas",
+          "en": "Hidden fees"
+        },
+        "processing": {
+          "pt": "Processamento",
+          "en": "Processing"
+        }
+      }
+    },
+    {
+      "type": "referral",
+      "feature": {
+        "pt": "COMISSÕES",
+        "en": "COMMISSIONS"
+      },
+      "title": {
+        "pt": "Sistema de comissões multinível",
+        "en": "Multi-level commission system"
+      },
+      "subtitle": {
+        "pt": "Ganhe comissões recorrentes pelos motoristas que indicar",
+        "en": "Earn recurring commissions from drivers you refer"
+      },
+      "description": {
+        "pt": "Indique motoristas e ganhe comissões sobre os ganhos deles. Quanto mais motoristas ativos na sua rede, mais você ganha - toda semana, automaticamente.",
+        "en": "Refer drivers and earn commissions on their earnings. The more active drivers in your network, the more you earn - every week, automatically."
+      },
+      "howItWorks": [
+        {
+          "pt": "Receba seu link de indicação exclusivo",
+          "en": "Get your exclusive referral link"
+        },
+        {
+          "pt": "Compartilhe com motoristas interessados em TVDE",
+          "en": "Share it with drivers interested in TVDE"
+        },
+        {
+          "pt": "Ganhe comissões quando eles se cadastrarem e começarem a trabalhar",
+          "en": "Earn commissions when they sign up and start working"
+        },
+        {
+          "pt": "Receba pagamentos semanais automáticos das suas comissões",
+          "en": "Receive automatic weekly payments of your commissions"
+        }
+      ],
+      "cta": {
+        "pt": "Juntar-se agora",
+        "en": "Join now"
+      },
+      "ctaAuth": {
+        "pt": "Ver minhas comissões",
+        "en": "View my commissions"
+      }
+    },
+    {
+      "type": "benefits",
+      "title": {
+        "pt": "Os Nossos Serviços",
+        "en": "Our Services"
+      },
+      "subtitle": {
+        "pt": "Tudo incluído para o seu sucesso como motorista TVDE",
+        "en": "Everything included for your success as a TVDE driver"
+      },
+      "feature": {
+        "pt": "SERVIÇOS",
+        "en": "SERVICES"
+      },
+      "items": [
+        {
+          "title": {
+            "pt": "Onboarding Completo",
+            "en": "Complete Onboarding"
+          },
+          "description": {
+            "pt": "Processo de entrada rápido e eficiente",
+            "en": "Fast and efficient entry process"
+          },
+          "icon": "🚀"
+        },
+        {
+          "title": {
+            "pt": "Suporte Dedicado",
+            "en": "Dedicated Support"
+          },
+          "description": {
+            "pt": "Equipa disponível 7 dias por semana",
+            "en": "Team available 7 days a week"
+          },
+          "icon": "🤝"
+        },
+        {
+          "title": {
+            "pt": "Portal do Motorista",
+            "en": "Driver Portal"
+          },
+          "description": {
+            "pt": "Tecnologia simples e intuitiva",
+            "en": "Simple and intuitive technology"
+          },
+          "icon": "💻"
+        },
+        {
+          "title": {
+            "pt": "Gestão Financeira",
+            "en": "Financial Management"
+          },
+          "description": {
+            "pt": "Pagamentos e faturação simplificados",
+            "en": "Simplified payments and invoicing"
+          },
+          "icon": "💰"
+        },
+        {
+          "title": {
+            "pt": "Compliance TVDE",
+            "en": "TVDE Compliance"
+          },
+          "description": {
+            "pt": "Conformidade legal garantida",
+            "en": "Legal compliance guaranteed"
+          },
+          "icon": "✅"
+        },
+        {
+          "title": {
+            "pt": "Frota Opcional",
+            "en": "Optional Fleet"
+          },
+          "description": {
+            "pt": "Carros disponíveis para aluguer",
+            "en": "Cars available for rent"
+          },
+          "icon": "🚗"
+        }
+      ]
+    },
+    {
+      "type": "financing",
+      "title": {
+        "pt": "Empréstimos para Capital de Giro",
+        "en": "Working Capital Loans"
+      },
+      "subtitle": {
+        "pt": "Dinheiro rápido para suas necessidades operacionais ou pessoais",
+        "en": "Fast money for your operational or personal needs"
+      },
+      "feature": {
+        "pt": "FINANCIAMENTO",
+        "en": "FINANCING"
+      },
+      "cardTitle": {
+        "pt": "Como Funciona o Empréstimo",
+        "en": "How the Loan Works"
+      },
+      "cardDescription": {
+        "pt": "Solicite empréstimos diretamente pela plataforma sem burocracia",
+        "en": "Request loans directly through the platform without bureaucracy"
+      },
+      "alert": {
+        "pt": "⚠️ Este empréstimo é exclusivo para despesas operacionais ou pessoais, NÃO para compra de veículos.",
+        "en": "⚠️ This loan is exclusively for operational or personal expenses, NOT for vehicle purchase."
+      },
+      "benefits": [
+        {
+          "pt": "Aprovação em até 24 horas",
+          "en": "Approval in up to 24 hours"
+        },
+        {
+          "pt": "Sem consulta ao Serasa ou bureaus de crédito",
+          "en": "No credit bureau checks"
+        },
+        {
+          "pt": "Parcelas descontadas automaticamente do repasse semanal",
+          "en": "Installments automatically deducted from weekly payout"
+        },
+        {
+          "pt": "Taxa de ônus bancário competitiva e transparente",
+          "en": "Competitive and transparent interest rate"
+        },
+        {
+          "pt": "Sem taxas ocultas ou surpresas",
+          "en": "No hidden fees or surprises"
+        }
+      ],
+      "example": {
+        "title": {
+          "pt": "Exemplo Prático:",
+          "en": "Practical Example:"
+        },
+        "scenario": {
+          "pt": "Empréstimo de €600 em 5 semanas com 4% de ônus bancário",
+          "en": "€600 loan in 5 weeks with 4% interest"
+        },
+        "details": [
+          {
+            "pt": "Parcela semanal: €120",
+            "en": "Weekly installment: €120"
+          },
+          {
+            "pt": "Ônus bancário semanal: 4% adicional sobre ganhos",
+            "en": "Weekly interest: 4% additional on earnings"
+          },
+          {
+            "pt": "Total a pagar: €600 + ônus bancário calculado sobre ganhos",
+            "en": "Total to pay: €600 + interest calculated on earnings"
+          },
+          {
+            "pt": "Após 5 semanas: empréstimo quitado automaticamente",
+            "en": "After 5 weeks: loan automatically paid off"
+          }
+        ]
+      }
+    },
+    {
+      "type": "requirements",
+      "title": {
+        "pt": "Requisitos e Documentos",
+        "en": "Requirements and Documents"
+      },
+      "subtitle": {
+        "pt": "Tudo o que precisa para começar",
+        "en": "Everything you need to get started"
+      },
+      "feature": {
+        "pt": "REQUISITOS",
+        "en": "REQUIREMENTS"
+      },
+      "documentsTitle": {
+        "pt": "Documentos Necessários",
+        "en": "Required Documents"
+      },
+      "documents": [
+        {
+          "pt": "Cartão de Cidadão (CC) válido",
+          "en": "Valid Citizen Card (CC)"
+        },
+        {
+          "pt": "Número de Identificação Fiscal (NIF)",
+          "en": "Tax Identification Number (NIF)"
+        },
+        {
+          "pt": "Carta de Condução válida",
+          "en": "Valid Driver's License"
+        },
+        {
+          "pt": "Certificado TVDE (ajudamos a obter se não tiver)",
+          "en": "TVDE Certificate (we help you get it if you don't have it)"
+        },
+        {
+          "pt": "IBAN para recebimento de pagamentos",
+          "en": "IBAN for payment receipt"
+        }
+      ],
+      "integrationsTitle": {
+        "pt": "Conexão com Plataformas",
+        "en": "Platform Connection"
+      },
+      "integrationsDescription": {
+        "pt": "Como conectar suas contas para importação automática de dados",
+        "en": "How to connect your accounts for automatic data import"
+      },
+      "integrations": [
+        {
+          "platform": {
+            "pt": "Uber",
+            "en": "Uber"
+          },
+          "requirement": {
+            "pt": "UUID do motorista (fornecido pela Uber)",
+            "en": "Driver UUID (provided by Uber)"
+          }
+        },
+        {
+          "platform": {
+            "pt": "Bolt",
+            "en": "Bolt"
+          },
+          "requirement": {
+            "pt": "Email associado à conta Bolt",
+            "en": "Email associated with Bolt account"
+          }
+        },
+        {
+          "platform": {
+            "pt": "MyPrio",
+            "en": "MyPrio"
+          },
+          "requirement": {
+            "pt": "Número do cartão de abastecimento",
+            "en": "Fuel card number"
+          }
+        },
+        {
+          "platform": {
+            "pt": "ViaVerde",
+            "en": "ViaVerde"
+          },
+          "requirement": {
+            "pt": "Matrícula do veículo vinculada",
+            "en": "Vehicle license plate linked"
+          }
+        }
+      ],
+      "bankingTitle": {
+        "pt": "Dados Bancários",
+        "en": "Banking Details"
+      },
+      "bankingDescription": {
+        "pt": "Para receber seus pagamentos semanais",
+        "en": "To receive your weekly payments"
+      },
+      "banking": [
+        {
+          "pt": "IBAN da conta bancária em seu nome",
+          "en": "Bank account IBAN in your name"
+        },
+        {
+          "pt": "Nome completo do titular (deve coincidir com documentos)",
+          "en": "Full name of account holder (must match documents)"
+        }
+      ]
+    },
+    {
+      "type": "support",
+      "title": {
+        "pt": "Suporte Sempre Disponível",
+        "en": "Support Always Available"
+      },
+      "subtitle": {
+        "pt": "Equipa dedicada para o seu sucesso",
+        "en": "A dedicated team for your success"
+      },
+      "feature": {
+        "pt": "SUPORTE",
+        "en": "SUPPORT"
+      },
+      "items": [
+        {
+          "icon": "FaWhatsapp",
+          "description": {
+            "pt": "Suporte rápido e eficiente",
+            "en": "Fast and efficient support"
+          },
+          "link": "/whatsapp",
+          "label": {
+            "pt": "WhatsApp",
+            "en": "WhatsApp"
+          }
+        },
+        {
+          "icon": "FaPhone",
+          "description": {
+            "pt": "Suporte 7 dias/semana",
+            "en": "7 days/week support"
+          },
+          "link": "/phone",
+          "label": {
+            "pt": "Telefone",
+            "en": "Phone"
+          }
+        },
+        {
+          "icon": "FaEnvelope",
+          "description": {
+            "pt": "Suporte e informações",
+            "en": "Support and information"
+          },
+          "link": "/email",
+          "label": {
+            "pt": "Email",
+            "en": "Email"
+          }
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": {
+        "pt": "Pronto para começar a ganhar?",
+        "en": "Ready to start earning?"
+      },
+      "subtitle": {
+        "pt": "Junte-se aos motoristas que já escolheram a Frota360.pt. Aprovação rápida, pagamentos garantidos e suporte 24/7.",
+        "en": "Join the drivers who have already chosen Frota360.pt. Fast approval, guaranteed payments and 24/7 support."
+      },
+      "feature": {
+        "pt": "COMECE HOJE",
+        "en": "START TODAY"
+      },
+      "buttonText": {
+        "pt": "Realizar Solicitação",
+        "en": "Submit Application"
+      },
+      "buttonLink": "/request",
+      "centered": true
+    }
+  ]
+}

@@ -4,6 +4,12 @@
     "data": "Meus Dados",
     "payslips": "Resumos",
     "contracts": "Contratos",
+    "documents": "Documentos",
+    "financing": "Financiamentos",
+    "commissions": "Indicações",
+    "recruitment": "Recrutamento",
+    "goals": "Metas & Recompensas",
+    "financial_performance": "Performance Financeira",
     "analytics": "Análises",
     "tracking": "Rastreamento",
     "profile": "Perfil",
@@ -11,7 +17,6 @@
     "requests": "Solicitações",
     "drivers": "Motoristas",
     "control": "Controle & Pagamentos",
-    "financing": "Financiamento",
     "monitor": "Monitoramento",
     "users": "Usuários",
     "overview": "Visão geral",
@@ -459,12 +464,48 @@
       "pending": "Pendentes"
     }
   },
+  "payments": {
+    "title": "Pagamentos",
+    "subtitle": "Histórico de pagamentos e repasses",
+    "breadcrumb": "Pagamentos",
+    "filter": {
+      "all": "Todos",
+      "paid": "Pagos",
+      "pending": "Pendentes"
+    }
+  },
   "contracts": {
     "title": "Meus contratos",
     "subtitle": "Baixe, assine e envie o contrato obrigatório para continuar ativo.",
     "empty": "Ainda não há um contrato associado à sua conta. Aguarde contacto da equipa.",
     "waitingReview": "Documento recebido. Notificaremos por email quando for aprovado.",
     "rejected": "Envio rejeitado"
+  },
+  "sections": {
+    "pending_contracts": "Contratos Pendentes",
+    "no_pending_contracts": "Nenhum contrato pendente",
+    "pending_documents": "Documentos Requisitados",
+    "no_pending_documents": "Nenhum documento requisitado",
+    "referrals": "Indicações",
+    "no_referrals": "Nenhuma indicação ainda",
+    "goals_rewards": "Metas & Bônus",
+    "no_goals": "Nenhuma meta ativa",
+    "view_all": "Ver Todos",
+    "received": "Recebido em",
+    "attempts": "Tentativas:",
+    "awaiting_submission": "Aguardando envio",
+    "rejection_reason": "Motivo da rejeição:",
+    "pending_approval": "pendentes de aprovação",
+    "total": "Total",
+    "approved": "Aprovadas",
+    "earned": "Ganhos",
+    "pending": "Pendentes"
+  },
+  "status": {
+    "pending": "Pendente",
+    "submitted": "Enviado",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado"
   },
   "help": {
     "title": "Ajuda e Suporte",

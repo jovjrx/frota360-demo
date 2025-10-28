@@ -1,0 +1,135 @@
+{
+  "id": "0D0dAAaRixi7rmnLg1mN_2025-W42",
+  "driverId": "0D0dAAaRixi7rmnLg1mN",
+  "driverName": "Silva Santos João",
+  "weekId": "2025-W42",
+  "weekStart": "2025-10-13",
+  "weekEnd": "2025-10-19",
+  "type": "affiliate",
+  "isLocatario": false,
+  "ganhosTotal": 493,
+  "uberTotal": 186,
+  "boltTotal": 170,
+  "prio": 119.09,
+  "ivaValor": 34,
+  "ganhosMenosIVA": 452,
+  "despesasAdm": 35.9394,
+  "viaverde": 0,
+  "aluguel": 0,
+  "totalDespesas": 44,
+  "commissionAmount": 0,
+  "totalBonusAmount": 0,
+  "bonusMetaPending": [],
+  "bonusMetaPaid": [],
+  "referralBonusPending": [],
+  "referralBonusPaid": [],
+  "repasse": 396,
+  "platformData": [
+    {
+      "platform": "Uber",
+      "value": 209.2
+    },
+    {
+      "platform": "Bolt",
+      "value": 185.13
+    },
+    {
+      "platform": "MyPrio",
+      "value": 119.09
+    }
+  ],
+  "paymentStatus": "paid",
+  "paymentDate": "2025-10-27T14:44:50.438Z",
+  "dataSource": "reprocessed",
+  "createdAt": "2025-10-27T14:44:50.438Z",
+  "paymentInfo": {
+    "proofs": [
+      {
+        "filename": "1761001239545-document1760998681551.pdf",
+        "url": "gs://frota360-pt.firebasestorage.app/driverPayments/2025-W42/0D0dAAaRixi7rmnLg1mN/1761001239545-document1760998681551.pdf",
+        "size": "134338"
+      }
+    ],
+    "proofCount": 1,
+    "uploadedAt": "2025-10-27T14:57:59.364Z"
+  },
+  "recordSnapshot": {
+    "id": "0D0dAAaRixi7rmnLg1mN_2025-W42",
+    "driverId": "0D0dAAaRixi7rmnLg1mN",
+    "driverName": "Silva Santos João",
+    "weekId": "2025-W42",
+    "weekStart": "2025-10-13",
+    "weekEnd": "2025-10-19",
+    "type": "affiliate",
+    "isLocatario": false,
+    "ganhosTotal": 635,
+    "uberTotal": 226,
+    "boltTotal": 213,
+    "prio": 119.09,
+    "ivaValor": 39,
+    "ganhosMenosIVA": 484,
+    "despesasAdm": 35.9394,
+    "combustivel": 0,
+    "viaverde": 0,
+    "aluguel": 0,
+    "totalDespesas": 31,
+    "commissionAmount": 0,
+    "totalBonusAmount": 0,
+    "bonusMetaPending": [],
+    "bonusMetaPaid": [],
+    "referralBonusPending": [],
+    "referralBonusPaid": [],
+    "repasse": 432,
+    "platformData": [
+      {
+        "platform": "Uber",
+        "value": 209.2
+      },
+      {
+        "platform": "Bolt",
+        "value": 185.13
+      },
+      {
+        "platform": "MyPrio",
+        "value": 119.09
+      }
+    ],
+    "paymentStatus": "paid",
+    "paymentDate": "2025-10-27T14:44:50.438Z",
+    "dataSource": "reprocessed",
+    "createdAt": "2025-10-27T14:44:50.438Z",
+    "updatedAt": "2025-10-27T14:44:50.438Z",
+    "financingDetails": {
+      "type": "discount",
+      "amount": 36,
+      "weeklyAmount": 0,
+      "weeklyInterest": 4,
+      "displayAmount": 51,
+      "totalCost": 40,
+      "hasFinancing": true,
+      "isParcelado": false,
+      "displayLabel": "Valor: R$ 41.00"
+    }
+  },
+  "financingDetails": {
+    "type": "discount",
+    "amount": 42,
+    "weeklyAmount": 0,
+    "weeklyInterest": 4,
+    "displayAmount": 44,
+    "totalCost": 54,
+    "hasFinancing": true,
+    "isParcelado": false,
+    "displayLabel": "Valor: R$ 41.00"
+  },
+  "portagens": 0,
+  "totalAmount": 543,
+  "totalAmountCents": 43056,
+  "adminFeeCents": 2742,
+  "adminFeeValue": 33,
+  "baseAmountCents": 56167,
+  "adminFeePercentage": 8,
+  "baseAmount": 461,
+  "combustivel": 0,
+  "updatedAt": "2025-10-27T17:58:44.170Z"
+}

@@ -246,7 +246,7 @@
         },
         {
           "label": "- Parcela de Empréstimo",
-          "description": "Se tiver empréstimo ativo, parcela semanal + juros são descontados"
+          "description": "Se tiver empréstimo ativo, parcela semanal + ônus bancário são descontados"
         },
         {
           "label": "= Repasse Líquido",
@@ -267,16 +267,16 @@
         "Aprovação em até 24 horas",
         "Sem consulta ao Serasa ou bureaus de crédito",
         "Parcelas descontadas automaticamente do repasse semanal",
-        "Taxa de juros competitiva e transparente",
+        "Taxa de ônus bancário competitiva e transparente",
         "Sem taxas ocultas ou surpresas"
       ],
       "example": {
         "title": "Exemplo Prático:",
-        "scenario": "Empréstimo de €600 em 5 semanas com 4% de juros",
+        "scenario": "Empréstimo de €600 em 5 semanas com 4% de ônus bancário",
         "details": [
           "Parcela semanal: €120",
-          "Juros semanal: 4% adicional sobre ganhos",
-          "Total a pagar: €600 + juros calculados sobre ganhos",
+          "Ônus bancário semanal: 4% adicional sobre ganhos",
+          "Total a pagar: €600 + ônus bancário calculado sobre ganhos",
           "Após 5 semanas: empréstimo quitado automaticamente"
         ]
       }
@@ -329,7 +329,7 @@
   },
   "cta": {
     "title": "Pronto para Fazer Parte?",
-    "subtitle": "Você conduz, nós cuidamos do resto! Candidate-se agora e comece sua jornada como motorista TVDE.",
+    "subtitle": "Você frota360, nós cuidamos do resto! Candidate-se agora e comece sua jornada como motorista TVDE.",
     "feature": "PRÓXIMO PASSO",
     "button": "Candidatar-me Agora",
     "link": "/request"

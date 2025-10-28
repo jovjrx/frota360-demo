@@ -1,0 +1,40 @@
+{
+  "id": "2025-W41-uber-1760324233327",
+  "weekId": "2025-W41",
+  "weekStart": "2025-10-06",
+  "weekEnd": "2025-10-12",
+  "platform": "uber",
+  "fileName": "20251006-20251012-payments_driver-ALVORADA_MAGISTRAL__LDA.csv",
+  "rawData": {
+    "headers": [
+      "UUID do motorista",
+      "Pago a si",
+      "Viagens",
+      "Nome do motorista"
+    ],
+    "rows": [
+      {
+        "UUID do motorista": "14f33942-d50c-49ea-aa1f-93e6072c152d",
+        "Pago a si": "354.41",
+        "Viagens": 0,
+        "Nome do motorista": "CONCEICAO YURI ROCHA DA SILVA"
+      },
+      {
+        "UUID do motorista": "37c63c0d-3eab-462a-9c56-3b01d28b7554",
+        "Pago a si": "267.80",
+        "Viagens": 0,
+        "Nome do motorista": "LAUBACK ELISEU"
+      },
+      {
+        "UUID do motorista": "cdb71862-2a87-4c68-afb3-04bbe06e733d",
+        "Pago a si": "493.18",
+        "Viagens": 0,
+        "Nome do motorista": "GUARINO WEDSON DE SOUZA"
+      }
+    ]
+  },
+  "importedAt": "2025-10-13T02:57:13.325Z",
+  "importedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "processed": true,
+  "processedAt": "2025-10-13T02:57:14.955Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "bolt",
+  "name": "Bolt",
+  "description": "Integração com Bolt para viagens e ganhos",
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759703113,
+      "_nanoseconds": 774000000
+    }
+  },
+  "credentials": {
+    "clientId": "G__hozQ4Baf39Xk9PjVH7",
+    "clientSecret": "SL5zIEeoQCAdz_wPOqEl1F4wL24xaYMoVws5jtemEZE_WZzBPIfSawHE-oaZ14UquJG6iejy84zs_njFjJ4wsA"
+  },
+  "config": {
+    "baseUrl": "https://node.bolt.eu/fleet-integration-gateway",
+    "authUrl": "https://oidc.bolt.eu/token"
+  },
+  "enabled": true,
+  "errorMessage": null,
+  "status": "connected",
+  "lastSync": "2025-10-06T13:52:33.810Z"
+}

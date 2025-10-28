@@ -1,0 +1,27 @@
+{
+  "id": "cartrack",
+  "name": "Cartrack",
+  "description": "Integração com Cartrack para dados de veículos",
+  "credentials": {
+    "username": "ALVO00008",
+    "apiKey": "4204acaf6943762f716ce3301f38d9f10e699512bbbca783f96aec223cbef805"
+  },
+  "config": {
+    "baseUrl": "https://fleetapi-pt.cartrack.com/rest",
+    "options": {
+      "authType": "basic",
+      "dateFormat": "YYYY-MM-DD HH:MM:SS",
+      "timezone": "Europe/Lisbon"
+    }
+  },
+  "enabled": true,
+  "metadata": {
+    "updatedAt": {
+      "_seconds": 1759703111,
+      "_nanoseconds": 647000000
+    }
+  },
+  "lastSync": "2025-10-09T02:18:58.544Z",
+  "errorMessage": null,
+  "status": "connected"
+}

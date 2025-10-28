@@ -13,6 +13,28 @@
     "my_data": "Dados",
     "download_payslip": "Baixar Resumo"
   },
+  "sections": {
+    "pending_contracts": "Contratos Pendentes",
+    "no_pending_contracts": "Nenhum contrato pendente",
+    "pending_documents": "Documentos Solicitados",
+    "no_pending_documents": "Nenhum documento solicitado",
+    "referrals": "Indicações",
+    "no_referrals": "Nenhuma indicação ainda",
+    "goals_rewards": "Metas & Bônus",
+    "no_goals": "Nenhuma meta ativa",
+    "view_all": "Ver Todos",
+    "received": "Recebido em",
+    "attempts": "Tentativas:",
+    "awaiting_submission": "Aguardando envio",
+    "rejection_reason": "Motivo da rejeição:",
+    "pending_approval": "pendentes de aprovação"
+  },
+  "status": {
+    "pending": "Pendente",
+    "submitted": "Enviado",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado"
+  },
   "goals": {
     "title": "Metas/Recompensas da Semana",
     "subtitle": "Veja as metas/recompensas válidas para você nesta semana.",

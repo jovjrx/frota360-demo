@@ -1,0 +1,17 @@
+{
+  "id": "WU29XdtGtIRGDlwH2G9HMub3OA73",
+  "uid": "WU29XdtGtIRGDlwH2G9HMub3OA73",
+  "email": "admin@test.com",
+  "name": "Teste Admin",
+  "displayName": "Teste Admin",
+  "role": "admin",
+  "isAdmin": true,
+  "createdAt": {
+    "_seconds": 1761434386,
+    "_nanoseconds": 723000000
+  },
+  "updatedAt": {
+    "_seconds": 1761434386,
+    "_nanoseconds": 723000000
+  }
+}

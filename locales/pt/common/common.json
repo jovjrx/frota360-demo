@@ -11,6 +11,7 @@
   "menu": {
     "dashboard": "Dashboard",
     "data": "Meus Dados",
+    "payments": "Pagamentos",
     "payslips": "Resumos",
     "analytics": "Análises",
     "tracking": "Rastreamento",
@@ -20,6 +21,7 @@
     "drivers": "Motoristas",
     "control": "Controle & Pagamentos",
     "financing": "Financiamento",
+    "documents": "Documentos",
     "monitor": "Monitoramento",
     "users": "Usuários",
     "overview": "Visão geral",
@@ -29,19 +31,23 @@
     "tracking_desc": "Rastreamento",
     "weekly_data": "Dados semanais",
     "user_management": "Gerenciamento de usuários",
-    "payments": "Pagamentos",
     "requests_management": "Gestão de solicitações",
     "payments_control": "Controle de pagamentos",
     "vehicle_tracking": "Rastreamento de veículos",
     "weekly_monitoring": "Monitoramento semanal",
     "commissions": "Comissões",
     "commissions_management": "Gestão de comissões",
-    "performance": "Performance",
-    "performance_management": "Gestão de performance",
+    "performance": "Desempenho",
+    "performance_management": "Gestão de desempenho",
+    "financial_performance": "Desempenho Financeiro",
+    "financial_performance_management": "Gestão de desempenho financeiro",
+    "recruitment": "Indicação",
     "kpis": "KPIs",
     "kpis_management": "Gestão de KPIs",
-    "goals": "Metas",
-    "goals_management": "Gestão de metas",
+    "goals": "Metas & Recompensas",
+    "goals_management": "Gestão de Metas & Recompensas",
+    "referral": "Indicação",
+    "referral_management": "Gestão de Indicação",
     "technical_reserve": "Reserva Técnica",
     "technical_reserve_management": "Gestão de reserva técnica",
     "contracts": "Contratos",
@@ -58,7 +64,8 @@
     "monitoring_management": "Gestão de Monitoramento",
     "settings_management": "Gestão de Configurações",
     "finance-settings": "Config. Financeira",
-    "commission-settings": "Config. Comissões"
+    "commission-settings": "Config. Comissões",
+    "bonus": "Bônus"
   },
   "user": {
     "email": "Email",
@@ -71,7 +78,7 @@
       "title": "TVDE Portugal | Frota360 - Você conduz, nós cuidamos do resto!",
       "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
       "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, mobilidade urbana, transporte privado, empresa TVDE, frota TVDE, licença TVDE",
-      "image": "/img/conduz.png"
+      "image": "/img/frota360.png"
     },
     "pages": {
       "home": {
@@ -103,6 +110,16 @@
         "title": "Criar Conta",
         "description": "Crie sua conta na Frota360 e comece sua jornada como motorista TVDE em Portugal.",
         "keywords": "criar conta Frota360, cadastro, registo TVDE"
+      },
+      "referral": {
+        "title": "Minha Indicação",
+        "description": "Gerencie suas indicações de motoristas e acompanhe ganhos através do programa de referência.",
+        "keywords": "indicação motoristas, referência, ganho extra, programa afiliados"
+      },
+      "goals": {
+        "title": "Minhas Metas",
+        "description": "Veja suas metas semanais e recompensas disponíveis.",
+        "keywords": "metas, recompensas, incentivos, performance"
       }
     }
   },
@@ -151,35 +168,36 @@
     "passwordsDontMatch": "As senhas não coincidem"
   },
   "company": {
-    "name": "Frota360 PT",
+    "name": "Frota360",
     "description": "Você conduz, nós cuidamos do resto!",
-    "email": "contacto@conduz.pt",
+    "email": "demo@frota360.pt",
     "emailDescription": "Suporte e informações",
-    "phone": "+351 913 415 670",
+    "phone": "+351 900 000 000",
     "phoneDescription": "Suporte 7 dias/semana",
-    "address": "Rua Engenheiro Arantes de Oliveira 143",
-    "postalCode": "3720-253",
-    "city": "Oliveira de Azeméis",
+    "address": "Av. da Liberdade 123, 3º Andar",
+    "postalCode": "1000-000",
+    "city": "Lisboa",
     "state": "Aveiro",
     "country": "Portugal",
-    "nipc": "517524945",
+    "nipc": "999999999",
     "whatsapp": "http://wa.me/+351913415670",
     "whats": "http://wa.me/+351913415670",
     "whatsDescription": "Suporte rápido e eficiente",
-    "website": "conduz.pt"
+    "website": "frota360.pt"
   },
   "footer": {
     "tagline": "Você conduz, nós cuidamos do resto!",
     "description": "A plataforma que transforma motoristas em empresários de sucesso",
     "contactInfo": "Informações de Contacto",
     "quickLinks": "Links Rápidos",
-    "rights": "© {{year}} Frota360 PT. Todos os direitos reservados.",
+    "rights": "© {{year}} Frota360. Todos os direitos reservados.",
     "copyright": "Todos os direitos reservados",
     "madeWith": "Feito com",
     "by": "por",
-    "company": "Frota360 PT",
+    "company": "Frota360",
     "developerBy": "Desenvolvido por",
-    "developer": "Jose Junior",
+    "developer": "Alvorada Magistral",
+    "developerWebsite": "alvoradamagistral.eu",
     "privacy": "Política de Privacidade",
     "terms": "Termos e Condições",
     "about": "Sobre Nós",
@@ -204,7 +222,7 @@
       },
       {
         "question": "Qual a diferença entre afiliado e locatário?",
-        "answer": "Motoristas afiliados trabalham com os seus próprios veículos, enquanto locatários utilizam veículos da Frota360 PT."
+        "answer": "Motoristas afiliados trabalham com os seus próprios veículos, enquanto locatários utilizam veículos da Frota360."
       },
       {
         "question": "Quanto tempo demora a aprovação?",
@@ -218,11 +236,11 @@
   },
   "testimonials": {
     "title": "O Que Dizem os Nossos Motoristas",
-    "subtitle": "Histórias reais de quem já faz parte da Frota360 PT",
+    "subtitle": "Histórias reais de quem já faz parte da Frota360",
     "feature": "Depoimentos",
     "items": [
       {
-        "quote": "A Frota360 PT facilitou muito a minha vida como motorista. O suporte é excelente e os processos são muito simples.",
+        "quote": "A Frota360 facilitou muito a minha vida como motorista. O suporte é excelente e os processos são muito simples.",
         "author": "João Silva",
         "location": "Lisboa"
       },

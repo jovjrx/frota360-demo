@@ -1,0 +1,52 @@
+{
+  "id": "2025-W42-myprio-1760961645291",
+  "weekId": "2025-W42",
+  "weekStart": "2025-10-13",
+  "weekEnd": "2025-10-19",
+  "platform": "myprio",
+  "fileName": "Transações_Frota_20251020.xlsx",
+  "rawData": {
+    "headers": [
+      "CARTAO",
+      "TOTAL"
+    ],
+    "rows": [
+      {
+        "CARTAO": "7824736068450002",
+        "TOTAL": 74
+      },
+      {
+        "CARTAO": "7824736068450002",
+        "TOTAL": 30
+      },
+      {
+        "CARTAO": "7824736068450003",
+        "TOTAL": 69
+      },
+      {
+        "CARTAO": "7824736068450001",
+        "TOTAL": 72
+      },
+      {
+        "CARTAO": "7824736068450002",
+        "TOTAL": 27
+      },
+      {
+        "CARTAO": "7824736068450003",
+        "TOTAL": 87
+      },
+      {
+        "CARTAO": "7824736068450002",
+        "TOTAL": 36
+      },
+      {
+        "CARTAO": "7824736068450001",
+        "TOTAL": 70
+      }
+    ]
+  },
+  "importedAt": "2025-10-20T12:00:45.244Z",
+  "importedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "processed": true,
+  "processedAt": "2025-10-20T13:28:22.047Z"
+}

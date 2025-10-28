@@ -1,0 +1,13 @@
+{
+  "id": "driver_test_1",
+  "fullName": "Teste João Silva -",
+  "type": "affiliate",
+  "isActive": true,
+  "adminFee": {
+    "mode": "percent",
+    "percentValue": 7
+  },
+  "banking": {
+    "iban": "PT50000000000000000000"
+  }
+}

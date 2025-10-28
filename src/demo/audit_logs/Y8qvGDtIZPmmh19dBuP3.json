@@ -1,0 +1,91 @@
+{
+  "id": "Y8qvGDtIZPmmh19dBuP3",
+  "action": "driver_update",
+  "driverId": "V0w09ifVSK6G4ue5Rg5R",
+  "adminId": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+  "oldData": {
+    "firstName": "ELISEU",
+    "lastName": "LAUBACK DA SILVA",
+    "fullName": "LAUBACK ELISEU DA SILVA",
+    "email": "eliseu_s_lobak@hotmail.com",
+    "phone": "+351910350202",
+    "birthDate": "1971-09-25",
+    "city": "Porto",
+    "status": "active",
+    "type": "affiliate",
+    "integrations": {
+      "uber": {
+        "key": "37c63c0d-3eab-462a-9c56-3b01d28b7554",
+        "enabled": true,
+        "lastSync": null
+      },
+      "bolt": {
+        "key": "eliseu_s_lobak@hotmail.com",
+        "enabled": true,
+        "lastSync": null
+      },
+      "myprio": {
+        "key": "7824736068450003",
+        "enabled": true,
+        "lastSync": null
+      },
+      "viaverde": {
+        "key": null,
+        "enabled": false,
+        "lastSync": null
+      }
+    },
+    "firebaseUid": "WPrvmBN6DVUEcPf53ZiwwbHoFkm2",
+    "createdAt": "2025-10-11T00:43:11.878Z",
+    "createdBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "updatedAt": "2025-10-11T00:43:11.878Z",
+    "activatedAt": "2025-10-11T00:43:11.878Z",
+    "activatedBy": "JEUa7VAR1JX7L4qE3WZZF4QUgAw2",
+    "vehicle": null,
+    "rentalFee": 0,
+    "banking": {
+      "iban": "PT5000 0700 000040526377023",
+      "accountHolder": "Eliseu da Sivla Lauback"
+    }
+  },
+  "newData": {
+    "status": "active",
+    "type": "affiliate",
+    "fullName": "Lauback Eliseu da Silva",
+    "email": "eliseu_s_lobak@hotmail.com",
+    "phone": "+351910350202",
+    "birthDate": "1971-09-25",
+    "city": "Porto",
+    "rentalFee": 0,
+    "integrations": {
+      "uber": {
+        "key": "37c63c0d-3eab-462a-9c56-3b01d28b7554",
+        "enabled": true,
+        "lastSync": null
+      },
+      "bolt": {
+        "key": "eliseu_s_lobak@hotmail.com",
+        "enabled": true,
+        "lastSync": null
+      },
+      "myprio": {
+        "key": "7824736068450003",
+        "enabled": true,
+        "lastSync": null
+      },
+      "viaverde": {
+        "key": null,
+        "enabled": false,
+        "lastSync": null
+      }
+    },
+    "banking": {
+      "iban": "PT5000 0700 000040526377023",
+      "accountHolder": "Eliseu da Sivla Lauback"
+    },
+    "updatedAt": 1760202168183
+  },
+  "timestamp": 1760202168183,
+  "createdAt": 1760202168183,
+  "driverName": "Rodrigues Silva Ana"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "2025-W40_uber_14f33942-d50c-49ea-aa1f-93e6072c152d",
+  "weekId": "2025-W40",
+  "weekStart": "2025-09-29",
+  "weekEnd": "2025-10-05",
+  "platform": "uber",
+  "referenceId": "14f33942-d50c-49ea-aa1f-93e6072c152d",
+  "vehiclePlate": null,
+  "totalValue": 288,
+  "totalTrips": 0,
+  "rawDataRef": "2025-W40-uber",
+  "createdAt": "2025-10-08T03:31:06.057Z",
+  "updatedAt": "2025-10-08T03:31:06.057Z",
+  "driverId": "0D0dAAaRixi7rmnLg1mN",
+  "driverName": "Silva Santos João",
+  "referenceLabel": "Silva Santos João"
+}

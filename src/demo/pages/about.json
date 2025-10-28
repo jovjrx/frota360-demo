@@ -1,0 +1,162 @@
+{
+  "blocks": [
+    {
+      "type": "card_with_highlight",
+      "title": {
+        "pt": "Nossa Missão",
+        "en": "Our Mission"
+      },
+      "subtitle": {
+        "pt": "Transformar a experiência dos motoristas TVDE",
+        "en": "Simplify TVDE in Portugal with advanced technology, human support and guaranteed compliance"
+      },
+      "feature": {
+        "pt": "PROPÓSITO",
+        "en": "MISSION"
+      },
+      "cardTitle": {
+        "pt": "Visão e Valores",
+        "en": "Vision and Values"
+      },
+      "cardDescription": {
+        "pt": "Construindo o futuro da mobilidade TVDE",
+        "en": "Building the future of TVDE mobility"
+      },
+      "cardContent": {
+        "pt": "A Frota360.pt nasceu para simplificar o TVDE em Portugal. Somos uma operação dedicada à mobilidade, combinando décadas de experiência em gestão com tecnologia de ponta para oferecer soluções completas para motoristas, empresas e gestores de frota.",
+        "en": "Frota360.pt was born to simplify TVDE in Portugal. We are a mobility-focused operation that combines decades of management experience with cutting-edge technology to deliver complete solutions for drivers, companies and fleet managers."
+      },
+      "valuesTitle": {
+        "pt": "Os Nossos Valores Fundamentais",
+        "en": "Our Core Values"
+      },
+      "values": {
+        "pt": [
+          "Transparência em todas as operações",
+          "Segurança e compliance TVDE garantido",
+          "Serviço de excelência 7 dias por semana",
+          "Tecnologia que simplifica processos",
+          "Escala sustentável e responsável"
+        ],
+        "en": [
+          "Transparency in every operation",
+          "Safety and TVDE compliance guaranteed",
+          "Excellent service 7 days a week",
+          "Technology that simplifies processes",
+          "Sustainable and responsible scale"
+        ]
+      },
+      "highlightImage": "/img/about.jpg",
+      "highlightTitle": {
+        "pt": "frota360.pt",
+        "en": "frota360.pt"
+      },
+      "highlightDescription": {
+        "pt": "Construindo o futuro da mobilidade TVDE",
+        "en": "Building the future of TVDE mobility"
+      },
+      "overlayPos": "bl",
+      "bgSizePersonalized": "cover",
+      "delayImage": 0.2,
+      "delayBox": 0.5
+    },
+    {
+      "type": "benefits",
+      "title": {
+        "pt": "Nossa Abordagem",
+        "en": "Our Approach"
+      },
+      "subtitle": {
+        "pt": "Metodologia testada para resultados excepcionais no TVDE",
+        "en": "Proven methodology for outstanding TVDE results"
+      },
+      "feature": {
+        "pt": "ABORDAGEM",
+        "en": "APPROACH"
+      },
+      "items": "approach.methods"
+    },
+    {
+      "type": "card_with_highlight",
+      "title": {
+        "pt": "Nossa Experiência",
+        "en": "Our Experience"
+      },
+      "subtitle": {
+        "pt": "Números que comprovam a nossa eficiência e dedicação",
+        "en": "Numbers that prove our efficiency and dedication"
+      },
+      "feature": {
+        "pt": "EXPERIÊNCIA",
+        "en": "EXPERIENCE"
+      },
+      "cardTitle": {
+        "pt": "História de Sucesso",
+        "en": "Success Story"
+      },
+      "cardDescription": {
+        "pt": "Da gestão empresarial ao TVDE de excelência",
+        "en": "From business management to excellent TVDE"
+      },
+      "cardContent": {
+        "pt": "A Frota360.pt reúne especialistas com mais de 30 anos de experiência em gestão empresarial e operação de frotas em Portugal, Itália, Espanha e outros países. Essa bagagem permite entregar uma solução TVDE completa, escalável e centrada em resultados.",
+        "en": "Frota360.pt brings together specialists with more than 30 years of experience in business management and fleet operations across Portugal, Italy, Spain and beyond. That expertise powers a complete, scalable and results-driven TVDE solution."
+      },
+      "statsTitle": {
+        "pt": "Números da Frota360 PT",
+        "en": "Frota360 PT in numbers"
+      },
+      "stats": "experience.card.stats.list",
+      "highlightImage": "/img/driver-app.jpg",
+      "highlightTitle": {
+        "pt": "Resultados Comprovados",
+        "en": "Proven Results"
+      },
+      "highlightDescription": {
+        "pt": "Eficiência operacional e satisfação de clientes",
+        "en": "Operational efficiency and customer satisfaction"
+      },
+      "overlayPos": "tr",
+      "bgSizePersonalized": "cover",
+      "delayImage": 0.4,
+      "delayBox": 0.7
+    },
+    {
+      "type": "team",
+      "title": {
+        "pt": "Nossa Equipa",
+        "en": "Our Team"
+      },
+      "subtitle": {
+        "pt": "Profissionais dedicados ao sucesso dos nossos motoristas e parceiros",
+        "en": "Professionals dedicated to the success of our drivers and partners"
+      },
+      "feature": {
+        "pt": "EQUIPA",
+        "en": "TEAM"
+      },
+      "items": "team.members"
+    },
+    {
+      "type": "cta",
+      "title": {
+        "pt": "Pronto para Fazer Parte da Frota360?",
+        "en": "Ready to be part of Frota360?"
+      },
+      "subtitle": {
+        "pt": "Junte-se a nós e descubra como podemos simplificar o seu TVDE",
+        "en": "Join us and discover how we can simplify your TVDE"
+      },
+      "feature": {
+        "pt": "PRÓXIMO PASSO",
+        "en": "NEXT STEP"
+      },
+      "buttonText": {
+        "pt": "Contactar Agora",
+        "en": "Contact Now"
+      },
+      "buttonLink": "/contact",
+      "centered": true
+    }
+  ]
+}
