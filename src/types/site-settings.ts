@@ -77,7 +77,7 @@ export interface SMTPConfig {
   port: number;
   secure: boolean; // true para 465, false para outras portas
   user: string; // Email que dispara (from)
-  name: string; // Nome do remetente (ex: "Conduz.pt")
+  name: string; // Nome do remetente (ex: "Frota360.pt")
   replyTo: string; // Email para reply
 }
 

@@ -75,14 +75,14 @@
   },
   "seo": {
     "default": {
-      "title": "TVDE Portugal | Frota360 - Você conduz, nós cuidamos do resto!",
+      "title": "TVDE Portugal | Frota360.pt - Sua Frota, merece uma gestão 360°.",
       "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
       "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, mobilidade urbana, transporte privado, empresa TVDE, frota TVDE, licença TVDE",
       "image": "/img/frota360.png"
     },
     "pages": {
       "home": {
-        "title": "Você conduz, nós cuidamos do resto!",
+        "title": "Frota360.pt | Sua Frota, merece uma gestão 360°.",
         "description": "Plataforma completa para gestão de motoristas TVDE em Portugal. Afiliados e locatários. Integração com Uber, Bolt e mais.",
         "keywords": "TVDE Portugal, motorista TVDE, Uber Portugal, Bolt Portugal, gestão motoristas, plataforma TVDE"
       },
@@ -169,7 +169,7 @@
   },
   "company": {
     "name": "Frota360",
-    "description": "Você conduz, nós cuidamos do resto!",
+    "description": "Sua Frota, merece uma gestão 360°.",
     "email": "demo@frota360.pt",
     "emailDescription": "Suporte e informações",
     "phone": "+351 900 000 000",
@@ -186,7 +186,7 @@
     "website": "frota360.pt"
   },
   "footer": {
-    "tagline": "Você conduz, nós cuidamos do resto!",
+    "tagline": "Sua Frota, merece uma gestão 360°.",
     "description": "A plataforma que transforma motoristas em empresários de sucesso",
     "contactInfo": "Informações de Contacto",
     "quickLinks": "Links Rápidos",

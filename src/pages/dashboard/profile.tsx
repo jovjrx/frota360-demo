@@ -252,7 +252,7 @@ export default function DriverProfile({
   return (
     <>
       <Head>
-        <title>Perfil - Conduz.pt</title>
+        <title>Perfil - Frota360.pt</title>
       </Head>
       
       <PainelLayout

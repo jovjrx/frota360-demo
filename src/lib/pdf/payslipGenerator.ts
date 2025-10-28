@@ -83,7 +83,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Buffer> {
         }
         currentY += 80;
       } catch (e) {
-        doc.fontSize(24).fillColor('#48BB78').text('CONDUZ.PT', leftMargin, currentY, { width: contentWidth, align: 'center' });
+        doc.fontSize(24).fillColor('#48BB78').text('FROTA360.PT', leftMargin, currentY, { width: contentWidth, align: 'center' });
         currentY += 25;
       }
       

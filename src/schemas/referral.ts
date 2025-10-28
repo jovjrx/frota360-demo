@@ -104,14 +104,14 @@ export function generateInviteCode(referrerId: string): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 7);
   const driverId = referrerId.substring(0, 4);
-  return `CONDUZ-${driverId}-${timestamp}-${random}`.toUpperCase();
+  return `FROTA360-${driverId}-${timestamp}-${random}`.toUpperCase();
 }
 
 /**
  * Validar código de convite
  */
 export function isValidInviteCode(code: string): boolean {
-  return /^CONDUZ-[A-Z0-9]{4}-[A-Z0-9]+-[A-Z0-9]+$/.test(code);
+  return /^FROTA360-[A-Z0-9]{4}-[A-Z0-9]+-[A-Z0-9]+$/.test(code);
 }
 
 

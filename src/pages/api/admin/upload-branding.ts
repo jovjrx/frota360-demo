@@ -66,7 +66,7 @@ export default async function handler(
     
     // Construir URL pública do Firebase Storage
     // Formato: https://storage.googleapis.com/[BUCKET]/[PATH]
-    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'conduz-pt.firebasestorage.app';
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'frota360-assets';
     const publicPath = `branding/${fileType}/${fileName}`;
     const downloadURL = `https://storage.googleapis.com/${bucketName}/${publicPath}`;
 

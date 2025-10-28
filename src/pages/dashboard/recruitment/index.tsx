@@ -264,7 +264,7 @@ export default function RecruitmentPage({ translations, locale, motorista }: Das
               Seu link de indicação
             </Text>
             <Text fontSize="sm" color="gray.500">
-              Defina um identificador único (slug) para compartilhar seu link: {typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt'}/r/&lt;slug&gt;
+              Defina um identificador único (slug) para compartilhar seu link: {typeof window !== 'undefined' ? window.location.origin : 'https://frota360.pt'}/r/&lt;slug&gt;
             </Text>
           </VStack>
           <HStack>
@@ -280,8 +280,8 @@ export default function RecruitmentPage({ translations, locale, motorista }: Das
             <HStack fontSize="sm">
               {slugAvailable === true && <Badge colorScheme="green">Disponível</Badge>}
               {slugAvailable === false && <Badge colorScheme="red">Indisponível</Badge>}
-              <Text color="gray.600">Link: {(typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt') + '/r/' + slug}</Text>
-              <Button size="sm" variant="ghost" leftIcon={<Icon as={FiCopy} />} onClick={() => navigator.clipboard.writeText((typeof window !== 'undefined' ? window.location.origin : 'https://conduz.pt') + '/r/' + slug)}>Copiar</Button>
+              <Text color="gray.600">Link: {(typeof window !== 'undefined' ? window.location.origin : 'https://frota360.pt') + '/r/' + slug}</Text>
+              <Button size="sm" variant="ghost" leftIcon={<Icon as={FiCopy} />} onClick={() => navigator.clipboard.writeText((typeof window !== 'undefined' ? window.location.origin : 'https://frota360.pt') + '/r/' + slug)}>Copiar</Button>
             </HStack>
           )}
         </VStack>

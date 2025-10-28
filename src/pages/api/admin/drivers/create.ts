@@ -212,7 +212,7 @@ export default withIronSessionApiRoute(async function handler(req: SessionReques
       .collection('notifications')
       .add({
         type: 'welcome',
-        title: 'Bem-vindo à Conduz!',
+        title: 'Bem-vindo à Frota360!',
         message: 'Sua conta foi criada com sucesso. Você já pode fazer login no painel.',
         read: false,
         createdAt: now,

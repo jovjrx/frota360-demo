@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 // Idiomas suportados
 const SUPPORTED_LOCALES = ['pt', 'en', 'it', 'fr', 'es', 'de'];
 const DEFAULT_LOCALE = 'pt';
-const LANGUAGE_STORAGE_KEY = 'conduz-locale';
+const LANGUAGE_STORAGE_KEY = 'frota360-locale';
 
 export function useLanguage() {
   const router = useRouter();

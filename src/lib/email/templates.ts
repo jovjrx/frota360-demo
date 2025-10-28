@@ -11,7 +11,7 @@ export interface RejectionEmailData {
 }
 
 export function getApprovalEmailTemplate(data: ApprovalEmailData): { subject: string; html: string; text: string } {
-  const subject = 'Bem-vindo à Conduz.pt! 🎉';
+  const subject = 'Bem-vindo à Frota360.pt! 🎉';
   
   const html = `
 <!DOCTYPE html>
@@ -69,14 +69,14 @@ export function getApprovalEmailTemplate(data: ApprovalEmailData): { subject: st
 </head>
 <body>
   <div class="header">
-    <h1>🎉 Bem-vindo à Conduz.pt!</h1>
+    <h1>🎉 Bem-vindo à Frota360.pt!</h1>
   </div>
   <div class="content">
     <p>Olá <strong>${data.driverName}</strong>,</p>
     
     <p>Temos o prazer de informar que sua solicitação foi <strong>aprovada</strong>!</p>
     
-    <p>Você agora faz parte da equipe Conduz.pt. Abaixo estão suas credenciais de acesso ao painel do motorista:</p>
+    <p>Você agora faz parte da equipe Frota360.pt. Abaixo estão suas credenciais de acesso ao painel do motorista:</p>
     
     <div class="credentials">
       <p><strong>Email:</strong> ${data.email}</p>
@@ -93,7 +93,7 @@ export function getApprovalEmailTemplate(data: ApprovalEmailData): { subject: st
     
     <p>Bem-vindo à equipe! 🚗</p>
     
-    <p>Atenciosamente,<br><strong>Equipe Conduz.pt</strong></p>
+    <p>Atenciosamente,<br><strong>Equipe Frota360.pt</strong></p>
   </div>
   <div class="footer">
     <p>Este é um email automático. Por favor, não responda.</p>
@@ -103,13 +103,13 @@ export function getApprovalEmailTemplate(data: ApprovalEmailData): { subject: st
   `;
   
   const text = `
-Bem-vindo à Conduz.pt! 🎉
+Bem-vindo à Frota360.pt! 🎉
 
 Olá ${data.driverName},
 
 Temos o prazer de informar que sua solicitação foi aprovada!
 
-Você agora faz parte da equipe Conduz.pt. Abaixo estão suas credenciais de acesso:
+Você agora faz parte da equipe Frota360.pt. Abaixo estão suas credenciais de acesso:
 
 Email: ${data.email}
 Senha: ${data.password}
@@ -123,14 +123,14 @@ Se tiver qualquer dúvida, entre em contato conosco.
 Bem-vindo à equipe! 🚗
 
 Atenciosamente,
-Equipe Conduz.pt
+Equipe frota360.pt
   `;
   
   return { subject, html, text };
 }
 
 export function getRejectionEmailTemplate(data: RejectionEmailData): { subject: string; html: string; text: string } {
-  const subject = 'Atualização sobre sua solicitação - Conduz.pt';
+  const subject = 'Atualização sobre sua solicitação - frota360.pt';
   
   const html = `
 <!DOCTYPE html>
@@ -180,7 +180,7 @@ export function getRejectionEmailTemplate(data: RejectionEmailData): { subject: 
   <div class="content">
     <p>Olá <strong>${data.driverName}</strong>,</p>
     
-    <p>Agradecemos seu interesse em fazer parte da equipe Conduz.pt.</p>
+    <p>Agradecemos seu interesse em fazer parte da equipe frota360.pt.</p>
     
     <p>Infelizmente, não podemos aprovar sua solicitação neste momento.</p>
     
@@ -193,7 +193,7 @@ export function getRejectionEmailTemplate(data: RejectionEmailData): { subject: 
     
     <p>Agradecemos sua compreensão.</p>
     
-    <p>Atenciosamente,<br><strong>Equipe Conduz.pt</strong></p>
+    <p>Atenciosamente,<br><strong>Equipe frota360.pt</strong></p>
   </div>
   <div class="footer">
     <p>Este é um email automático. Por favor, não responda.</p>
@@ -203,11 +203,11 @@ export function getRejectionEmailTemplate(data: RejectionEmailData): { subject: 
   `;
   
   const text = `
-Atualização sobre sua solicitação - Conduz.pt
+Atualização sobre sua solicitação - frota360.pt
 
 Olá ${data.driverName},
 
-Agradecemos seu interesse em fazer parte da equipe Conduz.pt.
+Agradecemos seu interesse em fazer parte da equipe frota360.pt.
 
 Infelizmente, não podemos aprovar sua solicitação neste momento.
 
@@ -218,7 +218,7 @@ Se tiver dúvidas ou quiser mais informações, não hesite em entrar em contato
 Agradecemos sua compreensão.
 
 Atenciosamente,
-Equipe Conduz.pt
+Equipe frota360.pt
   `;
   
   return { subject, html, text };

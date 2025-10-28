@@ -122,7 +122,7 @@ export default function LoginPage({ tPage }: PublicPageProps) {
   return (
     <>
       <Head>
-        <title>{tPage(PUBLIC.AUTH.LOGIN.TITLE)} - Conduz.pt</title>
+        <title>{tPage(PUBLIC.AUTH.LOGIN.TITLE)} - Frota360.pt</title>
         <meta name="description" content={tPage(PUBLIC.AUTH.LOGIN.SUBTITLE)} />
       </Head>
 

@@ -61,16 +61,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Se email informado, enviar convite por email com link direto
     if (email) {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || 'https://conduz.pt';
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || 'https://frota360.pt';
       const referralPath = driver.refSlug ? `/${driver.refSlug}` : `/${invite.inviteCode}`;
       const referralUrl = `${baseUrl}${referralPath}`;
 
-      const subject = `${driver.fullName || driver.name} convidou você para a Conduz.pt`;
+      const subject = `${driver.fullName || driver.name} convidou você para a Frota360.pt`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;">
           <h2 style="color:#2D3748;">Convite para ser motorista afiliado</h2>
           <p>Olá,</p>
-          <p><strong>${driver.fullName || driver.name}</strong> convidou você para conhecer a Conduz.pt.</p>
+          <p><strong>${driver.fullName || driver.name}</strong> convidou você para conhecer a Frota360.pt.</p>
           <p>Clique no botão abaixo para aceitar o convite e iniciar sua candidatura:</p>
           <div style="margin: 20px 0;">
             <a href="${referralUrl}" style="background-color:#48BB78;color:#fff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">Aceitar convite</a>
@@ -81,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           <p style="color:#718096;font-size:12px;">Este convite foi enviado a seu pedido. Se você não esperava este email, ignore-o.</p>
         </div>
       `;
-      const text = `Convite para a Conduz.pt\n\n${driver.fullName || driver.name} convidou você para conhecer a Conduz.pt.\n\nAceitar convite: ${referralUrl}\n\nSe você não esperava este email, ignore-o.`;
+      const text = `Convite para a Frota360.pt\n\n${driver.fullName || driver.name} convidou você para conhecer a Frota360.pt.\n\nAceitar convite: ${referralUrl}\n\nSe você não esperava este email, ignore-o.`;
 
       // Dispara de forma resiliente; não bloqueia a resposta caso falhe
       try {

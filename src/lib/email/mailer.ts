@@ -147,12 +147,12 @@ class EmailService {
 
   private getDriverWelcomeTemplate(driverName: string): EmailTemplate {
     return {
-      subject: 'Bem-vindo à Conduz.pt!',
+      subject: 'Bem-vindo à Frota360.pt!',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2D3748;">Bem-vindo à Conduz.pt!</h1>
+          <h1 style="color: #2D3748;">Bem-vindo à Frota360.pt!</h1>
           <p>Olá ${driverName},</p>
-          <p>Obrigado por se inscrever na Conduz.pt! Sua conta foi criada com sucesso.</p>
+          <p>Obrigado por se inscrever na Frota360.pt! Sua conta foi criada com sucesso.</p>
           <p>Seu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.</p>
           <p>Enquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.</p>
           <div style="margin: 20px 0;">
@@ -162,21 +162,21 @@ class EmailService {
             </a>
           </div>
           <p>Se você tiver alguma dúvida, não hesite em nos contatar.</p>
-          <p>Equipe Conduz.pt</p>
+          <p>Equipe Frota360.pt</p>
         </div>
       `,
-      text: `Bem-vindo à Conduz.pt!\n\nOlá ${driverName},\n\nObrigado por se inscrever na Conduz.pt! Sua conta foi criada com sucesso.\n\nSeu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.\n\nEnquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nSe você tiver alguma dúvida, não hesite em nos contatar.\n\nEquipe Conduz.pt`,
+      text: `Bem-vindo à Frota360.pt!\n\nOlá ${driverName},\n\nObrigado por se inscrever na Frota360.pt! Sua conta foi criada com sucesso.\n\nSeu perfil está sendo analisado pela nossa equipe. Você receberá uma notificação assim que for aprovado.\n\nEnquanto isso, você pode acessar o painel do motorista para completar seu perfil e enviar os documentos necessários.\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nSe você tiver alguma dúvida, não hesite em nos contatar.\n\nEquipe Frota360.pt`,
     };
   }
 
   private getDriverApprovalTemplate(driverName: string): EmailTemplate {
     return {
-      subject: 'Sua conta foi aprovada - Conduz.pt',
+      subject: 'Sua conta foi aprovada - Frota360.pt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #48BB78;">Parabéns!</h1>
           <p>Olá ${driverName},</p>
-          <p>Sua conta na Conduz.pt foi aprovada! 🎉</p>
+          <p>Sua conta na Frota360.pt foi aprovada! 🎉</p>
           <p>Agora você pode começar a usar nossa plataforma. Acesse o painel do motorista para:</p>
           <ul>
             <li>Configurar sua disponibilidade</li>
@@ -189,41 +189,41 @@ class EmailService {
               Acessar Painel
             </a>
           </div>
-          <p>Bem-vindo à equipe Conduz.pt!</p>
-          <p>Equipe Conduz.pt</p>
+          <p>Bem-vindo à equipe Frota360.pt!</p>
+          <p>Equipe Frota360.pt</p>
         </div>
       `,
-      text: `Parabéns!\n\nOlá ${driverName},\n\nSua conta na Conduz.pt foi aprovada! 🎉\n\nAgora você pode começar a usar nossa plataforma. Acesse o painel do motorista para:\n\n- Configurar sua disponibilidade\n- Escolher um plano de assinatura\n- Começar a receber corridas\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nBem-vindo à equipe Conduz.pt!\n\nEquipe Conduz.pt`,
+      text: `Parabéns!\n\nOlá ${driverName},\n\nSua conta na Frota360.pt foi aprovada! 🎉\n\nAgora você pode começar a usar nossa plataforma. Acesse o painel do motorista para:\n\n- Configurar sua disponibilidade\n- Escolher um plano de assinatura\n- Começar a receber corridas\n\nAcesse: ${process.env.NEXTAUTH_URL}/painel\n\nBem-vindo à equipe Frota360.pt!\n\nEquipe Frota360.pt`,
     };
   }
 
   private getDriverRejectionTemplate(driverName: string, reason?: string): EmailTemplate {
     return {
-      subject: 'Atualização sobre sua conta - Conduz.pt',
+      subject: 'Atualização sobre sua conta - Frota360.pt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #E53E3E;">Conta não aprovada</h1>
           <p>Olá ${driverName},</p>
-          <p>Infelizmente, sua conta na Conduz.pt não foi aprovada no momento.</p>
+          <p>Infelizmente, sua conta na Frota360.pt não foi aprovada no momento.</p>
           ${reason ? `<p><strong>Motivo:</strong> ${reason}</p>` : ''}
           <p>Você pode entrar em contato conosco para mais informações ou tentar novamente no futuro.</p>
           <div style="margin: 20px 0;">
-            <a href="mailto:suporte@conduz.pt" 
+            <a href="mailto:demo@frota360.pt" 
                style="background-color: #3182CE; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
               Contatar Suporte
             </a>
           </div>
-          <p>Obrigado pelo seu interesse na Conduz.pt.</p>
-          <p>Equipe Conduz.pt</p>
+          <p>Obrigado pelo seu interesse na Frota360.pt.</p>
+          <p>Equipe Frota360.pt</p>
         </div>
       `,
-      text: `Conta não aprovada\n\nOlá ${driverName},\n\nInfelizmente, sua conta na Conduz.pt não foi aprovada no momento.\n\n${reason ? `Motivo: ${reason}\n\n` : ''}Você pode entrar em contato conosco para mais informações ou tentar novamente no futuro.\n\nContato: suporte@conduz.pt\n\nObrigado pelo seu interesse na Conduz.pt.\n\nEquipe Conduz.pt`,
+      text: `Conta não aprovada\n\nOlá ${driverName},\n\nInfelizmente, sua conta na Frota360.pt não foi aprovada no momento.\n\n${reason ? `Motivo: ${reason}\n\n` : ''}Você pode entrar em contato conosco para mais informações ou tentar novamente no futuro.\n\nContato: demo@frota360.pt\n\nObrigado pelo seu interesse na Frota360.pt.\n\nEquipe Frota360.pt`,
     };
   }
 
   private getPaymentFailedTemplate(driverName: string, invoiceUrl?: string): EmailTemplate {
     return {
-      subject: 'Falha no pagamento - Conduz.pt',
+      subject: 'Falha no pagamento - Frota360.pt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #E53E3E;">Falha no pagamento</h1>
@@ -239,10 +239,10 @@ class EmailService {
             </div>
           ` : ''}
           <p>Se você tiver dúvidas, entre em contato conosco.</p>
-          <p>Equipe Conduz.pt</p>
+          <p>Equipe Frota360.pt</p>
         </div>
       `,
-      text: `Falha no pagamento\n\nOlá ${driverName},\n\nHouve um problema com o pagamento da sua assinatura.\n\nPor favor, atualize suas informações de pagamento para evitar a suspensão do serviço.\n\n${invoiceUrl ? `Atualizar: ${invoiceUrl}\n\n` : ''}Se você tiver dúvidas, entre em contato conosco.\n\nEquipe Conduz.pt`,
+      text: `Falha no pagamento\n\nOlá ${driverName},\n\nHouve um problema com o pagamento da sua assinatura.\n\nPor favor, atualize suas informações de pagamento para evitar a suspensão do serviço.\n\n${invoiceUrl ? `Atualizar: ${invoiceUrl}\n\n` : ''}Se você tiver dúvidas, entre em contato conosco.\n\nEquipe Frota360.pt`,
     };
   }
 
@@ -250,7 +250,7 @@ class EmailService {
     const renewalDateStr = renewalDate.toLocaleDateString('pt-BR');
     
     return {
-      subject: 'Renovação da assinatura em breve - Conduz.pt',
+      subject: 'Renovação da assinatura em breve - Frota360.pt',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #D69E2E;">Renovação em breve</h1>
@@ -264,10 +264,10 @@ class EmailService {
             </a>
           </div>
           <p>Se você não deseja renovar, pode cancelar a qualquer momento.</p>
-          <p>Equipe Conduz.pt</p>
+          <p>Equipe Frota360.pt</p>
         </div>
       `,
-      text: `Renovação em breve\n\nOlá ${driverName},\n\nSua assinatura do plano ${planName} será renovada automaticamente em ${renewalDateStr}.\n\nCertifique-se de que seu método de pagamento está atualizado.\n\nGerenciar: ${process.env.NEXTAUTH_URL}/painel/subscription\n\nSe você não deseja renovar, pode cancelar a qualquer momento.\n\nEquipe Conduz.pt`,
+      text: `Renovação em breve\n\nOlá ${driverName},\n\nSua assinatura do plano ${planName} será renovada automaticamente em ${renewalDateStr}.\n\nCertifique-se de que seu método de pagamento está atualizado.\n\nGerenciar: ${process.env.NEXTAUTH_URL}/painel/subscription\n\nSe você não deseja renovar, pode cancelar a qualquer momento.\n\nEquipe Frota360.pt`,
     };
   }
 
@@ -278,14 +278,14 @@ class EmailService {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
           <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #48BB78; margin: 0;">🚗 Conduz</h1>
+              <h1 style="color: #48BB78; margin: 0;">🚗 Frota360</h1>
               <p style="color: #718096; margin: 5px 0;">Frota360</p>
             </div>
             
             <h2 style="color: #2D3748; margin-bottom: 20px;">Olá ${driverName}!</h2>
             
             <p style="color: #4A5568; line-height: 1.6;">
-              Sua conta foi criada com sucesso na plataforma Conduz! 🎉
+              Sua conta foi criada com sucesso na plataforma Frota360! 🎉
             </p>
             
             <div style="background-color: #F7FAFC; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #48BB78;">
@@ -307,7 +307,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel" 
+              <a href="${process.env.NEXTAUTH_URL || 'https://frota360.pt'}/painel" 
                  style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
                 Acessar Painel do Motorista
               </a>
@@ -318,29 +318,29 @@ class EmailService {
                 <strong>Em caso de dúvidas:</strong>
               </p>
               <p style="color: #718096; font-size: 14px; margin: 5px 0;">
-                📧 Email: suporte@conduz.pt<br/>
+                📧 Email: demo@frota360.pt<br/>
                 📱 WhatsApp: +351 912 345 678
               </p>
             </div>
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
               <p style="color: #A0AEC0; font-size: 12px; margin: 0;">
-                Bem-vindo à equipe Conduz!<br/>
+                Bem-vindo à equipe Frota360!<br/>
                 Frota360 - Gestão de Motoristas TVDE
               </p>
             </div>
           </div>
         </div>
       `,
-  text: `Bem-vindo à Conduz!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Conduz! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Conduz!\nConduz PT - Gestão de Motoristas TVDE`,
+  text: `Bem-vindo à Frota360!\n\nOlá ${driverName}!\n\nSua conta foi criada com sucesso na plataforma Frota360! 🎉\n\nDADOS DE ACESSO:\n\nEmail: ${email}\nSenha Temporária: ${temporaryPassword}\n\n⚠️ IMPORTANTE: Esta é uma senha temporária. Por segurança, recomendamos que você altere sua senha após o primeiro login.\n\nAcesse o painel: ${process.env.NEXTAUTH_URL || 'https://frota360.pt'}/painel\n\nEM CASO DE DÚVIDAS:\nEmail: demo@frota360.pt\nWhatsApp: +351 912 345 678\n\nBem-vindo à equipe Frota360!\nFrota360 - Gestão de Motoristas TVDE`,
     };
   }
 
   private getPasswordResetTemplate(driverName: string, resetToken: string): EmailTemplate {
-    const resetUrl = `${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.NEXTAUTH_URL || 'https://frota360.pt'}/reset-password?token=${resetToken}`;
     
     return {
-      subject: 'Recuperação de Senha - Conduz',
+      subject: 'Recuperação de Senha - Frota360',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
           <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -351,7 +351,7 @@ class EmailService {
             <h2 style="color: #2D3748; margin-bottom: 20px;">Olá ${driverName}!</h2>
             
             <p style="color: #4A5568; line-height: 1.6;">
-              Recebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.
+              Recebemos uma solicitação para redefinir a senha da sua conta na plataforma Frota360.
             </p>
             
             <p style="color: #4A5568; line-height: 1.6;">
@@ -381,7 +381,7 @@ class EmailService {
                 <strong>Precisa de ajuda?</strong>
               </p>
               <p style="color: #718096; font-size: 14px; margin: 5px 0;">
-                📧 Email: suporte@conduz.pt<br/>
+                📧 Email: demo@frota360.pt<br/>
                 📱 WhatsApp: +351 912 345 678
               </p>
             </div>
@@ -395,13 +395,13 @@ class EmailService {
           </div>
         </div>
       `,
-  text: `Recuperação de Senha - Conduz\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Conduz.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: suporte@conduz.pt\nWhatsApp: +351 912 345 678\n\nConduz PT\nGestão de Motoristas TVDE`,
+  text: `Recuperação de Senha - Frota360\n\nOlá ${driverName}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na plataforma Frota360.\n\nSe você não fez esta solicitação, ignore este email. Sua senha permanecerá inalterada.\n\nPara redefinir sua senha, acesse:\n${resetUrl}\n\n⚠️ ATENÇÃO: Este link expira em 1 hora por questões de segurança.\n\nPRECISA DE AJUDA?\nEmail: demo@frota360.pt\nWhatsApp: +351 912 345 678\n\nFrota360\nGestão de Motoristas TVDE`,
     };
   }
 
   private getPasswordChangedTemplate(driverName: string, newPassword: string): EmailTemplate {
     return {
-      subject: 'Sua senha foi atualizada - Conduz',
+      subject: 'Sua senha foi atualizada - Frota360',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f7fafc;">
           <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -420,7 +420,7 @@ class EmailService {
               </p>
             </div>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL || 'https://conduz.pt'}/painel" 
+              <a href="${process.env.NEXTAUTH_URL || 'https://frota360.pt'}/painel"
                  style="background-color: #48BB78; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
                 Acessar Painel do Motorista
               </a>
@@ -430,7 +430,7 @@ class EmailService {
           </div>
         </div>
       `,
-      text: `Senha atualizada\n\nOlá ${driverName},\n\nSua senha foi alterada com sucesso por um administrador.\n\nNova senha: ${newPassword}\n\nImportante: Por segurança, recomendamos que você altere esta senha após o primeiro login.\n\nAcesse o painel: ${(process.env.NEXTAUTH_URL || 'https://conduz.pt') + '/painel'}\n\nSe você não solicitou esta alteração, contate o suporte imediatamente.\n\Frota360 PT - Gestão de Motoristas TVDE`,
+      text: `Senha atualizada\n\nOlá ${driverName},\n\nSua senha foi alterada com sucesso por um administrador.\n\nNova senha: ${newPassword}\n\nImportante: Por segurança, recomendamos que você altere esta senha após o primeiro login.\n\nAcesse o painel: ${(process.env.NEXTAUTH_URL || 'https://frota360.pt') + '/painel'}\n\nSe você não solicitou esta alteração, contate o suporte imediatamente.\n\Frota360 - Gestão de Motoristas TVDE`,
     };
   }
 }

@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `;
 
     await sendEmail({
-      to: 'contacto@conduz.pt',
+      to: 'demo@frota360.pt',
       subject: `[Painel Motorista] ${subject}`,
       html: emailContent,
       text: `Nova mensagem de ${driverName} (${driverEmail})\n\nAssunto: ${subject}\n\nMensagem:\n${message}`,
@@ -85,17 +85,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       <p>Caso seja urgente, você também pode entrar em contato através:</p>
       <ul>
         <li>WhatsApp: +351 91 234 5678</li>
-  <li>Email: suporte@conduz.pt</li>
+  <li>Email: demo@frota360.pt</li>
       </ul>
       
-      <p>Atenciosamente,<br><strong>Equipe CONDUZ.PT</strong></p>
+      <p>Atenciosamente,<br><strong>Equipe frota360.pt</strong></p>
     `;
 
     await sendEmail({
       to: driverEmail,
-      subject: 'Mensagem Recebida - CONDUZ.PT',
+      subject: 'Mensagem Recebida - FROTA360.PT',
       html: confirmationEmail,
-      text: `Olá ${driverName},\n\nRecebemos sua mensagem através do painel e nossa equipe entrará em contato em breve.\n\nResumo da sua mensagem:\nAssunto: ${subject}\nMensagem: ${message}\n\nAtenciosamente,\nEquipe CONDUZ.PT`,
+      text: `Olá ${driverName},\n\nRecebemos sua mensagem através do painel e nossa equipe entrará em contato em breve.\n\nResumo da sua mensagem:\nAssunto: ${subject}\nMensagem: ${message}\n\nAtenciosamente,\nEquipe FROTA360.PT`,
     });
 
     return res.status(200).json({ 

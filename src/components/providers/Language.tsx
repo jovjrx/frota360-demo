@@ -25,7 +25,7 @@ type Language = {
   flag: React.ComponentType<any>;
 };
 
-const LOCAL_STORAGE_KEY = "conduz-locale";
+const LOCAL_STORAGE_KEY = "frota360-locale";
 
 export const languages: Language[] = [
   { code: "pt", name: "Portuguese", nativeName: "Português", flag: PT },

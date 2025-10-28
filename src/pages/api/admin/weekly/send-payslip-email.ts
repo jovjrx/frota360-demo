@@ -20,9 +20,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         <p>Olá ${driverName},</p>
         <p>Seu contracheque referente à semana de ${weekStart} a ${weekEnd} está anexado a este e-mail.</p>
         <p>Atenciosamente,</p>
-        <p>A equipe Conduz.pt</p>
+        <p>A equipe Frota360.pt</p>
       `,
-      text: `Olá ${driverName},\n\nSeu contracheque referente à semana de ${weekStart} a ${weekEnd} está em anexo.\n\nAtenciosamente,\nEquipe Conduz.pt`,
+      text: `Olá ${driverName},\n\nSeu contracheque referente à semana de ${weekStart} a ${weekEnd} está em anexo.\n\nAtenciosamente,\nEquipe Frota360.pt`,
       attachments: [
         {
           filename: `contracheque_${driverName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}_${weekStart}_a_${weekEnd}.pdf`,

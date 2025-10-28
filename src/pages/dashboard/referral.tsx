@@ -106,7 +106,7 @@ export default function ReferralPage({
   return (
     <>
       <Head>
-        <title>{t('seo.pages.referral.title')} - Conduz</title>
+        <title>{t('seo.pages.referral.title')} - Frota360</title>
         <meta name="description" content={t('seo.pages.referral.description')} />
         <meta name="keywords" content={t('seo.pages.referral.keywords')} />
       </Head>
@@ -262,7 +262,7 @@ export const getServerSideProps = withDashboardSSR(
   { loadDriverData: true },
   async (context, user, driverId) => {
     // TODO: Buscar dados de referral do Firestore
-    const referralLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://conduz.pt'}/${driverId}`;
+    const referralLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://frota360.pt'}/${driverId}`;
     const referredDrivers: ReferredDriver[] = [];
     const totalBonus = 0;
     const paidBonus = 0;

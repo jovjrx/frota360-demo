@@ -103,7 +103,7 @@ export default function LoggedInLayout({
               </Box>
               <VStack align="start" spacing={0} display={{ base: 'none', md: 'flex' }}>
                 <Text fontWeight="bold" fontSize="lg" color="gray.900">
-                  Conduz.pt
+                  Frota360.pt
                 </Text>
                 <Text fontSize="sm" color="gray.500">
                   {isAdminRoute ? 'Painel Admin' : 'Painel'}
@@ -175,7 +175,7 @@ export default function LoggedInLayout({
                     Administrador
                   </Text>
                   <Text fontSize="xs" color="gray.500">
-                    admin@conduz.pt
+                    admin@frota360.pt
                   </Text>
                 </Box>
                 

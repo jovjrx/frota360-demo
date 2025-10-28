@@ -31,7 +31,6 @@ yarn-error.log*
 .env.production
 .env.development
 
-# Firebase credentials (conduz-pt.json is now included in repo)
 firebase-adminsdk-*.json
 
 # Vercel

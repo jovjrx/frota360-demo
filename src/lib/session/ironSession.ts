@@ -23,8 +23,8 @@ export interface SessionRequest extends NextApiRequest {
 }
 
 export const sessionOptions = {
-  password: process.env.SESSION_SECRET || 'conduz-pt-super-secret-session-key-2024-production',
-  cookieName: 'conduz-session',
+  password: process.env.SESSION_SECRET || 'frota360-super-secret-session-key-2024-production',
+  cookieName: 'frota360-session',
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,

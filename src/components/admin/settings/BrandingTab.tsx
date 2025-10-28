@@ -82,7 +82,7 @@ export function BrandingTab({ settings, updateBranding }: BrandingTabProps) {
           <Input
             value={settings.branding.appleTouchIcon}
             onChange={(e) => updateBranding('appleTouchIcon', e.target.value)}
-            placeholder="/img/conduz.png ou URL completa"
+            placeholder="/img/icone.png ou URL completa"
           />
         </FormControl>
       </Box>
