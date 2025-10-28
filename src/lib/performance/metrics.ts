@@ -644,6 +644,25 @@ export async function getAggregatedPerformanceMetrics(
  * Buscar ranking de top drivers por ganhos
  */
 export async function getTopDriversRanking(period: 'week' | 'month' | 'total' = 'month') {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log(`[getTopDriversRanking] Modo demo detectado, retornando ranking simulado...`);
+    const drivers = loadDemoData('drivers');
+    const weeklyData = loadDemoData('dataWeekly');
+    
+    // Simular ranking baseado nos dados
+    return drivers.slice(0, 5).map((driver: any, index: number) => ({
+      driverId: driver.id,
+      driverName: driver.fullName || 'Motorista Demo',
+      totalEarnings: (weeklyData.reduce((sum: number, item: any) => sum + (item.totalValue || 0), 0) / drivers.length) * (1 - index * 0.1),
+      totalRepasse: (weeklyData.reduce((sum: number, item: any) => sum + (item.totalValue || 0), 0) / drivers.length) * (1 - index * 0.1) * 0.85,
+      weeks: 4,
+      avgWeekly: (weeklyData.reduce((sum: number, item: any) => sum + (item.totalValue || 0), 0) / drivers.length) * (1 - index * 0.1) / 4,
+      trips: Math.floor(weeklyData.length / drivers.length),
+      adminFeePercentage: 7,
+    }));
+  }
+
   const allMetrics = await getAllDriversPerformanceMetrics(period);
   
   const driversData = Array.from(allMetrics.entries())
