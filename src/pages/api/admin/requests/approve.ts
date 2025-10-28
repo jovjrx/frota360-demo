@@ -7,7 +7,7 @@ import { firebaseAdmin } from '@/lib/firebase/firebaseAdmin';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { getApprovalEmailTemplate } from '@/lib/email/templates';
 import { initializeNewDriver } from '@/lib/services/driver-initialization';
-import { acceptReferralInvite } from '@/lib/services/referral-manager';
+// import { acceptReferralInvite } from '@/lib/services/referral-manager';
 
 export default withIronSessionApiRoute(async function handler(req: SessionRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

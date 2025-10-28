@@ -10,8 +10,8 @@
 import { adminDb } from '@/lib/firebaseAdmin';
 import { APP_CONFIG } from '@/lib/config';
 import { getFinancialConfig, isWeekEligibleByStart } from '@/lib/finance/config';
-import { getBonusForDriverWeek, markBonusAsPaid } from '@/lib/referral/bonus-calculator';
-import { calculateExtraCommission } from '@/lib/commission/extra-calculator';
+// import { getBonusForDriverWeek, markBonusAsPaid } from '@/lib/referral/bonus-calculator';
+// import { calculateExtraCommission } from '@/lib/commission/extra-calculator';
 import { computeDriverGoals } from '@/lib/goals/service';
 import { isDriverAdminFeeExempt } from '@/lib/finance/admin-fee-exemption';
 import type { DriverWeeklyRecord } from '@/schemas/driver-weekly-record';
@@ -501,18 +501,7 @@ export async function getDriverWeekData(
     }
 
 
-    // Aplicar comissão extra se habilitada em config
-    try {
-      const extraCommission = await calculateExtraCommission(driverId, driverType, completeRecord);
-      if (extraCommission.enabled && extraCommission.commissionAmount > 0) {
-        completeRecord.commissionPercent = extraCommission.mode === 'percent' ? extraCommission.percent : 0;
-        completeRecord.commissionAmount = extraCommission.commissionAmount;
-        // Comissão é bônus do motorista: soma ao repasse (não altera despesas)
-        completeRecord.repasse = completeRecord.repasse + extraCommission.commissionAmount;
-      }
-    } catch (e) {
-      console.warn('[getDriverWeekData] Falha ao aplicar comissão extra:', e);
-    }
+    // Comissão extra removida - funcionalidade não utilizada no demo
 
     // Adicionar metas/recompensas semanais (rewards/goals)
     try {
@@ -548,20 +537,7 @@ export async function getDriverWeekData(
       completeRecord.paymentInfo = latestPayment;
     }
 
-    // Comissão de afiliados (multinível): busca total de bônus PAYABLE e adiciona ao repasse
-    try {
-      const affiliateBonus = await getBonusForDriverWeek(driverId, weekId);
-      if (affiliateBonus && affiliateBonus.total > 0) {
-        completeRecord.commissionAmount = (completeRecord.commissionAmount || 0) + affiliateBonus.total;
-        completeRecord.repasse = completeRecord.repasse + affiliateBonus.total;
-        // Marcar bônus como PAID após injetar no repasse
-        await markBonusAsPaid(driverId, weekId);
-        // opcional: anexar detalhes para UI/exports
-        (completeRecord as any).affiliateBonusDetails = affiliateBonus.details;
-      }
-    } catch (e) {
-      console.warn('[getDriverWeekData] Falha ao obter bônus de afiliados:', e);
-    }
+    // Bônus de afiliados removido - funcionalidade não utilizada no demo
     
     return completeRecord;
     
