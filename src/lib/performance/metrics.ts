@@ -506,6 +506,12 @@ export async function getAllDriversPerformanceMetrics(
 export async function getAggregatedPerformanceMetrics(
   period: 'week' | 'month' | 'total' = 'month'
 ): Promise<PerformanceMetrics | null> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log(`[getAggregatedPerformanceMetrics] Modo demo detectado, retornando métricas simuladas...`);
+    return getDemoPerformanceMetrics();
+  }
+
   const allMetrics = await getAllDriversPerformanceMetrics(period);
   
   if (allMetrics.size === 0) {
