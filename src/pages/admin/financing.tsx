@@ -60,6 +60,27 @@ function isDemoMode(): boolean {
 }
 
 /**
+ * Carrega dados demo de financiamentos
+ */
+function getDemoFinancing(): any[] {
+  try {
+    const financingPath = path.join(process.cwd(), 'src/demo/financing');
+    const files = fs.readdirSync(financingPath);
+    
+    return files
+      .filter((file: string) => file.endsWith('.json'))
+      .map((file: string) => {
+        const filePath = path.join(financingPath, file);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(fileContent);
+      });
+  } catch (error) {
+    console.error('Erro ao carregar financiamentos demo:', error);
+    return [];
+  }
+}
+
+/**
  * Carrega dados demo de solicitações de financiamento
  */
 function getDemoFinancingRequests(): any[] {
