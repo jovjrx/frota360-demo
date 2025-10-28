@@ -102,22 +102,6 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
                 isSubmenu: true,
             },
             {
-                id: 'commissions',
-                label: 'commissions',
-                href: '/admin/commissions',
-                icon: FiDollarSign,
-                description: 'commissions_management',
-                isSubmenu: true,
-            },
-            {
-                id: 'referral',
-                label: 'referral',
-                href: '/admin/referrals',
-                icon: FiTrendingUp,
-                description: 'referral_management',
-                isSubmenu: true,
-            },
-            {
                 id: 'financing',
                 label: 'financing', // Traduzido via t('menu.financing')
                 href: '/admin/financing',

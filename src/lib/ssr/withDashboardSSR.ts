@@ -6,7 +6,6 @@ import {
   getDriverContracheques,
   getDriverContracts,
   getDriverDocumentRequests,
-  getDriverReferralsPreview,
   getDriverGoalsPreview,
 } from '@/lib/auth/driverData';
 
@@ -55,8 +54,6 @@ export interface DashboardSSROptions {
   loadDocuments?: boolean;
   /** Limite de documentos a carregar */
   documentLimit?: number;
-  /** Carregar preview de indicações */
-  loadReferrals?: boolean;
   /** Carregar preview de metas/bônus */
   loadGoals?: boolean;
 }
@@ -99,7 +96,6 @@ export function withDashboardSSR<P extends Record<string, any> = {}>(
       contractLimit = 5,
       loadDocuments = false,
       documentLimit = 5,
-      loadReferrals = false,
       loadGoals = false,
     } = options || {};
 
@@ -209,12 +205,6 @@ export function withDashboardSSR<P extends Record<string, any> = {}>(
       if (loadDocuments) {
         const documents = await getDriverDocumentRequests(driverId, documentLimit);
         baseProps.pendingDocuments = documents;
-      }
-
-      // 8.3 Carregar preview de indicações se solicitado
-      if (loadReferrals) {
-        const referrals = await getDriverReferralsPreview(driverId);
-        baseProps.referralsPreview = referrals;
       }
 
       // 8.4 Carregar preview de metas/bônus se solicitado

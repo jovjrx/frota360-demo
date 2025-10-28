@@ -39,7 +39,6 @@ import { FiNavigation, FiTrendingUp } from 'react-icons/fi';
 import {
   PendingContractsCard,
   PendingDocumentsCard,
-  ReferralsPreviewCard,
   GoalsPreviewCard,
 } from '@/components/dashboard/DashboardSections';
 
@@ -106,12 +105,6 @@ interface PainelDashboardProps extends DashboardPageProps {
     uploadCount: number;
     rejectionReason?: string;
   }>;
-  referralsPreview?: {
-    total: number;
-    pending: number;
-    approved: number;
-    earned: number;
-  };
   goalsPreview?: {
     activeGoals: number;
     completedGoals: number;
@@ -130,7 +123,6 @@ export default function PainelDashboard({
   contracheques,
   pendingContracts,
   pendingDocuments,
-  referralsPreview,
   goalsPreview,
   translations,
   locale 
@@ -623,12 +615,11 @@ export const getServerSideProps = withDashboardSSR(
     contractLimit: 5,
     loadDocuments: true,
     documentLimit: 5,
-    loadReferrals: true,
     loadGoals: true,
   },
   async (context, user, driverId) => {
     // Todos os dados já vêm automaticamente nas props base pelo withDashboardSSR
-    // motorista, contracheques, pendingContracts, pendingDocuments, referralsPreview, goalsPreview
+    // motorista, contracheques, pendingContracts, pendingDocuments, goalsPreview
     return {};
   }
 );

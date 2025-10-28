@@ -63,22 +63,10 @@ export const dashboardMenuItems: DashboardMenuItem[] = [
     icon: FiGift,
     subItems: [
       {
-        id: 'referral',
-        label: 'referral',
-        href: '/dashboard/referral',
-        icon: FiUsers,
-      },
-      {
         id: 'goals',
         label: 'goals',
         href: '/dashboard/goals',
         icon: FiTarget,
-      },
-      {
-        id: 'commissions',
-        label: 'commissions',
-        href: '/dashboard/commissions',
-        icon: FiDollarSign,
       },
     ],
   },

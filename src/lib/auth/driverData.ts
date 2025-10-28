@@ -276,45 +276,6 @@ export async function getDriverDocumentRequests(driverId: string, limit: number 
 }
 
 /**
- * Busca preview de indicações do motorista
- * SSR: para mostrar no dashboard
- */
-export async function getDriverReferralsPreview(driverId: string) {
-  try {
-    // Buscar ID real do motorista pelo email
-    const driversSnapshot = await adminDb
-      .collection('drivers')
-      .where('email', '==', driverId)
-      .limit(1)
-      .get();
-
-    if (driversSnapshot.empty) {
-      return { total: 0, pending: 0, approved: 0, earned: 0 };
-    }
-
-    const realDriverId = driversSnapshot.docs[0].id;
-
-    // Buscar indicações ativas (status = pending ou approved)
-    const referralsSnapshot = await adminDb
-      .collection('referrals')
-      .where('referrerId', '==', realDriverId)
-      .get();
-
-    const referrals = referralsSnapshot.docs.map(doc => doc.data());
-
-    return {
-      total: referrals.length,
-      pending: referrals.filter(r => r.status === 'pending').length,
-      approved: referrals.filter(r => r.status === 'approved').length,
-      earned: referrals.reduce((sum, r) => sum + (r.rewardAmount || 0), 0),
-    };
-  } catch (error) {
-    console.error('[getDriverReferralsPreview] Erro ao buscar indicações:', error);
-    return { total: 0, pending: 0, approved: 0, earned: 0 };
-  }
-}
-
-/**
  * Busca preview de metas/bônus do motorista
  * SSR: para mostrar no dashboard
  */
