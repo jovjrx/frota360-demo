@@ -138,7 +138,7 @@ export default function SEO({
         <meta name="format-detection" content="telephone=no" />
 
         <link rel="icon" href="/img/icone.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/img/conduz.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/img/icone.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/img/icone.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/img/icone.png" />
 
