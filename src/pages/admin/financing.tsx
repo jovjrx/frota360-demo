@@ -49,6 +49,49 @@ import { formatDate } from '@/lib/utils/format';
 import { getDrivers } from '@/lib/admin/adminQueries';
 import { serializeDatasets } from '@/lib/utils/serializeFirestore';
 import { adminDb } from '@/lib/firebaseAdmin';
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * Verifica se está em modo demo
+ */
+function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+}
+
+/**
+ * Carrega dados demo de solicitações de financiamento
+ */
+function getDemoFinancingRequests(): any[] {
+  try {
+    // Como não temos financing_requests na pasta demo, vamos simular algumas
+    return [
+      {
+        id: 'financing_req_1',
+        fullName: 'João Silva',
+        email: 'joao.silva@email.com',
+        phone: '+351 912 345 678',
+        status: 'pending',
+        type: 'financing',
+        amount: 5000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'financing_req_2', 
+        fullName: 'Maria Santos',
+        email: 'maria.santos@email.com',
+        phone: '+351 923 456 789',
+        status: 'pending',
+        type: 'financing',
+        amount: 7500,
+        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 dia atrás
+      }
+    ];
+  } catch (error) {
+    console.error('Erro ao carregar solicitações de financiamento demo:', error);
+    return [];
+  }
+}
 import { useRouter } from 'next/router';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -767,21 +810,38 @@ export default function AdminFinancingPage(props: AdminFinancingPageProps) {
 export const getServerSideProps = withAdminSSR(async (context, user) => {
   const drivers = await getDrivers({ status: 'active' });
   
-  // Buscar financiamentos direto do Firestore
-  const financingSnapshot = await adminDb
-    .collection('financing')
-    .orderBy('createdAt', 'desc')
-    .get();
-  const financing = financingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  // Verificar se está em modo demo
+  let financing: any[] = [];
+  let requests: any[] = [];
+  
+  if (isDemoMode()) {
+    console.log('[financing SSR] Modo demo detectado, carregando dados JSON...');
+    financing = getDemoFinancing();
+    // Para solicitações, usar dados demo de driver_requests filtrados por financing
+    try {
+      const allRequests = getDemoFinancingRequests();
+      requests = allRequests.filter((r: any) => r.status === 'pending').slice(0, 50);
+    } catch (error) {
+      console.error('Erro ao carregar requests demo:', error);
+      requests = [];
+    }
+  } else {
+    // Buscar financiamentos direto do Firestore
+    const financingSnapshot = await adminDb
+      .collection('financing')
+      .orderBy('createdAt', 'desc')
+      .get();
+    financing = financingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  // Buscar solicitações pendentes
-  const requestsSnapshot = await adminDb
-    .collection('financing_requests')
-    .where('status', '==', 'pending')
-    .orderBy('createdAt', 'desc')
-    .limit(50)
-    .get();
-  const requests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Buscar solicitações pendentes
+    const requestsSnapshot = await adminDb
+      .collection('financing_requests')
+      .where('status', '==', 'pending')
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get();
+    requests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
 
   // Serializar todos os Timestamps de forma centralizada
   const initialData = serializeDatasets({

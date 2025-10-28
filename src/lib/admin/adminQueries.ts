@@ -260,16 +260,30 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     console.log(`[getDashboardStats] Semanas: ${latestWeekId} (atual) e ${previousWeekId} (anterior)`);
 
     // Buscar contagens auxiliares em paralelo
-    const [driversSnapshot, pendingRequestsSnapshot, paymentsSnapshot] = await Promise.all([
-      adminDb.collection('drivers').get(),
-      adminDb.collection('driver_requests').where('status', '==', 'pending').get(),
-      adminDb.collection('driverPayments').get(),
-    ]);
+    let totalDrivers = 0;
+    let activeDrivers = 0;
+    let pendingRequests = 0;
+    let totalPaymentsPaid = 0;
+    
+    if (isDemoMode()) {
+      // Usar dados demo já calculados na getDemoDashboardStats
+      const demoStats = await getDemoDashboardStats();
+      totalDrivers = demoStats.totalDrivers;
+      activeDrivers = demoStats.activeDrivers;
+      pendingRequests = demoStats.pendingRequests;
+      totalPaymentsPaid = demoStats.totalPaymentsPaid;
+    } else {
+      const [driversSnapshot, pendingRequestsSnapshot, paymentsSnapshot] = await Promise.all([
+        adminDb.collection('drivers').get(),
+        adminDb.collection('driver_requests').where('status', '==', 'pending').get(),
+        adminDb.collection('driverPayments').get(),
+      ]);
 
-    const totalDrivers = driversSnapshot.size;
-    const activeDrivers = driversSnapshot.docs.filter(doc => (doc.data().status || '').toLowerCase() === 'active').length;
-    const pendingRequests = pendingRequestsSnapshot.size;
-    const totalPaymentsPaid = paymentsSnapshot.docs.reduce((acc, doc) => acc + (doc.data().totalAmount || 0), 0);
+      totalDrivers = driversSnapshot.size;
+      activeDrivers = driversSnapshot.docs.filter(doc => (doc.data().status || '').toLowerCase() === 'active').length;
+      pendingRequests = pendingRequestsSnapshot.size;
+      totalPaymentsPaid = paymentsSnapshot.docs.reduce((acc, doc) => acc + (doc.data().totalAmount || 0), 0);
+    }
     
     // Inicializar totais
     let totalGrossEarningsThisWeek = 0;

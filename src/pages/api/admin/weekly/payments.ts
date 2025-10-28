@@ -3,6 +3,45 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { DriverPayment } from '@/types/driver-payment';
 
 /**
+ * Verifica se está em modo demo
+ */
+function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+}
+
+/**
+ * Carrega dados demo de pagamentos
+ */
+function getDemoPayments(weekId: string): any[] {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const paymentsPath = path.join(process.cwd(), 'src/demo/driverPayments');
+    const files = fs.readdirSync(paymentsPath);
+    
+    return files
+      .filter((file: string) => file.endsWith('.json'))
+      .map((file: string) => {
+        const filePath = path.join(paymentsPath, file);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const payment = JSON.parse(fileContent);
+        
+        // Filtrar por weekId se fornecido
+        if (weekId && payment.weekId !== weekId) {
+          return null;
+        }
+        
+        return payment;
+      })
+      .filter(Boolean);
+  } catch (error) {
+    console.error('Erro ao carregar pagamentos demo:', error);
+    return [];
+  }
+}
+
+/**
  * GET /api/admin/weekly/payments?weekId=YYYY-Www
  * Retorna somente os registos já processados (driverPayments) para a semana.
  * Inclui vehicle e paymentInfo para compatibilidade com a UI.
@@ -20,6 +59,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
+      // Verificar se está em modo demo
+      if (isDemoMode()) {
+        console.log(`[API weekly/payments] Modo demo detectado, carregando pagamentos para semana ${weekId}...`);
+        
+        const payments = getDemoPayments(weekId);
+        
+        // Mapear para o formato esperado pela UI (simplificado para demo)
+        const records = payments.map((p: any) => ({
+          id: p.id || `${p.weekId}_${p.driverId}`,
+          driverId: p.driverId,
+          driverName: p.driverName || 'Motorista Demo',
+          weekId: p.weekId,
+          weekStart: p.weekStart || '',
+          weekEnd: p.weekEnd || '',
+          type: p.type || 'affiliate',
+          driverType: p.driverType || 'affiliate',
+          vehicle: p.vehicle || 'DEMO-001',
+          uberTotal: p.uberTotal || 0,
+          boltTotal: p.boltTotal || 0,
+          ganhosTotal: p.ganhosTotal || p.totalValue || 0,
+          ivaValor: p.ivaValor || 0,
+          ganhosMenosIVA: p.ganhosMenosIVA || (p.ganhosTotal || 0),
+          despesasAdm: p.despesasAdm || p.adminFeeValue || 0,
+          combustivel: p.combustivel || 0,
+          viaverde: p.viaverde || 0,
+          portagens: p.portagens || 0,
+          aluguel: p.aluguel || 0,
+          financingDetails: p.financingDetails,
+          totalDespesas: p.totalDespesas || 0,
+          repasse: p.repasse || ((p.ganhosTotal || 0) * 0.85),
+          bonusMetaPending: p.bonusMetaPending || [],
+          referralBonusPending: p.referralBonusPending || [],
+          commissionPending: p.commissionPending,
+          totalBonusAmount: p.totalBonusAmount || 0,
+          bonusMetaPaid: p.bonusMetaPaid || [],
+          referralBonusPaid: p.referralBonusPaid || [],
+          platformData: p.platformData || [],
+          paymentStatus: p.paymentStatus || 'pending',
+          createdAt: p.createdAt || new Date().toISOString(),
+          updatedAt: p.updatedAt || new Date().toISOString(),
+          dataSource: p.dataSource || 'payment',
+          isLocatario: p.isLocatario || false,
+          iban: p.iban,
+          paymentInfo: {
+            bonusAmount: p.bonusAmount || 0,
+            bonusCents: p.bonusCents || 0,
+            discountAmount: p.discountAmount || 0,
+            discountCents: p.discountCents || 0,
+            paymentDate: p.paymentDate,
+            proofUrl: p.proofUrl || null,
+            proofStoragePath: p.proofStoragePath,
+          },
+        }));
+
+        return res.status(200).json({ records });
+      }
+
       // 1) Buscar pagamentos da semana
       const paymentsSnap = await adminDb
         .collection('driverPayments')
