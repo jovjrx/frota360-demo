@@ -2,7 +2,10 @@
 const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
 const mockAuth = {
-  onAuthStateChanged: () => () => {},
+  onAuthStateChanged: (callback: any) => {
+    // Não faz nada em modo demo
+    return () => {}; // unsubscribe function
+  },
   signOut: () => Promise.resolve(),
 };
 
