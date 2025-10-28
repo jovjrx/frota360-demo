@@ -8,6 +8,80 @@
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getProcessedWeeklyRecords } from '@/lib/api/weekly-data-processor';
 import { getAuth } from 'firebase-admin/auth';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// ============================================================================
+// DEMO MODE FUNCTIONS
+// ============================================================================
+
+/**
+ * Verifica se está em modo demo
+ */
+function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+}
+
+/**
+ * Carrega dados JSON para modo demo
+ */
+function loadDemoData(folder: string): any[] {
+  try {
+    const demoPath = path.join(process.cwd(), 'src/demo', folder);
+    const files = fs.readdirSync(demoPath);
+    
+    return files
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        const filePath = path.join(demoPath, file);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(fileContent);
+      });
+  } catch (error) {
+    console.error(`Erro ao carregar dados demo de ${folder}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Carrega drivers do modo demo
+ */
+function getDemoDrivers(): Driver[] {
+  const drivers = loadDemoData('drivers');
+  return drivers.map(driver => ({
+    id: driver.id,
+    fullName: driver.fullName || driver.name || 'Nome não informado',
+    email: driver.email || `${driver.id}@demo.com`,
+    phone: driver.phone || '',
+    status: driver.isActive ? 'active' : 'inactive',
+    type: driver.type || 'affiliate',
+    ...driver
+  }));
+}
+
+/**
+ * Carrega dados semanais do modo demo
+ */
+function getDemoWeeklyData(): any[] {
+  return loadDemoData('dataWeekly');
+}
+
+/**
+ * Carrega solicitações do modo demo
+ */
+function getDemoRequests(): Request[] {
+  const requests = loadDemoData('driver_requests');
+  return requests.map(request => ({
+    id: request.id,
+    fullName: request.fullName || request.name || 'Nome não informado',
+    email: request.email || `${request.id}@demo.com`,
+    phone: request.phone || '',
+    status: request.status || 'pending',
+    type: request.type || 'driver',
+    createdAt: request.createdAt || new Date().toISOString(),
+    ...request
+  }));
+}
 
 // ============================================================================
 // INTERFACES
@@ -73,12 +147,91 @@ export interface DashboardData {
 // ============================================================================
 
 /**
+ * Carrega dados do dashboard para modo demo
+ */
+function getDemoDashboardStats(): DashboardData {
+  try {
+    console.log('[getDemoDashboardStats] Carregando dados demo do dashboard...');
+    
+    const weeklyData = getDemoWeeklyData();
+    const drivers = getDemoDrivers();
+    const requests = getDemoRequests();
+    
+    // Agrupar dados por semana
+    const weeklyGroups = weeklyData.reduce((acc, item) => {
+      const weekId = item.weekId;
+      if (!acc[weekId]) {
+        acc[weekId] = [];
+      }
+      acc[weekId].push(item);
+      return acc;
+    }, {} as Record<string, any[]>);
+    
+    // Pegar as semanas mais recentes
+    const weekIds = Object.keys(weeklyGroups).sort().reverse();
+    const latestWeekId = weekIds[0] || '2025-W43';
+    const previousWeekId = weekIds[1] || '2025-W42';
+    
+    // Calcular totais da semana atual
+    const currentWeekData = weeklyGroups[latestWeekId] || [];
+    const totalGrossEarningsThisWeek = currentWeekData.reduce((sum, item) => sum + (item.totalValue || 0), 0);
+    
+    // Calcular totais da semana anterior
+    const previousWeekData = weeklyGroups[previousWeekId] || [];
+    const totalGrossEarningsLastWeek = previousWeekData.reduce((sum, item) => sum + (item.totalValue || 0), 0);
+    
+    // Calcular métricas
+    const activeDrivers = drivers.filter(d => d.status === 'active').length;
+    const pendingRequests = requests.filter(r => r.status === 'pending').length;
+    
+    // Simular cálculos de repasse e lucros (valores demo)
+    const totalRepasseThisWeek = totalGrossEarningsThisWeek * 0.85; // 85% repasse
+    const totalEarningsThisWeek = totalGrossEarningsThisWeek * 0.15; // 15% lucro
+    
+    const totalRepasseLastWeek = totalGrossEarningsLastWeek * 0.85;
+    const totalEarningsLastWeek = totalGrossEarningsLastWeek * 0.15;
+    
+    return {
+      totalGrossEarningsThisWeek,
+      totalRepasseThisWeek,
+      totalEarningsThisWeek,
+      totalPaymentsPending: Math.floor(totalRepasseThisWeek * 0.3), // 30% pendente
+      totalPaymentsPaid: Math.floor(totalRepasseThisWeek * 0.7), // 70% pago
+      
+      totalGrossEarningsLastWeek,
+      totalRepasseLastWeek,
+      totalEarningsLastWeek,
+      
+      latestWeekId,
+      previousWeekId,
+      
+      totalDrivers: drivers.length,
+      activeDrivers,
+      pendingRequests,
+      averageEarningsPerDriver: activeDrivers > 0 ? totalGrossEarningsThisWeek / activeDrivers : 0,
+      profitCommissions: totalEarningsThisWeek * 0.4,
+      profitRentals: totalEarningsThisWeek * 0.3,
+      profitDiscounts: totalEarningsThisWeek * 0.3,
+    };
+  } catch (error) {
+    console.error('[getDemoDashboardStats] Erro:', error);
+    return getEmptyDashboardData();
+  }
+}
+
+/**
  * Busca dados do dashboard admin (SSR)
  * Usa função centralizada getDriverWeekData
  */
 export async function getDashboardStats(cookies?: string): Promise<DashboardData> {
   try {
     console.log('[getDashboardStats] Iniciando busca de dados do dashboard...');
+    
+    // Verificar se está em modo demo
+    if (isDemoMode()) {
+      console.log('[getDashboardStats] Modo demo detectado, carregando dados JSON...');
+      return getDemoDashboardStats();
+    }
     
     // Buscar últimas 2 semanas do dataWeekly
     const dataWeeklySnapshot = await adminDb
@@ -248,6 +401,23 @@ export async function getDrivers(options?: {
   status?: string;
   limit?: number;
 }): Promise<Driver[]> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log('[getDrivers] Modo demo detectado, carregando drivers JSON...');
+    let drivers = getDemoDrivers();
+    
+    // Aplicar filtros
+    if (options?.status) {
+      drivers = drivers.filter(d => d.status === options.status);
+    }
+    
+    if (options?.limit) {
+      drivers = drivers.slice(0, options.limit);
+    }
+    
+    return drivers;
+  }
+
   let query = adminDb.collection('drivers').orderBy('createdAt', 'desc');
 
   if (options?.status) {
@@ -293,6 +463,23 @@ export async function getRequests(options?: {
   status?: string;
   limit?: number;
 }): Promise<Request[]> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log('[getRequests] Modo demo detectado, carregando requests JSON...');
+    let requests = getDemoRequests();
+    
+    // Aplicar filtros
+    if (options?.status && options.status !== 'all') {
+      requests = requests.filter(r => r.status === options.status);
+    }
+    
+    if (options?.limit) {
+      requests = requests.slice(0, options.limit);
+    }
+    
+    return requests;
+  }
+
   let query = adminDb.collection('driver_requests').orderBy('createdAt', 'desc');
 
   if (options?.status && options.status !== 'all') {

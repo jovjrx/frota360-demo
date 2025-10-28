@@ -5,16 +5,27 @@ import * as path from 'path';
 
 // Função para ler users dos arquivos JSON
 function getUsersFromDemo() {
-  const usersPath = path.join(process.cwd(), 'src/demo/users');
-  const files = fs.readdirSync(usersPath);
-  
-  return files
-    .filter(file => file.endsWith('.json'))
-    .map(file => {
-      const filePath = path.join(usersPath, file);
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      return JSON.parse(fileContent);
-    });
+  try {
+    const usersPath = path.join(process.cwd(), 'src/demo/users');
+    console.log('🔍 Procurando usuários em:', usersPath);
+    
+    const files = fs.readdirSync(usersPath);
+    console.log('📁 Arquivos encontrados:', files);
+    
+    return files
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        const filePath = path.join(usersPath, file);
+        console.log('📄 Lendo arquivo:', filePath);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const userData = JSON.parse(fileContent);
+        console.log('👤 Usuário carregado:', userData.email);
+        return userData;
+      });
+  } catch (error) {
+    console.error('❌ Erro ao ler usuários:', error);
+    return [];
+  }
 }
 
 // Função para ler drivers dos arquivos JSON
@@ -33,22 +44,35 @@ function getDriversFromDemo() {
 
 // Função para autenticar sem Firebase
 async function authenticateUser(email: string, password: string) {
+  console.log(`🔐 Tentando autenticar: ${email}`);
+  
   // Buscar em users primeiro
   const users = getUsersFromDemo();
+  console.log(`👥 Usuários carregados: ${users.length}`);
+  
   const user = users.find(u => u.email === email);
+  console.log(`🔍 Usuário encontrado:`, user ? user.email : 'não encontrado');
   
   if (user && user.password === password) {
+    console.log(`✅ Senha correta para usuário: ${email}`);
     return { ...user, source: 'users' };
   }
   
+  console.log(`❌ Senha incorreta ou usuário não encontrado: ${email}`);
+  
   // Buscar em drivers
   const drivers = getDriversFromDemo();
+  console.log(`🚗 Drivers carregados: ${drivers.length}`);
+  
   const driver = drivers.find(d => d.email === email);
+  console.log(`🔍 Driver encontrado:`, driver ? driver.email : 'não encontrado');
   
   if (driver && driver.password === password) {
+    console.log(`✅ Senha correta para driver: ${email}`);
     return { ...driver, source: 'drivers' };
   }
   
+  console.log(`❌ Credenciais inválidas: ${email}`);
   return null;
 }
 

@@ -52,9 +52,13 @@ export async function createSession(
   res: NextApiResponse | ServerResponse,
   data: Omit<SessionData, 'isLoggedIn'>
 ): Promise<void> {
+  console.log(`🔑 Criando sessão com dados:`, data);
   const session = await getSession(req, res);
+  console.log(`📦 Sessão obtida:`, session);
   Object.assign(session, data, { isLoggedIn: true });
+  console.log(`💾 Salvando sessão...`);
   await session.save();
+  console.log(`✅ Sessão salva com sucesso`);
 }
 
 export async function destroySession(
