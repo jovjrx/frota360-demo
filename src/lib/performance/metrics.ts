@@ -8,6 +8,118 @@
 
 import { adminDb } from '@/lib/firebaseAdmin';
 import { Timestamp } from 'firebase-admin/firestore';
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * Verifica se está em modo demo
+ */
+function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+}
+
+/**
+ * Carrega dados demo de métricas de performance
+ */
+function getDemoPerformanceMetrics(): PerformanceMetrics {
+  // Simular métricas demo baseadas nos dados JSON
+  const weeklyData = loadDemoData('dataWeekly');
+  const drivers = loadDemoData('drivers');
+  
+  // Calcular métricas agregadas
+  const totalEarnings = weeklyData.reduce((sum: number, item: any) => sum + (item.totalValue || 0), 0);
+  const totalTrips = weeklyData.length;
+  const totalWeeks = 4;
+  const totalDrivers = drivers.length;
+  
+  return {
+    period: 'month',
+    startDate: '2025-10-01',
+    endDate: '2025-10-31',
+    
+    // Agregações
+    totalWeeks,
+    totalEarnings,
+    totalDeductions: totalEarnings * 0.15, // 15% deduções
+    totalNetPayout: totalEarnings * 0.85, // 85% payout
+    totalTrips,
+    
+    // Por categoria
+    earnings: {
+      total: totalEarnings,
+      avg: totalDrivers > 0 ? totalEarnings / totalDrivers : 0,
+      min: totalEarnings * 0.1,
+      max: totalEarnings * 0.4,
+      trend: 5.2, // 5.2% crescimento
+    },
+    
+    adminFee: {
+      total: totalEarnings * 0.07,
+      avg: totalEarnings * 0.07 / totalDrivers,
+      percentage: 7,
+    },
+    
+    fuel: {
+      total: totalEarnings * 0.03,
+      avg: totalEarnings * 0.03 / totalDrivers,
+      percentage: 3,
+    },
+    
+    tolls: {
+      total: totalEarnings * 0.02,
+      avg: totalEarnings * 0.02 / totalDrivers,
+      percentage: 2,
+    },
+    
+    rental: {
+      total: totalEarnings * 0.02,
+      avg: totalEarnings * 0.02 / totalDrivers,
+      percentage: 2,
+    },
+    
+    financing: {
+      total: totalEarnings * 0.01,
+      avg: totalEarnings * 0.01 / totalDrivers,
+      percentage: 1,
+    },
+    
+    // Eficiência
+    efficiency: {
+      avgEarningsPerTrip: totalTrips > 0 ? totalEarnings / totalTrips : 0,
+      totalTrips,
+      avgTripsPerWeek: totalTrips / totalWeeks,
+    },
+    
+    // Plataformas
+    platforms: {
+      uber: { total: totalEarnings * 0.6, percentage: 60, trips: Math.floor(totalTrips * 0.6) },
+      bolt: { total: totalEarnings * 0.4, percentage: 40, trips: Math.floor(totalTrips * 0.4) },
+    },
+    
+    weeklyData: [], // Dados semanais simplificados
+  };
+}
+
+/**
+ * Carrega dados JSON para modo demo
+ */
+function loadDemoData(folder: string): any[] {
+  try {
+    const demoPath = path.join(process.cwd(), 'src/demo', folder);
+    const files = fs.readdirSync(demoPath);
+    
+    return files
+      .filter((file: string) => file.endsWith('.json'))
+      .map((file: string) => {
+        const filePath = path.join(demoPath, file);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(fileContent);
+      });
+  } catch (error) {
+    console.error(`Erro ao carregar dados demo de ${folder}:`, error);
+    return [];
+  }
+}
 
 export interface WeeklyMetrics {
   weekId: string;
