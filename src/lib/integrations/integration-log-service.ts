@@ -60,7 +60,7 @@ function initializeFirebase() {
       // Tentar carregar credenciais do Firebase
       let serviceAccount;
       try {
-        serviceAccount = require('../../firebase-service-account.json');
+        // serviceAccount = require('../../firebase-service-account.json'); // Firebase desabilitado
       } catch (e) {
         serviceAccount = require('../../../firebase-service-account.json');
       }

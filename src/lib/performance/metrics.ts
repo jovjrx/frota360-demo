@@ -170,7 +170,9 @@ export async function getDriverPerformanceMetrics(
     return null;
   }
 
-  const allWeekIds = Array.from(new Set(allRecordsSnapshot.docs.map(doc => doc.data().weekId))).sort();
+  const allWeekIds = Array.from(new Set(
+    allRecordsSnapshot.docs.map(doc => doc.data().weekId)
+  )).filter((id): id is string => typeof id === 'string' && id !== '').sort();
   
   // Determinar que semanas incluir baseado no período
   let weeks: string[];
