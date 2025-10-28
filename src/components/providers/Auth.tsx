@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 interface UserData {
   uid: string;
@@ -40,6 +41,7 @@ export function AuthProvider({ children, initialUserData }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(initialUserData || null);
   const [loading, setLoading] = useState(!initialUserData);
+  const { isDemo } = useDemoMode();
 
   // Flag para indicar que viemos do SSR
   const [hasSSRData] = useState(!!initialUserData);
@@ -61,34 +63,48 @@ export function AuthProvider({ children, initialUserData }: AuthProviderProps) {
       return;
     }
 
+    // 🚫 DEMO MODE: Não usar Firebase Auth
+    if (isDemo) {
+      console.log('🎪 DEMO MODE: Pulando Firebase Auth, usando apenas dados JSON');
+      setLoading(false);
+      return;
+    }
+
     // ⚠️ FALLBACK: Apenas para páginas públicas sem SSR (raro)
     console.log('⚠️ Client-side auth: Sem dados SSR, iniciando listener Firebase');
     
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
+    if (auth && onAuthStateChanged) {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        setUser(firebaseUser);
+        
+        if (firebaseUser) {
+          // Páginas públicas com usuário logado - apenas setar loading false
+          // As páginas protegidas devem usar SSR (withAdminSSR/withDashboardSSR)
+          console.log('ℹ️ Usuário detectado no Firebase Auth (client-side)');
+          setLoading(false);
+        } else {
+          // Usuário não está logado
+          setUserData(null);
+          setLoading(false);
+        }
+      });
       
-      if (firebaseUser) {
-        // Páginas públicas com usuário logado - apenas setar loading false
-        // As páginas protegidas devem usar SSR (withAdminSSR/withDashboardSSR)
-        console.log('ℹ️ Usuário detectado no Firebase Auth (client-side)');
-        setLoading(false);
-      } else {
-        // Usuário não está logado
-        setUserData(null);
-        setLoading(false);
-      }
-    });
-    
-    return unsubscribe;
-  }, [hasSSRData]); // Só depende da flag hasSSRData
+      return unsubscribe;
+    } else {
+      console.log('🚫 Firebase Auth não disponível (modo demo ou erro de configuração)');
+      setLoading(false);
+    }
+  }, [hasSSRData, isDemo]); // Agora depende também do isDemo
 
   const signOut = async () => {
     try {
       // 1. Chamar API para destruir sessão iron-session
       await fetch('/api/auth/logout', { method: 'POST' });
       
-      // 2. Logout do Firebase
-      await fbSignOut(auth);
+      // 2. Logout do Firebase (apenas se não estiver em modo demo)
+      if (!isDemo && auth) {
+        await fbSignOut(auth);
+      }
       
       // 3. Limpar estado local
       setUserData(null);
