@@ -13,8 +13,6 @@ export { default as DriversList } from './DriversList';
 
 export { default as DocumentsStats } from './DocumentsStats';
 export { default as ContractsStats } from './ContractsStats';
-export { default as ReferralsStats } from './ReferralsStats';
-export { default as CommissionsStats } from './CommissionsStats';
 export { default as GoalsStats } from './GoalsStats';
 export { default as PerformanceStats } from './PerformanceStats';
 
