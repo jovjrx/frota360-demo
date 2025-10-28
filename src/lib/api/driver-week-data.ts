@@ -586,12 +586,12 @@ export async function getAllDriversWeekData(
   
   const driverIds = Array.from(new Set(
     dataWeeklySnapshot.docs.map(doc => doc.data().driverId)
-  )).filter(id => id);
+  )).filter((id): id is string => typeof id === 'string' && id !== '');
   
   console.log(`[getAllDriversWeekData] Processando ${driverIds.length} motoristas para semana ${weekId}`);
   
   const results = await Promise.all(
-    driverIds.map(driverId => getDriverWeekData(driverId, weekId, forceRefresh))
+    driverIds.map(driverId => getDriverWeekData(driverId as string, weekId, forceRefresh))
   );
   
   return results.filter(r => r !== null) as DriverWeeklyRecord[];
