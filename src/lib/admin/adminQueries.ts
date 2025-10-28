@@ -440,6 +440,13 @@ export async function getDrivers(options?: {
  * Buscar motorista por ID
  */
 export async function getDriverById(id: string): Promise<Driver | null> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log(`[getDriverById] Modo demo detectado, buscando driver ${id}...`);
+    const drivers = getDemoDrivers();
+    return drivers.find(d => d.id === id) || null;
+  }
+
   const doc = await adminDb.collection('drivers').doc(id).get();
 
   if (!doc.exists) {
@@ -508,6 +515,29 @@ export async function getRequestsStats(): Promise<{
   approved: number;
   rejected: number;
 }> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log('[getRequestsStats] Modo demo detectado, calculando stats...');
+    const requests = getDemoRequests();
+    
+    const stats = {
+      total: requests.length,
+      pending: 0,
+      evaluation: 0,
+      approved: 0,
+      rejected: 0,
+    };
+
+    requests.forEach(request => {
+      const status = request.status;
+      if (status in stats) {
+        (stats as any)[status]++;
+      }
+    });
+
+    return stats;
+  }
+
   const snapshot = await adminDb.collection('driver_requests').get();
 
   const stats = {
@@ -534,9 +564,34 @@ export async function getRequestsStats(): Promise<{
 // ============================================================================
 
 /**
+ * Carrega usuários do modo demo
+ */
+function getDemoUsers(): any[] {
+  const users = loadDemoData('users');
+  return users.map(user => ({
+    id: user.id || user.uid,
+    email: user.email,
+    displayName: user.name || user.displayName,
+    disabled: false,
+    emailVerified: true,
+    createdAt: user.createdAt || new Date().toISOString(),
+    lastSignIn: user.lastSignIn || new Date().toISOString(),
+    customClaims: { role: user.role || 'user' },
+    role: user.role || 'user',
+    ...user
+  }));
+}
+
+/**
  * Buscar todos os usuários (Firebase Auth + Firestore)
  */
 export async function getUsers(): Promise<any[]> {
+  // Verificar se está em modo demo
+  if (isDemoMode()) {
+    console.log('[getUsers] Modo demo detectado, carregando users JSON...');
+    return getDemoUsers();
+  }
+
   const auth = getAuth();
 
   try {
@@ -602,6 +657,47 @@ export async function getUsersStats(): Promise<{
  */
 export async function getWeekOptions(count: number = 12): Promise<WeekOption[]> {
   try {
+    // Verificar se está em modo demo
+    if (isDemoMode()) {
+      console.log('[getWeekOptions] Modo demo detectado, gerando opções de semanas...');
+      const weeklyData = getDemoWeeklyData();
+      
+      // Agrupar por weekId
+      const weeksMap = new Map<string, { weekStart: string; weekEnd: string }>();
+      
+      weeklyData.forEach(data => {
+        if (data.weekId && data.weekStart && data.weekEnd) {
+          if (!weeksMap.has(data.weekId)) {
+            weeksMap.set(data.weekId, {
+              weekStart: data.weekStart,
+              weekEnd: data.weekEnd,
+            });
+          }
+        }
+      });
+      
+      // Converter para array e formatar
+      const weeks = Array.from(weeksMap.entries()).map(([weekId, dates]) => {
+        const startParts = dates.weekStart.split('-'); // YYYY-MM-DD
+        const endParts = dates.weekEnd.split('-');
+        
+        const startFormatted = `${startParts[2]}/${startParts[1]}/${startParts[0]}`;
+        const endFormatted = `${endParts[2]}/${endParts[1]}/${endParts[0]}`;
+        
+        return {
+          label: `${startFormatted} - ${endFormatted}`,
+          value: weekId,
+          start: dates.weekStart,
+          end: dates.weekEnd,
+        };
+      });
+      
+      // Ordenar por data (mais recente primeiro)
+      weeks.sort((a, b) => b.start.localeCompare(a.start));
+      
+      return weeks.slice(0, count);
+    }
+
     // Buscar semanas que têm dados no dataWeekly
     const snapshot = await adminDb.collection('dataWeekly')
       .orderBy('weekStart', 'desc')
@@ -674,6 +770,39 @@ export interface WeeklyDataInitial {
  */
 export async function getWeeklyWeeks(): Promise<Array<{ weekId: string; label: string; weekStart: string; weekEnd: string; status?: string }>> {
   try {
+    // Verificar se está em modo demo
+    if (isDemoMode()) {
+      console.log('[getWeeklyWeeks] Modo demo detectado, gerando semanas...');
+      const weeklyData = getDemoWeeklyData();
+      
+      // Agrupar por weekId
+      const weeksMap = new Map<string, { weekStart: string; weekEnd: string }>();
+      
+      weeklyData.forEach(data => {
+        if (data.weekId && data.weekStart && data.weekEnd) {
+          if (!weeksMap.has(data.weekId)) {
+            weeksMap.set(data.weekId, {
+              weekStart: data.weekStart,
+              weekEnd: data.weekEnd,
+            });
+          }
+        }
+      });
+      
+      const weeks = Array.from(weeksMap.entries())
+        .map(([weekId, dates]) => ({ 
+          weekId, 
+          label: `Semana ${(weekId).split('-')[1] || weekId}`, 
+          weekStart: dates.weekStart,
+          weekEnd: dates.weekEnd,
+          status: 'completed'
+        }))
+        .sort((a, b) => b.weekId.localeCompare(a.weekId))
+        .slice(0, 12);
+
+      return weeks;
+    }
+
     const weeksSnapshot = await adminDb.collection('weekly').limit(50).get();
     const weeks = weeksSnapshot.docs
       .map((doc) => {
@@ -701,6 +830,51 @@ export async function getWeeklyWeeks(): Promise<Array<{ weekId: string; label: s
  */
 export async function getWeeklyData(weekId: string): Promise<WeeklyDataInitial | null> {
   try {
+    // Verificar se está em modo demo
+    if (isDemoMode()) {
+      console.log(`[getWeeklyData] Modo demo detectado, carregando dados da semana ${weekId}...`);
+      
+      // Filtrar dados da semana específica
+      const weeklyData = getDemoWeeklyData().filter(data => data.weekId === weekId);
+      const driverPayments = loadDemoData('driverPayments').filter(payment => payment.weekId === weekId);
+      
+      // Simular records baseados nos dados semanais
+      const records = weeklyData.map(data => ({
+        id: data.id,
+        driverId: data.driverId,
+        driverName: data.driverName || data.referenceLabel,
+        weekId: data.weekId,
+        totalValue: data.totalValue || 0,
+        repasse: (data.totalValue || 0) * 0.85, // 85% repasse
+        totalBonusAmount: Math.random() > 0.7 ? Math.floor(Math.random() * 50) : 0, // Bônus aleatório
+        paymentStatus: Math.random() > 0.3 ? 'paid' : 'pending', // Status aleatório
+        status: Math.random() > 0.3 ? 'paid' : 'pending',
+      }));
+      
+      // Calcular estatísticas
+      const pending = records.filter(r => r.status === 'pending').length;
+      const paid = records.filter(r => r.status === 'paid').length;
+      const bonusCount = records.filter(r => (r.totalBonusAmount || 0) > 0).length;
+      const totalAmount = records.reduce((sum, r) => sum + (r.repasse || 0), 0);
+      const totalBonus = records.reduce((sum, r) => sum + (r.totalBonusAmount || 0), 0);
+      
+      // Get weeks list
+      const weeks = await getWeeklyWeeks();
+      
+      return {
+        weeks,
+        records,
+        weeklyData,
+        weeklyMaestro: {
+          weekId,
+          status: 'completed',
+          weekStart: weeklyData[0]?.weekStart || '',
+          weekEnd: weeklyData[0]?.weekEnd || '',
+        },
+        stats: { total: records.length, pending, paid, bonusCount, totalAmount, totalBonus },
+      };
+    }
+
     // Get payments for week
     const snap = await adminDb.collection('driverPayments').where('weekId', '==', weekId).get();
     const records = snap.docs
