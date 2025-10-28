@@ -96,7 +96,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     const weekIds = Array.from(new Set(
       dataWeeklySnapshot.docs.map(doc => doc.data().weekId)
     ))
-    .filter(id => id)
+    .filter((id): id is string => typeof id === 'string' && id !== '')
     .sort()
     .reverse()
     .slice(0, 2);
@@ -136,7 +136,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     // ✅ Buscar dados da semana atual usando função ÚNICA (sem driverId → todos)
     if (latestWeekId) {
       console.log(`[getDashboardStats] Processando semana atual: ${latestWeekId}`);
-      const records = await getProcessedWeeklyRecords(latestWeekId, undefined, false);
+      const records = await getProcessedWeeklyRecords(latestWeekId as string, undefined, false);
       
       console.log(`[getDashboardStats] ${records.length} registros na semana atual`);
   driversWithRecords = new Set(records.map(rec => rec.driverId)).size;
@@ -163,7 +163,7 @@ export async function getDashboardStats(cookies?: string): Promise<DashboardData
     // ✅ Buscar dados da semana anterior usando função ÚNICA (sem driverId → todos)
     if (previousWeekId) {
       console.log(`[getDashboardStats] Processando semana anterior: ${previousWeekId}`);
-      const records = await getProcessedWeeklyRecords(previousWeekId, undefined, false);
+      const records = await getProcessedWeeklyRecords(previousWeekId as string, undefined, false);
       
       console.log(`[getDashboardStats] ${records.length} registros na semana anterior`);
       
